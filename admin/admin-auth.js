@@ -10,6 +10,7 @@ function lock(s){
 }
 function ready(profile){
  gate.hidden=true;shell.hidden=false;
+ window.dispatchEvent(new Event('admin-auth-ready'));
  const top=document.querySelector('.top-actions');
  if(top&&!document.getElementById('adminIdentity')){
   const who=document.createElement('span');who.id='adminIdentity';who.className='profile-button';who.textContent=(profile.displayName||profile.role)+' · '+profile.role;
