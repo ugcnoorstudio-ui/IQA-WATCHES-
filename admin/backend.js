@@ -1,37 +1,39 @@
-/* NOOR WATCHES admin backend adapter.
- * Add only after backend-config.js and Supabase JS v2 are configured.
- * This module deliberately exposes no service-role access and no generic write API.
+/* IQA WATCHES admin authentication adapter.
+ * Browser client uses only the public publishable key. No service-role access.
+ * All business-table authorization remains enforced by PostgreSQL RLS.
  */
 (function (global) {
   "use strict";
 
-  const config = global.NOOR_SUPABASE_CONFIG;
+  const config = global.IQA_SUPABASE_CONFIG;
   const sdk = global.supabase;
   let client = null;
   let profile = null;
 
   function configured() {
-    return Boolean(config && typeof config.url === "string" &&
+    return Boolean(config &&
+      typeof config.url === "string" &&
       /^https:\/\/[^/]+\.supabase\.co$/.test(config.url) &&
-      typeof config.anonKey === "string" &&
-      config.anonKey.length > 20 &&
+      typeof config.publishableKey === "string" &&
+      config.publishableKey.startsWith("sb_publishable_") &&
       !config.url.includes("YOUR_PROJECT_REF") &&
-      !config.anonKey.includes("YOUR_SUPABASE"));
+      !config.publishableKey.includes("YOUR_SUPABASE"));
   }
 
   function getClient() {
-    if (!configured()) throw new Error("Admin backend is not configured.");
+    if (!configured()) throw new Error("IQA WATCHES admin backend configuration is missing.");
     if (!sdk || typeof sdk.createClient !== "function") {
-      throw new Error("Supabase JS v2 has not been loaded.");
+      throw new Error("Supabase JS could not be loaded. Check your connection and reload.");
     }
     if (!client) {
-      client = sdk.createClient(config.url, config.anonKey, {
+      client = sdk.createClient(config.url, config.publishableKey, {
         auth: {
           persistSession: true,
           autoRefreshToken: true,
-          detectSessionInUrl: true
+          detectSessionInUrl: true,
+          flowType: "pkce"
         },
-        global: { headers: { "X-Client-Info": "noor-watches-admin" } }
+        global: { headers: { "X-Client-Info": "iqa-watches-admin" } }
       });
     }
     return client;
@@ -39,13 +41,11 @@
 
   async function getActiveProfile() {
     const supabaseClient = getClient();
-    const { data: sessionData, error: sessionError } =
-      await supabaseClient.auth.getSession();
+    const { data: sessionData, error: sessionError } = await supabaseClient.auth.getSession();
     if (sessionError) throw sessionError;
     const user = sessionData && sessionData.session && sessionData.session.user;
     if (!user) { profile = null; return null; }
 
-    // RLS intentionally permits staff to read only their own profile.
     const { data, error } = await supabaseClient
       .from("staff_profiles")
       .select("user_id,display_name,role,active")
@@ -53,11 +53,11 @@
       .maybeSingle();
     if (error) throw error;
 
-    if (!data || data.user_id !== user.id || data.active !== true ||
-        !["owner", "administrator", "inventory_manager", "order_manager", "support_staff"].includes(data.role)) {
+    const allowed = ["owner", "administrator", "inventory_manager", "order_manager", "support_staff"];
+    if (!data || data.user_id !== user.id || data.active !== true || !allowed.includes(data.role)) {
       profile = null;
       await supabaseClient.auth.signOut();
-      throw new Error("This account is not an active authorized staff account.");
+      throw new Error("This account is not an active IQA WATCHES staff account.");
     }
     profile = Object.freeze({
       userId: data.user_id,
@@ -69,9 +69,9 @@
   }
 
   async function signIn(email, password) {
-    if (!email || !password) throw new Error("Email and password are required.");
+    if (!email || !password) throw new Error("Enter your staff email and password.");
     const supabaseClient = getClient();
-    const { error } = await supabaseClient.auth.signInWithPassword({ email, password });
+    const { error } = await supabaseClient.auth.signInWithPassword({ email: email.trim(), password });
     if (error) throw error;
     try {
       return await getActiveProfile();
@@ -88,6 +88,10 @@
     if (error) throw error;
   }
 
+  function onAuthStateChange(callback) {
+    return getClient().auth.onAuthStateChange(callback);
+  }
+
   function currentProfile() { return profile; }
 
   function requireRole(allowedRoles) {
@@ -98,7 +102,6 @@
   }
 
   async function readTable(table, columns, options) {
-    // Read-only helper. Actual authorization must still be enforced by database RLS.
     if (!profile || profile.active !== true) throw new Error("Sign-in is required.");
     const safeTables = new Set([
       "products", "product_variants", "inventory_movements", "orders",
@@ -120,13 +123,8 @@
     return data || [];
   }
 
-  global.NOOR_ADMIN_BACKEND = Object.freeze({
-    configured,
-    signIn,
-    signOut,
-    getActiveProfile,
-    currentProfile,
-    requireRole,
-    readTable
+  global.IQA_ADMIN_BACKEND = Object.freeze({
+    configured, getClient, signIn, signOut, getActiveProfile,
+    currentProfile, requireRole, readTable, onAuthStateChange
   });
 })(window);
