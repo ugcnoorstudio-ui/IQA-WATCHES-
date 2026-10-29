@@ -161,5 +161,6 @@
     requireRole,
     readTable,
     listProducts,
-    listInventory\n  });
+    listInventory
+  });
 })(window);
