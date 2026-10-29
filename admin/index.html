@@ -3,25 +3,47 @@
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="robots" content="noindex,nofollow">
-<title>IQA WATCHES — Store Admin Preview</title>
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<title>IQA WATCHES — Secure Store Admin</title>
 <link rel="stylesheet" href="./admin.css">
 </head>
 <body>
-<div class="preview-banner"><strong>ADMIN PREVIEW · NOT CONNECTED</strong><span>No real store data is loaded. Authentication, database and server permissions must be configured before production use.</span><a href="../">← Storefront</a></div>
-<div class="shell">
+<section id="authGate" class="auth-gate" aria-labelledby="authTitle">
+  <div class="auth-card">
+    <a class="auth-brand" href="../"><span class="auth-mark">I</span><span>IQA WATCHES<small>SECURE ADMINISTRATION</small></span></a>
+    <p class="eyebrow gold">STAFF ACCESS · PRIVATE WORKSPACE</p>
+    <h1 id="authTitle">Welcome back.</h1>
+    <p class="auth-copy">Sign in with your authorized staff account. Public registration is disabled.</p>
+    <form id="loginForm" autocomplete="on">
+      <label for="authEmail">Staff email</label>
+      <input id="authEmail" name="email" type="email" autocomplete="username" value="ugcnoorstudio@gmail.com" required>
+      <label for="authPassword">Password</label>
+      <input id="authPassword" name="password" type="password" autocomplete="current-password" required>
+      <button id="authSubmit" class="auth-submit" type="submit">Sign in securely</button>
+      <p id="authMessage" class="auth-message" role="status" aria-live="polite">Your access is verified against the staff directory.</p>
+    </form>
+    <div class="auth-foot"><span>Protected by Supabase Auth</span><a href="../">Return to storefront</a></div>
+  </div>
+</section>
+<div class="preview-banner" hidden><strong>AUTHENTICATED ADMIN SHELL · DATA ACCESS LIMITED</strong><span>Owner/staff identity verified. Business records and write actions remain restricted until their individual server-side policies and workflows are enabled.</span><a href="../">← Storefront</a></div>
+<div class="shell" hidden>
 <aside class="sidebar" id="sidebar" aria-label="Admin navigation">
-<a class="brand" href="#overview"><span class="brand-mark">N</span><span>IQA WATCHES<small>STORE MANAGEMENT</small></span></a>
+<a class="brand" href="#overview"><span class="brand-mark">I</span><span>IQA WATCHES<small>STORE MANAGEMENT</small></span></a>
 <div class="side-label">WORKSPACE</div><nav id="nav"></nav>
-<div class="sidebar-foot"><span class="status-dot"></span> Backend not configured</div>
+<div class="sidebar-foot"><span class="status-dot"></span><span id="sidebarStatus">Authentication pending</span></div>
 </aside>
 <main class="main">
-<header class="topbar"><button class="menu-toggle" id="menuToggle" aria-label="Toggle navigation" aria-expanded="false">☰</button><div><p class="eyebrow">IQA WATCHES / ADMINISTRATION</p><h1 id="pageTitle">Dashboard overview</h1></div><div class="top-actions"><label class="global-search"><span>⌕</span><input id="globalSearch" type="search" placeholder="Search this preview" aria-label="Search current view"></label><button class="profile-button" id="setupInfo">Setup status</button></div></header>
+<header class="topbar"><button class="menu-toggle" id="menuToggle" aria-label="Toggle navigation" aria-expanded="false">☰</button><div><p class="eyebrow">IQA WATCHES / ADMINISTRATION</p><h1 id="pageTitle">Dashboard overview</h1></div><div class="top-actions"><label class="global-search"><span>⌕</span><input id="globalSearch" type="search" placeholder="Search this preview" aria-label="Search current view"></label><span id="staffIdentity" class="staff-identity">Authorized staff</span><button class="profile-button" id="setupInfo">Setup status</button><button class="profile-button signout-button" id="signOut" type="button">Sign out</button></div></header>
 <div class="crumb" id="crumb">Workspace / Overview</div>
 <div id="notice" class="notice" role="status" aria-live="polite" hidden></div>
 <section id="content" tabindex="-1"></section>
-<footer>IQA WATCHES · Admin UI preview · No credentials, customer data, orders or payment records are collected here.</footer>
+<footer>IQA WATCHES · Authenticated admin shell. Sensitive operations remain disabled until server-side policies and transactional workflows are verified.</footer>
 </main>
 </div>
 <dialog id="confirmDialog"><form method="dialog"><p class="eyebrow">PREVIEW CONFIRMATION</p><h2 id="dialogTitle">Confirm action</h2><p id="dialogText">This preview cannot save changes.</p><div class="dialog-actions"><button class="btn secondary" value="cancel">Cancel</button><button class="btn primary" value="confirm">Continue</button></div></form></dialog>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="./backend-config.js"></script>
+<script src="./backend.js"></script>
 <script src="./admin.js"></script>
+<script src="./auth.js"></script>
 </body></html>
