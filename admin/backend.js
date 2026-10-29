@@ -159,5 +159,7 @@
     getActiveProfile,
     currentProfile,
     requireRole,
-    readTable,\n    listProducts,\n    listInventory\n  });
+    readTable,
+    listProducts,
+    listInventory\n  });
 })(window);
