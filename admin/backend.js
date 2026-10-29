@@ -39,10 +39,16 @@
 
   async function getActiveProfile() {
     const supabaseClient = getClient();
-    const { data: sessionData, error: sessionError } =
-      await supabaseClient.auth.getSession();
-    if (sessionError) throw sessionError;
-    const user = sessionData && sessionData.session && sessionData.session.user;
+    // getUser() verifies the access token with Supabase Auth; do not use
+    // locally persisted getSession() user data as the identity authority.
+    const { data: userData, error: userError } =
+      await supabaseClient.auth.getUser();
+    if (userError) {
+      profile = null;
+      await supabaseClient.auth.signOut();
+      throw userError;
+    }
+    const user = userData && userData.user;
     if (!user) { profile = null; return null; }
 
     // RLS intentionally permits staff to read only their own profile.
