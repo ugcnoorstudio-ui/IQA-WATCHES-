@@ -7,7 +7,8 @@
 <link rel="stylesheet" href="./admin.css">
 </head>
 <body>
-<div id="loginGate" class="login-gate"><form id="loginForm" class="login-card"><p class="eyebrow gold">IQA WATCHES · SECURE ACCESS</p><h1>Admin sign in</h1><p>Only active staff accounts can open the management workspace.</p><label for="adminEmail">Email address</label><input id="adminEmail" type="email" autocomplete="username" required><label for="adminPassword">Password</label><input id="adminPassword" type="password" autocomplete="current-password" required><button class="btn primary" type="submit">Sign in securely</button><p id="loginMessage" role="status" aria-live="polite">Owner account setup is required before first sign-in.</p></form></div>\n<div class="preview-banner"><strong>ADMIN PREVIEW · NOT CONNECTED</strong><span>No real store data is loaded. Authentication, database and server permissions must be configured before production use.</span><a href="../">← Storefront</a></div>
+<div id="loginGate" class="login-gate"><form id="loginForm" class="login-card"><p class="eyebrow gold">IQA WATCHES · SECURE ACCESS</p><h1>Admin sign in</h1><p>Only active staff accounts can open the management workspace.</p><label for="adminEmail">Email address</label><input id="adminEmail" type="email" autocomplete="username" maxlength="254" required><label for="adminPassword">Password</label><input id="adminPassword" type="password" autocomplete="current-password" maxlength="128" required><button class="btn primary" type="submit">Sign in securely</button><p id="loginMessage" role="status" aria-live="polite">Owner account setup is required before first sign-in.</p></form></div>
+<div class="preview-banner"><strong>ADMIN PREVIEW · NOT CONNECTED</strong><span>No real store data is loaded. Authentication, database and server permissions must be configured before production use.</span><a href="../">← Storefront</a></div>
 <div class="shell" id="adminShell" hidden>
 <aside class="sidebar" id="sidebar" aria-label="Admin navigation">
 <a class="brand" href="#overview"><span class="brand-mark">N</span><span>NOOR WATCHES<small>STORE MANAGEMENT</small></span></a>
@@ -23,5 +24,9 @@
 </main>
 </div>
 <dialog id="confirmDialog"><form method="dialog"><p class="eyebrow">PREVIEW CONFIRMATION</p><h2 id="dialogTitle">Confirm action</h2><p id="dialogText">This preview cannot save changes.</p><div class="dialog-actions"><button class="btn secondary" value="cancel">Cancel</button><button class="btn primary" value="confirm">Continue</button></div></form></dialog>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>\n<script src="./backend-config.js"></script>\n<script src="./backend.js"></script>\n<script src="./admin-auth.js"></script>\n<script src="./admin.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="./backend-config.js"></script>
+<script src="./backend.js"></script>
+<script src="./admin-auth.js"></script>
+<script src="./admin.js"></script>
 </body></html>
