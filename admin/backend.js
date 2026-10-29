@@ -126,6 +126,32 @@
     return data || [];
   }
 
+  async function listProducts(limit) {
+    requireRole(["owner", "administrator", "inventory_manager", "order_manager", "support_staff"]);
+    const supabaseClient = getClient();
+    const safeLimit = Number.isInteger(limit) ? Math.min(Math.max(limit, 1), 100) : 50;
+    const { data, error } = await supabaseClient
+      .from("products")
+      .select("id,name,sku,brand,category,audience,selling_price,mrp,state,is_sample,verified_sellable,created_at,updated_at")
+      .order("created_at", { ascending: false })
+      .limit(safeLimit);
+    if (error) throw error;
+    return data || [];
+  }
+
+  async function listInventory(limit) {
+    requireRole(["owner", "administrator", "inventory_manager"]);
+    const supabaseClient = getClient();
+    const safeLimit = Number.isInteger(limit) ? Math.min(Math.max(limit, 1), 100) : 50;
+    const { data, error } = await supabaseClient
+      .from("product_variants")
+      .select("id,product_id,sku,options,selling_price,stock_on_hand,stock_reserved,low_stock_threshold,active")
+      .order("sku", { ascending: true })
+      .limit(safeLimit);
+    if (error) throw error;
+    return data || [];
+  }
+
   global.NOOR_ADMIN_BACKEND = Object.freeze({
     configured,
     signIn,
@@ -133,6 +159,5 @@
     getActiveProfile,
     currentProfile,
     requireRole,
-    readTable
-  });
+    readTable,\n    listProducts,\n    listInventory\n  });
 })(window);
