@@ -8,7 +8,7 @@
 - admin/backend-config.js contains only the project URL and public publishable key. No service-role key or provider secret is used in the browser.
 - Staff-role helper functions used by RLS policies now live in the non-exposed private schema. Their old public RPC entry points are no longer executable by anon or authenticated.
 - RLS is enabled on public business tables. The owner can read their own staff profile; role-gated read policies exist for products, variants and inventory movements. Seventeen business tables intentionally have no browser policies yet and remain inaccessible.
-- The admin navigation and forms are still a management-shell preview. Most forms do not persist data; no payment, order, customer, support, shipping or refund mutation is enabled.
+- The Products workspace now creates unpublished draft products and their first variant through the authenticated `iqa-admin-mutate` Edge Function. The Inventory workspace applies owner-approved stock adjustments through a transactional database function; both write audit events and use idempotency keys. Publishing, sellability verification, images, imports, and all other business mutations remain disabled.
 
 ## Admin access
 - Admin URL: https://ugcnoorstudio-ui.github.io/IQA-WATCHES-/admin/
@@ -28,7 +28,7 @@
 1. Enable leaked-password protection in Supabase Auth and review password strength/session lifetime.
 2. Configure MFA for the Owner and other staff; test recovery and session revocation.
 3. Design and review least-privilege policies for each remaining table. Keep customer PII, payments, refunds, staff management and settings restricted.
-4. Implement trusted transactional functions for stock reservation/release, order transitions, coupon redemption and refunds; use idempotency keys and unique provider-event IDs.
+4. Extend the trusted transactional pattern to stock reservation/release, order transitions, coupon redemption and refunds; use idempotency keys and unique provider-event IDs. Product creation and inventory adjustments are now implemented owner-only.
 5. Configure payment webhooks and verify signatures server-side. Mark payments paid only from verified gateway events/API reads.
 6. Add storage buckets with restricted upload policies for product imagery and evidence; validate MIME type, size and image dimensions.
 7. Configure allowed origins, email sender/recovery, rate limits, monitoring, backup retention and restore tests.
