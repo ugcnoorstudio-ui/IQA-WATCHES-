@@ -5,7 +5,8 @@ const groups=[
 {label:'COMMERCE',items:[['orders','▣','Orders'],['customers','♙','Customers'],['payments','₹','Payments & refunds'],['shipping','↗','Shipping & delivery'],['coupons','%','Discounts & coupons']]},
 {label:'CUSTOMER EXPERIENCE',items:[['reviews','☆','Reviews & moderation'],['support','☏','Customer support'],['returns','↩','Returns & warranty']]},
 {label:'OPERATIONS',items:[['suppliers','⇄','Suppliers & purchase orders'],['reports','▥','Reports & analytics']]},
-{label:'ADMINISTRATION',items:[['settings','⚙','Store settings'],['staff','♧','Staff & permissions'],['logs','≡','Activity logs'],['health','♥','System health & errors']]}
+{label:'ADMINISTRATION',items:[['settings','⚙','Store settings'],['staff','♧','Staff & permissions'],['logs','≡','Activity logs'],['health','♥','System health & errors']]},
+{label:'CREATIVE ENGINEERING',items:[['motion-studio','✦','Motion & Experience Studio']]}
 ];
 const descriptions={
 overview:'A health-first overview. Supabase and verified staff login are connected; operational metrics remain restricted until each module has reviewed access policies and server workflows.',
@@ -26,7 +27,8 @@ reports:'Export authorized reports with sales, refunds, tax, shipping and cost d
 settings:'Manage store identity, tax, shipping, policies, integrations and notification preferences.',
 staff:'Manage staff roles and permissions. Owner/admin changes require server authorization and audit trails.',
 logs:'Search administrative activity with safe before/after values and redacted sensitive fields.',
-health:'Check backend, database, gateway, email, courier, webhooks and backups when those integrations exist.'
+health:'Check backend, database, gateway, email, courier, webhooks and backups when those integrations exist.',
+'motion-studio':'Admin-only creative workflow preview for cinematic stories, 3D assets, campaign briefs, AI provider readiness, asset approval and performance evidence. Provider calls and publishing are disabled.'
 };
 const configs={
 products:{fields:[['name','Product name','text'],['sku','Unique SKU','text'],['brand','Brand','text'],['category','Category','text'],['audience','Audience','select','Men,Women,Unisex,Other'],['price','Selling price (INR)','number'],['mrp','MRP (INR)','number'],['stock','Initial stock','number'],['status','Publication state','select','Draft,Published,Archived,Scheduled'],['description','Description','textarea']],actions:['Add product','Import CSV','Export CSV']},
@@ -65,8 +67,9 @@ function dashboard(){return pageIntro('STORE OPERATIONS','Dashboard overview','A
 function render(){current=location.hash.slice(1).split('/')[0]||'overview';if(!allItems.some(x=>x[0]===current))current='not-found';renderNav();$('pageTitle').textContent=current==='not-found'?'Page not found':activeName();$('crumb').textContent='Workspace / '+activeName();$('globalSearch').value='';let body='';
 if(current==='overview')body=dashboard();
 else if(current==='not-found')body=pageIntro('404 · ADMIN ROUTE','Page not found','This admin route does not exist. Choose a workspace from the sidebar.','<button class="btn primary" data-route="overview">Back to overview</button>')+empty('Unknown admin destination','No data or protected action was loaded.');
+else if(current==='motion-studio')body=window.IQA_MOTION_STUDIO?window.IQA_MOTION_STUDIO.render():empty('Motion studio unavailable','Reload the authenticated admin workspace to try again.');
 else{const title=activeName();body=pageIntro('MANAGEMENT WORKSPACE',title,descriptions[current],'<span class="tag">Preview only</span>')+panel('Connection status','<div class="setup-row"><span class="tag red">Not connected</span><div><b>Live data is unavailable</b><p>This workspace does not query a production service. Form submissions are not saved and no real records are exposed.</p></div></div>')+formFor(current)+tablePanel(current);if(current==='health')body+=setupPanel();if(current==='staff'||current==='payments'||current==='customers'||current==='settings'||current==='logs')body+=panel('Security boundary','<p class="muted">Access control must be enforced by the backend on every request. This static preview cannot authenticate staff or authorize sensitive data.</p><span class="tag red">Production access disabled</span>')}
-$('content').innerHTML=body;$('sidebar').classList.toggle('open',mobileOpen);$('menuToggle').setAttribute('aria-expanded',String(mobileOpen));$('globalSearch').placeholder=current==='overview'?'Search workspaces':'Search this preview';}
+$('content').innerHTML=body;if(current==='motion-studio'&&window.IQA_MOTION_STUDIO)window.IQA_MOTION_STUDIO.bind($('content'));$('sidebar').classList.toggle('open',mobileOpen);$('menuToggle').setAttribute('aria-expanded',String(mobileOpen));$('globalSearch').placeholder=current==='overview'?'Search workspaces':'Search this preview';}
 function toast(msg){const n=$('notice');n.textContent=msg;n.hidden=false;clearTimeout(toastTimer);toastTimer=setTimeout(()=>n.hidden=true,5000)}
 function showConfirm(title,text){$('dialogTitle').textContent=title;$('dialogText').textContent=text;const d=$('confirmDialog');if(typeof d.showModal==='function')d.showModal();else toast(text)}
 document.addEventListener('click',e=>{const r=e.target.closest('[data-route]');if(r){location.hash=r.dataset.route;mobileOpen=false;return}const a=e.target.closest('[data-action]');if(a){if(a.dataset.action==='Open storefront'){location.href='../';return}showConfirm(a.dataset.action,'This is a non-persistent preview. No production record will be created, changed, exported or deleted. Configure backend authentication and server APIs first.');return}const fa=e.target.closest('[data-form-action]');if(fa){const form=fa.closest('form');const reason=form?.querySelector('[name="reason"]');if(reason&&!reason.value.trim()){toast('Validation preview: a reason is required for this action. No data was saved.');reason.focus();return}showConfirm(fa.dataset.formAction,'Preview only: this action is not connected to a backend and will not persist any changes. Never enter real customer or payment secrets here.');return}});
