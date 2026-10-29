@@ -41,3 +41,6 @@ button:disabled{opacity:.55;cursor:not-allowed}
 .signout-button{border-color:#69564a!important;color:#e7c0b5!important}
 .preview-banner{background:#29271f}
 @media(max-width:760px){.auth-card{padding:25px 21px}.auth-brand{margin-bottom:28px}.staff-identity{order:4;width:100%}.top-actions{flex-wrap:wrap}}
+
+/* Additive creative engineering workspace */
+@import url('./motion-studio.css');
