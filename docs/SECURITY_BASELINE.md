@@ -64,3 +64,6 @@ select
 
 ## Scope and status
 This baseline hardens database defaults only. It does not enable customer/admin CRUD, configure Auth, create an owner account, deploy Edge Functions, connect the storefront, or make the store production-ready.
+
+## Migration-owner limitation
+The project database role cannot alter the Supabase-managed `supabase_admin` role's default privileges (the attempted change was rejected with PostgreSQL permission denied and was not applied). The hardening migration therefore applies to the `postgres` migration owner used for project migrations. Continue creating application objects through reviewed migrations as `postgres`; do not create exposed application tables/functions manually under `supabase_admin`. The current existing public objects were individually checked and browser grants were revoked, with only the staff self-profile SELECT grant restored under its owner-only RLS policy.
