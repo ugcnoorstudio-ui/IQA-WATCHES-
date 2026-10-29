@@ -117,5 +117,6 @@ $('menuToggle').addEventListener('click',()=>{mobileOpen=!mobileOpen;$('sidebar'
 $('setupInfo').addEventListener('click',()=>{location.hash='health'});
 $('globalSearch').addEventListener('input',e=>{const q=e.target.value.trim().toLowerCase();if(!q){renderNav();return}const matches=allItems.filter(i=>i[2].toLowerCase().includes(q)||descriptions[i[0]]?.toLowerCase().includes(q));$('nav').innerHTML=matches.length?'<div class="side-label">SEARCH RESULTS</div>'+matches.map(i=>'<button class="nav-item" data-route="'+i[0]+'"><span class="nav-icon">'+i[1]+'</span><span>'+esc(i[2])+'</span></button>').join(''):'<p class="muted" style="padding:10px">No workspace matches.</p>'});
 window.addEventListener('hashchange',()=>{mobileOpen=false;render();window.scrollTo(0,0)});
+window.IQA_ADMIN_REFRESH=()=>{mobileOpen=false;render()};
 render();
 })();
