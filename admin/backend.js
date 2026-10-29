@@ -123,8 +123,17 @@
     return data || [];
   }
 
+  async function mutate(action, payload) {
+    requireRole(["owner"]);
+    if (!["create_product", "adjust_inventory"].includes(action)) throw new Error("Unsupported administrative action.");
+    const { data, error } = await getClient().functions.invoke("iqa-admin-mutate", { body: { action, payload } });
+    if (error) throw error;
+    if (!data || data.ok !== true) throw new Error(data?.error || "The operation was not confirmed.");
+    return data;
+  }
+
   global.IQA_ADMIN_BACKEND = Object.freeze({
     configured, getClient, signIn, signOut, getActiveProfile,
-    currentProfile, requireRole, readTable, onAuthStateChange
+    currentProfile, requireRole, readTable, mutate, onAuthStateChange
   });
 })(window);
