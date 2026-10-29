@@ -3,6 +3,6 @@
  * NEVER add service_role/secret keys, database passwords, or payment secrets.
  */
 window.IQA_SUPABASE_CONFIG = Object.freeze({
-  url: "https://ufidhdcwelaqtqrgeszy.supabase.co",
-  publishableKey: "sb_publishable_QWYrcih-puH-UINa8pIpNA_2kNU5oZE"
+  url: "https://nyhyfdququxnorqlnnqq.supabase.co",
+  publishableKey: "sb_publishable_coViYn8Fl7F-8JkxhRCstA_zfo_VR9C"
 });
