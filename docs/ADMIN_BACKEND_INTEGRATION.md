@@ -31,3 +31,34 @@ This scaffold does not connect to a live Supabase project, load real records, or
 ## GitHub deployment
 
 GitHub is the version-control/deployment source for the static site, not the database. A merge to the deployed branch can publish static UI changes through GitHub Pages; it cannot create a Supabase project, configure its secrets, or apply database permissions automatically.
+
+## IQA WATCHES project owner onboarding (project ref: ufidhdcwelaqtqrgeszy)
+
+The repository now includes an admin sign-in gate (admin/admin-auth.js) and a public configuration placeholder (admin/backend-config.js). The admin stays locked until a valid publishable key is configured and the signed-in user has an active staff profile.
+
+### Create the first owner account
+
+1. Open the [IQA WATCHES Supabase Authentication users page](https://supabase.com/dashboard/project/ufidhdcwelaqtqrgeszy/auth/users).
+2. Choose Add user / Invite user and invite the business owner's email address. Complete the email invitation and set a password using Supabase's trusted Auth flow. Do not share the password in ChatGPT or commit it to GitHub.
+3. After the invited user has accepted and appears in Authentication → Users, copy that user's UUID (Auth user ID).
+4. Open the Supabase SQL Editor for this project and run the following statement after replacing the UUID with the verified Auth user ID:
+
+```sql
+insert into public.staff_profiles (user_id, display_name, role, active)
+values ('REPLACE_WITH_AUTH_USER_UUID', 'IQA WATCHES Owner', 'owner', true)
+on conflict (user_id) do update
+set display_name = excluded.display_name, role = 'owner', active = true, updated_at = now();
+```
+
+Owner assignment must be done by the trusted project owner in Supabase SQL Editor; never expose a browser endpoint that lets a user assign their own role.
+
+### Configure the browser-safe key
+
+1. In Project Settings → API Keys, copy the publishable key (starts with sb_publishable_). Do not copy a secret key or service_role key.
+2. Replace YOUR_SUPABASE_PUBLISHABLE_KEY in admin/backend-config.js with that publishable key. The key is public in the static website; database RLS is the security boundary.
+3. Set Supabase Auth Site URL and Redirect URLs to https://ugcnoorstudio-ui.github.io/IQA-WATCHES-/.
+4. Deploy the branch only after reviewing the PR. Test login with the owner account and confirm inactive/non-staff users are denied.
+
+### Current status
+
+The admin page now has a login form and session gate, but the publishable key remains a placeholder and no owner profile is provisioned yet. Login cannot succeed until the owner invitation is accepted, the profile row is assigned by the trusted SQL Editor, and the publishable key is configured. This is a deliberate fail-closed state.
