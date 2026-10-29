@@ -20,12 +20,12 @@ The storefront and admin use additive `--nw-*` tokens and motion tokens. Gold te
 Use the dark ink values for body text on ivory/white. Use white/ivory text on midnight/charcoal. Use dark-gold ink (`#75551F`) for small text on light surfaces; champagne gold (`#C6A66B`) is an accent/border on dark surfaces, not body text on ivory/white. Status colors must be paired with explicit text and are not proof of status unless the underlying operation succeeds.
 
 Approximate WCAG contrast ratios:
-- `#101114` on `#F7F4ED`: 17.1:1.
-- `#1C1D20` on `#FFFFFF`: 16.5:1.
-- `#75551F` on `#F7F4ED`: 6.4:1.
-- `#FFFFFF` on `#176B45`: 6.1:1.
-- `#FFFFFF` on `#B42318`: 6.6:1.
-- `#FFFFFF` on `#8A5700`: 5.9:1.
+- `#101114` on `#F7F4ED`: 17.19:1.
+- `#1C1D20` on `#FFFFFF`: 16.85:1.
+- `#75551F` on `#F7F4ED`: 6.22:1.
+- `#FFFFFF` on `#176B45`: 6.51:1.
+- `#FFFFFF` on `#B42318`: 6.57:1.
+- `#FFFFFF` on `#8A5700`: 6.10:1.
 - Champagne `#C6A66B` on white/ivory is not approved for small text; use as an accent only.
 These are pair calculations, not an exhaustive automated scan of every dynamically composed component or image overlay. A full axe/Lighthouse contrast audit remains a follow-up verification task.
 
