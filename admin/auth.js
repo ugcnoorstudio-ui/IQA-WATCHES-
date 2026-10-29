@@ -17,6 +17,7 @@ function unlock(profile){
  banner.querySelector('strong').textContent='AUTHENTICATED ADMIN SHELL · DATA ACCESS LIMITED';
  banner.querySelector('span').textContent='Owner/staff identity verified. Business records and write actions remain restricted until their individual server-side policies and workflows are enabled.';
  message('',false);
+if(window.IQA_ADMIN_REFRESH)window.IQA_ADMIN_REFRESH();
 }
 async function init(){
  if(!backend||!backend.configured()){lock('Admin backend configuration is missing.');return}
