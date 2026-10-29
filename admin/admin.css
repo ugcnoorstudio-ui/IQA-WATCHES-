@@ -41,3 +41,5 @@ button:disabled{opacity:.55;cursor:not-allowed}
 .signout-button{border-color:#69564a!important;color:#e7c0b5!important}
 .preview-banner{background:#29271f}
 @media(max-width:760px){.auth-card{padding:25px 21px}.auth-brand{margin-bottom:28px}.staff-identity{order:4;width:100%}.top-actions{flex-wrap:wrap}}
+
+.approval-check{display:flex;align-items:flex-start;gap:10px;margin:16px 0;color:var(--muted,#b9b5aa);font-size:.9rem;line-height:1.5}.approval-check input{width:auto;min-width:17px;margin-top:3px;accent-color:var(--gold,#c9a96e)}form [type=submit]:disabled{opacity:.55;cursor:wait}
