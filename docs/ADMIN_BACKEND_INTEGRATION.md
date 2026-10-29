@@ -62,3 +62,12 @@ Owner assignment must be done by the trusted project owner in Supabase SQL Edito
 ### Current status
 
 The admin page now has a login form and session gate, but the publishable key remains a placeholder and no owner profile is provisioned yet. Login cannot succeed until the owner invitation is accepted, the profile row is assigned by the trusted SQL Editor, and the publishable key is configured. This is a deliberate fail-closed state.
+
+### Session identity verification hardening
+
+The admin adapter now calls Supabase Auth `getUser()` before reading the matching `staff_profiles` row. This verifies the access token with the Auth service instead of treating locally persisted session data as the identity authority. The UI also rechecks the staff profile when the tab regains focus and locks on sign-out. These browser checks improve the UX but do not replace RLS or server-side authorization.
+
+### Current security-advisor interpretation
+
+- The 17 RLS-enabled tables without policies are intentionally deny-by-default while their role-specific access model and server-side workflows are unfinished. Do not add blanket authenticated policies to silence the advisor.
+- The three staff helper functions are SECURITY DEFINER because they read the protected `staff_profiles` table for RLS predicates. Anonymous EXECUTE is revoked; authenticated EXECUTE remains intentionally required by staff policy checks. Their bodies are restricted to the caller's `auth.uid()`, and the functions use a fixed search_path. Keep reviewing them before adding new privileged functions.
