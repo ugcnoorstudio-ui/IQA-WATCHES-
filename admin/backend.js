@@ -14,9 +14,8 @@
     return Boolean(config && typeof config.url === "string" &&
       /^https:\/\/[^/]+\.supabase\.co$/.test(config.url) &&
       typeof config.anonKey === "string" &&
-      config.anonKey.length > 20 &&
-      !config.url.includes("YOUR_PROJECT_REF") &&
-      !config.anonKey.includes("YOUR_SUPABASE"));
+      /^(sb_publishable_[A-Za-z0-9_-]+|eyJ[A-Za-z0-9._-]+)$/.test(config.anonKey) &&
+      !config.url.includes("YOUR_PROJECT_REF"));
   }
 
   function getClient() {
@@ -152,6 +151,53 @@
     return data || [];
   }
 
+  async function invokeOwnerMutation(action, payload) {
+    requireRole(["owner"]);
+    const allowed = new Set([
+      "create_product",
+      "adjust_inventory",
+      "create_category",
+      "create_brand",
+      "assign_product_taxonomy",
+      "add_product_image",
+      "publish_product"
+    ]);
+    if (!allowed.has(action)) throw new Error("Administrative action is not allow-listed.");
+    if (!payload || typeof payload !== "object" || Array.isArray(payload)) {
+      throw new Error("A valid action payload is required.");
+    }
+    const supabaseClient = getClient();
+    const { data, error } = await supabaseClient.functions.invoke("iqa-admin-mutate", {
+      body: {
+        action,
+        payload: { ...payload, request_id: payload.request_id || crypto.randomUUID() }
+      }
+    });
+    if (error) {
+      const context = error.context;
+      let message = error.message || "Administrative operation failed.";
+      if (context && typeof context.json === "function") {
+        try {
+          const body = await context.json();
+          if (body && typeof body.error === "string") message = body.error;
+        } catch (_) {}
+      }
+      throw new Error(message);
+    }
+    if (!data || data.ok !== true) {
+      throw new Error((data && data.error) || "The server did not confirm this operation.");
+    }
+    return data;
+  }
+
+  async function createProduct(payload) {
+    return invokeOwnerMutation("create_product", payload);
+  }
+
+  async function adjustInventory(payload) {
+    return invokeOwnerMutation("adjust_inventory", payload);
+  }
+
   global.NOOR_ADMIN_BACKEND = Object.freeze({
     configured,
     signIn,
@@ -161,6 +207,8 @@
     requireRole,
     readTable,
     listProducts,
-    listInventory
+    listInventory,
+    createProduct,
+    adjustInventory
   });
 })(window);
