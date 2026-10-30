@@ -70,9 +70,92 @@ function stateTag(v){return '<span class="tag">'+esc(String(v||'unknown').replac
 function readTableMarkup(title,headers,rows,emptyText){
 return panel(title,'<div class="table-wrap"><table><thead><tr>'+headers.map(h=>'<th>'+esc(h)+'</th>').join('')+'</tr></thead><tbody>'+ (rows.length?rows.join(''):'<tr><td colspan="'+headers.length+'"><div class="empty-state"><h3>No records found</h3><p>'+esc(emptyText)+'</p></div></td></tr>')+'</tbody></table></div>');
 }
+const liveModules={
+orders:[['orders','id,order_number,state,currency,payable_total,payment_state,created_at,customer_id']],
+customers:[['customers','id,full_name,email,phone,consent,created_at']],
+payments:[['payment_events','id,order_id,gateway,gateway_reference,state,amount,currency,verified_at,created_at'],['refunds','id,order_id,amount,reason,state,gateway_reference,created_at']],
+shipping:[['orders','id,order_number,state,delivery_snapshot,created_at']],
+coupons:[['coupons','id,code,kind,value,minimum_order,starts_at,ends_at,usage_limit,active,created_at']],
+content:[['content_entries','id,content_type,slug,title,state,publish_at,updated_at']],
+reviews:[['reviews','id,product_id,rating,verified_purchase,state,created_at']],
+support:[['support_tickets','id,subject,priority,state,assigned_to,created_at,updated_at']],
+returns:[['return_requests','id,order_id,kind,reason,state,assigned_to,resolution,created_at']],
+suppliers:[['suppliers','id,name,active,created_at'],['purchase_orders','id,supplier_id,po_number,state,supplier_invoice_ref,created_at']],
+reports:[['orders','id,state,item_total,discount_total,shipping_total,tax_total,payable_total,payment_state,created_at'],['refunds','id,amount,state,created_at']],
+settings:[['store_settings','key,value,updated_at']],
+staff:[['staff_profiles','user_id,display_name,role,active,created_at']],
+logs:[['activity_logs','id,actor_role,action,entity_type,entity_id,outcome,reason,created_at'],['integration_events','id,integration,event_type,outcome,created_at']],
+health:[['integration_events','id,integration,event_type,outcome,created_at']]
+};
+function safeCell(value){
+ if(value===null||value===undefined||value==='')return '—';
+ if(typeof value==='object')return esc(JSON.stringify(value).slice(0,180));
+ if(typeof value==='number'&&/total|amount|value|price|cost/i.test(String(value)))return money(value);
+ return esc(String(value).slice(0,180));
+}
+function renderLiveModule(route,sets){
+ const target=$('content'),host=target.querySelector('[data-live-module]');
+ if(!host)return;
+ const headings={
+ orders:['Order','State','Payment','Payable','Created'],customers:['Customer','Email','Phone','Consent','Created'],
+ payments:['Reference','Order','Gateway','State','Amount','Verified'],refunds:['Order','Amount','State','Reason','Created'],
+ shipping:['Order','State','Delivery snapshot','Created'],coupons:['Code','Type','Value','Minimum','Active','Created'],
+ content:['Title','Type','Slug','State','Publish at'],reviews:['Product','Rating','Verified purchase','State','Created'],
+ support:['Subject','Priority','State','Assignee','Updated'],returns:['Order','Type','Reason','State','Resolution'],
+ suppliers:['Supplier','Active','Created'],purchase_orders:['PO number','Supplier','State','Invoice ref','Created'],
+ reports:['Order state','Items','Discount','Shipping','Tax','Payable','Payment'],
+ settings:['Setting key','Value','Updated'],staff:['Staff member','Role','Active','Created'],
+ logs:['Actor role','Action','Entity','Outcome','Reason','Time'],integration_events:['Integration','Event','Outcome','Time']
+ };
+ const renderSet=([table,columns],rows)=>{
+  const cols=headings[table]||columns.split(',');
+  const map={
+   orders:r=>[r.order_number,r.state,r.payment_state,money(r.payable_total),r.created_at],
+   customers:r=>[r.full_name,r.email,r.phone,r.consent,r.created_at],
+   payment_events:r=>[r.gateway_reference||r.event_id,r.order_id,r.gateway,r.state,money(r.amount),r.verified_at],
+   refunds:r=>[r.order_id,money(r.amount),r.state,r.reason,r.created_at],
+   shipping:r=>[r.order_number,r.state,r.delivery_snapshot,r.created_at],
+   coupons:r=>[r.code,r.kind,r.value,money(r.minimum_order),r.active?'Yes':'No',r.created_at],
+   content_entries:r=>[r.title,r.content_type,r.slug,r.state,r.publish_at],
+   reviews:r=>[r.product_id,r.rating,r.verified_purchase?'Yes':'No',r.state,r.created_at],
+   support_tickets:r=>[r.subject,r.priority,r.state,r.assigned_to,r.updated_at],
+   return_requests:r=>[r.order_id,r.kind,r.reason,r.state,r.resolution],
+   suppliers:r=>[r.name,r.active?'Yes':'No',r.created_at],
+   purchase_orders:r=>[r.po_number,r.supplier_id,r.state,r.supplier_invoice_ref,r.created_at],
+   store_settings:r=>[r.key,r.value,r.updated_at],
+   staff_profiles:r=>[r.display_name,r.role,r.active?'Yes':'No',r.created_at],
+   activity_logs:r=>[r.actor_role,r.action,r.entity_type,r.outcome,r.reason,r.created_at],
+   integration_events:r=>[r.integration,r.event_type,r.outcome,r.created_at]
+  };
+  const values=rows.map(r=>'<tr>'+map[table](r).map(v=>'<td>'+safeCell(v)+'</td>').join('')+'</tr>');
+  return readTableMarkup(table.replaceAll('_',' ')+' · '+rows.length+' records',cols,values,'No records are stored in this module yet.');
+ };
+ const sections=sets.map((entry,i)=>renderSet(entry[0],entry[1])).join('');
+ host.innerHTML=sections+'<div class="notice" style="margin-top:14px">Live database connection · Owner-only read access · Changes are disabled until this module has its own audited server workflow. No preview data is shown as real.</div>';
+}
 function loadReadOnlyData(route){
-if(!['products','inventory','categories'].includes(route))return;
+if(!['products','inventory','categories',...Object.keys(liveModules)].includes(route))return;
 const target=$('content');
+if(liveModules[route]){
+ const host=target.querySelector('[data-live-module]');
+ if(host)host.innerHTML='<div class="notice">Loading owner-authorized records…</div>';
+ (async()=>{
+  try{
+   const api=window.IQA_ADMIN_BACKEND;
+   if(!api||!api.currentProfile())throw new Error('Staff session is not active. Sign in again.');
+   api.requireRole(['owner']);
+   const entries=liveModules[route];
+   const rows=await Promise.all(entries.map(([table,columns])=>api.readTable(table,columns,{limit:100})));
+   if(current!==route)return;
+   renderLiveModule(route,entries.map((entry,i)=>[entry,rows[i]]));
+  }catch(error){
+   if(current!==route)return;
+   const host=target.querySelector('[data-live-module]');
+   if(host)host.innerHTML='<div class="notice">'+esc(error.message||'Unable to load live records.')+'</div>';
+  }
+ })();
+ return;
+}
 const placeholder='<tr><td colspan="7">Loading authorized records…</td></tr>';
 const tbody=target.querySelector('tbody');
 if(tbody)tbody.innerHTML=placeholder;
@@ -131,7 +214,7 @@ function render(){current=location.hash.slice(1).split('/')[0]||'overview';if(!a
 if(current==='overview')body=dashboard();
 else if(current==='not-found')body=pageIntro('404 · ADMIN ROUTE','Page not found','This admin route does not exist. Choose a workspace from the sidebar.','<button class="btn primary" data-route="overview">Back to overview</button>')+empty('Unknown admin destination','No data or protected action was loaded.');
 else if(current==='motion-studio')body=window.IQA_MOTION_STUDIO?window.IQA_MOTION_STUDIO.render():empty('Motion studio unavailable','Reload the authenticated admin workspace to try again.');
-else{const title=activeName();if(current==='products'||current==='inventory'||current==='categories'){const owner=window.IQA_ADMIN_BACKEND?.currentProfile()?.role==='owner';body=pageIntro('SECURE LIVE WORKSPACE',title,current==='products'?'Create draft products, classify them, upload images and publish only after server-side checks.':current==='categories'?'Manage live brand and category taxonomy with Owner-only approval.':'Review live stock and apply reason-required, owner-approved adjustments with a transactional audit trail.','<span class="tag">'+(owner?'Owner access':'Read only')+'</span>')+(owner?(current==='products'?productWriteForm()+productCatalogueToolsForm():current==='categories'?categoryBrandWriteForm():inventoryWriteForm()):panel('Owner approval required','<p class="muted">Only the active Owner account can change catalogue, taxonomy or stock. The database enforces this restriction.</p>'))+(current==='categories'?'<div data-live-taxonomy>'+panel('Loading taxonomy','<p class="muted">Reading authorized categories and brands…</p>')+'</div>':'<div data-live-records>'+panel('Loading live records','<p class="muted">Checking your active staff permissions…</p>')+'</div>')+(current==='inventory'?'<div data-live-movements></div>':'')}else{body=pageIntro('MANAGEMENT WORKSPACE',title,descriptions[current],'<span class="tag">Preview only</span>')+panel('Connection status','<div class="setup-row"><span class="tag red">Not connected</span><div><b>Live data is unavailable</b><p>This workspace does not query a production service. Form submissions are not saved and no real records are exposed.</p></div></div>')+formFor(current)+tablePanel(current);if(current==='health')body+=setupPanel();if(current==='staff'||current==='payments'||current==='customers'||current==='settings'||current==='logs')body+=panel('Security boundary','<p class="muted">Access control must be enforced by the backend on every request. This static preview cannot authenticate staff or authorize sensitive data.</p><span class="tag red">Production access disabled</span>')}}
+else{const title=activeName();if(current==='products'||current==='inventory'||current==='categories'){const owner=window.IQA_ADMIN_BACKEND?.currentProfile()?.role==='owner';body=pageIntro('SECURE LIVE WORKSPACE',title,current==='products'?'Create draft products, classify them, upload images and publish only after server-side checks.':current==='categories'?'Manage live brand and category taxonomy with Owner-only approval.':'Review live stock and apply reason-required, owner-approved adjustments with a transactional audit trail.','<span class="tag">'+(owner?'Owner access':'Read only')+'</span>')+(owner?(current==='products'?productWriteForm()+productCatalogueToolsForm():current==='categories'?categoryBrandWriteForm():inventoryWriteForm()):panel('Owner approval required','<p class="muted">Only the active Owner account can change catalogue, taxonomy or stock. The database enforces this restriction.</p>'))+(current==='categories'?'<div data-live-taxonomy>'+panel('Loading taxonomy','<p class="muted">Reading authorized categories and brands…</p>')+'</div>':'<div data-live-records>'+panel('Loading live records','<p class="muted">Checking your active staff permissions…</p>')+'</div>')+(current==='inventory'?'<div data-live-movements></div>':'')}else if(liveModules[current]){body=pageIntro('LIVE OWNER WORKSPACE',title,descriptions[current],'<span class="tag">Connected · Read only</span>')+panel('Connection status','<div class="setup-row"><span class="tag">Connected</span><div><b>Supabase live records</b><p>Owner-only row-level security is active. This module is connected for live reading. Write actions stay disabled until a dedicated audited server workflow and any required external provider are configured.</p></div></div>')+'<div data-live-module>'+panel('Loading live records','<p class="muted">Checking owner authorization…</p>')+'</div>'+(current==='health'?setupPanel():'')}else{body=pageIntro('MANAGEMENT WORKSPACE',title,descriptions[current],'<span class="tag">Preview only</span>')+panel('Connection status','<div class="setup-row"><span class="tag red">Not connected</span><div><b>Live data is unavailable</b><p>This workspace does not query a production service. Form submissions are not saved and no real records are exposed.</p></div></div>')+formFor(current)+tablePanel(current);if(current==='health')body+=setupPanel()}}
 $('content').innerHTML=body;loadReadOnlyData(current);if(current==='motion-studio'&&window.IQA_MOTION_STUDIO)window.IQA_MOTION_STUDIO.bind($('content'));syncMobileNav();$('globalSearch').placeholder=current==='overview'?'Search workspaces':'Search this preview';}
 function toast(msg){const n=$('notice');n.textContent=msg;n.hidden=false;clearTimeout(toastTimer);toastTimer=setTimeout(()=>n.hidden=true,5000)}
 function showConfirm(title,text){$('dialogTitle').textContent=title;$('dialogText').textContent=text;const d=$('confirmDialog');if(typeof d.showModal==='function')d.showModal();else toast(text)}
