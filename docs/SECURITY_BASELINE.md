@@ -42,3 +42,12 @@ The Owner identity, Supabase Auth login gate, baseline schema, staff self-profil
 
 ## Migration-owner limitation
 The project database role cannot alter the Supabase-managed supabase_admin role's default privileges (the attempted change was rejected with PostgreSQL permission denied and was not applied). The hardening migration therefore applies to the postgres migration owner used for project migrations. Continue creating application objects through reviewed migrations as postgres; do not create exposed application tables/functions manually under supabase_admin.
+
+
+## Catalogue taxonomy and public product image delivery
+
+- Categories, brands and product-media metadata have RLS enabled. Anonymous reads are limited to published taxonomy and media attached to published, non-sample, verified-sellable products. Authenticated staff reads require an active staff role.
+- The public `product-images` bucket is intentionally public for storefront image delivery, but storage object creation, overwrite and deletion are restricted to active Owners through Storage RLS. Allowed formats are JPEG, PNG, WebP and AVIF; maximum object size is 5 MiB.
+- Product taxonomy, image metadata and product publication are performed through `iqa-admin-mutate` and a service-role-only database function. The database independently validates active Owner status, records audit events and uses request idempotency.
+- Publishing requires category, brand, primary image, an active priced variant with available stock and a reasoned Owner approval. The database sets published / verified-sellable flags only after those checks.
+- Supabase security advisor still reports 17 unrelated RLS-enabled tables with no policies (intentionally inaccessible) and leaked-password protection disabled. Enable leaked-password protection in Auth settings before production.
