@@ -82,7 +82,7 @@ support:[['support_tickets','id,subject,priority,state,assigned_to,created_at,up
 returns:[['return_requests','id,order_id,kind,reason,state,assigned_to,resolution,created_at']],
 suppliers:[['suppliers','id,name,active,created_at'],['purchase_orders','id,supplier_id,po_number,state,supplier_invoice_ref,created_at']],
 reports:[['orders','id,state,item_total,discount_total,shipping_total,tax_total,payable_total,payment_state,created_at'],['refunds','id,amount,state,created_at']],
-settings:[['store_settings','key,value,updated_at']],
+settings:[['store_settings','key,updated_at']],
 staff:[['staff_profiles','user_id,display_name,role,active,created_at']],
 logs:[['activity_logs','id,actor_role,action,entity_type,entity_id,outcome,reason,created_at'],['integration_events','id,integration,event_type,outcome,created_at']],
 health:[['integration_events','id,integration,event_type,outcome,created_at']]
@@ -122,7 +122,7 @@ function renderLiveModule(route,sets){
    return_requests:r=>[r.order_id,r.kind,r.reason,r.state,r.resolution],
    suppliers:r=>[r.name,r.active?'Yes':'No',r.created_at],
    purchase_orders:r=>[r.po_number,r.supplier_id,r.state,r.supplier_invoice_ref,r.created_at],
-   store_settings:r=>[r.key,r.value,r.updated_at],
+   store_settings:r=>[r.key,'Protected setting value',r.updated_at],
    staff_profiles:r=>[r.display_name,r.role,r.active?'Yes':'No',r.created_at],
    activity_logs:r=>[r.actor_role,r.action,r.entity_type,r.outcome,r.reason,r.created_at],
    integration_events:r=>[r.integration,r.event_type,r.outcome,r.created_at]
