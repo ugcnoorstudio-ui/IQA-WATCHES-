@@ -236,20 +236,28 @@ async function loadStorefrontCatalogue(){
    .order('name',{ascending:true}).limit(100);
   if(productsError)throw productsError;
   const ids=(rows||[]).map(row=>row.id);
-  let variants=[];
+  let variants=[],media=[];
   if(ids.length){
-   const {data:variantRows,error:variantsError}=await storefrontClient.from('product_variants')
-    .select('id,product_id,options,selling_price,active,stock_on_hand,stock_reserved')
-    .in('product_id',ids).eq('active',true);
+   const [{data:variantRows,error:variantsError},{data:mediaRows,error:mediaError}]=await Promise.all([
+    storefrontClient.from('product_variants').select('id,product_id,options,selling_price').in('product_id',ids),
+    storefrontClient.from('product_media').select('id,product_id,storage_path,alt_text,sort_order,is_primary').in('product_id',ids).order('sort_order',{ascending:true})
+   ]);
    if(variantsError)throw variantsError;
-   variants=variantRows||[];
+   if(mediaError)throw mediaError;
+   variants=variantRows||[];media=mediaRows||[];
   }
+  const mediaByProduct=new Map();
+  media.forEach(item=>{if(!mediaByProduct.has(item.product_id))mediaByProduct.set(item.product_id,[]);mediaByProduct.get(item.product_id).push(item)});
   products=(rows||[]).map(row=>{
-   const available=variants.filter(v=>v.product_id===row.id&&Number(v.stock_on_hand||0)>Number(v.stock_reserved||0)&&Number(v.selling_price??row.selling_price)>0);
+   const available=variants.filter(v=>v.product_id===row.id&&Number(v.selling_price??row.selling_price)>0);
    const chosen=[...available].sort((a,b)=>Number(a.selling_price??row.selling_price)-Number(b.selling_price??row.selling_price))[0];
    const specs=row.specs&&typeof row.specs==='object'?row.specs:{};
-   const image=typeof specs.image_url==='string'?specs.image_url:'';
-   return {id:row.id,name:row.name,brand:row.brand||'IQA WATCHES',category:row.category||row.audience||'Watches',audience:row.audience||'',style:specs.style||specs.watch_type||specs.type||'Analog',tags:Array.isArray(specs.tags)?specs.tags:[],price:Number(chosen?.selling_price??row.selling_price??0),compareAt:Number(row.mrp||0),colour:specs.colour||specs.color||specs.case_colour||'',dial:specs.dial_colour||specs.dial||'',strap:specs.strap_material||specs.strap||'',stock:available.reduce((sum,v)=>sum+Math.max(0,Number(v.stock_on_hand||0)-Number(v.stock_reserved||0)),0),sku:specs.model_code||'Not listed',label:'Available',desc:row.description||'',image,imageAlt:row.name,caseDiameter:specs.case_diameter_mm||specs.case_diameter||specs.case_size_mm||'',caseThickness:specs.case_thickness_mm||specs.case_thickness||'',lugToLug:specs.lug_to_lug_mm||specs.lug_to_lug||'',caseMaterial:specs.case_material||'',strapWidth:specs.strap_width_mm||specs.strap_width||'',movement:specs.movement||'',waterResistance:specs.water_resistance||'',warranty:specs.warranty||''};
+   const gallery=mediaByProduct.get(row.id)||[];
+   const primaryImage=gallery.find(item=>item.is_primary)||gallery[0];
+   const storedImage=primaryImage?storefrontClient.storage.from('product-images').getPublicUrl(primaryImage.storage_path).data.publicUrl:'';
+   const image=storedImage||(typeof specs.image_url==='string'?specs.image_url:'');
+   const imageAlt=primaryImage?.alt_text||row.name;
+   return {id:row.id,name:row.name,brand:row.brand||'IQA WATCHES',category:row.category||row.audience||'Watches',audience:row.audience||'',style:specs.style||specs.watch_type||specs.type||'Analog',tags:Array.isArray(specs.tags)?specs.tags:[],price:Number(chosen?.selling_price??row.selling_price??0),compareAt:Number(row.mrp||0),colour:specs.colour||specs.color||specs.case_colour||'',dial:specs.dial_colour||specs.dial||'',strap:specs.strap_material||specs.strap||'',stock:available.length?1:0,sku:specs.model_code||'Not listed',label:'Available',desc:row.description||'',image,imageAlt,caseDiameter:specs.case_diameter_mm||specs.case_diameter||specs.case_size_mm||'',caseThickness:specs.case_thickness_mm||specs.case_thickness||'',lugToLug:specs.lug_to_lug_mm||specs.lug_to_lug||'',caseMaterial:specs.case_material||'',strapWidth:specs.strap_width_mm||specs.strap_width||'',movement:specs.movement||'',waterResistance:specs.water_resistance||'',warranty:specs.warranty||''};
   }).filter(p=>p.price>0&&p.image&&p.stock>0);
   knownProductIds=new Set(products.map(p=>p.id));
   cart=Object.fromEntries(Object.entries(storedCart&&typeof storedCart==='object'&&!Array.isArray(storedCart)?storedCart:{}).filter(([id,qty])=>knownProductIds.has(id)&&Number.isInteger(qty)&&qty>0&&qty<=10));
