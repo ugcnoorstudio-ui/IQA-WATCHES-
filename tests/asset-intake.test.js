@@ -63,9 +63,9 @@ test('local GLB viewer parses an embedded triangle mesh without network dependen
 
 test('3D viewer is loaded only in authenticated admin and exposes accessible local controls',()=>{
  const html=read('admin/index.html'),studio=read('admin/motion-studio.js'),viewer=read('admin/model-viewer.js');
- assert.match(html,/model-viewer\\.js/);assert.match(html,/auth\\.js/);
- assert.match(studio,/iqaViewerCanvas/);assert.match(studio,/Separate mesh parts/);
- assert.match(studio,/IQA_GLB_VIEWER\\.mount/);
- assert.doesNotMatch(viewer,/\\bfetch\\s*\\(|XMLHttpRequest|localStorage|indexedDB/);
- assert.match(viewer,/pointermove/);assert.match(viewer,/wheel/);assert.match(viewer,/gl\\.drawArrays/);
+ assert.ok(html.includes('model-viewer.js'));assert.ok(html.includes('auth.js'));
+ assert.ok(studio.includes('iqaViewerCanvas'));assert.ok(studio.includes('Separate mesh parts'));
+ assert.ok(studio.includes('IQA_GLB_VIEWER.mount'));
+ assert.doesNotMatch(viewer,/fetch|XMLHttpRequest|localStorage|indexedDB/i);
+ assert.ok(viewer.includes('pointermove'));assert.ok(viewer.includes('wheel'));assert.ok(viewer.includes('gl.drawArrays'));
 });
