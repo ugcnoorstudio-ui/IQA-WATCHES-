@@ -27,6 +27,7 @@ jobs:
         run: |
           node --check assets/cinematic-story.js
           node --check admin/motion-studio.js
+          node --check admin/asset-intake.js
           node --check admin/admin.js
           node --check admin/auth.js
           node --check routes.js
