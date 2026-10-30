@@ -1,6 +1,5 @@
 /* IQA WATCHES — local-only asset intake helpers.
- * This module validates basic file structure and previews local media only.
- * It does not upload, persist, publish, or establish licensing/quality approval.
+ * Basic structure checks and local preview only; never upload or publish.
  */
 (function (global) {
   'use strict';
@@ -10,12 +9,9 @@
       return { ok: false, message: 'GLB file is too small to contain a valid header.' };
     }
     var view = new DataView(buffer);
-    var magic = view.getUint32(0, true);
-    var version = view.getUint32(4, true);
-    var declaredLength = view.getUint32(8, true);
-    if (magic !== 0x46546c67) return { ok: false, message: 'Invalid GLB magic header.' };
-    if (version !== 2) return { ok: false, message: 'Only GLB version 2 is supported.' };
-    if (declaredLength !== buffer.byteLength) {
+    if (view.getUint32(0, true) !== 0x46546c67) return { ok: false, message: 'Invalid GLB magic header.' };
+    if (view.getUint32(4, true) !== 2) return { ok: false, message: 'Only GLB version 2 is supported.' };
+    if (view.getUint32(8, true) !== buffer.byteLength) {
       return { ok: false, message: 'GLB declared length does not match the selected file size.' };
     }
     return { ok: true, message: 'GLB v2 header and file length are consistent. Full model validation is still required.' };
@@ -28,7 +24,8 @@
     if (!data || !data.asset || typeof data.asset.version !== 'string') {
       return { ok: false, message: 'The .gltf file is missing asset.version metadata.' };
     }
-    if (!/^2(?:\\.|$)/.test(data.asset.version)) {
+    var version = data.asset.version;
+    if (version !== '2' && version.indexOf('2.') !== 0) {
       return { ok: false, message: 'Only glTF 2.x assets are supported.' };
     }
     return { ok: true, message: 'glTF 2.x JSON metadata is valid. Referenced files and model content still need review.' };
@@ -43,9 +40,9 @@
   }
 
   function previewVideo(file, videoElement) {
-    if (!file || !videoElement) return null;
+    if (!file || !videoElement) return { ok: false, message: 'Choose a local video file.' };
     var type = String(file.type || '');
-    if (!/^video\\/(mp4|webm)$/.test(type)) {
+    if (type !== 'video/mp4' && type !== 'video/webm') {
       return { ok: false, message: 'Choose a local MP4 or WebM video.' };
     }
     var previous = videoElement.dataset.objectUrl;
