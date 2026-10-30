@@ -50,5 +50,21 @@ if(backend&&backend.configured()){
   });
  }catch(_){}
 }
+let rechecking=false;
+async function recheckAccess(){
+ if(rechecking || document.hidden || gate.hidden===false) return;
+ rechecking=true;
+ try{
+  const verified=await backend.getActiveProfile();
+  if(!verified) lock('Your staff session could not be verified. Sign in again.');
+  else {
+   $('staffIdentity').textContent=(verified.displayName||'IQA WATCHES Staff')+' · '+verified.role.replaceAll('_',' ');
+   $('sidebarStatus').textContent='Authenticated · '+verified.role.replaceAll('_',' ');
+  }
+ }catch(error){lock(error.message||'Session verification failed. Sign in again.')}
+ finally{rechecking=false}
+}
+document.addEventListener('visibilitychange',()=>{if(!document.hidden)recheckAccess()});
+window.addEventListener('focus',recheckAccess);
 init();
 })();
