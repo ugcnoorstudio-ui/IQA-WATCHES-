@@ -7,13 +7,80 @@ function localMatrix(n){if(n.matrix)return new Float32Array(n.matrix);var q=n.ro
 function point(m,p){return [m[0]*p[0]+m[4]*p[1]+m[8]*p[2]+m[12],m[1]*p[0]+m[5]*p[1]+m[9]*p[2]+m[13],m[2]*p[0]+m[6]*p[1]+m[10]*p[2]+m[14]];}
 function parseGlb(buffer){
  if(!(buffer instanceof ArrayBuffer)||buffer.byteLength<20)throw Error('GLB file is too small.');
- var h=new DataView(buffer);if(h.getUint32(0,true)!==0x46546c67||h.getUint32(4,true)!==2||h.getUint32(8,true)!==buffer.byteLength)throw Error('Invalid GLB v2 header or declared file length.');
- var off=12,json=null,bin=null;while(off+8<=buffer.byteLength){var len=h.getUint32(off,true),type=h.getUint32(off+4,true),start=off+8;if(start+len>buffer.byteLength)throw Error('GLB chunk exceeds file boundary.');if(type===0x4e4f534a)json=JSON.parse(new TextDecoder().decode(new Uint8Array(buffer,start,len)).replace(/\u0000+$/,''));if(type===0x004e4942)bin=new Uint8Array(buffer,start,len);off=start+len;}
- if(!json||!json.asset||String(json.asset.version).split('.')[0]!=='2'||!bin)throw Error('GLB needs glTF 2.x JSON and an embedded binary chunk.');
- var views=json.bufferViews||[],access=json.accessors||[],nodes=json.nodes||[],meshes=json.meshes||[],materials=json.materials||[],scenes=json.scenes||[{nodes:nodes.map(function(_,i){return i;})}],scene=scenes[json.scene||0],parts=[];
- function accessor(id){var a=access[id];if(!a||a.sparse!==undefined||a.bufferView===undefined)throw Error('Sparse or missing accessors are not supported.');var b=views[a.bufferView];if(!b||b.buffer!==undefined&&b.buffer!==0)throw Error('Invalid GLB buffer view.');var count={SCALAR:1,VEC2:2,VEC3:3,VEC4:4}[a.type],size={5121:1,5123:2,5125:4,5126:4}[a.componentType],Ctor={5121:Uint8Array,5123:Uint16Array,5125:Uint32Array,5126:Float32Array}[a.componentType];if(!count||!size||!Ctor)throw Error('Unsupported accessor type or component.');var stride=b.byteStride||count*size,base=(b.byteOffset||0)+(a.byteOffset||0),dv=new DataView(bin.buffer,bin.byteOffset,bin.byteLength),data=[];for(var i=0;i<a.count;i++)for(var j=0;j<count;j++){var p=base+i*stride+j*size;if(p+size>bin.byteLength)throw Error('Accessor exceeds embedded binary data.');data.push(size===1?dv.getUint8(p):size===2?dv.getUint16(p,true):a.componentType===5126?dv.getFloat32(p,true):dv.getUint32(p,true));}return {data:data,count:a.count,components:count};}
- function visit(index,parent,depth){if(depth>64)throw Error('Node hierarchy exceeds safe depth.');var n=nodes[index];if(!n)throw Error('Scene references a missing node.');var world=multiply(parent,localMatrix(n));if(n.mesh!==undefined){var mesh=meshes[n.mesh];if(!mesh)throw Error('Scene references a missing mesh.');(mesh.primitives||[]).forEach(function(p){if(p.mode!==undefined&&p.mode!==4)throw Error('Only triangle-list primitives are supported.');if(p.targets&&p.targets.length)throw Error('Morph-target animation is not supported in this preview.');var a=accessor(p.attributes.POSITION);if(a.components!==3)throw Error('POSITION accessor must be VEC3.');var ix=p.indices===undefined?Array.from({length:a.count},function(_,i){return i;}):accessor(p.indices).data,mat=materials[p.material||0]||{},factor=mat.pbrMetallicRoughness&&mat.pbrMetallicRoughness.baseColorFactor||[.72,.67,.55,1],raw=[],center=[0,0,0];for(var k=0;k+2<ix.length;k+=3){var ids=[ix[k],ix[k+1],ix[k+2]];if(ids.some(function(v){return v>=a.count;}))throw Error('Triangle index is outside POSITION data.');var ps=ids.map(function(v){return point(world,a.data.slice(v*3,v*3+3));}),u=ps[1].map(function(v,i){return v-ps[0][i];}),v=ps[2].map(function(x,i){return x-ps[0][i];}),normal=[u[1]*v[2]-u[2]*v[1],u[2]*v[0]-u[0]*v[2],u[0]*v[1]-u[1]*v[0]],l=Math.hypot.apply(null,normal)||1;normal=normal.map(function(x){return x/l;});ps.forEach(function(pos){for(var d=0;d<3;d++)center[d]+=pos[d];raw.push(pos[0],pos[1],pos[2],normal[0],normal[1],normal[2],factor[0],factor[1],factor[2]);});}if(raw.length){center=center.map(function(x){return x/(raw.length/9);});parts.push({raw:raw,center:center});}});} (n.children||[]).forEach(function(child){visit(child,world,depth+1);});}
- (scene.nodes||[]).forEach(function(i){visit(i,identity(),0);});if(!parts.length)throw Error('No supported triangle geometry in the active scene.');var min=[Infinity,Infinity,Infinity],max=[-Infinity,-Infinity,-Infinity];parts.forEach(function(part){for(var i=0;i<part.raw.length;i+=9)for(var d=0;d<3;d++){var v=part.raw[i+d];min[d]=Math.min(min[d],v);max[d]=Math.max(max[d],v);}});var center=min.map(function(v,i){return (v+max[i])/2;}),span=Math.max(max[0]-min[0],max[1]-min[1],max[2]-min[2],.0001);parts.forEach(function(part){part.center=part.center.map(function(v,i){return (v-center[i])/span;});for(var i=0;i<part.raw.length;i+=9)for(var d=0;d<3;d++)part.raw[i+d]=(part.raw[i+d]-center[d])/span;});return {parts:parts,triangles:parts.reduce(function(n,p){return n+p.raw.length/27;},0)};
+ var h=new DataView(buffer);
+ if(h.getUint32(0,true)!==0x46546c67||h.getUint32(4,true)!==2||h.getUint32(8,true)!==buffer.byteLength)throw Error('Invalid GLB v2 header or declared file length.');
+ var off=12,json=null,bin=null,chunkIndex=0;
+ while(off<buffer.byteLength){
+  if(off+8>buffer.byteLength)throw Error('GLB has an incomplete chunk header.');
+  var len=h.getUint32(off,true),type=h.getUint32(off+4,true),start=off+8,end=start+len;
+  if(len%4!==0||end>buffer.byteLength)throw Error('GLB chunk is misaligned or exceeds the file boundary.');
+  if(chunkIndex===0&&type!==0x4e4f534a)throw Error('The first GLB chunk must contain JSON.');
+  if(type===0x4e4f534a){if(json!==null)throw Error('GLB contains more than one JSON chunk.');try{json=JSON.parse(new TextDecoder().decode(new Uint8Array(buffer,start,len)).replace(/[\u0000 ]+$/,''));}catch(_){throw Error('GLB JSON chunk is invalid.');}}
+  else if(type===0x004e4942){if(bin!==null)throw Error('GLB contains more than one binary chunk.');bin=new Uint8Array(buffer,start,len);}
+  off=end;chunkIndex++;
+ }
+ if(off!==buffer.byteLength||!json||!json.asset||String(json.asset.version).split('.')[0]!=='2'||!bin)throw Error('GLB needs valid glTF 2.x JSON and one embedded binary chunk.');
+ var views=json.bufferViews||[],access=json.accessors||[],nodes=json.nodes||[],meshes=json.meshes||[],materials=json.materials||[],scenes=json.scenes||[{nodes:nodes.map(function(_,i){return i;})}],scene=scenes[json.scene===undefined?0:json.scene],parts=[];
+ if(!scene||!Array.isArray(scene.nodes)||!Array.isArray(nodes)||!Array.isArray(meshes))throw Error('GLB active scene is invalid.');
+ function accessor(id){
+  var a=access[id];
+  if(!a||a.sparse!==undefined||!Number.isInteger(a.count)||a.count<1||!Number.isInteger(a.bufferView))throw Error('Sparse, missing or invalid accessors are not supported.');
+  var b=views[a.bufferView];
+  if(!b||b.buffer!==undefined&&b.buffer!==0||!Number.isInteger(b.byteLength)||b.byteLength<0)throw Error('Invalid GLB buffer view.');
+  var count={SCALAR:1,VEC2:2,VEC3:3,VEC4:4}[a.type],size={5121:1,5123:2,5125:4,5126:4}[a.componentType],dv=new DataView(bin.buffer,bin.byteOffset,bin.byteLength);
+  if(!count||!size)throw Error('Unsupported accessor type or component.');
+  var elementBytes=count*size,stride=b.byteStride||elementBytes,viewStart=b.byteOffset||0,accessStart=a.byteOffset||0;
+  if(!Number.isInteger(viewStart)||!Number.isInteger(accessStart)||viewStart<0||accessStart<0||stride<elementBytes||stride%size!==0)throw Error('Invalid accessor byte offsets or stride.');
+  var relativeEnd=accessStart+(a.count-1)*stride+elementBytes;
+  if(relativeEnd>b.byteLength||viewStart+b.byteLength>bin.byteLength)throw Error('Accessor exceeds its declared buffer view.');
+  var data=[];
+  for(var i=0;i<a.count;i++)for(var j=0;j<count;j++){
+   var p=viewStart+accessStart+i*stride+j*size;
+   var value=size===1?dv.getUint8(p):size===2?dv.getUint16(p,true):a.componentType===5126?dv.getFloat32(p,true):dv.getUint32(p,true);
+   if(!Number.isFinite(value))throw Error('Accessor contains a non-finite number.');
+   data.push(value);
+  }
+  return {data:data,count:a.count,components:count,componentType:a.componentType};
+ }
+ function visit(index,parent,depth){
+  if(depth>64)throw Error('Node hierarchy exceeds safe depth.');
+  var n=nodes[index];if(!n)throw Error('Scene references a missing node.');
+  var local=localMatrix(n);if(local.length!==16||Array.from(local).some(function(v){return !Number.isFinite(v);}))throw Error('Node transform is invalid.');
+  var world=multiply(parent,local);
+  if(n.mesh!==undefined){
+   var mesh=meshes[n.mesh];if(!mesh)throw Error('Scene references a missing mesh.');
+   (mesh.primitives||[]).forEach(function(p){
+    if(p.mode!==undefined&&p.mode!==4)throw Error('Only triangle-list primitives are supported.');
+    if(p.targets&&p.targets.length)throw Error('Morph-target animation is not supported in this preview.');
+    if(!p.attributes||p.attributes.POSITION===undefined)throw Error('Mesh primitive has no POSITION accessor.');
+    var a=accessor(p.attributes.POSITION);
+    if(a.components!==3||a.componentType!==5126)throw Error('POSITION must use a Float32 VEC3 accessor in this preview.');
+    var indexAccessor=p.indices===undefined?null:accessor(p.indices);
+    if(indexAccessor&&(indexAccessor.components!==1||![5121,5123,5125].includes(indexAccessor.componentType)))throw Error('Indices must use an unsigned SCALAR accessor.');
+    var ix=indexAccessor?indexAccessor.data:Array.from({length:a.count},function(_,i){return i;});
+    if(ix.length===0||ix.length%3!==0)throw Error('Triangle index count must be a non-zero multiple of three.');
+    var mat=materials[p.material||0]||{},factor=mat.pbrMetallicRoughness&&mat.pbrMetallicRoughness.baseColorFactor||[.72,.67,.55,1],raw=[],center=[0,0,0];
+    if(!Array.isArray(factor)||factor.length!==4||factor.some(function(v){return !Number.isFinite(v)||v<0||v>1;}))throw Error('Material base colour factor is invalid.');
+    for(var k=0;k<ix.length;k+=3){
+     var ids=[ix[k],ix[k+1],ix[k+2]];
+     if(ids.some(function(v){return !Number.isInteger(v)||v<0||v>=a.count;}))throw Error('Triangle index is outside POSITION data.');
+     var ps=ids.map(function(v){return point(world,a.data.slice(v*3,v*3+3));});
+     var u=ps[1].map(function(v,i){return v-ps[0][i];}),v=ps[2].map(function(x,i){return x-ps[0][i];}),normal=[u[1]*v[2]-u[2]*v[1],u[2]*v[0]-u[0]*v[2],u[0]*v[1]-u[1]*v[0]],l=Math.hypot.apply(null,normal)||1;
+     normal=normal.map(function(x){return x/l;});
+     ps.forEach(function(pos){for(var d=0;d<3;d++)center[d]+=pos[d];raw.push(pos[0],pos[1],pos[2],normal[0],normal[1],normal[2],factor[0],factor[1],factor[2]);});
+    }
+    if(raw.length){center=center.map(function(x){return x/(raw.length/9);});parts.push({raw:raw,center:center});}
+   });
+  }
+  (n.children||[]).forEach(function(child){visit(child,world,depth+1);});
+ }
+ (scene.nodes||[]).forEach(function(i){visit(i,identity(),0);});
+ if(!parts.length)throw Error('No supported triangle geometry in the active scene.');
+ var min=[Infinity,Infinity,Infinity],max=[-Infinity,-Infinity,-Infinity];
+ parts.forEach(function(part){for(var i=0;i<part.raw.length;i+=9)for(var d=0;d<3;d++){var v=part.raw[i+d];min[d]=Math.min(min[d],v);max[d]=Math.max(max[d],v);}});
+ var center=min.map(function(v,i){return (v+max[i])/2;}),span=Math.max(max[0]-min[0],max[1]-min[1],max[2]-min[2],.0001);
+ parts.forEach(function(part){part.center=part.center.map(function(v,i){return (v-center[i])/span;});for(var i=0;i<part.raw.length;i+=9)for(var d=0;d<3;d++)part.raw[i+d]=(part.raw[i+d]-center[d])/span;});
+ return {parts:parts,triangles:parts.reduce(function(n,p){return n+p.raw.length/27;},0)};
 }
 function mount(root){var input=root.querySelector('#iqaViewerFile'),canvas=root.querySelector('#iqaViewerCanvas'),status=root.querySelector('#iqaViewerStatus'),explode=root.querySelector('#iqaViewerExplode'),zoom=root.querySelector('#iqaViewerZoom'),reset=root.querySelector('#iqaViewerReset');if(!input||!canvas)return;var gl=canvas.getContext('webgl',{antialias:true,alpha:false});if(!gl){status.textContent='WebGL is unavailable on this browser or device.';input.disabled=true;return;}var model=null,buffers=[],rotation=[-.25,.55],distance=2.8,drag=null,program;
  function makeShader(type,src){var s=gl.createShader(type);gl.shaderSource(s,src);gl.compileShader(s);if(!gl.getShaderParameter(s,gl.COMPILE_STATUS))throw Error(gl.getShaderInfoLog(s));return s;}
