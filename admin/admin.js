@@ -108,7 +108,9 @@ function renderLiveModule(route,sets){
  logs:['Actor role','Action','Entity','Outcome','Reason','Time'],integration_events:['Integration','Event','Outcome','Time']
  };
  const renderSet=([table,columns],rows)=>{
-  const cols=headings[table]||columns.split(',');
+  const isShipping=route==='shipping'&&table==='orders';
+  const isReport=route==='reports'&&table==='orders';
+  const cols=isShipping?['Order','Delivery state','Delivery snapshot','Created']:isReport?['Order state','Items','Discount','Shipping','Tax','Payable','Payment']:headings[table]||columns.split(',');
   const map={
    orders:r=>[r.order_number,r.state,r.payment_state,money(r.payable_total),r.created_at],
    customers:r=>[r.full_name,r.email,r.phone,r.consent,r.created_at],
@@ -127,7 +129,10 @@ function renderLiveModule(route,sets){
    activity_logs:r=>[r.actor_role,r.action,r.entity_type,r.outcome,r.reason,r.created_at],
    integration_events:r=>[r.integration,r.event_type,r.outcome,r.created_at]
   };
-  const values=rows.map(r=>'<tr>'+map[table](r).map(v=>'<td>'+safeCell(v)+'</td>').join('')+'</tr>');
+  const values=rows.map(r=>{
+   const cells=isShipping?[r.order_number,r.state,r.delivery_snapshot,r.created_at]:isReport?[r.state,money(r.item_total),money(r.discount_total),money(r.shipping_total),money(r.tax_total),money(r.payable_total),r.payment_state]:map[table](r);
+   return '<tr>'+cells.map(v=>'<td>'+safeCell(v)+'</td>').join('')+'</tr>';
+  });
   return readTableMarkup(table.replaceAll('_',' ')+' · '+rows.length+' records',cols,values,'No records are stored in this module yet.');
  };
  const sections=sets.map((entry,i)=>renderSet(entry[0],entry[1])).join('');
