@@ -45,3 +45,27 @@ test('asset readiness gate requires five explicit review checks and a passed loc
  assert.match(studio,/No approval or save occurred/);
  assert.match(studio,/motionReviewReady/);
 });
+
+
+test('local GLB viewer parses an embedded triangle mesh without network dependencies',()=>{
+ const sandbox={window:{},ArrayBuffer,DataView,Uint8Array,Float32Array,Uint16Array,Uint32Array,Int8Array,Int16Array,TextDecoder,Math,JSON,String,Array,Error};
+ vm.runInNewContext(read('admin/model-viewer.js'),sandbox);
+ const json={asset:{version:'2.0'},buffers:[{byteLength:36}],bufferViews:[{buffer:0,byteOffset:0,byteLength:36}],accessors:[{bufferView:0,componentType:5126,count:3,type:'VEC3'}],meshes:[{primitives:[{attributes:{POSITION:0}}]}],nodes:[{mesh:0}],scenes:[{nodes:[0]}],scene:0};
+ let j=JSON.stringify(json);while(j.length%4)j+=' ';
+ const bin=new Float32Array([0,0,0,1,0,0,0,1,0]);
+ const total=12+8+j.length+8+bin.byteLength,buffer=new ArrayBuffer(total),view=new DataView(buffer);view.setUint32(0,0x46546c67,true);view.setUint32(4,2,true);view.setUint32(8,total,true);
+ view.setUint32(12,j.length,true);view.setUint32(16,0x4e4f534a,true);new Uint8Array(buffer,20,j.length).set(new TextEncoder().encode(j));
+ const binStart=20+j.length;view.setUint32(binStart,bin.byteLength,true);view.setUint32(binStart+4,0x004e4942,true);new Uint8Array(buffer,binStart+8,bin.byteLength).set(new Uint8Array(bin.buffer));
+ const parsed=sandbox.window.IQA_GLB_VIEWER.parseGlb(buffer);
+ assert.equal(parsed.parts.length,1);assert.equal(parsed.triangles,1);assert.equal(parsed.parts[0].raw.length,27);
+ assert.throws(()=>sandbox.window.IQA_GLB_VIEWER.parseGlb(new ArrayBuffer(12)));
+});
+
+test('3D viewer is loaded only in authenticated admin and exposes accessible local controls',()=>{
+ const html=read('admin/index.html'),studio=read('admin/motion-studio.js'),viewer=read('admin/model-viewer.js');
+ assert.match(html,/model-viewer\\.js/);assert.match(html,/auth\\.js/);
+ assert.match(studio,/iqaViewerCanvas/);assert.match(studio,/Separate mesh parts/);
+ assert.match(studio,/IQA_GLB_VIEWER\\.mount/);
+ assert.doesNotMatch(viewer,/\\bfetch\\s*\\(|XMLHttpRequest|localStorage|indexedDB/);
+ assert.match(viewer,/pointermove/);assert.match(viewer,/wheel/);assert.match(viewer,/gl\\.drawArrays/);
+});
