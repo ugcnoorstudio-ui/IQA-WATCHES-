@@ -57,3 +57,8 @@ The Supabase project already exists. This work did not create a new project or e
 - `product_media` stores image path and alt text. Public metadata reads are limited to published, non-sample, verified-sellable products; staff can read according to staff role.
 - Publishing is a separate Owner action. The database requires an active category and brand, primary image, active priced variant, available stock, and a valid approval reason before setting `state=published`, `is_sample=false`, and `verified_sellable=true`. The operation is audited and idempotent.
 - Product creation remains draft-first. Uploading images and assigning taxonomy do not publish products.
+
+
+### Edge Function deployment
+
+The `iqa-admin-mutate` Edge Function is deployed with JWT verification enabled. It validates the caller's Auth user, then invokes only the allow-listed mutation RPCs using a server-side key. It supports the legacy `SUPABASE_SERVICE_ROLE_KEY` / `SUPABASE_ANON_KEY` variables and the newer `SUPABASE_SECRET_KEYS` / `SUPABASE_PUBLISHABLE_KEYS` JSON maps. New opaque secret keys are sent only in the `apikey` header, never as Bearer JWTs. The browser never receives a privileged key.
