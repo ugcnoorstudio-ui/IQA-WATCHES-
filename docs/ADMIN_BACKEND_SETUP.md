@@ -47,3 +47,13 @@ Least-privilege policies for remaining tables, privileged Edge Functions, produc
 
 ## Costs
 The Supabase project already exists. This work did not create a new project or enable a paid add-on. The current plan, usage and possible billing were not checked; verify them in the Supabase dashboard. GitHub Pages remains the static host and does not provide a private application server.
+
+
+## Catalogue taxonomy, product media and publication gate
+
+- `categories` and `brands` are separate tables. Public reads are limited to published entries; staff reads use role checks. Only the active Owner can create new entries through the authenticated `iqa-admin-mutate` Edge Function.
+- `products.category_id` and `products.brand_id` reference the taxonomy tables; the legacy text columns are synchronized by the Owner classification operation.
+- Product images live in the public `product-images` bucket (JPG, PNG, WebP or AVIF, maximum 5 MB). Public delivery is intentional for storefront images; upload, overwrite and delete are Owner-only through Storage RLS. No arbitrary file types are accepted.
+- `product_media` stores image path and alt text. Public metadata reads are limited to published, non-sample, verified-sellable products; staff can read according to staff role.
+- Publishing is a separate Owner action. The database requires an active category and brand, primary image, active priced variant, available stock, and a valid approval reason before setting `state=published`, `is_sample=false`, and `verified_sellable=true`. The operation is audited and idempotent.
+- Product creation remains draft-first. Uploading images and assigning taxonomy do not publish products.
