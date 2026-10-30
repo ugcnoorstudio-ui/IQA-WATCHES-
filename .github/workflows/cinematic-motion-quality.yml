@@ -3,6 +3,7 @@ name: Cinematic motion quality checks
 on:
   push:
     branches:
+      - main
       - feature/cinematic-3d-motion-engine-v2
   pull_request:
     branches:
