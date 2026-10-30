@@ -67,5 +67,5 @@ test('3D viewer is loaded only in authenticated admin and exposes accessible loc
  assert.ok(studio.includes('iqaViewerCanvas'));assert.ok(studio.includes('Separate mesh parts'));
  assert.ok(studio.includes('IQA_GLB_VIEWER.mount'));
  assert.doesNotMatch(viewer,/fetch|XMLHttpRequest|localStorage|indexedDB/i);
- assert.ok(viewer.includes('pointermove'));assert.ok(viewer.includes('wheel'));assert.ok(viewer.includes('gl.drawArrays'));
+ assert.ok(viewer.includes('pointermove'));assert.ok(viewer.includes('wheel'));assert.ok(viewer.includes('keydown'));assert.ok(viewer.includes('gl.drawArrays'));
 });
