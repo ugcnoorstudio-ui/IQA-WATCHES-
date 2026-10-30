@@ -139,19 +139,15 @@
     if (!file || !allowed[file.type] || file.size < 1 || file.size > 5 * 1024 * 1024) {
       throw new Error("Choose a JPG, PNG, WebP or AVIF image up to 5 MB.");
     }
-    const path = productId + "/" + crypto.randomUUID() + "." + allowed[file.type];
-    const storage = getClient().storage.from("product-images");
-    const { error } = await storage.upload(path, file, { contentType: file.type, upsert: false, cacheControl: "3600" });
+    const form = new FormData();
+    form.append("product_id", String(productId));
+    form.append("image", file, file.name || "product-image");
+    form.append("alt_text", String(altText || "").trim());
+    form.append("is_primary", isPrimary === true ? "true" : "false");
+    const { data, error } = await getClient().functions.invoke("iqa-product-image-upload", { body: form });
     if (error) throw error;
-    try {
-      return await mutate("add_product_image", {
-        request_id: crypto.randomUUID(), product_id: productId, storage_path: path,
-        alt_text: String(altText || "").trim(), is_primary: isPrimary === true
-      });
-    } catch (error) {
-      await storage.remove([path]);
-      throw error;
-    }
+    if (!data || data.ok !== true) throw new Error(data?.error || "The image upload was not confirmed.");
+    return data;
   }
 
   global.IQA_ADMIN_BACKEND = Object.freeze({
