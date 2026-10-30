@@ -1,73 +1,65 @@
 # IQA WATCHES — secure admin backend integration
 
-## What the repository currently contains
+## Current verified project state
 
-- `admin/index.html`, `admin/admin.css`, and `admin/admin.js` provide the IQA WATCHES admin preview, login gate, and dashboard shell.
-- The existing Supabase migration creates the store schema and enables row-level security (RLS). It intentionally revokes browser access to business tables until reviewed policies and server-side operations are added.
-- The storefront is static GitHub Pages. GitHub Pages can host the UI, but it does not provide a private application server or protect secrets.
+- Repository: `ugcnoorstudio-ui/IQA-WATCHES-`; working branch: `feat/secure-admin-backend-integration`.
+- Supabase project: `ufidhdcwelaqtqrgeszy` (Free plan; keep the existing region and project).
+- The owner Auth user and matching active `owner` staff profile have been provisioned and verified.
+- Auth Site URL and Redirect URL are configured for the GitHub Pages origin.
+- Store schema and security migrations have already been applied. Do not reapply them blindly.
+- The static storefront is hosted on GitHub Pages. It cannot hold server secrets or execute private server-side code.
 
-## Added scaffold
+## Existing backend capabilities
 
-- `admin/backend-config.example.js`: placeholders only.
-- `admin/backend.js`: fail-closed Supabase JS v2 authentication/profile adapter, plus a read-only allow-listed helper.
-- `admin/backend.js`, `admin/admin-auth.js`, and `admin/backend-config.js` are loaded by the admin page. The configuration still contains a publishable-key placeholder, so the backend fails closed until the public key is configured.
+- `admin/backend.js`: Supabase JS v2 session/profile adapter, verifies identity through Auth `getUser()`, reads the caller's own active staff profile, and provides read-only Products and Inventory loaders.
+- `admin/admin-auth.js`: login gate, session recheck on focus/visibility, and sign-out lock.
+- `admin/admin.js`: renders read-only product and inventory data with safe empty/error states.
+- Supabase Edge Function `iqa-admin-mutate` is ACTIVE with JWT verification enabled. It checks the bearer token against Auth, verifies the actor in the database, and routes allow-listed operations to owner-restricted mutation RPCs.
+- `iqa_admin_mutation` supports owner-approved product creation and inventory adjustment with validation, audit records, and idempotency.
+- `iqa_catalogue_mutation` supports owner-restricted category/brand creation, taxonomy assignment, product image metadata registration, and publishing checks.
+- Database function privileges were inspected: mutation RPC execution is not granted to `anon` or ordinary `authenticated` users; the Edge Function uses its server-side privileged key to call the RPC after verifying the user.
+- Product and inventory tables currently contain zero live rows. Do not invent sample products as real stock.
 
-## Required setup before connecting
+## Current blockers — do not claim production readiness
 
-1. Use the existing IQA WATCHES Supabase project (ref: `ufidhdcwelaqtqrgeszy`). Do not send credentials through chat or commit secrets to GitHub.
-2. Review and apply `supabase/migrations/202610290001_secure_store.sql` in that project. Back up any existing database first; do not apply the starter migration blindly to a populated database.
-3. Create the owner account through Supabase Auth using a trusted setup process. Set the matching `staff_profiles` row to the owner role and `active = true` using the Supabase SQL editor or a trusted server-side administrative process. Never allow a browser client to assign its own role.
-4. Copy `admin/backend-config.example.js` to `admin/backend-config.js` and replace the placeholders with the project's HTTPS URL and publishable/anon key. The publishable/anon key is not a secret, but it is safe in a browser only when RLS is correct. Never use a `service_role` key in the website.
-5. Load Supabase JS v2, then `backend-config.js`, then `backend.js` from the admin page. Add a login screen and session guard before rendering protected workspaces. Keep the preview clearly labelled until the login path is verified.
-6. Add narrow database RLS policies per table and role. The current migration intentionally denies business-table access; reads will fail until those policies exist. For orders, refunds, staff management, audit logs, and integrations, prefer reviewed server-side functions/Edge Functions with explicit authorization and audit logging.
-7. Validate all writes server-side: role, allowed state transitions, amount/stock constraints, reason fields, and idempotency. Never trust UI role checks as the authorization boundary.
-8. Configure Auth redirect URLs for the exact GitHub Pages origin, email confirmation/recovery, rate limits, MFA for privileged staff where available, session expiry, monitoring and backup/restore tests.
-9. Run negative tests: logged-out access, inactive staff, support staff attempting owner operations, anonymous table reads, role self-escalation, and cross-customer access must all be denied.
+1. `admin/backend-config.js` still contains `YOUR_SUPABASE_PUBLISHABLE_KEY`; the admin login therefore deliberately fails closed.
+2. The admin HTML still contains four visible legacy NOOR WATCHES references. A prior repository write attempt was blocked by a safety check; do not work around that block through another channel.
+3. The admin UI currently has read-only Products and Inventory loaders. The mutation Edge Function exists, but a complete tested UI for create/edit/delete, inventory workflows, and other business modules is not finished.
+4. Orders, customers, payments, refunds, returns, suppliers, shipping, coupons, support, reports, staff management, and related workflows are not production-complete.
+5. The open Draft PR #7 has not been merged. Its changes are not considered live until the owner reviews and explicitly approves deployment.
 
-## Important limitations
+## Security posture and decisions
 
-The admin adapter has read-only Products and Inventory loaders, but the browser configuration still has a placeholder key. No product or inventory write actions are enabled. The project URL/key and an approved authorization model are not available in the repository. Do not remove the preview banner or claim the admin is production-ready until configuration, RLS, server operations, and tests are complete.
+- RLS is enabled across the business schema. Several tables intentionally have no policies yet, which means access is denied by default. Do not add broad authenticated policies merely to make the dashboard display data.
+- The existing overlapping Products/Variants SELECT policies need a careful review; do not remove or combine policies without verifying the intended public-catalogue and staff access semantics.
+- Staff helper functions use SECURITY DEFINER with a fixed search_path and caller-scoped identity checks. Anonymous EXECUTE is revoked. Preserve these restrictions.
+- The mutation Edge Function has `verify_jwt = true`, checks the exact allowed origin, verifies the token with Supabase Auth, and does not expose service credentials to the browser.
+- Never put `service_role`, Supabase secret keys, payment secrets, or shipping credentials in GitHub Pages JavaScript or chat.
+- The Security Advisor reports leaked-password protection disabled. Check whether this setting is available on the current Free plan before asking the owner to upgrade; do not recommend a paid upgrade under the zero-budget constraint.
+- Test negative cases before enabling writes: logged-out user, expired session, inactive staff, non-owner mutation, role self-escalation, anonymous private-table reads, and cross-customer access.
 
-## GitHub deployment
+## Zero-budget implementation policy
 
-GitHub is the version-control/deployment source for the static site, not the database. A merge to the deployed branch can publish static UI changes through GitHub Pages; it cannot create a Supabase project, configure its secrets, or apply database permissions automatically.
+- Keep the project on its existing Supabase Free plan and use GitHub Pages / existing connected services.
+- Do not enable paid add-ons, paid hosting, paid domains, paid plugins, or paid third-party APIs without explicit owner approval.
+- Prefer free-tier capabilities and local/manual owner-controlled processes where a secure free automation is unavailable.
+- Be explicit about free-tier quotas and operational limitations. Do not silently create a paid resource or trigger a billable action.
 
-## IQA WATCHES project owner onboarding (project ref: ufidhdcwelaqtqrgeszy)
+## Safe next steps
 
-The repository includes an admin sign-in gate (`admin/admin-auth.js`) and a public configuration placeholder (`admin/backend-config.js`). The admin stays locked until a valid publishable key is configured and the signed-in user has an active staff profile.
+1. Finish a read-only audit of existing code, schema, RLS, Edge Functions, and deployment configuration.
+2. Complete branding changes only through approved repository writes; do not bypass blocked writes.
+3. Finish and test the admin authentication path after the owner configures the browser-safe publishable key in the repository using an approved workflow. The publishable key is intended for browser use, but only with correct RLS; never use a secret key.
+4. Implement one business module at a time, starting with Products and Inventory, with server-side authorization, validation, audit logging, and idempotency.
+5. Add other modules only after their table-specific RLS and server-side workflows are reviewed.
+6. Run automated and manual tests, review PR #7, and obtain explicit owner approval before merging or deploying.
 
-### Create the first owner account
+## Owner setup references
 
-1. Open the [IQA WATCHES Supabase Authentication users page](https://supabase.com/dashboard/project/ufidhdcwelaqtqrgeszy/auth/users).
-2. Choose Add user / Invite user and invite the business owner's email address. Complete the email invitation and set a password using Supabase's trusted Auth flow. Do not share the password in ChatGPT or commit it to GitHub.
-3. After the invited user has accepted and appears in Authentication → Users, copy that user's UUID (Auth user ID).
-4. Open the Supabase SQL Editor for this project and run the following statement after replacing the UUID with the verified Auth user ID:
+- Supabase Auth users: https://supabase.com/dashboard/project/ufidhdcwelaqtqrgeszy/auth/users
+- Supabase API keys: https://supabase.com/dashboard/project/ufidhdcwelaqtqrgeszy/settings/api
+- GitHub Pages preview: https://ugcnoorstudio-ui.github.io/IQA-WATCHES-/
+- Admin preview: https://ugcnoorstudio-ui.github.io/IQA-WATCHES-/admin/
+- Draft PR #7: https://github.com/ugcnoorstudio-ui/IQA-WATCHES-/pull/7
 
-```sql
-insert into public.staff_profiles (user_id, display_name, role, active)
-values ('REPLACE_WITH_AUTH_USER_UUID', 'IQA WATCHES Owner', 'owner', true)
-on conflict (user_id) do update
-set display_name = excluded.display_name, role = 'owner', active = true, updated_at = now();
-```
-
-Owner assignment must be done by the trusted project owner in Supabase SQL Editor; never expose a browser endpoint that lets a user assign their own role.
-
-### Configure the browser-safe key
-
-1. In Project Settings → API Keys, copy the publishable key (starts with sb_publishable_). Do not copy a secret key or service_role key.
-2. Replace YOUR_SUPABASE_PUBLISHABLE_KEY in admin/backend-config.js with that publishable key. The key is public in the static website; database RLS is the security boundary.
-3. Set Supabase Auth Site URL and Redirect URLs to https://ugcnoorstudio-ui.github.io/IQA-WATCHES-/.
-4. Deploy the branch only after reviewing the PR. Test login with the owner account and confirm inactive/non-staff users are denied.
-
-### Current status
-
-The admin page has a login form and session gate. The owner Auth user and active `owner` staff profile have already been provisioned and verified. The publishable key remains a placeholder, so login cannot succeed until that browser-safe key is configured. This is a deliberate fail-closed state.
-
-### Session identity verification hardening
-
-The admin adapter now calls Supabase Auth `getUser()` before reading the matching `staff_profiles` row. This verifies the access token with the Auth service instead of treating locally persisted session data as the identity authority. The UI also rechecks the staff profile when the tab regains focus and locks on sign-out. These browser checks improve the UX but do not replace RLS or server-side authorization.
-
-### Current security-advisor interpretation
-
-- The 17 RLS-enabled tables without policies are intentionally deny-by-default while their role-specific access model and server-side workflows are unfinished. Do not add blanket authenticated policies to silence the advisor.
-- The three staff helper functions are SECURITY DEFINER because they read the protected `staff_profiles` table for RLS predicates. Anonymous EXECUTE is revoked; authenticated EXECUTE remains intentionally required by staff policy checks. Their bodies are restricted to the caller's `auth.uid()`, and the functions use a fixed search_path. Keep reviewing them before adding new privileged functions.
+The owner account is already provisioned. Do not repeat owner creation or reapply existing migrations. Keep the browser key placeholder until an approved, safe repository update is available; do not bypass repository safety checks.
