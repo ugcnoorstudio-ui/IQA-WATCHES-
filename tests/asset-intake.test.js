@@ -69,3 +69,45 @@ test('3D viewer is loaded only in authenticated admin and exposes accessible loc
  assert.doesNotMatch(viewer,/fetch|XMLHttpRequest|localStorage|indexedDB/i);
  assert.ok(viewer.includes('pointermove'));assert.ok(viewer.includes('wheel'));assert.ok(viewer.includes('keydown'));assert.ok(viewer.includes('gl.drawArrays'));
 });
+
+
+function makeGlb(json,binary){
+ let jsonText=JSON.stringify(json);while(jsonText.length%4)jsonText+=' ';
+ const binLength=Math.ceil(binary.byteLength/4)*4;
+ const total=12+8+jsonText.length+8+binLength;
+ const buffer=new ArrayBuffer(total),view=new DataView(buffer);
+ view.setUint32(0,0x46546c67,true);view.setUint32(4,2,true);view.setUint32(8,total,true);
+ view.setUint32(12,jsonText.length,true);view.setUint32(16,0x4e4f534a,true);
+ new Uint8Array(buffer,20,jsonText.length).set(new TextEncoder().encode(jsonText));
+ const binStart=20+jsonText.length;view.setUint32(binStart,binLength,true);view.setUint32(binStart+4,0x004e4942,true);
+ new Uint8Array(buffer,binStart+8,binary.byteLength).set(new Uint8Array(binary));
+ return buffer;
+}
+
+test('GLB parser rejects malformed accessor bounds and invalid index formats',()=>{
+ const sandbox={window:{},ArrayBuffer,DataView,Uint8Array,Float32Array,Uint16Array,Uint32Array,Int8Array,Int16Array,TextDecoder,TextEncoder,Math,JSON,String,Array,Error,Number};
+ vm.runInNewContext(read('admin/model-viewer.js'),sandbox);
+ const parse=sandbox.window.IQA_GLB_VIEWER.parseGlb;
+ const geometry=new ArrayBuffer(44),dv=new DataView(geometry);
+ [0,0,0,1,0,0,0,1,0].forEach((v,i)=>dv.setFloat32(i*4,v,true));
+ [0,1,2].forEach((v,i)=>dv.setUint16(36+i*2,v,true));
+ const base={asset:{version:'2.0'},buffers:[{byteLength:44}],bufferViews:[{buffer:0,byteOffset:0,byteLength:36},{buffer:0,byteOffset:36,byteLength:6}],accessors:[{bufferView:0,componentType:5126,count:3,type:'VEC3'},{bufferView:1,componentType:5123,count:3,type:'SCALAR'}],meshes:[{primitives:[{attributes:{POSITION:0},indices:1}]}],nodes:[{mesh:0}],scenes:[{nodes:[0]}],scene:0};
+ assert.equal(parse(makeGlb(base,geometry)).triangles,1);
+ const badBounds=structuredClone(base);badBounds.bufferViews[0].byteLength=8;
+ assert.throws(()=>parse(makeGlb(badBounds,geometry)),/buffer view/);
+ const badIndex=structuredClone(base);badIndex.accessors[1].componentType=5126;
+ assert.throws(()=>parse(makeGlb(badIndex,geometry)),/unsigned SCALAR/);
+ const outside=structuredClone(base);const outDv=new DataView(geometry);outDv.setUint16(40,9,true);
+ assert.throws(()=>parse(makeGlb(outside,geometry)),/outside POSITION/);
+});
+
+test('GLB parser rejects trailing partial chunk headers',()=>{
+ const sandbox={window:{},ArrayBuffer,DataView,Uint8Array,Float32Array,Uint16Array,Uint32Array,Int8Array,Int16Array,TextDecoder,TextEncoder,Math,JSON,String,Array,Error,Number};
+ vm.runInNewContext(read('admin/model-viewer.js'),sandbox);
+ const parse=sandbox.window.IQA_GLB_VIEWER.parseGlb;
+ const json={asset:{version:'2.0'},buffers:[{byteLength:4}],bufferViews:[{buffer:0,byteLength:4}],accessors:[{bufferView:0,componentType:5126,count:1,type:'VEC3'}]};
+ const buf=makeGlb(json,new ArrayBuffer(4));
+ const malformed=new ArrayBuffer(buf.byteLength+4);new Uint8Array(malformed).set(new Uint8Array(buf));
+ new DataView(malformed).setUint32(8,malformed.byteLength,true);
+ assert.throws(()=>parse(malformed),/incomplete chunk header/);
+});
