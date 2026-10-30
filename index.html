@@ -72,6 +72,66 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
  .product-card:hover,.product-card:focus-within{transform:none}
 }
 
+
+/* IQA WATCHES — storefront usability and responsive interaction refinements */
+.icon-btn{min-width:48px;min-height:48px;padding:8px;color:#171713;font-size:15px;border:1px solid #b8b0a2;border-radius:2px}
+.icon-btn:hover,.icon-btn:focus-visible{background:#e9e1d3;border-color:#76613b;color:#111}
+.menu-btn{display:none}
+.search-wrap input,.toolbar select,.route-toolbar input,.route-toolbar select{min-height:48px;font-size:15px;border:1px solid #928a7c;color:#171713;background:#fffdf8}
+.search-wrap input::placeholder,.route-toolbar input::placeholder{color:#625d54;opacity:1}
+.search-wrap input:focus-visible,.toolbar select:focus-visible,.route-toolbar input:focus-visible,.route-toolbar select:focus-visible{outline:3px solid #a17b38;outline-offset:2px;border-color:#60491f}
+.wish-btn{width:44px;height:44px;right:10px;top:10px;font-size:22px;border:1px solid #80796d;color:#171713;box-shadow:0 2px 8px #0002}
+.card-actions button,.route-actions .button{min-height:46px;padding:12px 14px;font-size:11px;letter-spacing:1px;font-weight:600}
+.card-actions .quick-view{background:#fffdf8;border:1px solid #71695c;color:#171713}
+.card-actions .add-cart{background:#171713;border:1px solid #171713;color:#fffdf8}
+.card-actions button:focus-visible,.wish-btn:focus-visible,.related-product:focus-visible{outline:3px solid #a17b38;outline-offset:3px}
+.product-image[data-view]{cursor:zoom-in}
+.product-image[data-view]:focus-visible{outline:3px solid #a17b38;outline-offset:3px}
+.drawer{width:min(480px,100vw)}
+.drawer-head{padding:24px 26px}.drawer-head h2{font-size:30px}.drawer-body{padding:20px 26px}.drawer-foot{padding:22px 26px}
+.modal-wrap{padding:clamp(10px,3vw,28px);background:rgba(12,12,11,.78);backdrop-filter:blur(5px)}
+.modal{width:min(1040px,100%);max-height:min(92vh,940px);border:1px solid #c6bda9;box-shadow:0 24px 90px #0006;animation:iqaModalIn .22s ease-out}
+@keyframes iqaModalIn{from{opacity:0;transform:translateY(12px) scale(.985)}to{opacity:1;transform:translateY(0) scale(1)}}
+.product-modal{grid-template-columns:minmax(0,1.05fr) minmax(0,.95fr);min-height:520px}
+.product-modal-image{min-height:520px;display:grid;place-items:center;overflow:hidden;background:radial-gradient(ellipse at 50% 45%,#f8f4eb 0,#e5dece 62%,#d8cfbe 100%)}
+.product-modal-image img{width:100%;height:100%;max-height:680px;object-fit:contain;padding:clamp(14px,3vw,38px);mix-blend-mode:multiply}
+.product-modal-copy{padding:clamp(26px,4vw,52px);display:flex;flex-direction:column;justify-content:center}
+.product-modal-copy h2{font-size:clamp(32px,4vw,46px);margin:12px 0 16px}
+.product-modal-copy p{font-size:14px;color:#514c43;line-height:1.85}
+.product-modal-copy .button{min-height:52px;font-size:12px;letter-spacing:1.2px}
+.product-preview-note{font-size:11px!important;color:#6b655a!important}
+.product-related{padding:24px clamp(18px,3vw,34px) 30px;border-top:1px solid #d8d0c2;background:#f8f5ee}
+.product-related h3{font:400 26px var(--serif);margin:6px 0 18px}
+.product-related-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+.related-product{min-width:0;border:1px solid #d6cdbd;background:#fffdf8;padding:0 0 12px;text-align:left;color:#171713;cursor:pointer;overflow:hidden}
+.related-product img{width:100%;height:150px;display:block;object-fit:cover;background:#e7e1d6;transition:transform .25s}
+.related-product:hover img{transform:scale(1.035)}
+.related-product span,.related-product small{display:block;padding:0 12px;overflow-wrap:anywhere}
+.related-product span{font:18px var(--serif);margin-top:10px}.related-product small{font-size:11px;color:#625d54;margin-top:3px}
+.mobile-menu-close{display:none}
+@media(max-width:680px){
+ .menu-btn{display:inline-flex;min-width:50px;min-height:50px;font-size:28px;border-color:#a79e8f}
+ .nav-actions{gap:6px}.nav-actions .icon-btn{min-width:46px;min-height:46px;font-size:14px}
+ .mobile-menu.open{position:fixed;top:0;right:0;bottom:0;left:auto;width:min(88vw,390px);max-height:100dvh;overflow-y:auto;overscroll-behavior:contain;z-index:60;padding:88px 24px 28px;display:flex;flex-direction:column;gap:0;background:#f7f3ea;border-left:1px solid #b8ad9b;box-shadow:-100vw 0 0 100vw rgba(0,0,0,.62),-12px 0 36px rgba(0,0,0,.24)}
+ .mobile-menu.open a{display:flex;align-items:center;min-height:54px;padding:13px 4px;border-bottom:1px solid #d5ccbc;color:#191814;font-size:15px;font-weight:600;letter-spacing:.7px;text-transform:none}
+ .mobile-menu.open a:focus-visible{outline:3px solid #9a7639;outline-offset:2px;background:#eee6d8}
+ .mobile-menu.open .mobile-menu-close{display:flex;position:absolute;top:18px;right:20px;width:48px;height:48px;align-items:center;justify-content:center;border:1px solid #8d8578;background:#fffdf8;color:#171713;font-size:30px;line-height:1;cursor:pointer}
+ .card-actions{flex-direction:column;gap:8px}.card-actions button{min-height:48px;font-size:11px}
+ .search-wrap input,.toolbar select{min-height:50px;font-size:16px}
+ .wish-btn{width:46px;height:46px;font-size:23px}
+ .product-modal{grid-template-columns:1fr;min-height:0}
+ .product-modal-image{min-height:280px;height:min(42vh,390px)}
+ .product-modal-image img{max-height:390px;padding:18px}
+ .product-modal-copy{padding:24px 22px 28px}
+ .product-modal-copy h2{font-size:34px}
+ .product-modal-copy p{font-size:14px}
+ .product-related-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .related-product img{height:125px}
+ .modal{max-height:94dvh;width:100%;overflow-y:auto}
+ .modal-wrap{padding:10px}
+ .drawer-head{padding:20px}.drawer-body{padding:16px 20px}.drawer-foot{padding:18px 20px}
+}
+@media(prefers-reduced-motion:reduce){.modal{animation:none}}
 </style>
 <link rel="stylesheet" href="./assets/cinematic-story.css">
 </head>
