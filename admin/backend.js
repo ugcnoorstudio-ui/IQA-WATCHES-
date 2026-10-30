@@ -41,9 +41,15 @@
 
   async function getActiveProfile() {
     const supabaseClient = getClient();
-    const { data: sessionData, error: sessionError } = await supabaseClient.auth.getSession();
-    if (sessionError) throw sessionError;
-    const user = sessionData && sessionData.session && sessionData.session.user;
+    // getSession() reads browser storage and does not verify the identity with Auth.
+    // getUser() makes a server request; only this verified user ID may be used
+    // to look up the staff profile that gates the private workspace.
+    const { data: userData, error: userError } = await supabaseClient.auth.getUser();
+    if (userError) {
+      profile = null;
+      throw userError;
+    }
+    const user = userData && userData.user;
     if (!user) { profile = null; return null; }
 
     const { data, error } = await supabaseClient
