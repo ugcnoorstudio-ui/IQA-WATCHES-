@@ -214,6 +214,35 @@
     return invokeOwnerMutation("assign_product_taxonomy", payload);
   }
 
+  async function uploadProductImage(productId, file, options) {
+    requireRole(["owner"]);
+    if (!productId || !file) throw new Error("Choose a product and image file.");
+    const allowed = new Set(["image/jpeg", "image/png", "image/webp", "image/avif"]);
+    if (!allowed.has(file.type)) throw new Error("Only JPEG, PNG, WebP or AVIF images are accepted.");
+    if (file.size > 5 * 1024 * 1024) throw new Error("Image must be 5 MB or smaller.");
+    const ext = ({ "image/jpeg": "jpg", "image/png": "png", "image/webp": "webp", "image/avif": "avif" })[file.type];
+    const path = productId + "/" + crypto.randomUUID() + "." + ext;
+    const supabaseClient = getClient();
+    const bucket = supabaseClient.storage.from("product-images");
+    const uploaded = await bucket.upload(path, file, { contentType: file.type, upsert: false, cacheControl: "31536000" });
+    if (uploaded.error) throw uploaded.error;
+    try {
+      const result = await invokeOwnerMutation("add_product_image", {
+        product_id: productId,
+        bucket_id: "product-images",
+        storage_path: path,
+        alt_text: String(options?.alt_text || "").trim(),
+        sort_order: Number.isInteger(options?.sort_order) ? options.sort_order : 0,
+        is_primary: options?.is_primary === true
+      });
+      return { ...result, storage_path: path, public_url: bucket.getPublicUrl(path).data.publicUrl };
+    } catch (error) {
+      const cleanup = await bucket.remove([path]);
+      if (cleanup.error) throw new Error((error.message || "Image registration failed.") + " Uploaded file cleanup also failed; contact the owner before retrying.");
+      throw error;
+    }
+  }
+
   async function createCategory(payload) {
     return invokeOwnerMutation("create_category", payload);
   }
@@ -235,6 +264,7 @@
     listTaxonomy,
     createProduct,
     assignProductTaxonomy,
+    uploadProductImage,
     adjustInventory,
     createCategory,
     createBrand
