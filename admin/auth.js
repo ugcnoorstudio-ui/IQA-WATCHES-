@@ -14,8 +14,8 @@ function unlock(profile){
  document.body.classList.remove('auth-locked');
  $('staffIdentity').textContent=(profile.displayName||'IQA WATCHES Staff')+' · '+profile.role.replaceAll('_',' ');
  $('sidebarStatus').textContent='Authenticated · '+profile.role.replaceAll('_',' ');
- banner.querySelector('strong').textContent='AUTHENTICATED ADMIN SHELL · DATA ACCESS LIMITED';
- banner.querySelector('span').textContent='Owner/staff identity verified. Business records and write actions remain restricted until their individual server-side policies and workflows are enabled.';
+ banner.querySelector('strong').textContent='AUTHENTICATED ADMIN SHELL · LIVE OWNER ACCESS';
+ banner.querySelector('span').textContent='Owner identity verified. Live catalogue and owner-only operational records are connected. Only server-approved write actions are enabled; other changes remain safely disabled.';
  message('',false);
 if(window.IQA_ADMIN_REFRESH)window.IQA_ADMIN_REFRESH();
 }
