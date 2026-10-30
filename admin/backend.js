@@ -198,6 +198,14 @@
     return invokeOwnerMutation("adjust_inventory", payload);
   }
 
+  async function createCategory(payload) {
+    return invokeOwnerMutation("create_category", payload);
+  }
+
+  async function createBrand(payload) {
+    return invokeOwnerMutation("create_brand", payload);
+  }
+
   global.NOOR_ADMIN_BACKEND = Object.freeze({
     configured,
     signIn,
@@ -209,6 +217,8 @@
     listProducts,
     listInventory,
     createProduct,
-    adjustInventory
+    adjustInventory,
+    createCategory,
+    createBrand
   });
 })(window);
