@@ -74,7 +74,7 @@ Deno.serve(async (req: Request) => {
   }
   if (!user?.id) return json({ error: "Unable to verify staff identity." }, 401);
 
-  const rpcName = catalogue.includes(body.action) ? "iqa_catalogue_mutation" : "iqa_admin_mutation";
+  const rpcName = catalogue.includes(body.action) ? "iqa_catalogue_mutation" : "iqa_admin_mutate";
   const rpcHeaders: Record<string, string> = {
     apikey: service,
     "Content-Type": "application/json",
