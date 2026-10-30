@@ -104,7 +104,7 @@
   async function readTable(table, columns, options) {
     if (!profile || profile.active !== true) throw new Error("Sign-in is required.");
     const safeTables = new Set([
-      "products", "product_variants", "inventory_movements", "orders",
+      "products", "product_variants", "inventory_movements", "categories", "brands", "product_media", "orders",
       "order_status_events", "payment_events", "refunds", "coupons",
       "support_tickets", "return_requests", "suppliers", "purchase_orders",
       "content_entries", "reviews", "activity_logs", "integration_events",
@@ -125,15 +125,37 @@
 
   async function mutate(action, payload) {
     requireRole(["owner"]);
-    if (!["create_product", "adjust_inventory"].includes(action)) throw new Error("Unsupported administrative action.");
+    if (!["create_product", "adjust_inventory", "create_category", "create_brand", "assign_product_taxonomy", "add_product_image", "publish_product"].includes(action)) throw new Error("Unsupported administrative action.");
     const { data, error } = await getClient().functions.invoke("iqa-admin-mutate", { body: { action, payload } });
     if (error) throw error;
     if (!data || data.ok !== true) throw new Error(data?.error || "The operation was not confirmed.");
     return data;
   }
 
+  async function uploadProductImage(productId, file, altText, isPrimary) {
+    requireRole(["owner"]);
+    if (!/^[0-9a-f-]{36}$/i.test(String(productId || ""))) throw new Error("Choose a valid product.");
+    const allowed = { "image/jpeg": "jpg", "image/png": "png", "image/webp": "webp", "image/avif": "avif" };
+    if (!file || !allowed[file.type] || file.size < 1 || file.size > 5 * 1024 * 1024) {
+      throw new Error("Choose a JPG, PNG, WebP or AVIF image up to 5 MB.");
+    }
+    const path = productId + "/" + crypto.randomUUID() + "." + allowed[file.type];
+    const storage = getClient().storage.from("product-images");
+    const { error } = await storage.upload(path, file, { contentType: file.type, upsert: false, cacheControl: "3600" });
+    if (error) throw error;
+    try {
+      return await mutate("add_product_image", {
+        request_id: crypto.randomUUID(), product_id: productId, storage_path: path,
+        alt_text: String(altText || "").trim(), is_primary: isPrimary === true
+      });
+    } catch (error) {
+      await storage.remove([path]);
+      throw error;
+    }
+  }
+
   global.IQA_ADMIN_BACKEND = Object.freeze({
     configured, getClient, signIn, signOut, getActiveProfile,
-    currentProfile, requireRole, readTable, mutate, onAuthStateChange
+    currentProfile, requireRole, readTable, mutate, uploadProductImage, onAuthStateChange
   });
 })(window);
