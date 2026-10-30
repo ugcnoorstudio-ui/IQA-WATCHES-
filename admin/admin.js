@@ -71,7 +71,7 @@ function readTableMarkup(title,headers,rows,emptyText){
 return panel(title,'<div class="table-wrap"><table><thead><tr>'+headers.map(h=>'<th>'+esc(h)+'</th>').join('')+'</tr></thead><tbody>'+ (rows.length?rows.join(''):'<tr><td colspan="'+headers.length+'"><div class="empty-state"><h3>No records found</h3><p>'+esc(emptyText)+'</p></div></td></tr>')+'</tbody></table></div>');
 }
 const liveModules={
-orders:[['orders','id,order_number,state,currency,payable_total,payment_state,created_at,customer_id']],
+orders:[['orders','id,order_number,state,currency,payable_total,payment_state,created_at,customer_id'],['order_items','id,order_id,sku_snapshot,product_snapshot,quantity,unit_price,line_total'],['order_status_events','id,order_id,previous_state,new_state,reason,created_at']],
 customers:[['customers','id,full_name,email,phone,consent,created_at']],
 payments:[['payment_events','id,order_id,gateway,gateway_reference,state,amount,currency,verified_at,created_at'],['refunds','id,order_id,amount,reason,state,gateway_reference,created_at']],
 shipping:[['orders','id,order_number,state,delivery_snapshot,created_at']],
@@ -97,7 +97,7 @@ function renderLiveModule(route,sets){
  const target=$('content'),host=target.querySelector('[data-live-module]');
  if(!host)return;
  const headings={
- orders:['Order','State','Payment','Payable','Created'],customers:['Customer','Email','Phone','Consent','Created'],
+ orders:['Order','State','Payment','Payable','Created'],order_items:['Order','SKU','Product snapshot','Qty','Unit price','Line total'],order_status_events:['Order','Previous state','New state','Reason','Time'],customers:['Customer','Email','Phone','Consent','Created'],
  payments:['Reference','Order','Gateway','State','Amount','Verified'],refunds:['Order','Amount','State','Reason','Created'],
  shipping:['Order','State','Delivery snapshot','Created'],coupons:['Code','Type','Value','Minimum','Active','Created'],
  content:['Title','Type','Slug','State','Publish at'],reviews:['Product','Rating','Verified purchase','State','Created'],
@@ -113,6 +113,8 @@ function renderLiveModule(route,sets){
   const cols=isShipping?['Order','Delivery state','Delivery snapshot','Created']:isReport?['Order state','Items','Discount','Shipping','Tax','Payable','Payment']:headings[table]||columns.split(',');
   const map={
    orders:r=>[r.order_number,r.state,r.payment_state,money(r.payable_total),r.created_at],
+   order_items:r=>[r.order_id,r.sku_snapshot,r.product_snapshot,r.quantity,money(r.unit_price),money(r.line_total)],
+   order_status_events:r=>[r.order_id,r.previous_state,r.new_state,r.reason,r.created_at],
    customers:r=>[r.full_name,r.email,r.phone,r.consent,r.created_at],
    payment_events:r=>[r.gateway_reference||r.event_id,r.order_id,r.gateway,r.state,money(r.amount),r.verified_at],
    refunds:r=>[r.order_id,money(r.amount),r.state,r.reason,r.created_at],
