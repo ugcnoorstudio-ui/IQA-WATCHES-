@@ -33,3 +33,15 @@ test('asset intake remains local-only and is wired into the authenticated admin 
  assert.match(studio,/motionModelFile/);assert.match(studio,/motionVideoPreview/);
  assert.match(studio,/Basic format checks are not full model/);
 });
+
+
+test('asset readiness gate requires five explicit review checks and a passed local model inspection',()=>{
+ const studio=read('admin/motion-studio.js');
+ assert.match(studio,/data-review-check/);
+ assert.match(studio,/reviewChecks.length===5/);
+ assert.match(studio,/reviewChecks.every/);
+ assert.match(studio,/modelPassed&&complete/);
+ assert.match(studio,/Prepared for owner review in this browser session only/);
+ assert.match(studio,/No approval or save occurred/);
+ assert.match(studio,/motionReviewReady/);
+});
