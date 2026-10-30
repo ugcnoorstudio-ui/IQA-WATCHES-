@@ -37,3 +37,13 @@
 .motion-brief-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:9px}
 .motion-brief-actions .btn{min-height:40px}
 @media(max-width:420px){.motion-brief-actions{display:grid;grid-template-columns:1fr}.motion-brief-actions .btn{width:100%}}
+
+/* Local asset intake controls */
+.motion-asset-panel{display:grid;gap:10px}
+.motion-asset-panel label{display:grid;gap:6px;font-size:11px;color:#d6d2c8}
+.motion-asset-panel input[type=file]{width:100%;max-width:100%;padding:10px;background:#111210;color:var(--ink);border:1px solid #45443d}
+.motion-asset-panel video{display:block;width:100%;max-height:320px;background:#090a09;border:1px solid #45443d}
+.motion-asset-actions{display:flex;flex-wrap:wrap;gap:8px}
+.motion-asset-panel input:focus-visible,.motion-asset-actions button:focus-visible{outline:2px solid #c6a66b;outline-offset:2px}
+@media(max-width:420px){.motion-asset-actions button{width:100%}}
+@media(prefers-reduced-motion:reduce){.motion-asset-panel *{scroll-behavior:auto!important;transition:none!important;animation:none!important}}
