@@ -38,3 +38,11 @@
 .motion-asset-panel input:focus-visible,.motion-asset-actions button:focus-visible{outline:2px solid #c6a66b;outline-offset:2px}
 @media(max-width:420px){.motion-asset-actions button{width:100%}}
 @media(prefers-reduced-motion:reduce){.motion-asset-panel *{scroll-behavior:auto!important;transition:none!important;animation:none!important}}
+
+/* Human review readiness gate — local session only */
+.motion-review-panel{display:grid;align-content:start;gap:12px}
+.motion-review-checks{display:grid;gap:10px}
+.motion-review-checks label{display:flex;align-items:flex-start;gap:9px;color:#d6d2c8;font-size:11px;line-height:1.6}
+.motion-review-checks input{flex:0 0 auto;margin:2px 0 0;accent-color:#c6a66b}
+.motion-review-panel button:disabled{opacity:.48;cursor:not-allowed}
+.motion-review-checks input:focus-visible,.motion-review-panel button:focus-visible{outline:2px solid #c6a66b;outline-offset:3px}
