@@ -14,7 +14,7 @@
     return Boolean(config && typeof config.url === "string" &&
       /^https:\/\/[^/]+\.supabase\.co$/.test(config.url) &&
       typeof config.anonKey === "string" &&
-      /^(sb_publishable_[A-Za-z0-9_-]+|eyJ[A-Za-z0-9._-]+)$/.test(config.anonKey) &&
+      /^(sb_publishable_[A-Za-z0-9_-]+|eyJ[A-Za-z0-9._-]+)$/.test(config.anonKey.trim()) &&
       !config.url.includes("YOUR_PROJECT_REF"));
   }
 
@@ -24,7 +24,7 @@
       throw new Error("Supabase JS v2 has not been loaded.");
     }
     if (!client) {
-      client = sdk.createClient(config.url, config.anonKey, {
+      client = sdk.createClient(config.url, config.anonKey.trim(), {
         auth: {
           persistSession: true,
           autoRefreshToken: true,
