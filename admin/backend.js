@@ -243,6 +243,20 @@
     }
   }
 
+  async function listProductImages() {
+    requireRole(["owner", "administrator", "inventory_manager", "order_manager", "support_staff"]);
+    const supabaseClient = getClient();
+    const { data, error } = await supabaseClient
+      .from("product_media")
+      .select("id,product_id,bucket_id,storage_path,alt_text,sort_order,is_primary,created_at")
+      .order("product_id", { ascending: true })
+      .order("sort_order", { ascending: true })
+      .limit(200);
+    if (error) throw error;
+    const bucket = supabaseClient.storage.from("product-images");
+    return (data || []).map(item => ({ ...item, public_url: bucket.getPublicUrl(item.storage_path).data.publicUrl }));
+  }
+
   async function createCategory(payload) {
     return invokeOwnerMutation("create_category", payload);
   }
@@ -262,6 +276,7 @@
     listProducts,
     listInventory,
     listTaxonomy,
+    listProductImages,
     createProduct,
     assignProductTaxonomy,
     uploadProductImage,
