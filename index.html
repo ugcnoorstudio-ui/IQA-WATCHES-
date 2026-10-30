@@ -72,6 +72,94 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
  .product-card:hover,.product-card:focus-within{transform:none}
 }
 
+
+/* IQA storefront responsive refinement: catalogue cards, search and product detail */
+#shop .toolbar{display:grid;grid-template-columns:minmax(240px,1.6fr) repeat(3,minmax(145px,1fr));gap:12px;align-items:stretch}
+#shop .search-wrap{max-width:none;min-width:0;width:100%}
+#shop .search-wrap input,#shop .toolbar select{width:100%;min-width:0;min-height:50px;padding:12px 14px;font-size:15px;border-radius:0}
+#shop .results-count{font-size:13px;margin:4px 0 14px}
+.product-card{display:flex;flex-direction:column;height:100%;background:rgba(255,253,248,.55);border:1px solid rgba(222,216,203,.75);padding:0 0 12px}
+.product-image{width:100%;aspect-ratio:4/4.8}
+.product-image img{object-fit:contain;padding:5%;mix-blend-mode:multiply}
+.product-info{display:flex;flex:1;flex-direction:column;padding:13px 12px 0}
+.product-brand{font-size:10px;letter-spacing:1.35px}
+.product-title{font-size:clamp(17px,1.5vw,20px);overflow-wrap:anywhere}
+.product-desc{font-size:12px;line-height:1.5;min-height:2.8em}
+.price-line{min-height:24px}
+.card-actions{margin-top:auto;padding-top:13px;gap:8px}
+.card-actions button{min-height:42px;font-size:10px;letter-spacing:.8px}
+.wish-btn{width:40px;height:40px;min-width:40px;font-size:20px}
+.modal-wrap{padding:clamp(8px,2vw,22px);overscroll-behavior:contain}
+.modal{width:min(900px,100%);max-height:min(92dvh,900px);overscroll-behavior:contain}
+.product-modal{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
+.product-modal-image{min-height:420px;max-height:680px;display:grid;place-items:center;overflow:hidden}
+.product-modal-image img{max-height:680px;object-fit:contain;padding:5%}
+.product-modal-copy{min-width:0}
+.product-modal-copy h2{overflow-wrap:anywhere}
+.spec-list div{font-size:13px;line-height:1.5}
+.spec-list span:first-child{flex:0 0 42%}
+.spec-list span:last-child{min-width:0;overflow-wrap:anywhere}
+.route-product-layout{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,.95fr);gap:clamp(22px,4vw,56px);align-items:start}
+.route-product-media{position:relative;min-width:0;background:#f7f5f1;border:1px solid var(--line);min-height:360px;display:grid;place-items:center;overflow:hidden}
+.route-product-media img{width:100%;height:auto;max-height:680px;object-fit:contain;padding:5%}
+.route-product-copy{min-width:0}
+.route-product-copy h2{font:400 clamp(30px,4vw,46px)/1.12 var(--serif)!important;margin:12px 0}
+.route-product-price{font-size:clamp(25px,3vw,34px);font-weight:700}
+.route-product-copy>p{line-height:1.8;color:#5f5b53}
+.route-specs{table-layout:fixed;margin:20px 0}
+.route-specs th{width:38%;font-size:13px;font-weight:600}
+.route-specs td{font-size:13px;overflow-wrap:anywhere}
+.route-product-copy .route-actions{gap:10px}
+.route-product-copy .route-actions .button{min-height:44px;align-items:center}
+.route-product-copy .route-disabled{margin-top:18px}
+.route-hero h1{overflow-wrap:anywhere}
+@media(max-width:950px){
+ #shop .toolbar{grid-template-columns:repeat(2,minmax(0,1fr))}
+ #shop .search-wrap{grid-column:1/-1}
+ .product-grid{gap:18px 12px}
+}
+@media(max-width:680px){
+ #shop .toolbar{grid-template-columns:1fr 1fr;gap:10px;margin:18px 0}
+ #shop .search-wrap{grid-column:1/-1}
+ #shop .search-wrap input,#shop .toolbar select{min-height:50px;font-size:16px}
+ #shop .results-count{font-size:13px}
+ .product-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:16px 10px}
+ .product-card{padding-bottom:10px}
+ .product-image{aspect-ratio:4/4.9}
+ .product-info{padding:11px 9px 0}
+ .product-brand{font-size:9px;letter-spacing:1px}
+ .product-title{font-size:16px;line-height:1.25}
+ .product-desc{font-size:11px;min-height:2.7em}
+ .price{font-size:14px}
+ .card-actions{flex-direction:row;gap:6px;padding-top:10px}
+ .card-actions button{min-width:0;min-height:42px;padding:9px 4px;font-size:9px;letter-spacing:.35px}
+ .product-modal{grid-template-columns:1fr}
+ .modal{width:min(560px,100%);max-height:94dvh}
+ .product-modal-image{min-height:0;height:clamp(210px,34vh,300px);max-height:300px}
+ .product-modal-image img{width:100%;height:100%;object-fit:contain}
+ .product-modal-copy{padding:22px 18px 24px}
+ .product-modal-copy h2{font-size:28px}
+ .product-modal-copy p{font-size:14px}
+ .spec-list div{font-size:13px;padding:10px 0}
+ .route-product-layout{grid-template-columns:1fr;gap:22px}
+ .route-product-media{min-height:0;max-height:430px}
+ .route-product-media img{max-height:430px;width:100%;height:auto}
+ .route-product-copy h2{font-size:34px!important}
+ .route-specs th,.route-specs td{padding:10px 8px;font-size:13px}
+ .route-product-copy .route-actions{display:grid;grid-template-columns:1fr 1fr}
+ .route-product-copy .route-actions .button{width:100%;padding:12px 8px;font-size:9px;letter-spacing:.6px}
+}
+@media(max-width:380px){
+ .product-grid{gap:12px 8px}
+ .product-info{padding-left:7px;padding-right:7px}
+ .product-title{font-size:15px}
+ .card-actions{flex-direction:column}
+ .card-actions button{width:100%;font-size:10px}
+ #shop .toolbar{gap:8px}
+ .route-product-copy .route-actions{grid-template-columns:1fr}
+}
+@media(prefers-reduced-motion:reduce){.product-image img{transition:none}}
+
 </style>
 <link rel="stylesheet" href="./assets/cinematic-story.css">
 </head>
@@ -222,7 +310,7 @@ function openPolicyFromHash(){const match=location.hash.match(/^#policy-(.+)$/);
 function setCategory(category){activeCategory=category;document.querySelectorAll('[data-category]').forEach(b=>b.classList.toggle('active',b.dataset.category===category));renderProducts()}
 function resetFilters(){$('searchInput').value='';$('brandFilter').value='All';$('priceFilter').value='all';$('sortFilter').value='featured';setCategory('All')}
 [$('searchInput'),$('brandFilter'),$('priceFilter'),$('sortFilter')].forEach(el=>el.addEventListener(el.tagName==='INPUT'?'input':'change',renderProducts));
-$('cartOpen').addEventListener('click',()=>{location.hash='bag'});$('wishlistOpen').addEventListener('click',()=>{location.hash='wishlist'});$('drawerClose').addEventListener('click',closePanel);$('overlay').addEventListener('click',closePanel);$('modalWrap').addEventListener('click',e=>{if(e.target===$('modalWrap'))closeModal()});$('headerSearch').addEventListener('click',()=>{location.hash='search'});$('menuToggle').addEventListener('click',()=>{const open=$('mobileMenu').classList.toggle('open');$('menuToggle').setAttribute('aria-expanded',String(open))});$('newsletterForm').addEventListener('submit',e=>{e.preventDefault();toast('Preview only: signup is not connected and no email was sent.');$('newsletterEmail').value=''});document.addEventListener('keydown',e=>{if(e.key==='Escape'){closePanel();closeModal();$('mobileMenu').classList.remove('open')}});$('year').textContent=new Date().getFullYear();renderProducts();updateCounts();openPolicyFromHash();loadStorefrontCatalogue();
+$('cartOpen').addEventListener('click',()=>{location.hash='bag'});$('wishlistOpen').addEventListener('click',()=>{location.hash='wishlist'});$('drawerClose').addEventListener('click',closePanel);$('overlay').addEventListener('click',closePanel);$('modalWrap').addEventListener('click',e=>{if(e.target===$('modalWrap'))closeModal()});$('headerSearch').addEventListener('click',()=>{if(location.hash!=='#home')location.hash='home';setTimeout(()=>{$('shop').scrollIntoView({behavior:'smooth',block:'start'});$('searchInput').focus({preventScroll:true})},90)});$('menuToggle').addEventListener('click',()=>{const open=$('mobileMenu').classList.toggle('open');$('menuToggle').setAttribute('aria-expanded',String(open))});$('newsletterForm').addEventListener('submit',e=>{e.preventDefault();toast('Preview only: signup is not connected and no email was sent.');$('newsletterEmail').value=''});document.addEventListener('keydown',e=>{if(e.key==='Escape'){closePanel();closeModal();$('mobileMenu').classList.remove('open')}});$('year').textContent=new Date().getFullYear();renderProducts();updateCounts();openPolicyFromHash();loadStorefrontCatalogue();
 </script>
 <script>
 /* Progressive enhancement: content stays visible if JS/observers fail. */
