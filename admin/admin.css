@@ -13,3 +13,9 @@
 .login-card input:focus{outline:2px solid #c8ad72;outline-offset:2px}
 .login-card .btn{margin-top:8px;justify-content:center}
 #loginMessage{min-height:22px;font-size:13px}
+
+.image-gallery-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:14px}
+.image-gallery-card{overflow:hidden;border:1px solid var(--line,rgba(255,255,255,.12));border-radius:14px;background:rgba(255,255,255,.025)}
+.image-gallery-card img{display:block;width:100%;aspect-ratio:1/1;object-fit:cover;background:#171717}
+.image-gallery-meta{display:grid;gap:5px;padding:11px}
+.image-gallery-meta span,.image-gallery-meta small{color:var(--muted,#999);font-size:12px;overflow-wrap:anywhere}
