@@ -51,3 +51,11 @@ The project database role cannot alter the Supabase-managed supabase_admin role'
 - Product taxonomy, image metadata and product publication are performed through `iqa-admin-mutate` and a service-role-only database function. The database independently validates active Owner status, records audit events and uses request idempotency.
 - Publishing requires category, brand, primary image, an active priced variant with available stock and a reasoned Owner approval. The database sets published / verified-sellable flags only after those checks.
 - Supabase security advisor still reports 17 unrelated RLS-enabled tables with no policies (intentionally inaccessible) and leaked-password protection disabled. Enable leaked-password protection in Auth settings before production.
+
+
+### Catalogue rollout verification (2026-10-30)
+
+- The deployed `iqa-admin-mutate` Edge Function is ACTIVE (version 4) with platform JWT verification enabled. It validates the Supabase Auth user before forwarding only allow-listed mutations. It supports both legacy server environment variables and the newer JSON key maps; opaque secret keys are never sent as Bearer tokens.
+- The catalogue RPC is executable by `service_role` only. Verification confirmed `anon` and `authenticated` cannot execute it. A negative test using a non-existent actor was rejected by the active-Owner check and created zero rows.
+- The effective variant selling price is checked against MRP before publication. Author foreign-key indexes are present for categories, brands and product media.
+- The public GitHub Pages admin page and cache-busted JavaScript assets were fetched successfully after deployment. The actual authenticated Owner UI has not yet been exercised end-to-end with a live product/image; no sample catalogue data was inserted during verification.
