@@ -46,3 +46,17 @@
 .motion-review-checks input{flex:0 0 auto;margin:2px 0 0;accent-color:#c6a66b}
 .motion-review-panel button:disabled{opacity:.48;cursor:not-allowed}
 .motion-review-checks input:focus-visible,.motion-review-panel button:focus-visible{outline:2px solid #c6a66b;outline-offset:3px}
+
+/* Local WebGL model viewer */
+.motion-3d-viewer{display:grid;gap:12px;min-width:0}
+.motion-viewer-file{display:grid;gap:6px;font-size:11px;color:#d6d2c8}
+.motion-viewer-file input{width:100%;max-width:100%;padding:10px;background:#111210;color:var(--ink);border:1px solid #45443d}
+#iqaViewerCanvas{display:block;width:100%;height:clamp(260px,48vw,440px);background:#0e100e;border:1px solid #45443d;touch-action:pan-y;cursor:grab;outline-offset:3px}
+#iqaViewerCanvas:active{cursor:grabbing}
+#iqaViewerCanvas:focus-visible,.motion-viewer-controls input:focus-visible,.motion-viewer-controls button:focus-visible{outline:2px solid #c6a66b;outline-offset:3px}
+.motion-viewer-controls{display:flex;align-items:center;flex-wrap:wrap;gap:14px}
+.motion-viewer-controls label{display:flex;align-items:center;gap:8px;color:#d6d2c8;font-size:11px}
+.motion-viewer-controls input[type=range]{width:min(180px,34vw);accent-color:#c6a66b}
+.motion-viewer-controls input[type=checkbox]{accent-color:#c6a66b}
+@media(max-width:480px){.motion-viewer-controls{align-items:flex-start;flex-direction:column}.motion-viewer-controls button{width:100%}}
+@media(prefers-reduced-motion:reduce){#iqaViewerCanvas{scroll-behavior:auto}}
