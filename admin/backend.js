@@ -198,6 +198,22 @@
     return invokeOwnerMutation("adjust_inventory", payload);
   }
 
+  async function listTaxonomy() {
+    requireRole(["owner", "administrator", "inventory_manager", "order_manager", "support_staff"]);
+    const supabaseClient = getClient();
+    const [categories, brands] = await Promise.all([
+      supabaseClient.from("categories").select("id,name,slug,state").eq("state", "published").order("name").limit(200),
+      supabaseClient.from("brands").select("id,name,slug,state").eq("state", "published").order("name").limit(200)
+    ]);
+    if (categories.error) throw categories.error;
+    if (brands.error) throw brands.error;
+    return { categories: categories.data || [], brands: brands.data || [] };
+  }
+
+  async function assignProductTaxonomy(payload) {
+    return invokeOwnerMutation("assign_product_taxonomy", payload);
+  }
+
   async function createCategory(payload) {
     return invokeOwnerMutation("create_category", payload);
   }
@@ -216,7 +232,9 @@
     readTable,
     listProducts,
     listInventory,
+    listTaxonomy,
     createProduct,
+    assignProductTaxonomy,
     adjustInventory,
     createCategory,
     createBrand
