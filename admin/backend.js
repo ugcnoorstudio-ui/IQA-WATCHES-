@@ -112,7 +112,7 @@
     const safeTables = new Set([
       "products", "product_variants", "inventory_movements", "categories", "brands", "product_media", "orders",
       "order_status_events", "payment_events", "refunds", "coupons",
-      "support_tickets", "return_requests", "suppliers", "purchase_orders",
+      "support_tickets", "return_requests", "suppliers", "purchase_orders", "customers", "staff_profiles",
       "content_entries", "reviews", "activity_logs", "integration_events",
       "store_settings"
     ]);
