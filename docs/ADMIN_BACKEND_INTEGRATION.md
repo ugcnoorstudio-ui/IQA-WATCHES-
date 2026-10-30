@@ -1,8 +1,8 @@
-# NOOR WATCHES — secure admin backend integration
+# IQA WATCHES — secure admin backend integration
 
 ## What the repository currently contains
 
-- `admin/index.html`, `admin/admin.css`, and `admin/admin.js` are an explicitly labelled, non-persistent admin preview.
+- `admin/index.html`, `admin/admin.css`, and `admin/admin.js` provide the IQA WATCHES admin preview, login gate, and dashboard shell.
 - The existing Supabase migration creates the store schema and enables row-level security (RLS). It intentionally revokes browser access to business tables until reviewed policies and server-side operations are added.
 - The storefront is static GitHub Pages. GitHub Pages can host the UI, but it does not provide a private application server or protect secrets.
 
@@ -10,11 +10,11 @@
 
 - `admin/backend-config.example.js`: placeholders only.
 - `admin/backend.js`: fail-closed Supabase JS v2 authentication/profile adapter, plus a read-only allow-listed helper.
-- These files are not loaded by the current preview yet. This is intentional: activating a half-configured login or data path could break the existing storefront or accidentally expose data.
+- `admin/backend.js`, `admin/admin-auth.js`, and `admin/backend-config.js` are loaded by the admin page. The configuration still contains a publishable-key placeholder, so the backend fails closed until the public key is configured.
 
 ## Required setup before connecting
 
-1. Create/select the private Supabase project intended for NOOR WATCHES. Do not send credentials through chat or commit them to GitHub.
+1. Use the existing IQA WATCHES Supabase project (ref: `ufidhdcwelaqtqrgeszy`). Do not send credentials through chat or commit secrets to GitHub.
 2. Review and apply `supabase/migrations/202610290001_secure_store.sql` in that project. Back up any existing database first; do not apply the starter migration blindly to a populated database.
 3. Create the owner account through Supabase Auth using a trusted setup process. Set the matching `staff_profiles` row to the owner role and `active = true` using the Supabase SQL editor or a trusted server-side administrative process. Never allow a browser client to assign its own role.
 4. Copy `admin/backend-config.example.js` to `admin/backend-config.js` and replace the placeholders with the project's HTTPS URL and publishable/anon key. The publishable/anon key is not a secret, but it is safe in a browser only when RLS is correct. Never use a `service_role` key in the website.
@@ -26,7 +26,7 @@
 
 ## Important limitations
 
-This scaffold does not connect to a live Supabase project, load real records, or enable write actions. The project URL/key and an approved authorization model are not available in the repository. Do not remove the preview banner or claim the admin is production-ready until configuration, RLS, server operations, and tests are complete.
+The admin adapter has read-only Products and Inventory loaders, but the browser configuration still has a placeholder key. No product or inventory write actions are enabled. The project URL/key and an approved authorization model are not available in the repository. Do not remove the preview banner or claim the admin is production-ready until configuration, RLS, server operations, and tests are complete.
 
 ## GitHub deployment
 
@@ -34,7 +34,7 @@ GitHub is the version-control/deployment source for the static site, not the dat
 
 ## IQA WATCHES project owner onboarding (project ref: ufidhdcwelaqtqrgeszy)
 
-The repository now includes an admin sign-in gate (admin/admin-auth.js) and a public configuration placeholder (admin/backend-config.js). The admin stays locked until a valid publishable key is configured and the signed-in user has an active staff profile.
+The repository includes an admin sign-in gate (`admin/admin-auth.js`) and a public configuration placeholder (`admin/backend-config.js`). The admin stays locked until a valid publishable key is configured and the signed-in user has an active staff profile.
 
 ### Create the first owner account
 
@@ -61,7 +61,7 @@ Owner assignment must be done by the trusted project owner in Supabase SQL Edito
 
 ### Current status
 
-The admin page now has a login form and session gate, but the publishable key remains a placeholder and no owner profile is provisioned yet. Login cannot succeed until the owner invitation is accepted, the profile row is assigned by the trusted SQL Editor, and the publishable key is configured. This is a deliberate fail-closed state.
+The admin page has a login form and session gate. The owner Auth user and active `owner` staff profile have already been provisioned and verified. The publishable key remains a placeholder, so login cannot succeed until that browser-safe key is configured. This is a deliberate fail-closed state.
 
 ### Session identity verification hardening
 
