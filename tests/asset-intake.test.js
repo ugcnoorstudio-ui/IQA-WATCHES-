@@ -48,7 +48,7 @@ test('asset readiness gate requires five explicit review checks and a passed loc
 
 
 test('local GLB viewer parses an embedded triangle mesh without network dependencies',()=>{
- const sandbox={window:{},ArrayBuffer,DataView,Uint8Array,Float32Array,Uint16Array,Uint32Array,Int8Array,Int16Array,TextDecoder,Math,JSON,String,Array,Error};
+ const sandbox={window:{},ArrayBuffer,DataView,Uint8Array,Float32Array,Uint16Array,Uint32Array,Int8Array,Int16Array,TextDecoder,TextEncoder,Math,JSON,String,Array,Error};
  vm.runInNewContext(read('admin/model-viewer.js'),sandbox);
  const json={asset:{version:'2.0'},buffers:[{byteLength:36}],bufferViews:[{buffer:0,byteOffset:0,byteLength:36}],accessors:[{bufferView:0,componentType:5126,count:3,type:'VEC3'}],meshes:[{primitives:[{attributes:{POSITION:0}}]}],nodes:[{mesh:0}],scenes:[{nodes:[0]}],scene:0};
  let j=JSON.stringify(json);while(j.length%4)j+=' ';
