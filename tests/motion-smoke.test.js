@@ -48,3 +48,19 @@ test('admin route remains attached to the existing authenticated shell', () => {
   assert.match(html, /motion-studio\.js/);
   assert.match(html, /auth\.js/);
 });
+
+test('local asset intake performs bounded format checks without network or persistence', () => {
+  const source = read('admin/asset-intake.js');
+  const html = read('admin/index.html');
+  const studio = read('admin/motion-studio.js');
+  assert.match(source, /0x46546c67/);
+  assert.match(source, /declaredLength !== buffer.byteLength/);
+  assert.match(source, /JSON\.parse/);
+  assert.match(source, /URL\.createObjectURL/);
+  assert.match(source, /URL\.revokeObjectURL/);
+  assert.doesNotMatch(source, /\bfetch\s*\(|XMLHttpRequest|localStorage|indexedDB/i);
+  assert.match(html, /asset-intake\.js/);
+  assert.match(studio, /motionModelFile/);
+  assert.match(studio, /motionVideoPreview/);
+  assert.match(studio, /Basic format checks are not full model/);
+});
