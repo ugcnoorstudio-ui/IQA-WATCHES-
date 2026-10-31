@@ -3,7 +3,7 @@
 const KEY='iqa-customer-storefront-v1';
 const $=id=>document.getElementById(id);
 const esc=v=>typeof escapeHtml==='function'?escapeHtml(v):String(v??'');
-const money=v=>typeof window.money==='function'?window.money(Number(v||0)):'₹'+Number(v||0).toLocaleString('en-IN');
+const money=v=>typeof money==='function'?money(Number(v||0)):'₹'+Number(v||0).toLocaleString('en-IN');
 const root=()=>document.getElementById('routeView');
 const saved=(key,fallback)=>{try{return JSON.parse(localStorage.getItem(key))??fallback}catch{return fallback}};
 const state=saved(KEY,{compare:[],recent:[]});
@@ -13,7 +13,7 @@ function shell(title,sub,body){const r=root();if(!r)return;r.classList.remove('h
 function card(p){return '<article class="route-card"><a href="#product/'+encodeURIComponent(p.id)+'"><img src="'+esc(safeImageUrl(p.image))+'" alt="'+esc(p.imageAlt||p.name)+'" loading="lazy"></a><div class="route-card-copy"><div class="product-brand">'+esc(p.brand||'IQA WATCHES')+'</div><h3><a href="#product/'+encodeURIComponent(p.id)+'">'+esc(p.name)+'</a></h3><p>'+money(p.price)+'</p><div class="route-actions"><a class="button light" href="#product/'+encodeURIComponent(p.id)+'">Product details</a><button class="button light" type="button" data-customer-compare="'+esc(p.id)+'">'+(state.compare.includes(p.id)?'Remove compare':'Compare')+'</button></div></div></article>'}
 function productList(items){return '<div class="route-grid">'+(items.length?items.map(card).join(''):'<div class="route-empty">No matching products are currently published.</div>')+'</div>'}
 function renderCompare(){
- const items=state.compare.map(id=>(window.products||[]).find(p=>p.id===id)).filter(Boolean);
+ const items=state.compare.map(id=>(typeof products!=='undefined'?products:[]).find(p=>p.id===id)).filter(Boolean);
  shell('Compare watches','Compare up to four currently approved watches side by side.',
  '<div class="route-feature"><p>Select Compare on product cards to add watches here. You can compare up to four products.</p><button class="button light" id="clearCustomerCompare" type="button">Clear comparison</button></div>'+
  (items.length?'<div class="route-feature" style="overflow-x:auto"><table class="route-specs"><thead><tr><th>Feature</th>'+items.map(p=>'<th>'+esc(p.name)+'</th>').join('')+'</tr></thead><tbody>'+
@@ -22,11 +22,11 @@ function renderCompare(){
  const clear=$('clearCustomerCompare');if(clear)clear.addEventListener('click',()=>{state.compare=[];persist();renderCompare()});
 }
 function renderBrands(){
- const groups=[...new Set((window.products||[]).map(p=>p.brand).filter(Boolean))].sort();
+ const groups=[...new Set((typeof products!=='undefined'?products:[]).map(p=>p.brand).filter(Boolean))].sort();
  shell('Shop by brand','Explore the brands represented in the approved catalogue.',
- '<div class="route-grid">'+groups.map(b=>{const count=window.products.filter(p=>p.brand===b).length;return '<article class="route-feature"><h2>'+esc(b)+'</h2><p>'+count+' available catalogue '+(count===1?'watch':'watches')+'</p><a class="button light" href="#brand/'+encodeURIComponent(b)+'">View brand</a></article>'}).join('')+'</div>');
+ '<div class="route-grid">'+groups.map(b=>{const count=(typeof products!=='undefined'?products:[]).filter(p=>p.brand===b).length;return '<article class="route-feature"><h2>'+esc(b)+'</h2><p>'+count+' available catalogue '+(count===1?'watch':'watches')+'</p><a class="button light" href="#brand/'+encodeURIComponent(b)+'">View brand</a></article>'}).join('')+'</div>');
 }
-function renderBrand(name){const items=(window.products||[]).filter(p=>p.brand===name);shell(name,'Explore approved '+name+' watches.',productList(items))}
+function renderBrand(name){const items=(products||[]).filter(p=>p.brand===name);shell(name,'Explore approved '+name+' watches.',productList(items))}
 function renderCategories(){
  const groups=[...new Set((window.products||[]).map(p=>p.category).filter(Boolean))].sort();
  shell('Shop by category','Choose a category to explore matching watches.',
