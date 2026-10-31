@@ -122,6 +122,12 @@
     }
     const supabaseClient = getClient();
     let query = supabaseClient.from(table).select(columns);
+    if (options && options.orderBy !== undefined) {
+      if (typeof options.orderBy !== "string" || !/^[a-zA-Z][a-zA-Z0-9_]*$/.test(options.orderBy)) {
+        throw new Error("Invalid sort column.");
+      }
+      query = query.order(options.orderBy, { ascending: options.ascending !== false, nullsFirst: false });
+    }
     const limit = options && Number.isInteger(options.limit) ? options.limit : 50;
     query = query.limit(Math.min(Math.max(limit, 1), 100));
     const { data, error } = await query;
