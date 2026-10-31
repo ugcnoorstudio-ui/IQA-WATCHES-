@@ -256,7 +256,8 @@ if(form.matches('[data-product-create]')){
   await api.mutate('assign_product_taxonomy',{request_id:crypto.randomUUID(),product_id:productId,category_id:values.category,brand_id:values.brand});
   for(let index=0;index<files.length;index++){
    const viewLabel=index===0?'primary view':'additional view '+(index+1);
-   const altText=(String(values.image_alt_text||'')+' — '+viewLabel).slice(0,180);\n   await api.uploadProductImage(productId,files[index],altText,index===0);
+   const altText=(String(values.image_alt_text||'')+' — '+viewLabel).slice(0,180);
+   await api.uploadProductImage(productId,files[index],altText,index===0);
   }
   result=await api.mutate('publish_product',{request_id:crypto.randomUUID(),product_id:productId,reason:values.publish_reason});
   if(result.state!=='published')throw new Error('The server did not confirm the published state.');
