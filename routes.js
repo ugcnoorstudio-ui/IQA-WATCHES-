@@ -39,7 +39,13 @@ function customerAuthClient(){
  if(customerClient)return customerClient;
  const cfg=window.IQA_SUPABASE_CONFIG;
  if(!window.supabase||!cfg?.url||!cfg?.publishableKey)throw new Error('Secure customer sign-in is not configured.');
- customerClient=window.supabase.createClient(cfg.url,cfg.publishableKey,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
+ customerClient=window.supabase.createClient(cfg.url,cfg.publishableKey,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true,flowType:'pkce'}});
+ // Keep the public catalogue client stateless; only this customer client persists a session.
+ customerClient.auth.onAuthStateChange((event,session)=>{
+  const accountLink=document.querySelector('a[href="#account"][aria-label="My account"]');
+  if(accountLink)accountLink.textContent=session?.user?'My account':'Account';
+  if(event==='SIGNED_OUT'&&['account','profile','orders','tracking','addresses'].includes((location.hash||'#').slice(1).split('/')[0]))location.hash='login';
+ });
  return customerClient;
 }
 function infoRoute(kicker,title,description,body){
@@ -111,10 +117,14 @@ async function renderAccount(){
   const client=customerAuthClient(),{data,error}=await client.auth.getSession();if(error)throw error;
   const user=data.session?.user;
   if(!user){renderAuth('login');return;}
-  const meta=user.user_metadata||{};
-  infoRoute('IQA WATCHES · MY IQA','Welcome'+(meta.full_name?' back, '+meta.full_name.split(' ')[0]:''),'Your customer account and preferences.',
-   '<div class="route-columns"><div class="route-feature"><h2>Profile</h2><form id="customerProfileForm" class="route-form"><label>Full name<input name="full_name" maxlength="100" value="'+esc(meta.full_name||'')+'"></label><label>Email address<input value="'+esc(user.email||'')+'" disabled></label><label>Phone number<input name="phone" type="tel" maxlength="20" value="'+esc(meta.phone||'')+'"></label><button class="button" type="submit">Save profile</button><p class="route-note" id="profileMessage" role="status"></p></form><button class="button light" id="customerSignOut" type="button">Sign out</button></div><div class="route-feature"><h2>My IQA</h2><ul class="account-links"><li><a href="#orders">My orders & order details</a></li><li><a href="#tracking">Track an order</a></li><li><a href="#addresses">Saved addresses</a></li><li><a href="#wishlist">Wishlist</a></li><li><a href="#reviews">My reviews</a></li><li><a href="#returns">Returns & refunds</a></li><li><a href="#support">Customer support</a></li><li><a href="#coupons">My coupons</a></li><li><a href="#offers">Offers & rewards</a></li></ul></div></div>');
-  $r('customerProfileForm').addEventListener('submit',async e=>{e.preventDefault();const fd=new FormData(e.currentTarget),msg=$r('profileMessage');try{const {error}=await client.auth.updateUser({data:{full_name:String(fd.get('full_name')||'').trim(),phone:String(fd.get('phone')||'').trim()}});if(error)throw error;msg.textContent='Profile details saved securely.';}catch(err){msg.textContent=err.message||'Profile could not be saved.';}});
+  const meta=user.user_metadata||{},customerId=await ensureCustomer(client,user);
+  const {data:profile,error:profileError}=await client.from('customers').select('full_name,phone,email').eq('id',customerId).single();
+  if(profileError)throw profileError;
+  const fullName=profile.full_name||meta.full_name||'';
+  const phone=profile.phone||meta.phone||'';
+  infoRoute('IQA WATCHES · MY IQA','Welcome'+(fullName?' back, '+fullName.split(' ')[0]:''),'Your customer account and preferences.',
+   '<div class="route-columns"><div class="route-feature"><h2>Profile</h2><form id="customerProfileForm" class="route-form"><label>Full name<input name="full_name" maxlength="100" value="'+esc(fullName)+'" required></label><label>Email address<input value="'+esc(user.email||'')+'" disabled></label><label>Phone number<input name="phone" type="tel" maxlength="20" value="'+esc(phone)+'"></label><button class="button" type="submit">Save profile</button><p class="route-note" id="profileMessage" role="status"></p></form><button class="button light" id="customerSignOut" type="button">Sign out</button></div><div class="route-feature"><h2>My IQA</h2><ul class="account-links"><li><a href="#orders">My orders & order details</a></li><li><a href="#tracking">Track an order</a></li><li><a href="#addresses">Saved addresses</a></li><li><a href="#wishlist">Wishlist</a></li><li><a href="#returns">Returns & refunds</a></li><li><a href="#support">Customer support</a></li></ul></div></div>');
+  $r('customerProfileForm').addEventListener('submit',async e=>{e.preventDefault();const fd=new FormData(e.currentTarget),msg=$r('profileMessage'),nextName=String(fd.get('full_name')||'').trim(),nextPhone=String(fd.get('phone')||'').trim();try{const {error:dbError}=await client.from('customers').update({full_name:nextName,phone:nextPhone||null,email:user.email||null}).eq('id',customerId).eq('auth_user_id',user.id);if(dbError)throw dbError;const {error:authError}=await client.auth.updateUser({data:{full_name:nextName,phone:nextPhone}});if(authError)throw authError;msg.textContent='Profile details saved securely.';}catch(err){msg.textContent=err.message||'Profile could not be saved.';}});
   $r('customerSignOut').addEventListener('click',async()=>{const {error}=await client.auth.signOut();if(error){$r('profileMessage').textContent=error.message;return;}location.hash='login';});
  }catch(err){infoRoute('IQA WATCHES · MY ACCOUNT','Account unavailable','Secure customer authentication could not be initialized.','<div class="route-disabled">'+esc(err.message||'Please try again later.')+'</div>');}
 }
@@ -125,7 +135,15 @@ async function ensureCustomer(client,user){
  if(found?.id)return found.id;
  const meta=user.user_metadata||{};
  const {data,error}=await client.from('customers').insert({auth_user_id:user.id,email:user.email||null,full_name:meta.full_name||'',phone:meta.phone||null}).select('id').single();
- if(error)throw error;
+ if(error){
+  // Concurrent first visits can race on the unique auth_user_id constraint.
+  if(error.code==='23505'){
+   const {data:retry,error:retryError}=await client.from('customers').select('id').eq('auth_user_id',user.id).maybeSingle();
+   if(retryError)throw retryError;
+   if(retry?.id)return retry.id;
+  }
+  throw error;
+ }
  return data.id;
 }
 async function requireCustomer(){
@@ -149,7 +167,7 @@ async function renderCustomerDataPage(route){
     const {data,error}=await client.from('customer_addresses').select('*').eq('customer_id',customerId).order('is_default',{ascending:false}).order('created_at',{ascending:false});
     if(error)throw error;
     host.innerHTML='<h2>Saved delivery addresses</h2><form id="addressForm" class="route-form"><label>Label<input name="label" value="Home" maxlength="40" required></label><label>Recipient name<input name="recipient_name" autocomplete="name" required maxlength="100"></label><label>Phone<input name="phone" type="tel" required maxlength="20"></label><label>Address line 1<input name="address_line1" autocomplete="address-line1" required maxlength="200"></label><label>Address line 2<input name="address_line2" autocomplete="address-line2" maxlength="200"></label><label>Landmark<input name="landmark" maxlength="120"></label><label>City<input name="city" autocomplete="address-level2" required></label><label>State<input name="state" autocomplete="address-level1" required></label><label>PIN code<input name="postal_code" inputmode="numeric" pattern="[0-9]{6}" maxlength="6" required></label><label><input name="is_default" type="checkbox"> Set as default address</label><button class="button" type="submit">Save address</button><p id="addressMessage" role="status"></p></form><div class="route-grid">'+(data||[]).map(a=>'<article class="route-feature"><h3>'+esc(a.label)+(a.is_default?' · Default':'')+'</h3><p>'+esc(a.recipient_name)+' · '+esc(a.phone)+'<br>'+esc(a.address_line1)+' '+esc(a.address_line2||'')+'<br>'+esc(a.city)+', '+esc(a.state)+' '+esc(a.postal_code)+', '+esc(a.country)+'</p><button class="button light" data-delete-address="'+esc(a.id)+'">Delete</button></article>').join('')+'</div>';
-    $r('addressForm').addEventListener('submit',async e=>{e.preventDefault();const fd=new FormData(e.currentTarget);const row={customer_id:customerId,label:String(fd.get('label')).trim(),recipient_name:String(fd.get('recipient_name')).trim(),phone:String(fd.get('phone')).trim(),address_line1:String(fd.get('address_line1')).trim(),address_line2:String(fd.get('address_line2')||'').trim()||null,landmark:String(fd.get('landmark')||'').trim()||null,city:String(fd.get('city')).trim(),state:String(fd.get('state')).trim(),postal_code:String(fd.get('postal_code')).trim(),is_default:fd.get('is_default')==='on'};try{if(row.is_default)await client.from('customer_addresses').update({is_default:false}).eq('customer_id',customerId);const {error}=await client.from('customer_addresses').insert(row);if(error)throw error;await draw();}catch(err){customerMessage('addressMessage',err.message||'Could not save address.',true);}});
+    $r('addressForm').addEventListener('submit',async e=>{e.preventDefault();const fd=new FormData(e.currentTarget);const row={customer_id:customerId,label:String(fd.get('label')).trim(),recipient_name:String(fd.get('recipient_name')).trim(),phone:String(fd.get('phone')).trim(),address_line1:String(fd.get('address_line1')).trim(),address_line2:String(fd.get('address_line2')||'').trim()||null,landmark:String(fd.get('landmark')||'').trim()||null,city:String(fd.get('city')).trim(),state:String(fd.get('state')).trim(),postal_code:String(fd.get('postal_code')).trim(),is_default:fd.get('is_default')==='on'};try{if(row.is_default){const {error:defaultError}=await client.from('customer_addresses').update({is_default:false}).eq('customer_id',customerId);if(defaultError)throw defaultError;}const {error}=await client.from('customer_addresses').insert(row);if(error)throw error;await draw();}catch(err){customerMessage('addressMessage',err.message||'Could not save address.',true);}});
     host.querySelectorAll('[data-delete-address]').forEach(b=>b.addEventListener('click',async()=>{const {error}=await client.from('customer_addresses').delete().eq('id',b.dataset.deleteAddress).eq('customer_id',customerId);if(error){customerMessage('addressMessage',error.message,true);return;}await draw();}));
    };await draw();return;
   }
