@@ -4,6 +4,12 @@ const $r=id=>document.getElementById(id);
 const esc=v=>typeof escapeHtml==='function'?escapeHtml(v):String(v??'');
 function hero(k,t,d){return '<header class="route-hero"><div class="eyebrow">'+esc(k)+'</div><h1>'+esc(t)+'</h1><p>'+esc(d)+'</p></header>'}
 function product(id){
+ if(typeof catalogueState!=='undefined'&&catalogueState==='loading'){
+  root.innerHTML=hero('IQA WATCHES · PRODUCT','Loading product details','Fetching the latest approved product information and availability.')+'<div class="route-content"><div class="route-feature" role="status" aria-live="polite">Please wait while the product catalogue loads…</div></div>';return;
+ }
+ if(typeof catalogueState!=='undefined'&&catalogueState==='error'){
+  root.innerHTML=hero('IQA WATCHES · PRODUCT','Product temporarily unavailable','The approved product catalogue could not be loaded.')+'<div class="route-content"><div class="route-disabled" role="alert">Please refresh the page or return to the collection. No purchase has been created.</div><a class="button light" href="#shop">Back to Shop</a></div>';return;
+ }
  const p=products.find(x=>x.id===id);
  if(!p){root.innerHTML=hero('IQA WATCHES · PRODUCT','Product not found','This product is not currently in the approved catalogue.')+'<div class="route-content"><a class="button" href="#shop">Shop All</a></div>';return}
  const casio=p.sku==='CAS-AE1200WHL5AV-001'||p.sku==='CAS-AE1200WHL5AVDF-001'||p.sku==='AE-1200WHL-5AV'||p.sku==='AE-1200WHL-5AVDF';
@@ -113,13 +119,17 @@ function renderAuth(mode='login'){
  });
 }
 async function renderAccount(){
+ const requestedHash=location.hash;
  try{
   const client=customerAuthClient(),{data,error}=await client.auth.getSession();if(error)throw error;
+  if(location.hash!==requestedHash)return;
   const user=data.session?.user;
   if(!user){renderAuth('login');return;}
   const meta=user.user_metadata||{},customerId=await ensureCustomer(client,user);
+  if(location.hash!==requestedHash)return;
   const {data:profile,error:profileError}=await client.from('customers').select('full_name,phone,email').eq('id',customerId).single();
   if(profileError)throw profileError;
+  if(location.hash!==requestedHash)return;
   const fullName=profile.full_name||meta.full_name||'';
   const phone=profile.phone||meta.phone||'';
   infoRoute('IQA WATCHES · MY IQA','Welcome'+(fullName?' back, '+fullName.split(' ')[0]:''),'Your customer account and preferences.',
@@ -226,9 +236,17 @@ function renderSearch(){
  $r('routeSearchInput').addEventListener('input',update);$r('routeBrand').addEventListener('change',update);$r('routePrice').addEventListener('change',update);update();
 }
 
+function normalizeCollectionTag(value){return String(value||'').trim().toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'')}
+function collectionForRoute(route){const definitions={shop:{title:'Shop all watches',description:'Browse every currently approved watch with available stock.',matches:()=>true},men:{title:'Men’s watches',description:'Watches assigned to the Men audience in the approved catalogue.',matches:p=>normalizeCollectionTag(p.audience)==='men'},women:{title:'Women’s watches',description:'Watches assigned to the Women audience in the approved catalogue.',matches:p=>normalizeCollectionTag(p.audience)==='women'},unisex:{title:'Unisex watches',description:'Watches assigned to the Unisex audience in the approved catalogue.',matches:p=>normalizeCollectionTag(p.audience)==='unisex'},'new-arrivals':{title:'New arrivals',description:'Watches explicitly tagged New Arrivals in the approved catalogue.',matches:p=>(Array.isArray(p.tags)?p.tags:[]).some(tag=>['new-arrival','new-arrivals'].includes(normalizeCollectionTag(tag)))},bestsellers:{title:'Bestsellers',description:'Watches explicitly tagged as bestsellers in the approved catalogue.',matches:p=>(Array.isArray(p.tags)?p.tags:[]).some(tag=>['bestseller','bestsellers','best-seller'].includes(normalizeCollectionTag(tag)))}};return definitions[route]||definitions.shop}
+window.IQA_ROUTE_COLLECTIONS=Object.freeze({normalizeTag:normalizeCollectionTag,collectionForRoute});
+function showHomeSection(id){const home=document.getElementById('home');if(!home)return;root.classList.add('hidden');document.getElementById('mobileMenu')?.classList.remove('open');document.getElementById('menuToggle')?.setAttribute('aria-expanded','false');Array.from(home.children).forEach(x=>{if(x!==root)x.classList.remove('hidden')});requestAnimationFrame(()=>document.getElementById(id)?.scrollIntoView({behavior:'smooth',block:'start'}));}
+
 function render(){
- const raw=(location.hash||'#home').slice(1),parts=raw.split('/'),r=parts[0]||'home',arg=decodeURIComponent(parts.slice(1).join('/')||'');
+ try{
+ const raw=(location.hash||'#home').slice(1),parts=raw.split('/'),r=parts[0]||'home';
+ let arg='';try{arg=decodeURIComponent(parts.slice(1).join('/')||'')}catch(_){arg=''}
  if(!root)return;
+ root.hidden=false;
  if(r==='home'){root.classList.add('hidden');Array.from(document.getElementById('home').children).forEach(x=>{if(x!==root)x.classList.remove('hidden')});return}
  Array.from(document.getElementById('home').children).forEach(x=>{if(x!==root)x.classList.add('hidden')});
  root.classList.remove('hidden');window.scrollTo(0,0);
@@ -246,20 +264,31 @@ function render(){
  if(r==='policies')return renderPolicies();
  if(r==='contact')return renderContact();
 
+ if(r==='care')return renderPolicies();
+ if(r==='journal'){infoRoute('IQA WATCHES · JOURNAL','The Watch Journal is coming soon','Guides, watch-care notes and product education are being prepared.','<div class="route-feature"><p>We will publish model-specific guides only when product details and manufacturer information have been verified.</p><a class="button" href="#shop">Explore watches</a></div>');return;}
+ if(r==='finder'){showHomeSection('finderCard');return;}
+ if(r==='comparison'){showHomeSection('compareCard');return;}
  if(['shop','men','women','unisex','new-arrivals','bestsellers'].includes(r)){
-  root.innerHTML=hero('IQA WATCHES · COLLECTION','Shop watches','Browse all currently approved products in the live catalogue.')+'<div class="route-content"><div id="routeCatalogue" class="route-grid" style="margin-top:22px"></div></div>';
+  const collection=collectionForRoute(r),matching=products.filter(collection.matches);
+  root.innerHTML=hero('IQA WATCHES · COLLECTION',collection.title,collection.description)+'<div class="route-content"><div id="routeCatalogue" class="route-grid" style="margin-top:22px"></div></div>';
   const grid=$r('routeCatalogue');
-  grid.innerHTML=products.length?products.map(p=>'<article class="route-card"><a href="#product/'+encodeURIComponent(p.id)+'"><img src="'+esc(safeImageUrl(p.image))+'" alt="'+esc(p.name)+'"></a><div class="route-card-copy"><div class="product-brand">'+esc(p.brand)+'</div><h3><a href="#product/'+encodeURIComponent(p.id)+'">'+esc(p.name)+'</a></h3><p>'+money(p.price)+' · '+Number(p.stock)+' available</p><a class="button light" href="#product/'+encodeURIComponent(p.id)+'">View product</a></div></article>').join(''):'<div class="route-empty">No approved products are currently available.</div>';
+  grid.innerHTML=matching.length?matching.map(p=>'<article class="route-card"><a href="#product/'+encodeURIComponent(p.id)+'"><img src="'+esc(safeImageUrl(p.image))+'" alt="'+esc(p.name)+'" loading="lazy"></a><div class="route-card-copy"><div class="product-brand">'+esc(p.brand)+'</div><h3><a href="#product/'+encodeURIComponent(p.id)+'">'+esc(p.name)+'</a></h3><p>'+money(p.price)+' · '+Number(p.stock)+' available</p><a class="button light" href="#product/'+encodeURIComponent(p.id)+'">View product</a></div></article>').join(''):'<div class="route-empty">No watches currently match this collection. Products appear here only when the approved catalogue includes the required audience or collection tag. <a href="#shop">Browse all watches</a>.</div>';
   return;
  }
  root.innerHTML=hero('IQA WATCHES','Page not found','This destination is unavailable.')+'<div class="route-content"><a class="button" href="#home">Home</a> <a class="button light" href="#shop">Shop All</a></div>';
+ }catch(error){
+  console.error('IQA WATCHES route render failed:',error);
+  if(root){root.hidden=false;root.classList.remove('hidden');root.innerHTML=hero('IQA WATCHES · PAGE ERROR','This page could not be displayed','The page encountered a rendering problem.')+'<div class="route-content"><div class="route-disabled" role="alert">Please reload the page or return to the home page. No order or account changes were made.</div><a class="button light" href="#home">Return home</a></div>';}
+ }
 }
 document.addEventListener('click',e=>{if(e.target.closest('[data-qty],[data-remove],[data-add],[data-wish]'))setTimeout(()=>{const route=(location.hash||'').slice(1);if(['bag','cart','wishlist'].includes(route))render();},0);});
 // Explicitly open the customer area on every account-link tap, even if #account is already active.
 document.addEventListener('click',e=>{const link=e.target.closest('a[href="#account"]');if(!link)return;e.preventDefault();if(location.hash!=='#account')location.hash='account';render();});
 window.addEventListener('hashchange',render);
 window.addEventListener('load',render);
+window.addEventListener('pageshow',render);
 window.addEventListener('catalogue:ready',render);
+window.addEventListener('catalogue:error',render);
 document.addEventListener('click',e=>{const thumb=e.target.closest('[data-gallery-src]');if(thumb){const main=document.getElementById('routeMainImage');if(main){main.src=thumb.dataset.gallerySrc;main.alt=thumb.dataset.galleryAlt||main.alt;}document.querySelectorAll('[data-gallery-src]').forEach(button=>button.setAttribute('aria-pressed',String(button===thumb)));}const add=e.target.closest('[data-add-compare]');if(add)location.hash='comparison'});
 window.renderRouteFromHash=render;
 render();
