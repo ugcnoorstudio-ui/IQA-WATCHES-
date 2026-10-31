@@ -37,7 +37,7 @@ async function main() {
           limit: '1'
         }).toString();
         const catalogue = await request(endpoint, {
-          headers: { apikey: config.publishableKey, Authorization: 'Bearer ' + config.publishableKey }
+          headers: { apikey: config.publishableKey }
         });
         const rows = await catalogue.json();
         if (!Array.isArray(rows)) throw new Error('Supabase catalogue response was not an array');
