@@ -262,11 +262,11 @@ function render(){
  if(r==='comparison'){showHomeSection('compareCard');return;}
 
  if(['shop','men','women','unisex','new-arrivals','bestsellers'].includes(r)){
-  const terms={men:['men',"men's",'mens'],women:['women',"women's",'womens'],unisex:['unisex'],'new-arrivals':['new arrival','new-arrivals','new'],bestsellers:['bestseller','best seller','best-seller']};
+  const terms={men:['men','men s','mens'],women:['women','women s','womens'],unisex:['unisex'],'new-arrivals':['new arrival','new arrivals','new-arrival','new-arrivals'],bestsellers:['bestseller','best seller','best-seller']};
   const matches=terms[r];
   const collection=matches?products.filter(p=>{
-   const values=[p.audience,p.category,p.style,...(Array.isArray(p.tags)?p.tags:[])].filter(Boolean).join(' ').toLowerCase();
-   return matches.some(term=>values.includes(term));
+   const values=[p.audience,p.category,p.style,...(Array.isArray(p.tags)?p.tags:[])].filter(Boolean).map(value=>String(value).toLowerCase().replace(/[^a-z0-9]+/g,' ').trim());
+   return matches.some(term=>values.some(value=>value===term||value.split(' ').includes(term)||value.includes(term+' ')));
   }):products;
   const label=({shop:'All watches',men:'Men',women:'Women',unisex:'Unisex','new-arrivals':'New arrivals',bestsellers:'Bestsellers'})[r];
   root.innerHTML=hero('IQA WATCHES · COLLECTION',label,'Browse currently approved, in-stock watches in this collection.')+'<div class="route-content"><div id="routeCatalogue" class="route-grid" style="margin-top:22px"></div></div>';
