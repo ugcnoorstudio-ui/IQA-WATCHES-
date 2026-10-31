@@ -26,9 +26,6 @@ Deno.serve(async(req:Request)=>{
   try{body=JSON.parse(raw);}catch{return reply(400,{ok:false,error:"Invalid JSON body."});}
   if(!body||typeof body!=="object"||Array.isArray(body)||typeof body.action!=="string"||!body.payload||typeof body.payload!=="object"||Array.isArray(body.payload))return reply(400,{ok:false,error:"Invalid request body."});
   const updateActions=["update_product","update_product_variant"];
-  const allowed=["create_product","adjust_inventory","create_category","create_brand","assign_product_taxonomy","publish_product",...updateActions];
-  if(!allowed.includes(body.action))return reply(400,{ok:false,error:"This action is not enabled yet."});
-  const updateActions=["update_product","update_product_variant"];
   const taxonomyActions=["update_category","archive_category","update_brand","archive_brand"];
   const allowed=["create_product","adjust_inventory","create_category","create_brand","assign_product_taxonomy","publish_product",...updateActions,...taxonomyActions];
   if(!allowed.includes(body.action))return reply(400,{ok:false,error:"This action is not enabled yet."});
