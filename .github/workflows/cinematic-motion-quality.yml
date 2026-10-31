@@ -33,7 +33,7 @@ jobs:
           node --check admin/admin.js
           node --check admin/auth.js
           node --check routes.js
-      - name: Run local asset viewer tests
+      - name: Run repository regression tests
         run: node --test tests/*.test.js
       - name: Check patch whitespace
         run: git diff --check origin/main...HEAD
