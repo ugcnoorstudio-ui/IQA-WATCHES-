@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 
 const routes = await readFile(new URL('../routes.js', import.meta.url), 'utf8');
+const storefront = await readFile(new URL('../customer-storefront.js', import.meta.url), 'utf8');
 
 test('customer auth persists sessions with refresh and PKCE callback handling', () => {
   assert.match(routes, /persistSession:\s*true/);
@@ -49,4 +50,29 @@ test('checkout remains disabled and no order creation call is introduced', () =>
 test('desktop and mobile account links always render the account route on repeated taps', () => {
   assert.ok(routes.includes("e.target.closest('a[href=\"#account\"]')"));
   assert.ok(routes.includes("if(location.hash!=='#account')location.hash='account';render();"));
+});
+
+
+test('storefront menu destinations resolve to the matching page or shopping tool', () => {
+  assert.match(routes, /if\(r==='finder'\)\{showHomeSection\('finderCard'\);return;\}/);
+  assert.match(routes, /if\(r==='comparison'\)\{showHomeSection\('compareCard'\);return;\}/);
+  assert.match(routes, /if\(r==='journal'\)\{/);
+  assert.match(routes, /if\(r==='care'\)return renderPolicies\(\)/);
+});
+
+test('collection routes filter by catalogue audience, category, style and tags', () => {
+  assert.match(routes, /const terms=\{men:/);
+  assert.match(routes, /p\.audience,p\.category,p\.style/);
+  assert.match(routes, /Array\.isArray\(p\.tags\)/);
+  assert.match(routes, /No watches are currently tagged for this collection/);
+});
+
+test('collection cards retain product details links and current stock display', () => {
+  assert.match(storefront, /href="#product\/'+encodeURIComponent\(p\.id\)/);
+  assert.match(routes, /Number\(p\.stock\)+' available'/);
+});
+
+test('gender collection matching uses word boundaries so women are not included in men', () => {
+  assert.match(routes, /replace\(\/\[\^a-z0-9\]\+\/g,' '\)/);
+  assert.match(routes, /values\.some\(value=>value===term\|\|value\.split\(' '\)\.includes\(term\)/);
 });
