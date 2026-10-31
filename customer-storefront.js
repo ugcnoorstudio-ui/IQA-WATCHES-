@@ -60,6 +60,17 @@ function renderOffers(){
  shell('Offers & promotions','Browse currently published promotions.',
  '<div class="route-feature"><p>Offers will appear here only when active promotion rules are configured. Coupon validity, minimum order value and eligibility will be checked again during checkout.</p><a class="button light" href="#coupons">My coupons</a></div>');
 }
+
+function installCustomerNav(){
+ const header=document.querySelector('.site-header'),nav=document.querySelector('.site-header .nav');
+ if(!header||!nav||document.getElementById('customerQuickNav'))return;
+ const style=document.createElement('style');
+ style.textContent='#customerQuickNav{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;padding:8px 4%;border-top:1px solid var(--line);background:var(--white)}#customerQuickNav a{font-size:9px;letter-spacing:1px;text-transform:uppercase;padding:7px 10px;border:1px solid transparent;white-space:nowrap}#customerQuickNav a:hover,#customerQuickNav a:focus-visible{border-color:var(--gold);color:#8c6f3c}@media(max-width:720px){#customerQuickNav{justify-content:flex-start;flex-wrap:nowrap;overflow-x:auto;scrollbar-width:thin}#customerQuickNav a{flex:0 0 auto}}';
+ document.head.appendChild(style);
+ const row=document.createElement('nav');row.id='customerQuickNav';row.setAttribute('aria-label','Customer store shortcuts');
+ row.innerHTML=[['Categories','#categories'],['Brands','#brands'],['Compare','#compare'],['Delivery','#delivery'],['Recently viewed','#recently-viewed'],['Offers','#promotions']].map(([label,href])=>'<a href="'+href+'">'+label+'</a>').join('');
+ nav.insertAdjacentElement('afterend',row);
+}
 function renderRoute(){
  const raw=(location.hash||'#home').slice(1),parts=raw.split('/'),route=parts[0],arg=decodeURIComponent(parts.slice(1).join('/')||'');
  if(route==='compare')return renderCompare();
@@ -99,7 +110,7 @@ document.addEventListener('click',e=>{
 const observer=new MutationObserver(()=>addCompareButtons());
 if(document.body)observer.observe(document.body,{childList:true,subtree:true});
 window.addEventListener('hashchange',()=>{recordViewed();renderRoute();});
-window.addEventListener('load',()=>{recordViewed();renderRoute();addCompareButtons();});
+window.addEventListener('load',()=>{installCustomerNav();recordViewed();renderRoute();addCompareButtons();});
 window.addEventListener('catalogue:ready',()=>{renderRoute();addCompareButtons();});
-if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>{renderRoute();addCompareButtons()});else{renderRoute();addCompareButtons()}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>{installCustomerNav();renderRoute();addCompareButtons()});else{installCustomerNav();renderRoute();addCompareButtons()}
 })();
