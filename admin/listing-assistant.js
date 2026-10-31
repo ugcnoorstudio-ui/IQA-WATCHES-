@@ -9,7 +9,7 @@ function mount(){
  const heading=document.createElement('h2');heading.textContent='ChatGPT listing details intake';
  const note=document.createElement('p');note.className='muted';note.textContent='Paste product JSON prepared in ChatGPT. This fills the listing form; then attach the real product photos and click Publish product live to create and publish in one Owner action.';
  const area=document.createElement('textarea');area.rows=8;area.maxLength=12000;area.placeholder='Paste listing JSON here…';area.setAttribute('aria-label','Listing JSON');
- const apply=document.createElement('button');apply.type='button';apply.className='btn secondary';apply.textContent='Validate and fill draft form';
+ const apply=document.createElement('button');apply.type='button';apply.className='btn secondary';apply.textContent='Validate and fill listing';
  const status=document.createElement('p');status.className='muted';status.setAttribute('role','status');
  box.append(heading,note,area,apply,status);form.parentElement.insertBefore(box,form);
  apply.addEventListener('click',()=>{
