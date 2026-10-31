@@ -84,8 +84,8 @@ suppliers:[['suppliers','id,name,active,created_at'],['purchase_orders','id,supp
 reports:[['orders','id,state,item_total,discount_total,shipping_total,tax_total,payable_total,payment_state,created_at'],['refunds','id,amount,state,created_at']],
 settings:[['store_settings','key,updated_at']],
 staff:[['staff_profiles','user_id,display_name,role,active,created_at']],
-logs:[['activity_logs','id,actor_role,action,entity_type,entity_id,outcome,reason,created_at'],['integration_events','id,integration,event_type,outcome,created_at']],
-health:[['integration_events','id,integration,event_type,outcome,created_at']]
+logs:[['activity_logs','id,actor_role,action,entity_type,entity_id,outcome,reason,created_at']],
+health:[]
 };
 function safeCell(value){
  if(value===null||value===undefined||value==='')return '—';
@@ -141,6 +141,7 @@ function renderLiveModule(route,sets){
  host.innerHTML=sections+'<div class="notice" style="margin-top:14px">Live database connection · Owner-only read access · Changes are disabled until this module has its own audited server workflow. No preview data is shown as real.</div>';
 }
 function loadReadOnlyData(route){
+if(route==='health')return; // Health checks run through the authenticated server diagnostics function, not a direct table read.
 if(!['products','inventory','categories',...Object.keys(liveModules)].includes(route))return;
 const target=$('content');
 if(liveModules[route]){
