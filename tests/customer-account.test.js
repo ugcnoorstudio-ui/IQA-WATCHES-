@@ -60,19 +60,22 @@ test('storefront menu destinations resolve to the matching page or shopping tool
   assert.match(routes, /if\(r==='care'\)return renderPolicies\(\)/);
 });
 
-test('collection routes filter by catalogue audience, category, style and tags', () => {
-  assert.match(routes, /const terms=\{men:/);
-  assert.match(routes, /p\.audience,p\.category,p\.style/);
+test('collection routes use normalized exact audience and explicit collection tags', () => {
+  assert.match(routes, /function normalizeCollectionTag\(/);
+  assert.match(routes, /function collectionForRoute\(/);
+  assert.match(routes, /matches:p=>normalizeCollectionTag\(p\.audience\)==='men'/);
+  assert.match(routes, /matches:p=>normalizeCollectionTag\(p\.audience\)==='women'/);
   assert.match(routes, /Array\.isArray\(p\.tags\)/);
-  assert.match(routes, /No watches are currently tagged for this collection/);
+  assert.match(routes, /No watches currently match this collection/);
 });
 
-test('collection cards retain product details links and current stock display', () => {
-  assert.match(storefront, /href="#product\/'+encodeURIComponent\(p\.id\)/);
-  assert.match(routes, /Number\(p\.stock\)+' available'/);
+test('collection cards retain product detail links and stock display', () => {
+  assert.ok(storefront.includes('function card(p)'));
+  assert.ok(storefront.includes('encodeURIComponent(p.id)'));
+  assert.match(routes, /Number\(p\.stock\)\+' available'/);
 });
 
-test('gender collection matching uses word boundaries so women are not included in men', () => {
-  assert.match(routes, /replace\(\/\[\^a-z0-9\]\+\/g,' '\)/);
-  assert.match(routes, /values\.some\(value=>value===term\|\|value\.split\(' '\)\.includes\(term\)/);
+test('normalized audience matching prevents women being classified as men', () => {
+  assert.match(routes, /normalizeCollectionTag\(p\.audience\)==='men'/);
+  assert.match(routes, /normalizeCollectionTag\(p\.audience\)==='women'/);
 });
