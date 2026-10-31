@@ -9,7 +9,7 @@ test('admin readiness distinguishes database checks from external providers and 
   const admin = read('admin/admin.js');
   assert.match(admin, /Payment gateway, transactional email and courier providers/);
   assert.match(admin, /No provider credentials or verified webhook are configured/);
-  assert.match(admin, /19 database access checks/);
+  assert.match(admin, /19 table-access checks/);
   assert.match(admin, /Full backup retention, restore drills/);
 });
 
