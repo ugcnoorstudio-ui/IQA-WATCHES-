@@ -177,19 +177,25 @@ const cr=categories.map(x=>'<tr><td>'+esc(x.name)+'</td><td>'+esc(x.slug)+'</td>
 const br=brands.map(x=>'<tr><td>'+esc(x.name)+'</td><td>'+esc(x.slug)+'</td><td>'+stateTag(x.state)+'</td><td>'+esc(x.id.slice(0,8))+'</td></tr>');
 const host=target.querySelector('[data-live-taxonomy]');if(host)host.innerHTML=readTableMarkup('Categories · '+categories.length+' records',['Name','Slug','State','ID'],cr,'No categories exist yet.')+readTableMarkup('Brands · '+brands.length+' records',['Name','Slug','State','ID'],br,'No brands exist yet.');
 }else if(route==='products'){
-const [rows,categories,brands,media]=await Promise.all([api.readTable('products','id,name,sku,brand,category,category_id,brand_id,state,is_sample,verified_sellable,selling_price,mrp',{limit:100}),api.readTable('categories','id,name,slug,state',{limit:100}),api.readTable('brands','id,name,slug,state',{limit:100}),api.readTable('product_media','id,product_id,storage_path,alt_text,sort_order,is_primary',{limit:300})]);
+const results=await Promise.allSettled([api.readTable('products','id,name,sku,brand,category,category_id,brand_id,state,is_sample,verified_sellable,selling_price,mrp',{limit:100}),api.readTable('categories','id,name,slug,state',{limit:100}),api.readTable('brands','id,name,slug,state',{limit:100}),api.readTable('product_media','id,product_id,storage_path,alt_text,sort_order,is_primary',{limit:300})]);
 if(current!==route)return;
-const productOptions='<option value="">Select product…</option>'+rows.map(p=>'<option value="'+esc(p.id)+'">'+esc(p.name)+' · '+esc(p.sku)+'</option>').join('');
+const labels=['products','categories','brands','product images'];
+const failures=results.map((r,i)=>r.status==='rejected'?labels[i]+': '+(r.reason?.message||'request failed'):null).filter(Boolean);
+const rows=results[0].status==='fulfilled'?results[0].value:[];
+const categories=results[1].status==='fulfilled'?results[1].value:[];
+const brands=results[2].status==='fulfilled'?results[2].value:[];
+const media=results[3].status==='fulfilled'?results[3].value:[];
+const productOptions='<option value="">'+(results[0].status==='fulfilled'?'Select product…':'Products could not be loaded')+'</option>'+rows.map(p=>'<option value="'+esc(p.id)+'">'+esc(p.name)+' · '+esc(p.sku)+'</option>').join('');
 target.querySelectorAll('[data-product-select]').forEach(x=>x.innerHTML=productOptions);
-const categoryOptions='<option value="">Select category…</option>'+categories.filter(x=>x.state==='published').map(x=>'<option value="'+esc(x.id)+'">'+esc(x.name)+'</option>').join('');
-const brandOptions='<option value="">Select brand…</option>'+brands.filter(x=>x.state==='published').map(x=>'<option value="'+esc(x.id)+'">'+esc(x.name)+'</option>').join('');
+const categoryOptions='<option value="">'+(results[1].status==='fulfilled'?'Select category…':'Categories could not be loaded')+'</option>'+categories.filter(x=>x.state==='published').map(x=>'<option value="'+esc(x.id)+'">'+esc(x.name)+'</option>').join('');
+const brandOptions='<option value="">'+(results[2].status==='fulfilled'?'Select brand…':'Brands could not be loaded')+'</option>'+brands.filter(x=>x.state==='published').map(x=>'<option value="'+esc(x.id)+'">'+esc(x.name)+'</option>').join('');
 target.querySelectorAll('[data-category-select]').forEach(x=>x.innerHTML=categoryOptions);
 target.querySelectorAll('[data-brand-select]').forEach(x=>x.innerHTML=brandOptions);
 const mediaByProduct=new Map();
 media.sort((a,b)=>Number(a.sort_order||0)-Number(b.sort_order||0)).forEach(m=>{if(!mediaByProduct.has(m.product_id))mediaByProduct.set(m.product_id,[]);mediaByProduct.get(m.product_id).push(m)});
 const html=rows.map(p=>{const gallery=mediaByProduct.get(p.id)||[];const thumbnails=gallery.map(m=>{const url=api.getClient().storage.from('product-images').getPublicUrl(m.storage_path).data.publicUrl;return '<img class="product-thumb'+(m.is_primary?' is-primary':'')+'" src="'+esc(url)+'" alt="'+esc(m.alt_text)+'" loading="lazy">'}).join('');return '<tr><td><div class="product-gallery">'+(thumbnails||'<span class="product-thumb-placeholder">No image</span>')+'</div></td><td><strong>'+esc(p.name)+'</strong><div class="muted">'+esc(p.brand||'Unbranded')+'</div></td><td>'+esc(p.sku)+'</td><td>'+esc(p.category||'—')+'</td><td>'+stateTag(p.state)+'</td><td>'+money(p.selling_price)+'</td><td>'+(p.is_sample?'<span class="tag red">Sample</span>':p.verified_sellable?'<span class="tag">Verified</span>':'<span class="tag red">Not verified</span>')+'</td><td>'+esc(p.id.slice(0,8))+'</td></tr>'});
 const host=target.querySelector('[data-live-records]');
-if(host)host.innerHTML=readTableMarkup('Live product catalogue · '+rows.length+' records',['Image','Product','SKU','Category','State','Selling price','Sellability','Record ID'],html,'No products are currently visible to this staff role. RLS may be restricting access, or the catalogue is empty.');
+if(host)host.innerHTML=(failures.length?'<div class="notice">Some product tools could not load: '+esc(failures.join(' | '))+'</div>':'')+readTableMarkup('Live product catalogue · '+rows.length+' records',['Image','Product','SKU','Category','State','Selling price','Sellability','Record ID'],html,'No products are currently visible to this staff role. RLS may be restricting access, or the catalogue is empty.');
 }else{
 const [variants,movements]=await Promise.all([
 api.readTable('product_variants','id,product_id,sku,options,selling_price,stock_on_hand,stock_reserved,low_stock_threshold,active',{limit:100}),
