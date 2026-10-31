@@ -230,6 +230,8 @@ function showHomeSection(id){
  const home=document.getElementById('home');
  if(!home)return;
  root.classList.add('hidden');
+ document.getElementById('mobileMenu')?.classList.remove('open');
+ document.getElementById('menuToggle')?.setAttribute('aria-expanded','false');
  Array.from(home.children).forEach(x=>{if(x!==root)x.classList.remove('hidden')});
  requestAnimationFrame(()=>document.getElementById(id)?.scrollIntoView({behavior:'smooth',block:'start'}));
 }
