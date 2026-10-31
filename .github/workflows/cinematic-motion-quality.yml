@@ -33,7 +33,8 @@ jobs:
           node --check admin/admin.js
           node --check admin/auth.js
           node --check routes.js
+          node --check scripts/monitor-public-health.js
       - name: Run local asset viewer tests
-        run: node --test tests/asset-intake.test.js
+        run: node --test tests/*.test.js
       - name: Check patch whitespace
         run: git diff --check origin/main...HEAD

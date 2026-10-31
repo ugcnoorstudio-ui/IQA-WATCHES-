@@ -1,0 +1,27 @@
+name: IQA WATCHES recurring public health monitor
+
+on:
+  schedule:
+    - cron: '*/30 * * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: iqa-public-health-monitor
+  cancel-in-progress: true
+
+jobs:
+  public-health:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Check storefront, admin shell and Supabase public catalogue
+        run: node scripts/monitor-public-health.js
