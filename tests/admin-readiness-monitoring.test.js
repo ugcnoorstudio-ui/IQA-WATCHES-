@@ -10,7 +10,7 @@ test('admin readiness distinguishes database checks from external providers and 
   assert.match(admin, /Payment gateway, transactional email and courier providers/);
   assert.match(admin, /No provider credentials or verified webhook are configured/);
   assert.match(admin, /19 database access checks/);
-  assert.match(admin, /backup retention and restore testing remain unverified/);
+  assert.match(admin, /Full backup retention, restore drills/);
 });
 
 test('admin readiness explains recurring public health schedule and its coverage', () => {
