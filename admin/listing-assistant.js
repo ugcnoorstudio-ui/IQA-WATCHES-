@@ -25,7 +25,7 @@ function mount(){
    const option=Array.from(input.options).find(o=>o.value.toLowerCase()===wanted||o.textContent.trim().toLowerCase()===wanted);
    if(option){input.value=option.value;count++}else unmatched.push(key+' "'+data[key]+'"');
   });
-  status.textContent='Filled '+count+' fields.'+(unmatched.length?' Select the matching published '+unmatched.join(' and ')+' manually from the dropdown.':'')+' Verify all facts and prices, add genuine product photos separately, then use the existing Owner-approved Create draft button.';
+  status.textContent='Filled '+count+' fields.'+(unmatched.length?' Select the matching published '+unmatched.join(' and ')+' manually from the dropdown.':'')+' Verify all facts and prices, add genuine product photos separately, then click Publish product live to create and publish in one Owner action.';
  });
 }
 const observer=new MutationObserver(mount);
