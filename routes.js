@@ -125,7 +125,8 @@ async function renderAccount(){
   if(location.hash!==requestedHash)return;
   const user=data.session?.user;
   if(!user){renderAuth('login');return;}
-  const meta=user.user_metadata||{},customerId=await ensureCustomer(client,user);\n  if(location.hash!==requestedHash)return;
+  const meta=user.user_metadata||{},customerId=await ensureCustomer(client,user);
+  if(location.hash!==requestedHash)return;
   const {data:profile,error:profileError}=await client.from('customers').select('full_name,phone,email').eq('id',customerId).single();
   if(profileError)throw profileError;
   const fullName=profile.full_name||meta.full_name||'';
