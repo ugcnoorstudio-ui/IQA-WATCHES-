@@ -28,13 +28,13 @@ function renderBrands(){
 }
 function renderBrand(name){const items=(products||[]).filter(p=>p.brand===name);shell(name,'Explore approved '+name+' watches.',productList(items))}
 function renderCategories(){
- const groups=[...new Set((window.products||[]).map(p=>p.category).filter(Boolean))].sort();
+ const groups=[...new Set((typeof products!=='undefined'?products:[]).map(p=>p.category).filter(Boolean))].sort();
  shell('Shop by category','Choose a category to explore matching watches.',
- '<div class="route-grid">'+groups.map(c=>{const count=window.products.filter(p=>p.category===c).length;return '<article class="route-feature"><h2>'+esc(c)+'</h2><p>'+count+' catalogue '+(count===1?'watch':'watches')+'</p><a class="button light" href="#category/'+encodeURIComponent(c)+'">Explore category</a></article>'}).join('')+'</div>');
+ '<div class="route-grid">'+groups.map(c=>{const count=(typeof products!=='undefined'?products:[]).filter(p=>p.category===c).length;return '<article class="route-feature"><h2>'+esc(c)+'</h2><p>'+count+' catalogue '+(count===1?'watch':'watches')+'</p><a class="button light" href="#category/'+encodeURIComponent(c)+'">Explore category</a></article>'}).join('')+'</div>');
 }
-function renderCategory(name){const items=(window.products||[]).filter(p=>p.category===name||p.audience===name||p.style===name);shell(name,'Watches listed under '+name+'.',productList(items))}
+function renderCategory(name){const items=(typeof products!=='undefined'?products:[]).filter(p=>p.category===name||p.audience===name||p.style===name);shell(name,'Watches listed under '+name+'.',productList(items))}
 function renderRecent(){
- const items=state.recent.map(id=>(window.products||[]).find(p=>p.id===id)).filter(Boolean);
+ const items=state.recent.map(id=>(typeof products!=='undefined'?products:[]).find(p=>p.id===id)).filter(Boolean);
  shell('Recently viewed','Your recently opened watches on this device.',productList(items));
 }
 function renderDelivery(){
@@ -74,7 +74,7 @@ function renderRoute(){
 function recordViewed(){
  const match=(location.hash||'').match(/^#product\/(.+)$/);if(!match)return;
  let id;try{id=decodeURIComponent(match[1])}catch(_){return}
- if(!(window.products||[]).some(p=>p.id===id))return;
+ if(!(typeof products!=='undefined'?products:[]).some(p=>p.id===id))return;
  state.recent=[id,...state.recent.filter(x=>x!==id)].slice(0,12);persist();
 }
 function addCompareButtons(){
