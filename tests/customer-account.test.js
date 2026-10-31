@@ -38,12 +38,15 @@ test('order history and line items use customer RLS-scoped queries', () => {
 });
 
 test('checkout remains disabled and no order creation call is introduced', () => {
-  assert.match(routes, /function renderCheckoutRoute\(\)[\s\S]*?Checkout is not available yet/);
-  assert.doesNotMatch(routes, /rpc\(['"]iqa_create_customer_order['"]\)/);
+  const start = routes.indexOf('function renderCheckoutRoute()');
+  const end = routes.indexOf('\n}', start);
+  const checkout = routes.slice(start, end);
+  assert.ok(start >= 0 && end > start);
+  assert.match(checkout, /Checkout is not available yet/);
+  assert.doesNotMatch(checkout, /\.rpc\(/);
 });
 
-
 test('desktop and mobile account links always render the account route on repeated taps', () => {
-  assert.match(routes, /e\.target\.closest\('a\\[href="#account"\\]'\)/);
-  assert.match(routes, /if\(location\.hash!=='#account'\)location\.hash='account';render\(\)/);
+  assert.ok(routes.includes("e.target.closest('a[href=\"#account\"]')"));
+  assert.ok(routes.includes("if(location.hash!=='#account')location.hash='account';render();"));
 });
