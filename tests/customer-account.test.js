@@ -70,3 +70,8 @@ test('collection cards retain product details links and current stock display', 
   assert.match(routes, /href="#product\/'+encodeURIComponent\(p\.id\)/);
   assert.match(routes, /Number\(p\.stock\)+' available'/);
 });
+
+test('gender collection matching uses word boundaries so women are not included in men', () => {
+  assert.match(routes, /replace\(\/\[\^a-z0-9\]\+\/g,' '\)/);
+  assert.match(routes, /values\.some\(value=>value===term\|\|value\.split\(' '\)\.includes\(term\)/);
+});
