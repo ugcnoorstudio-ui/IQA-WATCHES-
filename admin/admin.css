@@ -95,3 +95,23 @@ body.nav-open{overflow:hidden}
   .grid{gap:8px}
   .metric{padding:10px}
 }
+
+
+/* Accessible horizontal data-table scrolling and mobile drawer focus states */
+.table-wrap{max-width:100%;min-width:0;overflow-x:auto;overflow-y:hidden;overscroll-behavior-x:contain;-webkit-overflow-scrolling:touch;scrollbar-gutter:stable}
+.table-wrap:focus-visible{outline:3px solid #e4c781;outline-offset:2px;border-radius:4px}
+.table-wrap table{width:max-content;min-width:570px}
+.table-wrap::-webkit-scrollbar{height:9px}
+.table-wrap::-webkit-scrollbar-thumb{background:#81775f;border:2px solid #1b1c19;border-radius:8px}
+.sidebar{overscroll-behavior:contain}
+.sidebar nav{min-width:0}
+.nav-item{touch-action:manipulation}
+.sidebar-backdrop{touch-action:manipulation}
+@media(max-width:900px){
+  .shell,.main,.panel,.table-wrap{min-width:0;max-width:100%}
+  .table-wrap{margin-inline:-2px;padding-bottom:4px}
+  .table-wrap table{min-width:570px}
+  .empty-state{padding:22px 12px}
+  .empty-state p{font-size:13px;line-height:1.55}
+}
+@media(prefers-reduced-motion:reduce){.sidebar{transition:none!important}}
