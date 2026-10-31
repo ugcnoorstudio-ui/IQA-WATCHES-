@@ -68,7 +68,7 @@ async function loadRecentDashboardOrders(){
   const api=window.IQA_ADMIN_BACKEND;
   if(!api||!api.currentProfile())throw new Error('Owner session is not active.');
   api.requireRole(['owner']);
-  const rows=await api.readTable('orders','id,order_number,state,payable_total,created_at',{limit:5});
+  const rows=await api.readTable('orders','id,order_number,state,payable_total,created_at',{limit:5,orderBy:'created_at',ascending:false});
   if(current!=='overview')return;
   if(!rows.length){host.innerHTML='<div class="empty-state"><h3>No orders recorded yet</h3><p>Verified customer orders will appear here when checkout is enabled.</p></div>';return;}
   host.innerHTML='<div class="table-wrap"><table><thead><tr><th>Order</th><th>Status</th><th>Total</th><th>Created</th></tr></thead><tbody>'+rows.map(r=>'<tr><td>'+esc(r.order_number||r.id.slice(0,8))+'</td><td>'+stateTag(r.state)+'</td><td>'+money(r.payable_total)+'</td><td>'+esc(r.created_at?new Date(r.created_at).toLocaleString('en-IN'):'—')+'</td></tr>').join('')+'</tbody></table></div>';
@@ -102,7 +102,7 @@ return panel(title,'<div class="table-wrap"><table><thead><tr>'+headers.map(h=>'
 const liveModules={
 orders:[['orders','id,order_number,state,currency,payable_total,payment_state,created_at,customer_id'],['order_items','id,order_id,sku_snapshot,product_snapshot,quantity,unit_price,line_total'],['order_status_events','id,order_id,previous_state,new_state,reason,created_at']],
 customers:[['customers','id,full_name,email,phone,consent,created_at']],
-payments:[['payment_events','id,order_id,gateway,gateway_reference,state,amount,currency,verified_at,created_at'],['refunds','id,order_id,amount,reason,state,gateway_reference,created_at']],
+payments:[['payment_events','id,order_id,gateway,gateway_reference,event_id,state,amount,currency,verified_at,created_at'],['refunds','id,order_id,amount,reason,state,gateway_reference,created_at']],
 shipping:[['orders','id,order_number,state,delivery_snapshot,created_at']],
 coupons:[['coupons','id,code,kind,value,minimum_order,starts_at,ends_at,usage_limit,active,created_at']],
 content:[['content_entries','id,content_type,slug,title,state,publish_at,updated_at']],
