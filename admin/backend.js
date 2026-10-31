@@ -131,8 +131,15 @@
 
   async function mutate(action, payload) {
     requireRole(["owner"]);
-    if (!["create_product", "adjust_inventory", "create_category", "create_brand", "assign_product_taxonomy", "add_product_image", "publish_product"].includes(action)) throw new Error("Unsupported administrative action.");
-    const { data, error } = await getClient().functions.invoke("iqa-admin-mutate", { body: { action, payload } });
+    if (!["create_product", "adjust_inventory", "create_category", "create_brand", "assign_product_taxonomy", "add_product_image", "publish_product", "update_product", "update_product_variant"].includes(action)) throw new Error("Unsupported administrative action.");
+    const requestPayload = Object.assign({}, payload || {});
+    if (!requestPayload.request_id) {
+      if (!global.crypto || typeof global.crypto.randomUUID !== "function") {
+        throw new Error("Secure request ID generation is unavailable in this browser.");
+      }
+      requestPayload.request_id = global.crypto.randomUUID();
+    }
+    const { data, error } = await getClient().functions.invoke("iqa-admin-mutate", { body: { action, payload: requestPayload } });
     if (error) throw error;
     if (!data || data.ok !== true) throw new Error(data?.error || "The operation was not confirmed.");
     return data;
