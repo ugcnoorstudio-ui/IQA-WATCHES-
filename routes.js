@@ -45,6 +45,7 @@ function render(){
  }
  root.innerHTML=hero('IQA WATCHES','Page not found','This destination is unavailable.')+'<div class="route-content"><a class="button" href="#home">Home</a> <a class="button light" href="#shop">Shop All</a></div>';
 }
+window.IQA_ROUTE_COLLECTIONS=Object.freeze({normalizeTag,collectionForRoute});
 window.addEventListener('hashchange',render);
 window.addEventListener('load',render);
 window.addEventListener('catalogue:ready',render);
