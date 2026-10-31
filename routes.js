@@ -29,8 +29,44 @@ function renderWishlistRoute(){
  const items=(wishlist||[]).map(id=>products.find(p=>p.id===id)).filter(Boolean);
  root.innerHTML=hero('IQA WATCHES · YOUR EDIT','Wishlist','Keep your favourite pieces together.')+'<div class="route-content"><div class="route-grid">'+(items.length?items.map(p=>'<article class="route-card"><a href="#product/'+encodeURIComponent(p.id)+'"><img src="'+esc(safeImageUrl(p.image))+'" alt="'+esc(p.name)+'"></a><div class="route-card-copy"><div class="product-brand">'+esc(p.brand)+'</div><h3><a href="#product/'+encodeURIComponent(p.id)+'">'+esc(p.name)+'</a></h3><p>'+money(p.price)+'</p><div class="route-actions"><button class="button" data-add="'+esc(p.id)+'">Add to bag</button><button class="button light" data-wish="'+esc(p.id)+'">Remove</button></div></div></article>').join(''):'<div class="route-empty">Your wishlist is empty. Save products using the heart icon.<br><a class="button" href="#shop">Discover watches</a></div>')+'</div></div>';
 }
-function renderCheckoutRoute(){
- root.innerHTML=hero('IQA WATCHES · SECURE CHECKOUT','Checkout','Your order is not placed until secure checkout is enabled.')+'<div class="route-content"><div class="route-disabled"><strong>Checkout is not available yet.</strong><br>Server-side stock reservation, verified delivery charges, order creation, payment callbacks and duplicate-order protection must be tested first. No payment or order can be submitted from this preview.</div><a class="button light" href="#bag">Return to bag</a></div>';
+async function renderCheckoutRoute(){
+ const entries=Object.entries(cart||{}).map(([id,qty])=>({p:products.find(x=>x.id===id),qty})).filter(x=>x.p&&Number.isInteger(x.qty)&&x.qty>0);
+ if(!entries.length){infoRoute('IQA WATCHES · CHECKOUT','Your bag is empty','Add a watch before checkout.','<a class="button" href="#shop">Explore watches</a>');return;}
+ root.innerHTML=hero('IQA WATCHES · SECURE CHECKOUT','Checkout','Sign in, choose a saved delivery address and review your order request.')+'<div class="route-content"><div class="route-disabled" role="status">Loading secure checkout details…</div></div>';
+ try{
+  const client=customerAuthClient(),{data:{session},error:sessionError}=await client.auth.getSession();
+  if(sessionError)throw sessionError;
+  if(!session?.user){location.hash='login';return;}
+  const customerId=await ensureCustomer(client,session.user);
+  const [{data:addresses,error:addressError},{data:variants,error:variantError}]=await Promise.all([
+   client.from('customer_addresses').select('id,label,recipient_name,phone,address_line1,address_line2,landmark,city,state,postal_code,country,is_default').eq('customer_id',customerId).order('is_default',{ascending:false}),
+   client.from('product_variants').select('id,product_id,sku,selling_price,stock_on_hand,stock_reserved,active,options').in('product_id',entries.map(x=>x.p.id)).eq('active',true)
+  ]);
+  if(addressError)throw addressError;if(variantError)throw variantError;
+  const variantMap=new Map();
+  (variants||[]).forEach(v=>{const list=variantMap.get(v.product_id)||[];list.push(v);variantMap.set(v.product_id,list);});
+  const ready=entries.every(x=>(variantMap.get(x.p.id)||[]).some(v=>Number(v.stock_on_hand)-Number(v.stock_reserved)>=x.qty));
+  const addressOptions=(addresses||[]).map(a=>'<option value="'+esc(a.id)+'">'+esc(a.label+' · '+a.recipient_name+' · '+a.city+' · '+a.postal_code)+'</option>').join('');
+  const itemRows=entries.map(({p,qty})=>{
+   const choices=(variantMap.get(p.id)||[]).filter(v=>Number(v.stock_on_hand)-Number(v.stock_reserved)>=qty);
+   const select=choices.length===1?'<input type="hidden" data-checkout-variant="'+esc(p.id)+'" value="'+esc(choices[0].id)+'"><span>'+esc(choices[0].sku)+'</span>':'<label>Variant<select data-checkout-variant="'+esc(p.id)+'" required><option value="">Choose SKU / variant</option>'+choices.map(v=>'<option value="'+esc(v.id)+'">'+esc(v.sku+' · '+JSON.stringify(v.options||{}))+'</option>').join('')+'</select></label>';
+   return '<div class="cart-row"><div><strong>'+esc(p.name)+'</strong><p>'+esc(p.brand)+' · Qty '+qty+'</p>'+select+'</div><strong>'+money(p.price*qty)+'</strong></div>';
+  }).join('');
+  root.innerHTML=hero('IQA WATCHES · SECURE CHECKOUT','Delivery & order review','Your final price and stock are rechecked securely by IQA WATCHES before an order is accepted.')+'<div class="route-content"><div class="route-columns"><section class="route-feature"><h2>1. Delivery address</h2>'+(addresses?.length?'<form id="customerCheckoutForm" class="route-form"><label>Saved delivery address<select name="address_id" required><option value="">Choose an address</option>'+addressOptions+'</select></label><p class="route-note"><a href="#addresses">Add or manage saved addresses</a></p><h2>2. Your watches</h2>'+itemRows+'<h2>3. Payment</h2><p>Cash on Delivery is offered only if the store has explicitly enabled it. No online payment is collected by this checkout.</p><button class="button" type="submit" '+(!ready?'disabled':'')+'>Place order request</button><p id="checkoutMessage" role="status" aria-live="polite"></p></form>':'<p>Add a saved delivery address before checkout.</p><a class="button" href="#addresses">Add delivery address</a>')+'</section><aside class="route-feature"><h2>Order summary</h2><div class="total-row"><span>Items</span><strong>'+entries.reduce((s,x)=>s+x.qty,0)+'</strong></div><div class="total-row"><span>Items subtotal (preview)</span><strong>'+money(entries.reduce((s,x)=>s+x.p.price*x.qty,0))+'</strong></div><p class="route-note">Final item prices, stock and verified shipping charges are calculated by the server. Preview totals are not a payment quote.</p></aside></div>'+(ready?'':'<div class="route-disabled">One or more products do not have a matching active variant with enough available stock. Update your bag or contact support.</div>')+'</div>';
+  const form=$r('customerCheckoutForm');if(!form)return;
+  form.addEventListener('submit',async e=>{
+   e.preventDefault();const button=form.querySelector('button[type="submit"]'),msg=$r('checkoutMessage');button.disabled=true;msg.textContent='Verifying prices, stock and delivery configuration…';
+   try{
+    const payload={address_id:String(new FormData(form).get('address_id')||''),items:entries.map(({p,qty})=>({variant_id:String(form.querySelector('[data-checkout-variant="'+CSS.escape(p.id)+'"]')?.value||''),quantity:qty}))};
+    if(!payload.address_id||payload.items.some(x=>!x.variant_id))throw new Error('Choose a delivery address and every product variant.');
+    const {data,error}=await client.functions.invoke('iqa-customer-checkout',{body:payload,headers:{'x-idempotency-key':crypto.randomUUID()}});
+    if(error)throw error;
+    if(!data?.ok)throw new Error(data?.error||'Checkout was not confirmed.');
+    cart={};if(typeof saveState==='function')saveState();
+    root.innerHTML=hero('IQA WATCHES · ORDER RECEIVED','Thank you for your order request','Your order is now recorded in your IQA WATCHES account.')+'<div class="route-content"><div class="route-feature"><h2>Order '+esc(data.order?.order_number||'received')+'</h2><p>'+esc(data.message||'The IQA WATCHES team will confirm your order.')+'</p><p>Amount: '+money(data.order?.payable_total||0)+' · Payment: Pending / Cash on Delivery</p><a class="button" href="#orders">View my orders</a> <a class="button light" href="#shop">Continue shopping</a></div></div>';
+   }catch(err){msg.textContent=err.message||'Checkout could not be completed. No payment has been collected.';button.disabled=false;}
+  });
+ }catch(err){infoRoute('IQA WATCHES · CHECKOUT','Checkout unavailable','Please sign in and try again.','<div class="route-disabled">'+esc(err.message||'Secure checkout details could not be loaded.')+'</div><a class="button light" href="#login">Sign in</a> <a class="button light" href="#bag">Return to bag</a>');}
 }
 
 
