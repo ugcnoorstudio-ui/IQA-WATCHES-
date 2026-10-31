@@ -4,6 +4,12 @@ const $r=id=>document.getElementById(id);
 const esc=v=>typeof escapeHtml==='function'?escapeHtml(v):String(v??'');
 function hero(k,t,d){return '<header class="route-hero"><div class="eyebrow">'+esc(k)+'</div><h1>'+esc(t)+'</h1><p>'+esc(d)+'</p></header>'}
 function product(id){
+ if(typeof catalogueState!=='undefined'&&catalogueState==='loading'){
+  root.innerHTML=hero('IQA WATCHES · PRODUCT','Loading product details','Fetching the latest approved product information and availability.')+'<div class="route-content"><div class="route-feature" role="status" aria-live="polite">Please wait while the product catalogue loads…</div></div>';return;
+ }
+ if(typeof catalogueState!=='undefined'&&catalogueState==='error'){
+  root.innerHTML=hero('IQA WATCHES · PRODUCT','Product temporarily unavailable','The approved product catalogue could not be loaded.')+'<div class="route-content"><div class="route-disabled" role="alert">Please refresh the page or return to the collection. No purchase has been created.</div><a class="button light" href="#shop">Back to Shop</a></div>';return;
+ }
  const p=products.find(x=>x.id===id);
  if(!p){root.innerHTML=hero('IQA WATCHES · PRODUCT','Product not found','This product is not currently in the approved catalogue.')+'<div class="route-content"><a class="button" href="#shop">Shop All</a></div>';return}
  const casio=p.sku==='CAS-AE1200WHL5AV-001'||p.sku==='CAS-AE1200WHL5AVDF-001'||p.sku==='AE-1200WHL-5AV'||p.sku==='AE-1200WHL-5AVDF';
@@ -113,11 +119,13 @@ function renderAuth(mode='login'){
  });
 }
 async function renderAccount(){
+ const requestedHash=location.hash;
  try{
   const client=customerAuthClient(),{data,error}=await client.auth.getSession();if(error)throw error;
+  if(location.hash!==requestedHash)return;
   const user=data.session?.user;
   if(!user){renderAuth('login');return;}
-  const meta=user.user_metadata||{},customerId=await ensureCustomer(client,user);
+  const meta=user.user_metadata||{},customerId=await ensureCustomer(client,user);\n  if(location.hash!==requestedHash)return;
   const {data:profile,error:profileError}=await client.from('customers').select('full_name,phone,email').eq('id',customerId).single();
   if(profileError)throw profileError;
   const fullName=profile.full_name||meta.full_name||'';
@@ -227,8 +235,11 @@ function renderSearch(){
 }
 
 function render(){
- const raw=(location.hash||'#home').slice(1),parts=raw.split('/'),r=parts[0]||'home',arg=decodeURIComponent(parts.slice(1).join('/')||'');
+ try{
+ const raw=(location.hash||'#home').slice(1),parts=raw.split('/'),r=parts[0]||'home';
+ let arg='';try{arg=decodeURIComponent(parts.slice(1).join('/')||'')}catch(_){arg=''}
  if(!root)return;
+ root.hidden=false;
  if(r==='home'){root.classList.add('hidden');Array.from(document.getElementById('home').children).forEach(x=>{if(x!==root)x.classList.remove('hidden')});return}
  Array.from(document.getElementById('home').children).forEach(x=>{if(x!==root)x.classList.add('hidden')});
  root.classList.remove('hidden');window.scrollTo(0,0);
@@ -253,13 +264,19 @@ function render(){
   return;
  }
  root.innerHTML=hero('IQA WATCHES','Page not found','This destination is unavailable.')+'<div class="route-content"><a class="button" href="#home">Home</a> <a class="button light" href="#shop">Shop All</a></div>';
+ }catch(error){
+  console.error('IQA WATCHES route render failed:',error);
+  if(root){root.hidden=false;root.classList.remove('hidden');root.innerHTML=hero('IQA WATCHES · PAGE ERROR','This page could not be displayed','The page encountered a rendering problem.')+'<div class="route-content"><div class="route-disabled" role="alert">Please reload the page or return to the home page. No order or account changes were made.</div><a class="button light" href="#home">Return home</a></div>';}
+ }
 }
 document.addEventListener('click',e=>{if(e.target.closest('[data-qty],[data-remove],[data-add],[data-wish]'))setTimeout(()=>{const route=(location.hash||'').slice(1);if(['bag','cart','wishlist'].includes(route))render();},0);});
 // Explicitly open the customer area on every account-link tap, even if #account is already active.
 document.addEventListener('click',e=>{const link=e.target.closest('a[href="#account"]');if(!link)return;e.preventDefault();if(location.hash!=='#account')location.hash='account';render();});
 window.addEventListener('hashchange',render);
 window.addEventListener('load',render);
+window.addEventListener('pageshow',render);
 window.addEventListener('catalogue:ready',render);
+window.addEventListener('catalogue:error',render);
 document.addEventListener('click',e=>{const thumb=e.target.closest('[data-gallery-src]');if(thumb){const main=document.getElementById('routeMainImage');if(main){main.src=thumb.dataset.gallerySrc;main.alt=thumb.dataset.galleryAlt||main.alt;}document.querySelectorAll('[data-gallery-src]').forEach(button=>button.setAttribute('aria-pressed',String(button===thumb)));}const add=e.target.closest('[data-add-compare]');if(add)location.hash='comparison'});
 window.renderRouteFromHash=render;
 render();
