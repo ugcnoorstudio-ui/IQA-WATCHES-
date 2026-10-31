@@ -129,6 +129,7 @@ async function renderAccount(){
   if(location.hash!==requestedHash)return;
   const {data:profile,error:profileError}=await client.from('customers').select('full_name,phone,email').eq('id',customerId).single();
   if(profileError)throw profileError;
+  if(location.hash!==requestedHash)return;
   const fullName=profile.full_name||meta.full_name||'';
   const phone=profile.phone||meta.phone||'';
   infoRoute('IQA WATCHES · MY IQA','Welcome'+(fullName?' back, '+fullName.split(' ')[0]:''),'Your customer account and preferences.',
