@@ -37,13 +37,12 @@ test('order history and line items use customer RLS-scoped queries', () => {
   assert.match(routes, /from\('order_status_events'\)\.select\([\s\S]*?\.in\('order_id',ids\)/);
 });
 
-test('checkout invokes only the authenticated server-side checkout function', () => {
+test('checkout remains disabled and no order creation call is introduced', () => {
   const start = routes.indexOf('function renderCheckoutRoute()');
   const end = routes.indexOf('\n}', start);
   const checkout = routes.slice(start, end);
   assert.ok(start >= 0 && end > start);
-  assert.match(checkout, /functions\.invoke\(['"]iqa-customer-checkout['"]/);
-  assert.match(checkout, /idempotency/i);
+  assert.match(checkout, /Checkout is not available yet/);
   assert.doesNotMatch(checkout, /\.rpc\(/);
 });
 
