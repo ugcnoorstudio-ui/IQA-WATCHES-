@@ -136,7 +136,8 @@ function renderLiveModule(route,sets){
  settings:['Setting key','Value','Updated'],staff:['Staff member','Role','Active','Created'],
  logs:['Actor role','Action','Entity','Outcome','Reason','Time'],integration_events:['Integration','Event','Outcome','Time']
  };
- const renderSet=([table,columns],rows)=>{
+ const renderSet=([table,columns],rows,error)=>{
+  if(error)return panel(table.replaceAll('_',' ')+' · unavailable','<div class="notice" role="status">'+esc(error.message||'This table could not be loaded. Other Orders records may still be available.')+'</div>');
   const isShipping=route==='shipping'&&table==='orders';
   const isReport=route==='reports'&&table==='orders';
   const cols=isShipping?['Order','Delivery state','Delivery snapshot','Created']:isReport?['Order state','Items','Discount','Shipping','Tax','Payable','Payment']:headings[table]||columns.split(',');
@@ -164,10 +165,11 @@ function renderLiveModule(route,sets){
    const cells=isShipping?[r.order_number,r.state,r.delivery_snapshot,r.created_at]:isReport?[r.state,money(r.item_total),money(r.discount_total),money(r.shipping_total),money(r.tax_total),money(r.payable_total),r.payment_state]:map[table](r);
    return '<tr>'+cells.map(v=>'<td>'+safeCell(v)+'</td>').join('')+'</tr>';
   });
-  return readTableMarkup(table.replaceAll('_',' ')+' · '+rows.length+' records',cols,values,'No records are stored in this module yet.');
+  return readTableMarkup(table.replaceAll('_',' ')+' · '+rows.length+' records',cols,values,'No records are currently visible to this Owner account.');
  };
- const sections=sets.map((entry,i)=>renderSet(entry[0],entry[1])).join('');
- host.innerHTML=sections+'<div class="notice" style="margin-top:14px">Live database connection · Owner-only read access · Changes are disabled until this module has its own audited server workflow. No preview data is shown as real.</div>';
+ const sections=sets.map((entry)=>renderSet(entry[0],entry[1],entry[2])).join('');
+ const failed=sets.filter(entry=>entry[2]).length;
+ host.innerHTML=sections+'<div class="notice" role="status" style="margin-top:14px">'+(failed?failed+' of '+sets.length+' Orders data sources could not be loaded. Review the affected section above. ':'All Orders data sources responded. ')+'Live database connection · Owner-only read access · Changes are disabled until this module has its own audited server workflow. No preview data is shown as real.</div>';
 }
 function loadReadOnlyData(route){
 if(route==='health')return; // Health checks run through the authenticated server diagnostics function, not a direct table read.
@@ -182,9 +184,9 @@ if(liveModules[route]){
    if(!api||!api.currentProfile())throw new Error('Staff session is not active. Sign in again.');
    api.requireRole(['owner']);
    const entries=liveModules[route];
-   const rows=await Promise.all(entries.map(([table,columns])=>api.readTable(table,columns,{limit:100})));
+   const results=await Promise.allSettled(entries.map(([table,columns])=>api.readTable(table,columns,{limit:100})));
    if(current!==route)return;
-   renderLiveModule(route,entries.map((entry,i)=>[entry,rows[i]]));
+   renderLiveModule(route,entries.map((entry,i)=>results[i].status==='fulfilled'?[entry,results[i].value,null]:[entry,[],results[i].reason]));
   }catch(error){
    if(current!==route)return;
    const host=target.querySelector('[data-live-module]');
