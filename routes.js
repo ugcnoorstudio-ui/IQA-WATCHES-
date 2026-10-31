@@ -291,6 +291,8 @@ function render(){
  root.innerHTML=hero('IQA WATCHES','Page not found','This destination is unavailable.')+'<div class="route-content"><a class="button" href="#home">Home</a> <a class="button light" href="#shop">Shop All</a></div>';
 }
 document.addEventListener('click',e=>{if(e.target.closest('[data-qty],[data-remove],[data-add],[data-wish]'))setTimeout(()=>{const route=(location.hash||'').slice(1);if(['bag','cart','wishlist'].includes(route))render();},0);});
+// Explicitly open the customer area on every account-link tap, even if #account is already active.
+document.addEventListener('click',e=>{const link=e.target.closest('a[href="#account"]');if(!link)return;e.preventDefault();if(location.hash!=='#account')location.hash='account';render();});
 window.addEventListener('hashchange',render);
 window.addEventListener('load',render);
 window.addEventListener('catalogue:ready',render);
