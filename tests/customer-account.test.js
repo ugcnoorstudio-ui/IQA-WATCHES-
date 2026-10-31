@@ -80,7 +80,8 @@ test('mobile viewport guardrails keep storefront containers within the viewport'
 
 test('all inline storefront JavaScript blocks parse without syntax errors', async () => {
   const html = await readFile(new URL('../index.html', import.meta.url), 'utf8');
-  const scripts = [...html.matchAll(/<script(?:\\s[^>]*)?>([\\s\\S]*?)<\\/script>/gi)]
+  const scriptPattern = new RegExp('<script(?:\\s[^>]*)?>([\\s\\S]*?)<\\/script>', 'gi');
+  const scripts = [...html.matchAll(scriptPattern)]
     .map(match => match[1].trim()).filter(Boolean);
   assert.ok(scripts.length > 0, 'expected inline storefront scripts');
   scripts.forEach((source, index) => assert.doesNotThrow(() => new vm.Script(source), `inline script ${index + 1}`));
