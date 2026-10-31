@@ -4,7 +4,7 @@
 
 1. Ask ChatGPT to prepare factual product copy from the real watch photos and verified details supplied by the Owner.
 2. Open Admin → Product management and paste the JSON into **ChatGPT listing details intake**.
-3. Select **Validate and fill draft form** (the helper fills fields only; it does not save).
+3. Select **Validate and fill listing** (the helper fills fields only; it does not save).
 4. Verify all values, select the existing published brand/category, attach 1–5 genuine product photos, enter real price and available stock, and confirm the Owner authorization checkbox.
 5. Click **Publish product live** once. The Admin performs the secure sequence: create product record, assign the selected published taxonomy, upload images (first image becomes primary), and call the existing server-side publication validator. On success, the product is published and visible on the storefront without a separate review/approval queue.
 
