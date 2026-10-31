@@ -129,6 +129,21 @@
     return data || [];
   }
 
+  async function countTable(table) {
+    if (!profile || profile.active !== true) throw new Error("Sign-in is required.");
+    const safeTables = new Set([
+      "products", "product_variants", "inventory_movements", "categories", "brands",
+      "product_media", "orders", "order_items", "order_status_events", "payment_events",
+      "refunds", "coupons", "support_tickets", "return_requests", "suppliers",
+      "purchase_orders", "customers", "staff_profiles", "content_entries", "reviews",
+      "activity_logs", "integration_events", "store_settings"
+    ]);
+    if (!safeTables.has(table)) throw new Error("Table is not allow-listed.");
+    const { count, error } = await getClient().from(table).select("id", { count: "exact", head: true });
+    if (error) throw error;
+    return Number(count || 0);
+  }
+
   async function mutate(action, payload) {
     requireRole(["owner"]);
     if (!["create_product", "adjust_inventory", "create_category", "create_brand", "assign_product_taxonomy", "add_product_image", "publish_product", "update_product", "update_product_variant", "update_category", "archive_category", "update_brand", "archive_brand"].includes(action)) throw new Error("Unsupported administrative action.");
@@ -165,6 +180,6 @@
 
   global.IQA_ADMIN_BACKEND = Object.freeze({
     configured, getClient, signIn, signOut, getActiveProfile,
-    currentProfile, requireRole, readTable, mutate, uploadProductImage, onAuthStateChange
+    currentProfile, requireRole, readTable, countTable, mutate, uploadProductImage, onAuthStateChange
   });
 })(window);
