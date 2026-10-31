@@ -303,7 +303,7 @@ async function loadStorefrontCatalogue(){
   if(location.hash.startsWith('#product/'))window.dispatchEvent(new Event('hashchange'));
  }catch(error){
   catalogueState='error';catalogueError='Catalogue temporarily unavailable. Please try again shortly.';
-  console.error('IQA WATCHES catalogue load failed:',error);renderProducts();initSmartShopping();
+  console.error('IQA WATCHES catalogue load failed:',error);renderProducts();initSmartShopping();window.dispatchEvent(new Event('catalogue:error'));
  }
 }
 function filteredProducts(){let list=products.filter(p=>{const q=$('searchInput').value.trim().toLowerCase();const searchOk=!q||[p.name,p.brand,p.category,p.audience,p.style,p.colour,p.dial,p.strap].join(' ').toLowerCase().includes(q);const categoryOk=activeCategory==='All'||p.category===activeCategory||p.audience===activeCategory||p.style===activeCategory||p.tags.includes(activeCategory);const brandOk=$('brandFilter').value==='All'||p.brand===$('brandFilter').value;const price=$('priceFilter').value;const priceOk=price==='all'||(price==='under1000'&&p.price<1000)||(price==='1000to2500'&&p.price>=1000&&p.price<=2500)||(price==='over2500'&&p.price>2500);return searchOk&&categoryOk&&brandOk&&priceOk});const sort=$('sortFilter').value;if(sort==='low')list.sort((a,b)=>a.price-b.price);if(sort==='high')list.sort((a,b)=>b.price-a.price);if(sort==='name')list.sort((a,b)=>a.name.localeCompare(b.name));return list}
