@@ -226,6 +226,13 @@ function renderSearch(){
  $r('routeSearchInput').addEventListener('input',update);$r('routeBrand').addEventListener('change',update);$r('routePrice').addEventListener('change',update);update();
 }
 
+function showHomeSection(id){
+ const home=document.getElementById('home');
+ if(!home)return;
+ root.classList.add('hidden');
+ Array.from(home.children).forEach(x=>{if(x!==root)x.classList.remove('hidden')});
+ requestAnimationFrame(()=>document.getElementById(id)?.scrollIntoView({behavior:'smooth',block:'start'}));
+}
 function render(){
  const raw=(location.hash||'#home').slice(1),parts=raw.split('/'),r=parts[0]||'home',arg=decodeURIComponent(parts.slice(1).join('/')||'');
  if(!root)return;
@@ -245,11 +252,26 @@ function render(){
  if(r==='faq')return renderFaq();
  if(r==='policies')return renderPolicies();
  if(r==='contact')return renderContact();
+ if(r==='care')return renderPolicies();
+ if(r==='journal'){
+  infoRoute('IQA WATCHES · JOURNAL','The Watch Journal is coming soon','Guides, watch-care notes and product education are being prepared.',
+   '<div class="route-feature"><p>We will publish model-specific guides only when product details and manufacturer information have been verified.</p><a class="button" href="#shop">Explore watches</a></div>');
+  return;
+ }
+ if(r==='finder'){showHomeSection('finderCard');return;}
+ if(r==='comparison'){showHomeSection('compareCard');return;}
 
  if(['shop','men','women','unisex','new-arrivals','bestsellers'].includes(r)){
-  root.innerHTML=hero('IQA WATCHES · COLLECTION','Shop watches','Browse all currently approved products in the live catalogue.')+'<div class="route-content"><div id="routeCatalogue" class="route-grid" style="margin-top:22px"></div></div>';
+  const terms={men:['men',"men's",'mens'],women:['women',"women's",'womens'],unisex:['unisex'],'new-arrivals':['new arrival','new-arrivals','new'],bestsellers:['bestseller','best seller','best-seller']};
+  const matches=terms[r];
+  const collection=matches?products.filter(p=>{
+   const values=[p.audience,p.category,p.style,...(Array.isArray(p.tags)?p.tags:[])].filter(Boolean).join(' ').toLowerCase();
+   return matches.some(term=>values.includes(term));
+  }):products;
+  const label=({shop:'All watches',men:'Men',women:'Women',unisex:'Unisex','new-arrivals':'New arrivals',bestsellers:'Bestsellers'})[r];
+  root.innerHTML=hero('IQA WATCHES · COLLECTION',label,'Browse currently approved, in-stock watches in this collection.')+'<div class="route-content"><div id="routeCatalogue" class="route-grid" style="margin-top:22px"></div></div>';
   const grid=$r('routeCatalogue');
-  grid.innerHTML=products.length?products.map(p=>'<article class="route-card"><a href="#product/'+encodeURIComponent(p.id)+'"><img src="'+esc(safeImageUrl(p.image))+'" alt="'+esc(p.name)+'"></a><div class="route-card-copy"><div class="product-brand">'+esc(p.brand)+'</div><h3><a href="#product/'+encodeURIComponent(p.id)+'">'+esc(p.name)+'</a></h3><p>'+money(p.price)+' · '+Number(p.stock)+' available</p><a class="button light" href="#product/'+encodeURIComponent(p.id)+'">View product</a></div></article>').join(''):'<div class="route-empty">No approved products are currently available.</div>';
+  grid.innerHTML=collection.length?collection.map(p=>'<article class="route-card"><a href="#product/'+encodeURIComponent(p.id)+'"><img src="'+esc(safeImageUrl(p.image))+'" alt="'+esc(p.name)+'"></a><div class="route-card-copy"><div class="product-brand">'+esc(p.brand)+'</div><h3><a href="#product/'+encodeURIComponent(p.id)+'">'+esc(p.name)+'</a></h3><p>'+money(p.price)+' · '+Number(p.stock)+' available</p><a class="button light" href="#product/'+encodeURIComponent(p.id)+'">View product</a></div></article>').join(''):'<div class="route-empty">No watches are currently tagged for this collection. <a href="#shop">Browse all approved watches</a>.</div>';
   return;
  }
  root.innerHTML=hero('IQA WATCHES','Page not found','This destination is unavailable.')+'<div class="route-content"><a class="button" href="#home">Home</a> <a class="button light" href="#shop">Shop All</a></div>';
