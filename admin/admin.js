@@ -239,6 +239,20 @@ $('content').innerHTML=body;loadReadOnlyData(current);if(current==='motion-studi
 function toast(msg){const n=$('notice');n.textContent=msg;n.hidden=false;clearTimeout(toastTimer);toastTimer=setTimeout(()=>n.hidden=true,5000)}
 function showConfirm(title,text){$('dialogTitle').textContent=title;$('dialogText').textContent=text;const d=$('confirmDialog');if(typeof d.showModal==='function')d.showModal();else toast(text)}
 document.addEventListener('click',async e=>{const healthButton=e.target.closest('[data-action="run-health-check"]');if(healthButton){const output=$('healthResults');healthButton.disabled=true;healthButton.textContent='Checking…';output.innerHTML='<p class="muted">Verifying owner session and database access…</p>';try{const api=window.IQA_ADMIN_BACKEND;api.requireRole(['owner']);const {data,error}=await api.getClient().functions.invoke('iqa-admin-health',{body:{}});if(error)throw error;if(!data||data.ok!==true)throw new Error(data?.error||'Diagnostics were not confirmed.');const checks=Array.isArray(data.checks)?data.checks:[];output.innerHTML='<div class="setup-row"><span class="tag '+(data.database==='connected'?'':'red')+'">'+esc(data.database||'unknown')+'</span><div><b>'+esc(String(data.summary?.passed??0))+' passed · '+esc(String(data.summary?.failed??0))+' failed · '+esc(String(data.summary?.total??checks.length))+' total</b><p>Checked '+esc(data.checked_at||'')+' · Role: '+esc(data.actor_role||'')+'</p></div></div><div class="table-wrap"><table><thead><tr><th>Check</th><th>Table</th><th>Status</th><th>Records</th><th>Details</th></tr></thead><tbody>'+checks.map(x=>'<tr><td>'+esc(x.name||'')+'</td><td>'+esc(x.table||'')+'</td><td><span class="tag '+(x.ok?'':'red')+'">'+(x.ok?'Connected':'Failed')+'</span></td><td>'+esc(x.count===null?'—':String(x.count))+'</td><td>'+esc(x.error||'Access verified')+'</td></tr>').join('')+'</tbody></table></div>';toast('System diagnostics completed. Review each check below.');}catch(error){output.innerHTML='<div class="setup-row"><span class="tag red">Failed</span><div><b>Diagnostics could not complete</b><p>'+esc(error?.message||'Check your owner sign-in and Supabase function logs.')+'</p></div></div>';toast('Health check failed. No status was assumed.');}finally{healthButton.disabled=false;healthButton.textContent='Run diagnostics';}return;}const r=e.target.closest('[data-route]');if(r){location.hash=r.dataset.route;mobileOpen=false;syncMobileNav();return}const a=e.target.closest('[data-action]');if(a){if(a.dataset.action==='Open storefront'){location.href='../';return}showConfirm(a.dataset.action,'This is a non-persistent preview. No production record will be created, changed, exported or deleted. Configure backend authentication and server APIs first.');return}const fa=e.target.closest('[data-form-action]');if(fa){const form=fa.closest('form');const reason=form?.querySelector('[name="reason"]');if(reason&&!reason.value.trim()){toast('Validation preview: a reason is required for this action. No data was saved.');reason.focus();return}showConfirm(fa.dataset.formAction,'Preview only: this action is not connected to a backend and will not persist any changes. Never enter real customer or payment secrets here.');return}});
+document.addEventListener('change',e=>{
+ const form=e.target.closest('[data-product-create]');
+ if(!form)return;
+ const pairs=[['[name="brand"]','[data-new-brand-name]'],['[name="category"]','[data-new-category-name]']];
+ pairs.forEach(([selectSelector,inputSelector])=>{
+  if(e.target.matches(selectSelector)){
+   const select=form.querySelector(selectSelector),input=form.querySelector(inputSelector);
+   const isNew=select.value==='__new__';
+   input.hidden=!isNew;input.required=isNew;
+   if(!isNew)input.value='';
+   if(isNew)input.focus();
+  }
+ });
+});
 document.addEventListener('submit',async e=>{
 const form=e.target;
 if(form.matches('[data-product-create]')||form.matches('[data-inventory-adjust]')){
