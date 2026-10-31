@@ -43,17 +43,7 @@ function renderDelivery(){
  const form=$('deliveryCheckForm');form.addEventListener('submit',async e=>{
   e.preventDefault();const pin=String(new FormData(form).get('pin')||'').trim(),msg=$('deliveryCheckMessage');
   if(!/^[0-9]{6}$/.test(pin)){msg.textContent='Please enter a valid 6-digit PIN code.';return;}
-  msg.textContent='Checking configured delivery coverage…';
-  try{
-   const client=window.supabase&&window.IQA_SUPABASE_CONFIG?.url&&window.IQA_SUPABASE_CONFIG?.publishableKey?window.supabase.createClient(window.IQA_SUPABASE_CONFIG.url,window.IQA_SUPABASE_CONFIG.publishableKey,{auth:{persistSession:false,autoRefreshToken:false,detectSessionInUrl:false}}):null;
-   if(!client)throw new Error('Delivery settings are not available.');
-   const {data,error}=await client.from('store_settings').select('value').eq('key','shipping').maybeSingle();
-   if(error)throw error;
-   const cfg=data?.value;
-   if(!cfg||!Array.isArray(cfg.serviceable_pincodes)){msg.textContent='Delivery coverage is not configured yet. Please check again later; no delivery commitment can be made.';return;}
-   const match=cfg.serviceable_pincodes.map(String).includes(pin);
-   msg.textContent=match?'This PIN code is listed as serviceable. Final delivery date and charges must be confirmed at checkout.': 'Delivery is not currently listed for this PIN code. Please contact customer care before ordering.';
-  }catch(_){msg.textContent='Verified delivery coverage is not configured yet. No delivery date or fee can be confirmed.';}
+  msg.textContent='Delivery coverage checker is not active yet. No delivery date or fee can be confirmed for '+pin+'. Please check back after the secure delivery integration is enabled.';
  });
 }
 function renderOffers(){
