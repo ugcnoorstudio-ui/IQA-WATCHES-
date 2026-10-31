@@ -22,11 +22,11 @@ The public catalogue read is intentionally narrower than admin access. The brows
 - Add-to-bag, quantity changes, remove and wishlist currently operate as browser-local preview state. They are not yet a server-reserved stock commitment or a submitted order.
 - Customer sign-in can later sync a server-side cart only after the cart schema and customer ownership policies are reviewed.
 
-## Orders and admin connection — required before live sales
+## Orders and admin connection — Phase 2 implementation
 
 The current database contains `orders`, `order_items`, `customers`, `product_variants`, order status and payment event tables. Admin staff policies permit role-authorized order operations, while customer policies restrict order reads to the authenticated customer. There is no public order-insert policy, and the existing Edge Functions are admin mutation, product image upload and admin health—not customer checkout.
 
-Do not insert orders directly from browser code. Before live sales, implement and test a dedicated authenticated Edge Function for checkout that:
+Do not insert orders directly from browser code. Phase 2 now includes the authenticated `iqa-customer-checkout` Edge Function and `iqa_create_customer_order` database RPC. The endpoint is deployed with JWT verification enabled. It:
 
 1. Validates the customer identity or a secure guest verification flow.
 2. Re-reads product, variant, price and available stock from the database; never trusts client totals.
@@ -37,7 +37,9 @@ Do not insert orders directly from browser code. Before live sales, implement an
 7. Returns only a safe order confirmation payload to the customer.
 8. Leaves payment pending until a provider integration with signed webhook verification, refund and reconciliation support is configured.
 
-The admin workspace must consume the same `orders` and `order_items` records created by this server-side flow. No shadow order list or manually copied spreadsheet is acceptable.
+The admin workspace must consume the same `orders` and `order_items` records created by this server-side flow. Existing owner-only RLS read policies allow the authorized owner workspace to read orders and items; no shadow order list or manually copied spreadsheet is acceptable.
+
+The checkout endpoint is deliberately fail-closed: the `store_settings` table currently has no configuration rows. It returns HTTP 409 and creates no order until the owner configures a verified `shipping` record (`serviceable_pincodes`, `flat_shipping_fee`, `currency: INR`, optional `method` and `estimate_label`) and a `payments` record (`cod_enabled: true`). Online payment is not implemented. The current customer checkout UI requires sign-in and a saved address; guest checkout is not enabled.
 
 ## Delivery and payments
 
@@ -48,7 +50,8 @@ The admin workspace must consume the same `orders` and `order_items` records cre
 
 ## Release gates
 
-- Keep the current preview bag visibly identified as a preview.
+- The bag remains browser-local until a customer submits a valid signed-in checkout; checkout then revalidates variant, price and stock server-side.
+- A successful order request reserves stock and appears in the shared `orders` and `order_items` tables with payment pending. Admin confirmation and stock-release/cancel workflows must be verified before accepting live COD orders.
 - Do not claim an order, delivery or payment is live until the server-side path is deployed and tested end-to-end.
 - Test that customer A cannot read customer B's profile, addresses, cart or orders.
 - Test that unauthenticated users cannot reach admin functions or owner-only settings.
