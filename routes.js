@@ -94,7 +94,7 @@ function renderAuth(mode='login'){
    const client=customerAuthClient(),email=String(fd.get('email')||'').trim(),password=String(fd.get('password')||'');
    if(signup){
     const full_name=String(fd.get('full_name')||'').trim();
-    const {data,error}=await client.auth.signUp({email,password,options:{data:{full_name},emailRedirectTo:location.origin+location.pathname+'#account'}});
+    const {data,error}=await client.auth.signUp({email,password,options:{data:{full_name}}});
     if(error)throw error;
     msg.textContent=data.session?'Account created. Opening your account…':'Account request created. Check your email to confirm the address, then sign in.';
     if(data.session)location.hash='account';
