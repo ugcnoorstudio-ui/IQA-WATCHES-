@@ -50,3 +50,23 @@ test('desktop and mobile account links always render the account route on repeat
   assert.ok(routes.includes("e.target.closest('a[href=\"#account\"]')"));
   assert.ok(routes.includes("if(location.hash!=='#account')location.hash='account';render();"));
 });
+
+
+test('storefront menu destinations resolve to the matching page or shopping tool', () => {
+  assert.match(routes, /if\(r==='finder'\)\{showHomeSection\('finderCard'\);return;\}/);
+  assert.match(routes, /if\(r==='comparison'\)\{showHomeSection\('compareCard'\);return;\}/);
+  assert.match(routes, /if\(r==='journal'\)\{/);
+  assert.match(routes, /if\(r==='care'\)return renderPolicies\(\)/);
+});
+
+test('collection routes filter by catalogue audience, category, style and tags', () => {
+  assert.match(routes, /const terms=\{men:/);
+  assert.match(routes, /p\.audience,p\.category,p\.style/);
+  assert.match(routes, /Array\.isArray\(p\.tags\)/);
+  assert.match(routes, /No watches are currently tagged for this collection/);
+});
+
+test('collection cards retain product details links and current stock display', () => {
+  assert.match(routes, /href="#product\/'+encodeURIComponent\(p\.id\)/);
+  assert.match(routes, /Number\(p\.stock\)+' available'/);
+});
