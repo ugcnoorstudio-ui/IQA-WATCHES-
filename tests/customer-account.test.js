@@ -1,5 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import vm from 'node:vm';
 import { readFile } from 'node:fs/promises';
 
 const routes = await readFile(new URL('../routes.js', import.meta.url), 'utf8');
@@ -75,4 +76,12 @@ test('mobile viewport guardrails keep storefront containers within the viewport'
   assert.match(html, /html,body\{width:100%;max-width:100%;min-width:0;overflow-x:hidden\}/);
   assert.match(html, /@media\(max-width:760px\)/);
   assert.match(html, /\.route-product-layout\{grid-template-columns:minmax\(0,1fr\)!important\}/);
+});
+
+test('all inline storefront JavaScript blocks parse without syntax errors', async () => {
+  const html = await readFile(new URL('../index.html', import.meta.url), 'utf8');
+  const scripts = [...html.matchAll(/<script(?:\\s[^>]*)?>([\\s\\S]*?)<\\/script>/gi)]
+    .map(match => match[1].trim()).filter(Boolean);
+  assert.ok(scripts.length > 0, 'expected inline storefront scripts');
+  scripts.forEach((source, index) => assert.doesNotThrow(() => new vm.Script(source), `inline script ${index + 1}`));
 });
