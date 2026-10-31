@@ -118,20 +118,76 @@ async function renderAccount(){
   $r('customerSignOut').addEventListener('click',async()=>{const {error}=await client.auth.signOut();if(error){$r('profileMessage').textContent=error.message;return;}location.hash='login';});
  }catch(err){infoRoute('IQA WATCHES · MY ACCOUNT','Account unavailable','Secure customer authentication could not be initialized.','<div class="route-disabled">'+esc(err.message||'Please try again later.')+'</div>');}
 }
-function renderCustomerDataPage(route){
- const copy={
-  orders:['My orders','Your order history will appear here after customer-owned order access and secure order creation are enabled.'],
-  tracking:['Track an order','Live courier tracking is not connected yet. No shipment status will be invented.'],
-  addresses:['Saved addresses','Address storage is not enabled yet. We will not store personal addresses in browser-only storage.'],
-  reviews:['My reviews','Customer review submission and verified-purchase checks are not enabled yet.'],
-  support:['Customer support','Support ticket creation is waiting for customer ownership and privacy policies.'],
-  returns:['Returns & refunds','Return requests will be enabled after order ownership checks and the final return policy are deployed.'],
-  coupons:['My coupons','Customer-specific coupon access is not available yet.'],
-  offers:['Offers & rewards','Only verified active offers will be shown here. No live offers are currently published.']
- };
- const item=copy[route]||['My account','Customer account information'];
- infoRoute('IQA WATCHES · MY IQA',item[0],item[1],'<div class="route-feature"><p>'+esc(item[1])+'</p><a class="button" href="#account">Go to My Account</a></div>');
+
+async function ensureCustomer(client,user){
+ const {data:found,error:findError}=await client.from('customers').select('id').eq('auth_user_id',user.id).maybeSingle();
+ if(findError)throw findError;
+ if(found?.id)return found.id;
+ const meta=user.user_metadata||{};
+ const {data,error}=await client.from('customers').insert({auth_user_id:user.id,email:user.email||null,full_name:meta.full_name||'',phone:meta.phone||null}).select('id').single();
+ if(error)throw error;
+ return data.id;
 }
+async function requireCustomer(){
+ const client=customerAuthClient(),{data,error}=await client.auth.getSession();
+ if(error)throw error;
+ if(!data.session?.user){location.hash='login';return null;}
+ const customerId=await ensureCustomer(client,data.session.user);
+ return {client,user:data.session.user,customerId};
+}
+function customerMessage(target,message,isError=false){
+ const el=$r(target);if(el){el.textContent=message;el.style.color=isError?'#a33':'';}
+}
+async function renderCustomerDataPage(route){
+ const titles={orders:'My orders',tracking:'Track an order',addresses:'Saved addresses',reviews:'My reviews',support:'Customer support',returns:'Returns & refunds',coupons:'My coupons',offers:'Offers & rewards'};
+ infoRoute('IQA WATCHES · MY IQA',titles[route]||'My account','Private customer information is loaded only after secure sign-in.','<div class="route-feature" id="customerPanel"><p>Loading your secure customer area…</p></div>');
+ try{
+  const ctx=await requireCustomer();if(!ctx)return;
+  const {client,customerId}=ctx,host=$r('customerPanel');if(!host)return;
+  if(route==='addresses'){
+   const draw=async()=>{
+    const {data,error}=await client.from('customer_addresses').select('*').eq('customer_id',customerId).order('is_default',{ascending:false}).order('created_at',{ascending:false});
+    if(error)throw error;
+    host.innerHTML='<h2>Saved delivery addresses</h2><form id="addressForm" class="route-form"><label>Label<input name="label" value="Home" maxlength="40" required></label><label>Recipient name<input name="recipient_name" autocomplete="name" required maxlength="100"></label><label>Phone<input name="phone" type="tel" required maxlength="20"></label><label>Address line 1<input name="address_line1" autocomplete="address-line1" required maxlength="200"></label><label>Address line 2<input name="address_line2" autocomplete="address-line2" maxlength="200"></label><label>Landmark<input name="landmark" maxlength="120"></label><label>City<input name="city" autocomplete="address-level2" required></label><label>State<input name="state" autocomplete="address-level1" required></label><label>PIN code<input name="postal_code" inputmode="numeric" pattern="[0-9]{6}" maxlength="6" required></label><label><input name="is_default" type="checkbox"> Set as default address</label><button class="button" type="submit">Save address</button><p id="addressMessage" role="status"></p></form><div class="route-grid">'+(data||[]).map(a=>'<article class="route-feature"><h3>'+esc(a.label)+(a.is_default?' · Default':'')+'</h3><p>'+esc(a.recipient_name)+' · '+esc(a.phone)+'<br>'+esc(a.address_line1)+' '+esc(a.address_line2||'')+'<br>'+esc(a.city)+', '+esc(a.state)+' '+esc(a.postal_code)+', '+esc(a.country)+'</p><button class="button light" data-delete-address="'+esc(a.id)+'">Delete</button></article>').join('')+'</div>';
+    $r('addressForm').addEventListener('submit',async e=>{e.preventDefault();const fd=new FormData(e.currentTarget);const row={customer_id:customerId,label:String(fd.get('label')).trim(),recipient_name:String(fd.get('recipient_name')).trim(),phone:String(fd.get('phone')).trim(),address_line1:String(fd.get('address_line1')).trim(),address_line2:String(fd.get('address_line2')||'').trim()||null,landmark:String(fd.get('landmark')||'').trim()||null,city:String(fd.get('city')).trim(),state:String(fd.get('state')).trim(),postal_code:String(fd.get('postal_code')).trim(),is_default:fd.get('is_default')==='on'};try{if(row.is_default)await client.from('customer_addresses').update({is_default:false}).eq('customer_id',customerId);const {error}=await client.from('customer_addresses').insert(row);if(error)throw error;await draw();}catch(err){customerMessage('addressMessage',err.message||'Could not save address.',true);}});
+    host.querySelectorAll('[data-delete-address]').forEach(b=>b.addEventListener('click',async()=>{const {error}=await client.from('customer_addresses').delete().eq('id',b.dataset.deleteAddress).eq('customer_id',customerId);if(error){customerMessage('addressMessage',error.message,true);return;}await draw();}));
+   };await draw();return;
+  }
+  if(route==='orders'||route==='tracking'){
+   const {data:orders,error}=await client.from('orders').select('id,order_number,state,payment_state,currency,item_total,discount_total,shipping_total,tax_total,payable_total,created_at,delivery_snapshot').eq('customer_id',customerId).order('created_at',{ascending:false});
+   if(error)throw error;
+   if(!orders?.length){host.innerHTML='<h2>'+titles[route]+'</h2><p>No orders are linked to this account yet.</p><a class="button light" href="#shop">Explore watches</a>';return;}
+   const ids=orders.map(o=>o.id);
+   const [{data:items,error:itemError},{data:events,error:eventError}]=await Promise.all([client.from('order_items').select('order_id,sku_snapshot,product_snapshot,quantity,unit_price,line_total').in('order_id',ids),client.from('order_status_events').select('order_id,previous_state,new_state,reason,created_at').in('order_id',ids).order('created_at',{ascending:false})]);
+   if(itemError)throw itemError;if(eventError)throw eventError;
+   host.innerHTML='<h2>'+titles[route]+'</h2>'+orders.map(o=>{const oi=(items||[]).filter(i=>i.order_id===o.id),ev=(events||[]).filter(x=>x.order_id===o.id);return '<article class="route-feature"><h3>Order '+esc(o.order_number||o.id.slice(0,8))+'</h3><p>'+new Date(o.created_at).toLocaleString('en-IN')+' · '+esc(o.state)+' · Payment: '+esc(o.payment_state)+'</p><p><strong>₹'+Number(o.payable_total||0).toLocaleString('en-IN')+'</strong></p><ul>'+oi.map(i=>'<li>'+esc(i.product_snapshot?.name||i.sku_snapshot||'Product')+' × '+Number(i.quantity)+' — ₹'+Number(i.line_total||0).toLocaleString('en-IN')+'</li>').join('')+'</ul>'+(route==='tracking'?'<h4>Order status history</h4><ol>'+ev.map(x=>'<li>'+esc(x.new_state)+' · '+new Date(x.created_at).toLocaleString('en-IN')+(x.reason?' — '+esc(x.reason):'')+'</li>').join('')+'</ol><p>Courier location tracking is shown only when a verified carrier integration supplies it.</p>':'<a class="button light" href="#tracking">Track this order</a> <a class="button light" href="#returns">Request return</a>')+'</article>';}).join('');return;
+  }
+  if(route==='returns'){
+   const {data:orders,error}=await client.from('orders').select('id,order_number,state,created_at').eq('customer_id',customerId).order('created_at',{ascending:false});if(error)throw error;
+   const {data:existing,error:retError}=await client.from('return_requests').select('id,order_id,kind,reason,state,created_at').order('created_at',{ascending:false});if(retError)throw retError;
+   host.innerHTML='<h2>Request a return</h2><form id="returnForm" class="route-form"><label>Order<select name="order_id" required><option value="">Choose your order</option>'+(orders||[]).map(o=>'<option value="'+esc(o.id)+'">'+esc(o.order_number||o.id.slice(0,8))+' · '+esc(o.state)+'</option>').join('')+'</select></label><label>Request type<select name="kind"><option value="return">Return</option><option value="exchange">Exchange</option></select></label><label>Reason<textarea name="reason" required minlength="5" maxlength="1000"></textarea></label><button class="button" type="submit">Submit request</button><p id="returnMessage" role="status"></p></form><h3>Previous requests</h3>'+((existing||[]).map(x=>'<p>Request '+esc(x.id.slice(0,8))+' · '+esc(x.kind)+' · '+esc(x.state)+' — '+esc(x.reason)+'</p>').join('')||'<p>No return requests yet.</p>')+'<p class="route-note">Requests are subject to the final published return policy and staff review. Submitting does not guarantee approval.</p>';
+   $r('returnForm').addEventListener('submit',async e=>{e.preventDefault();const fd=new FormData(e.currentTarget);const {error}=await client.from('return_requests').insert({order_id:fd.get('order_id'),kind:fd.get('kind'),reason:String(fd.get('reason')).trim(),state:'requested'});if(error){customerMessage('returnMessage',error.message,true);return;}customerMessage('returnMessage','Return request submitted for review.');e.currentTarget.reset();});return;
+  }
+  if(route==='reviews'){
+   const {data:catalog,error}=await client.from('products').select('id,name').eq('state','published').order('name');if(error)throw error;
+   host.innerHTML='<h2>Write a product review</h2><form id="reviewForm" class="route-form"><label>Product<select name="product_id" required><option value="">Choose a product</option>'+(catalog||[]).map(p=>'<option value="'+esc(p.id)+'">'+esc(p.name)+'</option>').join('')+'</select></label><label>Rating<select name="rating" required><option value="">Choose rating</option><option value="5">5 — Excellent</option><option value="4">4 — Very good</option><option value="3">3 — Good</option><option value="2">2 — Fair</option><option value="1">1 — Poor</option></select></label><label>Your review<textarea name="body" required minlength="10" maxlength="2000"></textarea></label><button class="button" type="submit">Submit for moderation</button><p id="reviewMessage" role="status"></p></form><p class="route-note">Reviews are submitted as pending and are not marked as verified purchases automatically.</p>';
+   $r('reviewForm').addEventListener('submit',async e=>{e.preventDefault();const fd=new FormData(e.currentTarget);const {error}=await client.from('reviews').insert({product_id:fd.get('product_id'),customer_id:customerId,rating:Number(fd.get('rating')),body:String(fd.get('body')).trim(),state:'pending',verified_purchase:false});if(error){customerMessage('reviewMessage',error.message,true);return;}customerMessage('reviewMessage','Review submitted for moderation.');e.currentTarget.reset();});return;
+  }
+  if(route==='support'){
+   host.innerHTML='<h2>Contact customer support</h2><form id="supportForm" class="route-form"><label>Subject<input name="subject" required maxlength="160"></label><label>How can we help?<textarea name="body" required minlength="10" maxlength="3000"></textarea></label><button class="button" type="submit">Submit support request</button><p id="supportMessage" role="status"></p></form><p class="route-note">Your message is private to your account and authorized support staff. Internal staff notes are never shown in this customer panel.</p>';
+   $r('supportForm').addEventListener('submit',async e=>{e.preventDefault();const fd=new FormData(e.currentTarget);const {data,error}=await client.from('support_tickets').insert({customer_id:customerId,subject:String(fd.get('subject')).trim(),body:String(fd.get('body')).trim()}).select('id').single();if(error){customerMessage('supportMessage',error.message,true);return;}customerMessage('supportMessage','Support request submitted. Reference: '+data.id.slice(0,8));e.currentTarget.reset();});return;
+  }
+  if(route==='coupons'||route==='offers'){
+   const {data,error}=await client.from('coupons').select('code,kind,value,minimum_order,starts_at,ends_at,rules').eq('active',true).order('ends_at',{ascending:true});if(error)throw error;
+   const now=Date.now(),valid=(data||[]).filter(c=>(!c.starts_at||new Date(c.starts_at).getTime()<=now)&&(!c.ends_at||new Date(c.ends_at).getTime()>now));
+   host.innerHTML='<h2>'+titles[route]+'</h2>'+(valid.length?'<div class="route-grid">'+valid.map(c=>'<article class="route-feature"><h3>'+esc(c.code)+'</h3><p>'+ (c.kind==='percent'?Number(c.value)+'% off':c.kind==='fixed'?'₹'+Number(c.value).toLocaleString('en-IN')+' off':'Offer')+'</p>'+(c.minimum_order?'<p>Minimum order: ₹'+Number(c.minimum_order).toLocaleString('en-IN')+'</p>':'')+(c.ends_at?'<p>Valid until '+new Date(c.ends_at).toLocaleDateString('en-IN')+'</p>':'')+'</article>').join('')+'</div>':'<p>No active offers are published right now.</p>');return;
+  }
+ }catch(err){
+  if(err?.message==='Auth session missing!'){location.hash='login';return;}
+  const host=$r('customerPanel');if(host)host.innerHTML='<div class="route-disabled">'+esc(err.message||'This customer feature is temporarily unavailable.')+'</div>';
+ }
+}
+
 function renderSearch(){
  const draw=(query='',brand='All',price='all')=>{
   const q=query.trim().toLowerCase();
