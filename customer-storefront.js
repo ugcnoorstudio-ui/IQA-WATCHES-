@@ -3,7 +3,7 @@
 const KEY='iqa-customer-storefront-v1';
 const $=id=>document.getElementById(id);
 const esc=v=>typeof escapeHtml==='function'?escapeHtml(v):String(v??'');
-const money=v=>typeof money==='function'?money(Number(v||0)):'₹'+Number(v||0).toLocaleString('en-IN');
+const money=v=>new Intl.NumberFormat('en-IN',{style:'currency',currency:'INR',maximumFractionDigits:0}).format(Number(v||0));
 const root=()=>document.getElementById('routeView');
 const saved=(key,fallback)=>{try{return JSON.parse(localStorage.getItem(key))??fallback}catch{return fallback}};
 const state=saved(KEY,{compare:[],recent:[]});
