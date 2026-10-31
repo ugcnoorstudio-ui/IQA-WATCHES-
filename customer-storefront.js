@@ -26,7 +26,7 @@ function renderBrands(){
  shell('Shop by brand','Explore the brands represented in the approved catalogue.',
  '<div class="route-grid">'+groups.map(b=>{const count=(typeof products!=='undefined'?products:[]).filter(p=>p.brand===b).length;return '<article class="route-feature"><h2>'+esc(b)+'</h2><p>'+count+' available catalogue '+(count===1?'watch':'watches')+'</p><a class="button light" href="#brand/'+encodeURIComponent(b)+'">View brand</a></article>'}).join('')+'</div>');
 }
-function renderBrand(name){const items=(products||[]).filter(p=>p.brand===name);shell(name,'Explore approved '+name+' watches.',productList(items))}
+function renderBrand(name){const items=(typeof products!=='undefined'?products:[]).filter(p=>p.brand===name);shell(name,'Explore approved '+name+' watches.',productList(items))}
 function renderCategories(){
  const groups=[...new Set((typeof products!=='undefined'?products:[]).map(p=>p.category).filter(Boolean))].sort();
  shell('Shop by category','Choose a category to explore matching watches.',
