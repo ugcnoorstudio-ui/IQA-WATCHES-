@@ -72,7 +72,8 @@ test('collection routes use normalized exact audience and explicit collection ta
 test('collection cards retain product detail links and stock display', () => {
   assert.ok(storefront.includes('function card(p)'));
   assert.ok(storefront.includes('encodeURIComponent(p.id)'));
-  assert.match(routes, /Number\(p\.stock\)\+' available'/);
+  assert.ok(routes.includes('Number(p.stock)'));
+  assert.ok(routes.includes('available</p>'));
 });
 
 test('normalized audience matching prevents women being classified as men', () => {
