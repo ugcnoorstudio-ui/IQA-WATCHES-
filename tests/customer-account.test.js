@@ -37,16 +37,43 @@ test('order history and line items use customer RLS-scoped queries', () => {
   assert.match(routes, /from\('order_status_events'\)\.select\([\s\S]*?\.in\('order_id',ids\)/);
 });
 
-test('checkout remains disabled and no order creation call is introduced', () => {
+test('checkout invokes only the authenticated server-side checkout function', () => {
   const start = routes.indexOf('function renderCheckoutRoute()');
   const end = routes.indexOf('\n}', start);
   const checkout = routes.slice(start, end);
   assert.ok(start >= 0 && end > start);
-  assert.match(checkout, /Checkout is not available yet/);
+  assert.match(checkout, /functions\.invoke\(['"]iqa-customer-checkout['"]/);
+  assert.match(checkout, /idempotency/i);
   assert.doesNotMatch(checkout, /\.rpc\(/);
 });
 
 test('desktop and mobile account links always render the account route on repeated taps', () => {
   assert.ok(routes.includes("e.target.closest('a[href=\"#account\"]')"));
   assert.ok(routes.includes("if(location.hash!=='#account')location.hash='account';render();"));
+});
+
+test('product route waits for catalogue readiness and reports catalogue failures', () => {
+  assert.match(routes, /catalogueState==='loading'[\s\S]*?Loading product details/);
+  assert.match(routes, /catalogueState==='error'[\s\S]*?Product temporarily unavailable/);
+  assert.match(routes, /catalogue:ready/);
+  assert.match(routes, /catalogue:error/);
+});
+
+test('route renderer catches runtime failures and leaves a visible recovery action', () => {
+  assert.match(routes, /IQA WATCHES route render failed/);
+  assert.match(routes, /role="alert"/);
+  assert.match(routes, /Return home/);
+});
+
+test('account async rendering does not overwrite a newer route', () => {
+  assert.match(routes, /const requestedHash=location\.hash/);
+  assert.match(routes, /if\(location.hash!==requestedHash\)return/);
+});
+
+test('mobile viewport guardrails keep storefront containers within the viewport', async () => {
+  const html = await readFile(new URL('../index.html', import.meta.url), 'utf8');
+  assert.match(html, /name="viewport" content="width=device-width, initial-scale=1"/);
+  assert.match(html, /html,body\{width:100%;max-width:100%;min-width:0;overflow-x:hidden\}/);
+  assert.match(html, /@media\(max-width:760px\)/);
+  assert.match(html, /\.route-product-layout\{grid-template-columns:minmax\(0,1fr\)!important\}/);
 });
