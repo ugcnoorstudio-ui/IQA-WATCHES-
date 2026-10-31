@@ -5,7 +5,8 @@
 <!-- IQA WATCHES live catalogue is fetched from the connected Supabase project. -->
 
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="theme-color" content="#10100f">\n<link rel="icon" type="image/svg+xml" href="./assets/iqa-watches-favicon.svg">
+<meta name="theme-color" content="#10100f">
+<link rel="icon" type="image/svg+xml" href="./assets/iqa-watches-favicon.svg">
 <meta name="description" content="IQA WATCHES — Timeless design. Everyday precision. Discover a considered edit of watches for every day.">
 <meta property="og:title" content="IQA WATCHES — Timeless design. Everyday precision.">
 <meta property="og:description" content="A considered collection of everyday watch styles.">
@@ -159,6 +160,28 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
  .route-product-copy .route-actions{grid-template-columns:1fr}
 }
 @media(prefers-reduced-motion:reduce){.product-image img{transition:none}}
+
+
+/* Mobile layout guardrails: prevent fixed/min-content children from narrowing the storefront canvas. */
+html,body{width:100%;max-width:100%;min-width:0;overflow-x:hidden}
+#home,.site-header,.announcement,.footer{width:100%;max-width:100%;min-width:0}
+#home>*{min-width:0}
+.nav{width:100%;min-width:0}
+@media(max-width:760px){
+ .nav{gap:6px;padding-left:3%;padding-right:3%}
+ .brand{min-width:0;flex:0 1 auto}
+ .brand-logo{width:clamp(132px,38vw,190px);max-width:100%;height:auto}
+ .nav-links{display:none}
+ .nav-actions{min-width:0;gap:1px;flex:0 0 auto}
+ .nav-actions .icon-btn{min-width:0;width:auto;padding:0 4px;white-space:nowrap;font-size:10px;gap:3px}
+ .nav-actions .count{width:16px;height:16px;font-size:9px}
+ .menu-btn{display:inline-flex;flex:0 0 auto}
+ .route-view{width:100%;min-width:0}
+ .route-product-layout{grid-template-columns:minmax(0,1fr)!important}
+ .route-product-media,.route-product-copy{min-width:0;width:100%}
+ .route-feature,.route-content,.route-hero{min-width:0;max-width:100%}
+ .route-specs{table-layout:fixed;overflow-wrap:anywhere}
+}
 
 </style>
 <style>
