@@ -79,6 +79,7 @@ test('collection matching uses normalized whole-token and phrase boundaries', ()
   const matcher = new Function(helpers + '; return { normalizeCollectionText, matchesCollectionTerm, collectionProductMatches };')();
   assert.equal(matcher.matchesCollectionTerm("Men's watches", 'men s'), true);
   assert.equal(matcher.matchesCollectionTerm('watches designed for men', 'men'), true);
+  assert.equal(matcher.matchesCollectionTerm('watches for men s', 'men s'), true);
   assert.equal(matcher.matchesCollectionTerm("Women's watches", 'men'), false);
   assert.equal(matcher.matchesCollectionTerm('watches for women', 'men'), false);
   assert.equal(matcher.matchesCollectionTerm('premium-watch collection', 'premium watch'), true);
