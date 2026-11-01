@@ -201,6 +201,6 @@ test('mobile comparison table scrolls inside its own container instead of wideni
 
 test('return history is scoped through the authenticated customer order and uses schema-supported request kinds', () => {
   assert.match(routes, /from\('return_requests'\)\.select\('id,order_id,kind,reason,state,created_at,orders!inner\(customer_id\)'\)\.eq\('orders\.customer_id',customerId\)/);
-  assert.match(routes, /<option value="return">Return<\\/option><option value="refund">Refund<\\/option><option value="warranty">Warranty<\\/option>/);
-  assert.doesNotMatch(routes, /<option value="exchange">Exchange<\\/option>/);
+  assert.ok(routes.includes('<option value="return">Return</option><option value="refund">Refund</option><option value="warranty">Warranty</option>'));
+  assert.ok(!routes.includes('<option value="exchange">Exchange</option>'));
 });
