@@ -243,6 +243,78 @@ test('catalogue search finds products by model code and description', async ({ p
 });
 
 
+
+test('product detail tolerates null optional fields and ignores invalid gallery media', async ({ page }) => {
+  await openStore(page);
+  const card = page.locator('#productGrid .product-card').first();
+  const productId = await card.locator('a[href^="#product/"]').first().getAttribute('href').then(href => decodeURIComponent(href.slice('#product/'.length)));
+  const expectedImage = await card.locator('.product-image img').getAttribute('src');
+  await page.evaluate(id => {
+    const product = products.find(item => item.id === id);
+    Object.assign(product, {
+      brand: null, category: null, style: null, colour: null, dial: null,
+      strap: null, sku: null, desc: null, imageAlt: null, tags: null,
+      gallery: [{ src: null, alt: null }, { src: 'javascript:alert(1)', alt: 'unsafe' }]
+    });
+    location.hash = '#product/' + encodeURIComponent(id);
+  }, productId);
+  await expect(page.locator('#routeMainImage')).toBeVisible();
+  await expect(page.locator('#routeMainImage')).toHaveAttribute('src', expectedImage);
+  await expect(page.locator('#routeView [data-gallery-src]')).toHaveCount(0);
+  await expect(page.locator('#routeView')).toContainText(/Not specified/i);
+  await expect(page.locator('#routeView')).toContainText(/IQA WATCHES/i);
+});
+
+test('cart contents and quantities persist after a full page reload', async ({ page }) => {
+  await openStore(page);
+  const card = page.locator('#productGrid .product-card').first();
+  const productId = await card.locator('[data-add]').getAttribute('data-add');
+  await card.locator('[data-add]').click();
+  await page.reload();
+  await expect.poll(() => page.evaluate(() => typeof catalogueState === 'undefined' ? 'missing' : catalogueState), { timeout: 20000 }).toBe('ready');
+  await navigateToHash(page, 'bag');
+  const bag = page.locator('#routeView');
+  await expect(bag.locator('[data-qty][data-delta="1"]')).toBeVisible();
+  await expect(bag.locator('[data-remove="' + productId + '"]')).toBeVisible();
+  await expect(bag.locator('.qty')).toContainText('1');
+  await bag.locator('[data-qty][data-delta="1"]').click();
+  await page.reload();
+  await expect.poll(() => page.evaluate(() => typeof catalogueState === 'undefined' ? 'missing' : catalogueState), { timeout: 20000 }).toBe('ready');
+  await navigateToHash(page, 'bag');
+  await expect(page.locator('#routeView .qty')).toContainText('2');
+});
+
+test('customer discovery routes render and retain recently viewed products', async ({ page }) => {
+  await openStore(page);
+  const productLink = page.locator('#productGrid a[href^="#product/"]').first();
+  const productName = (await productLink.textContent()).trim();
+  await productLink.click();
+  await navigateToHash(page, 'recently-viewed');
+  await expect(page.locator('#routeView')).toContainText(/Recently viewed/i);
+  await expect(page.locator('#routeView')).toContainText(productName);
+  for (const [route, label] of [['brands', 'Shop by brand'], ['categories', 'Shop by category'], ['delivery', 'Delivery availability'], ['promotions', 'Offers & promotions'], ['compare', 'Compare watches']]) {
+    await navigateToHash(page, route);
+    await expect(page.locator('#routeView')).toContainText(new RegExp(label, 'i'));
+  }
+});
+
+test('mobile product, collection, bag and wishlist routes fit the viewport', async ({ page, isMobile }) => {
+  test.skip(!isMobile, 'mobile viewport only');
+  await openStore(page);
+  const productHref = await page.locator('#productGrid a[href^="#product/"]').first().getAttribute('href');
+  const routes = [productHref, '#men', '#bag', '#wishlist', '#faq', '#policies'];
+  for (const hash of routes) {
+    await page.evaluate(value => { location.hash = value; }, hash);
+    await page.waitForFunction(value => location.hash === value, hash);
+    await page.waitForTimeout(50);
+    const metrics = await page.evaluate(() => ({
+      viewport: document.documentElement.clientWidth,
+      content: document.documentElement.scrollWidth
+    }));
+    expect(metrics.content, hash + ' should not overflow horizontally').toBeLessThanOrEqual(metrics.viewport + 1);
+  }
+});
+
 test('collection routes show only products matching approved audience and explicit tags', async ({ page }) => {
   await openStore(page);
   const routes = ['men', 'women', 'unisex', 'new-arrivals', 'bestsellers'];
