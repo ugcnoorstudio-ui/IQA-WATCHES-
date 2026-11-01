@@ -63,8 +63,8 @@ test('storefront menu destinations resolve to the matching page or shopping tool
 test('collection routes use normalized exact audience and explicit collection tags', () => {
   assert.match(routes, /function normalizeCollectionTag\(/);
   assert.match(routes, /function collectionForRoute\(/);
-  assert.match(routes, /matches:p=>normalizeCollectionTag\(p\.audience\)==='men'/);
-  assert.match(routes, /matches:p=>normalizeCollectionTag\(p\.audience\)==='women'/);
+  assert.match(routes, /matches:p=>matchesAudienceCollection\(p,\['men','mens'\]\)/);
+  assert.match(routes, /matches:p=>matchesAudienceCollection\(p,\['women','womens'\]\)/);
   assert.match(routes, /Array\.isArray\(p\.tags\)/);
   assert.match(routes, /No watches currently match this collection/);
 });
@@ -77,8 +77,8 @@ test('collection cards retain product detail links and stock display', () => {
 });
 
 test('normalized audience matching prevents women being classified as men', () => {
-  assert.match(routes, /normalizeCollectionTag\(p\.audience\)==='men'/);
-  assert.match(routes, /normalizeCollectionTag\(p\.audience\)==='women'/);
+  assert.match(routes, /matchesAudienceCollection\(p,\['men','mens'\]\)/);
+  assert.match(routes, /matchesAudienceCollection\(p,\['women','womens'\]\)/);
 });
 
 
