@@ -50,6 +50,8 @@ test('homepage loads without horizontal overflow or uncaught page errors', async
   await page.goto('/');
   await expect(page).toHaveTitle(/IQA WATCHES/i);
   await expect(page.locator('#home')).toBeVisible();
+  await expect(page.locator('.storefront-shortcuts')).toHaveCount(0);
+  await expect(page.locator('.hero')).toBeVisible();
   const overflow = await page.evaluate(() => document.documentElement.scrollWidth > document.documentElement.clientWidth);
   expect(overflow, 'homepage should not overflow horizontally').toBe(false);
   expect(pageErrors, 'uncaught browser errors').toEqual([]);
