@@ -520,6 +520,8 @@ body.menu-open::before{content:"";position:fixed;inset:0;background:rgba(13,13,1
 </style>
 <style id="desktop-navigation-drawer">
 @media(min-width:681px){
+  body.menu-open .site-header{z-index:100}
+  body.menu-open .mobile-menu.open{z-index:101}
   .menu-btn{display:inline-flex;flex:0 0 42px;width:42px;min-width:42px;height:42px;font-size:23px;order:-1}
   .nav{justify-content:flex-start;gap:22px}
   .brand{flex:0 0 auto}
