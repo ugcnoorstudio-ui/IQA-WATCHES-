@@ -195,7 +195,7 @@ test('every mobile menu link opens its real destination and closes the menu', as
     await toggle.click();
     await expect(menu).toHaveClass(/open/);
     await menu.locator('a[href="#' + route + '"]').click();
-    const expectedHash = route === 'orders' ? '#login' : '#' + route;
+    const expectedHash = ['orders', 'offers'].includes(route) ? '#login' : '#' + route;
     await expect.poll(() => page.evaluate(() => location.hash)).toBe(expectedHash);
     await expect(menu).not.toHaveClass(/open/);
     await expect(toggle).toHaveAttribute('aria-expanded', 'false');
