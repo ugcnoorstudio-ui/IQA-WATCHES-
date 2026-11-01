@@ -89,7 +89,8 @@ test('mobile navigation opens and closes and viewport has no horizontal overflow
   await expect(toggle).toBeVisible();
   await toggle.click();
   await expect(page.locator('#mobileMenu')).toHaveClass(/open/);
-  await toggle.click();
+  // The trigger is correctly inert behind the modal; close it from its own dialog control.
+  await page.locator('#mobileMenuClose').click();
   await expect(page.locator('#mobileMenu')).not.toHaveClass(/open/);
   const overflow = await page.evaluate(() => document.documentElement.scrollWidth > document.documentElement.clientWidth);
   expect(overflow, 'mobile page should not overflow horizontally').toBe(false);
@@ -561,4 +562,35 @@ test('customer comparison removes individual watches and prunes stale catalogue 
   await navigateToHash(page, 'compare');
   await expect(page.locator('[data-remove-customer-compare]')).toHaveCount(1);
   await expect(page.locator('[data-remove-customer-compare="' + secondId + '"]')).toBeVisible();
+});
+
+test('mobile drawer exposes modal navigation semantics, traps focus and restores background access', async ({ page, isMobile }) => {
+  test.skip(!isMobile, 'mobile viewport only');
+  await page.goto('/');
+  const toggle = page.locator('#menuToggle');
+  const menu = page.locator('#mobileMenu');
+  await expect(toggle).toHaveAttribute('aria-controls', 'mobileMenu');
+  await toggle.click();
+  await expect(menu).toHaveAttribute('role', 'dialog');
+  await expect(menu).toHaveAttribute('aria-modal', 'true');
+  await expect(menu).toHaveAttribute('aria-hidden', 'false');
+  await expect(menu.locator('nav[aria-label="Mobile navigation links"]')).toBeVisible();
+  await expect(toggle).toHaveAttribute('aria-expanded', 'true');
+  await expect(page.locator('main')).toHaveAttribute('inert', '');
+  await expect(page.locator('#mobileMenuClose')).toBeFocused();
+
+  const links = menu.locator('a');
+  await expect(links).toHaveCount(17);
+  await page.keyboard.press('Shift+Tab');
+  await expect(links.last()).toBeFocused();
+  await page.keyboard.press('Tab');
+  await expect(page.locator('#mobileMenuClose')).toBeFocused();
+
+  await page.keyboard.press('Escape');
+  await expect(menu).toHaveAttribute('aria-hidden', 'true');
+  await expect(toggle).toHaveAttribute('aria-expanded', 'false');
+  await expect(toggle).toBeFocused();
+  await expect(page.locator('main')).not.toHaveAttribute('inert', '');
+  await expect(page.locator('.hero')).toBeVisible();
+  await expect(page.locator('.storefront-shortcuts')).toHaveCount(0);
 });
