@@ -20,7 +20,7 @@ test('cart and wishlist totals announce updates to assistive technology',()=>{
 
 test('category filters expose and synchronize their pressed state',()=>{
  assert.match(html,/data-category="All" aria-pressed="true"/);
- assert.match(html,/data-category="Men" aria-pressed="false"/);
+ assert.ok(html.includes("data-category=\"'+escapeHtml(v)+'\" aria-pressed=\"'+(activeCategory===v?'true':'false')+'\""));
  assert.ok(html.includes("aria-pressed=\"'+(activeCategory==='All'?'true':'false')+'\""));
  assert.ok(html.includes("b.setAttribute('aria-pressed',String(selected))"));
 });
@@ -29,4 +29,27 @@ test('product card controls have product-specific accessible names and wishlist 
  assert.ok(html.includes("aria-label=\"'+(wishlist.includes(p.id)?'Remove '+escapeHtml(p.name)+' from wishlist':'Add '+escapeHtml(p.name)+' to wishlist')+'\" aria-pressed=\"'+(wishlist.includes(p.id)?'true':'false')+'\""));
  assert.ok(html.includes("aria-label=\"View details for '+escapeHtml(p.name)+'\""));
  assert.ok(html.includes("aria-label=\"Add '+escapeHtml(p.name)+' to preview bag\""));
+});
+
+const customer=fs.readFileSync(path.join(__dirname,'..','customer-storefront.js'),'utf8');
+const routes=fs.readFileSync(path.join(__dirname,'..','routes.js'),'utf8');
+
+test('mobile drawer exposes an explicit close control and closes on Escape',()=>{
+ assert.match(html,/id="mobileMenuClose" aria-label="Close navigation"/);
+ assert.match(html,/mobileMenuClose.*setMobileMenu\\(false\\)/s);
+ assert.match(html,/closeModal\\(\\);\\$\\('mobileMenu'\\)\\.classList\\.remove\\('open'\\);return/);
+});
+
+test('customer comparison state is bounded, validated and synchronized across tabs',()=>{
+ assert.match(customer,/const cleanIds=\\(value,limit\\)/);
+ assert.match(customer,/cleanIds\\(initialState\\?\\.compare,4\\)/);
+ assert.match(customer,/cleanIds\\(initialState\\?\\.recent,12\\)/);
+ assert.match(customer,/window\\.addEventListener\\('storage'/);
+ assert.match(customer,/const valid=state\\.compare\\.filter/);
+});
+
+test('collection routes normalize audience, category, style and collection labels',()=>{
+ assert.match(routes,/function matchesAudienceCollection\\(/);
+ assert.match(routes,/matches:p=>matchesAudienceCollection\\(p,\\['new-arrival','new-arrivals'\\]\\)/);
+ assert.match(routes,/matches:p=>matchesAudienceCollection\\(p,\\['bestseller','bestsellers','best-seller'\\]\\)/);
 });
