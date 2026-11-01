@@ -381,3 +381,30 @@ test('collection routes show only products matching approved audience and explic
     if (!expectedIds.length) await expect(page.locator('#routeCatalogue .route-empty')).toBeVisible();
   }
 });
+
+
+test('product cards open a complete quick-view modal and related watches replace its content', async ({ page }) => {
+  await openStore(page);
+  await page.evaluate(() => {
+    const first = products[0];
+    products.push({ ...first, id: first.id + '-quick-view-fixture', name: first.name + ' Related QA Watch' });
+    renderProducts();
+  });
+  const card = page.locator('#productGrid .product-card').first();
+  const expectedName = (await card.locator('.product-title').innerText()).trim();
+  await card.locator('.product-image-link').click();
+  const modal = page.locator('#modalWrap');
+  await expect(modal).toHaveClass(/open/);
+  await expect(page.locator('#modalContent h2')).toHaveText(expectedName);
+  await expect(page.locator('#modalContent .product-modal-image img')).toBeVisible();
+  await expect(page.locator('#modalContent .spec-list')).toBeVisible();
+  await expect(page.locator('#modalContent .related-product')).not.toHaveCount(0);
+  const related = page.locator('#modalContent .related-product').first();
+  const relatedName = (await related.locator('span').innerText()).trim();
+  await related.click();
+  await expect(modal).toHaveClass(/open/);
+  await expect(page.locator('#modalContent h2')).toHaveText(relatedName);
+  await expect(page).toHaveURL(/#home$/);
+  await page.keyboard.press('Escape');
+  await expect(modal).not.toHaveClass(/open/);
+});
