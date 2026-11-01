@@ -38,3 +38,20 @@ test('public monitor checks storefront, admin, public config and approved catalo
   assert.match(script, /verified_sellable/);
   assert.doesNotMatch(script, /service_role|secret_key|password/i);
 });
+
+test('checkout Edge Function mirrors deployed customer and address ownership guards', () => {
+  const checkout = read('supabase/functions/iqa-customer-checkout/index.ts');
+  assert.match(checkout, /auth\.auth\.getUser\(token\)/);
+  assert.match(checkout, /\.eq\("auth_user_id", authData\.user\.id\)/);
+  assert.match(checkout, /\.eq\("customer_id", customer\.id\)/);
+  assert.match(checkout, /p_idempotency_key/);
+  assert.match(checkout, /payments\.cod_enabled !== true/);
+});
+
+test('owner health Edge Function source is version-controlled and owner-gated', () => {
+  const health = read('supabase/functions/iqa-admin-health/index.ts');
+  assert.match(health, /staff_profiles/);
+  assert.match(health, /staff\.role !== "owner"/);
+  assert.match(health, /Access-Control-Allow-Origin/);
+  assert.match(health, /database: failed === 0 \? "connected" : "degraded"/);
+});
