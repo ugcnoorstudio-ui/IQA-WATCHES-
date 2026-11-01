@@ -42,10 +42,14 @@ test('watch image, title and quick-view button open the large image-first detail
   const panel = await page.locator('#modalContent').evaluate(el => ({
     width: el.getBoundingClientRect().width,
     maxHeight: getComputedStyle(el).maxHeight,
+    viewportHeight: window.innerHeight,
     imageHeight: el.querySelector('.product-modal-image').getBoundingClientRect().height
   }));
   expect(panel.width).toBeGreaterThan(350);
-  expect(panel.maxHeight).toContain('94');
+  // Computed styles resolve vh/dvh units to pixels, so validate the rendered
+  // height relative to the viewport rather than looking for the CSS token.
+  expect(Number.parseFloat(panel.maxHeight)).toBeGreaterThan(panel.viewportHeight * 0.9);
+  expect(Number.parseFloat(panel.maxHeight)).toBeLessThanOrEqual(panel.viewportHeight);
   expect(panel.imageHeight).toBeGreaterThan(230);
   await page.locator('#modalContent #modalClose').click();
   await card.locator('.product-title a').click();
