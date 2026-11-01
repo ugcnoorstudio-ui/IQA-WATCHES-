@@ -95,6 +95,47 @@ test('mobile navigation opens and closes and viewport has no horizontal overflow
   expect(overflow, 'mobile page should not overflow horizontally').toBe(false);
 });
 
+test('mobile header keeps its logo and action icons in one row without overflow', async ({ page, isMobile }) => {
+  test.skip(!isMobile, 'mobile viewport only');
+  await page.goto('/');
+  for (const width of [320, 360, 390]) {
+    await page.setViewportSize({ width, height: 844 });
+    const nav = page.locator('.site-header .nav');
+    await expect(nav).toBeVisible();
+    await expect(page.locator('#menuToggle')).toBeVisible();
+    await expect(page.locator('.brand-logo')).toBeVisible();
+    for (const id of ['#headerSearch', '#voiceSearch', '#wishlistOpen', '#cartOpen']) {
+      await expect(page.locator(id)).toBeVisible();
+    }
+    const layout = await page.evaluate(() => {
+      const nav = document.querySelector('.site-header .nav');
+      const logo = document.querySelector('.site-header .brand');
+      const actions = document.querySelector('.site-header .nav-actions');
+      const menu = document.querySelector('#menuToggle');
+      const rect = element => {
+        const r = element.getBoundingClientRect();
+        return { left: r.left, right: r.right, top: r.top, bottom: r.bottom };
+      };
+      return {
+        viewportWidth: document.documentElement.clientWidth,
+        navWidth: nav.getBoundingClientRect().width,
+        navScrollWidth: nav.scrollWidth,
+        menu: rect(menu),
+        logo: rect(logo),
+        actions: rect(actions),
+        pageScrollWidth: document.documentElement.scrollWidth
+      };
+    });
+    expect(layout.navScrollWidth, 'header row should not overflow').toBeLessThanOrEqual(layout.navWidth + 1);
+    expect(layout.pageScrollWidth, 'page should not overflow horizontally').toBeLessThanOrEqual(layout.viewportWidth + 1);
+    expect(layout.menu.right).toBeLessThanOrEqual(layout.logo.left + 1);
+    expect(layout.logo.right).toBeLessThanOrEqual(layout.actions.left + 1);
+    expect(layout.actions.right).toBeLessThanOrEqual(layout.viewportWidth + 1);
+  }
+  await expect(page.locator('.storefront-shortcuts')).toHaveCount(0);
+  await expect(page.locator('.hero')).toBeVisible();
+});
+
 test('every mobile menu link opens its real destination and closes the menu', async ({ page, isMobile }) => {
   test.skip(!isMobile, 'mobile viewport only');
   await openStore(page);
