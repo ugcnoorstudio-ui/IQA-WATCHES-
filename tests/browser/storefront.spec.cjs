@@ -11,6 +11,18 @@ async function openStore(page) {
   await expect.poll(async () => page.locator('#productGrid .product-card').count(), { timeout: 20000 }).toBeGreaterThan(0);
 }
 
+async function navigateToHash(page, route) {
+  const hash = '#' + route;
+  await page.evaluate(value => { location.hash = value; }, hash);
+  await page.waitForFunction(expected => location.hash === expected, hash);
+  const homeToolRoute = ['finder', 'comparison'].includes(route.split('/')[0]);
+  await page.waitForFunction(({ expectedHash, expectHidden }) => {
+    if (location.hash !== expectedHash) return false;
+    const root = document.getElementById('routeView');
+    return Boolean(root) && root.classList.contains('hidden') === expectHidden;
+  }, { expectedHash: hash, expectHidden: homeToolRoute });
+}
+
 async function firstProductId(page) {
   const card = page.locator('#productGrid .product-card').first();
   const wish = card.locator('[data-wish]');
@@ -40,7 +52,7 @@ test('customer routes render their actual destinations', async ({ page }) => {
     ['contact', 'Contact'], ['search', 'Search'], ['bag', 'shopping bag'], ['wishlist', 'wishlist']
   ];
   for (const [route, expected] of routes) {
-    await page.evaluate(value => { location.hash = value; }, route);
+    await navigateToHash(page, route);
     if (route === 'shop' || ['men','women','unisex','new-arrivals','bestsellers'].includes(route)) {
       const catalogue = page.locator('#routeCatalogue');
       await expect(catalogue).toBeAttached();
@@ -50,9 +62,9 @@ test('customer routes render their actual destinations', async ({ page }) => {
       await expect(page.locator('#routeView')).toContainText(new RegExp(expected, 'i'));
     }
   }
-  await page.evaluate(() => { location.hash = 'finder'; });
+  await navigateToHash(page, 'finder');
   await expect(page.locator('#finderCard')).toBeVisible();
-  await page.evaluate(() => { location.hash = 'comparison'; });
+  await navigateToHash(page, 'comparison');
   await expect(page.locator('#compareCard')).toBeVisible();
 });
 
@@ -74,7 +86,7 @@ test('cart add, increment, decrement and remove work without enabling checkout',
   const card = page.locator('#productGrid .product-card').first();
   const productId = await card.locator('[data-add]').getAttribute('data-add');
   await card.locator('[data-add]').click();
-  await page.evaluate(() => { location.hash = 'bag'; });
+  await navigateToHash(page, 'bag');
   const bag = page.locator('#routeView');
   await expect(bag).toContainText(/shopping bag/i);
   await expect(bag.locator('[data-qty][data-delta="1"]')).toBeVisible();
@@ -99,9 +111,10 @@ test('wishlist persists in browser storage after reload and can be removed', asy
     { timeout: 20000 }
   ).toBe('ready');
   await expect.poll(() => page.evaluate(() => JSON.parse(localStorage.getItem('iqa-preview-wishlist') || '[]'))).toContain(productId);
-  await page.evaluate(() => { location.hash = 'wishlist'; });
+  await navigateToHash(page, 'wishlist');
   await expect(page.locator('#routeView')).toContainText(/wishlist/i);
-  await expect(page.locator('#routeView')).toContainText((await card.locator('.product-title').textContent()).trim());
+  const productName = (await card.locator('.product-title').textContent()).trim();
+  await expect(page.locator('#routeView')).toContainText(productName);
   await page.locator('#routeView [data-wish="' + productId + '"]').click();
   await expect.poll(() => page.evaluate(() => JSON.parse(localStorage.getItem('iqa-preview-wishlist') || '[]'))).not.toContain(productId);
 });
