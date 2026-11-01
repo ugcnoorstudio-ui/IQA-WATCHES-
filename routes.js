@@ -8,10 +8,10 @@ function product(id){
   root.innerHTML=hero('IQA WATCHES · PRODUCT','Loading product details','Loading the latest product details and availability.')+'<div class="route-content"><div class="route-feature" role="status" aria-live="polite">Please wait while the product catalogue loads…</div></div>';return;
  }
  if(typeof catalogueState!=='undefined'&&catalogueState==='error'){
-  root.innerHTML=hero('IQA WATCHES · PRODUCT','Product temporarily unavailable','We couldn't load the collection right now.')+'<div class="route-content"><div class="route-disabled" role="alert">Please refresh the page or return to the collection. No purchase has been created.</div><a class="button light" href="#shop">Back to Shop</a></div>';return;
+  root.innerHTML=hero('IQA WATCHES · PRODUCT','Product temporarily unavailable','We could not load the collection right now.')+'<div class="route-content"><div class="route-disabled" role="alert">Please refresh the page or return to the collection. No purchase has been created.</div><a class="button light" href="#shop">Back to Shop</a></div>';return;
  }
  const p=products.find(x=>x.id===id);
- if(!p){root.innerHTML=hero('IQA WATCHES · PRODUCT','Product not found','This watch isn't part of the current collection.')+'<div class="route-content"><a class="button" href="#shop">Shop All</a></div>';return}
+ if(!p){root.innerHTML=hero('IQA WATCHES · PRODUCT','Product not found','This watch is not part of the current collection.')+'<div class="route-content"><a class="button" href="#shop">Shop All</a></div>';return}
  const casio=p.sku==='CAS-AE1200WHL5AV-001'||p.sku==='CAS-AE1200WHL5AVDF-001'||p.sku==='AE-1200WHL-5AV'||p.sku==='AE-1200WHL-5AVDF';
  const galleryItems=(Array.isArray(p.gallery)?p.gallery:[]).map(item=>({src:safeImageUrl(item.src),alt:String(item.alt||p.name)})).filter(item=>item.src);
  if(!galleryItems.length&&p.image){const fallback=safeImageUrl(p.image);if(fallback)galleryItems.push({src:fallback,alt:p.imageAlt||p.name})}
@@ -138,7 +138,7 @@ function renderFaq(){
 }
 function renderPolicies(){
  const entries=[
- ['Shipping','Delivery availability, charges and estimated timelines vary by location. Please message us on WhatsApp and we'll confirm the details for your PIN code.'],
+ ['Shipping','Delivery availability, charges and estimated timelines vary by location. Please message us on WhatsApp and we will confirm the details for your PIN code.'],
  ['Returns & refunds','Please contact us before returning an item so we can confirm the applicable return, exchange or refund terms for your order.'],
  ['Warranty','Warranty coverage varies by watch and seller. Please refer to the warranty information supplied with your selected product.'],
  ['Privacy','Your account information is used to manage your sign-in and orders. Never share your password, OTP, card PIN or banking credentials.'],
@@ -151,7 +151,7 @@ function renderPolicies(){
 }
 function renderContact(){
  infoRoute('IQA WATCHES · GET IN TOUCH','Contact us','For order enquiries, please message us on WhatsApp using the order link on our home page.',
- '<div class="route-feature"><h2>We're here to help</h2><p>For help with an order, please message us using the WhatsApp order link on our home page.</p><p>We'll be happy to help with your order or product questions.</p><a class="button light" href="#faq">Read FAQs</a></div>');
+ '<div class="route-feature"><h2>We are here to help</h2><p>For help with an order, please message us using the WhatsApp order link on our home page.</p><p>We'll be happy to help with your order or product questions.</p><a class="button light" href="#faq">Read FAQs</a></div>');
 }
 function renderAuth(mode='login'){
  const signup=mode==='signup';
@@ -338,7 +338,7 @@ function renderCategories(selectedCategory=''){
 }
 function renderDelivery(){
  infoRoute('IQA WATCHES · DELIVERY','Delivery information','Enter your PIN code and message us on WhatsApp to confirm delivery availability and estimated timelines.',
- '<div class="route-feature"><h2>We'll confirm your delivery details</h2><p>Delivery availability, charges and estimated timelines depend on your location. Please message us on WhatsApp and we'll confirm the details before your order is placed.</p><p>We'll confirm the delivery fee and estimated date with you before your order is placed.</p><a class="button light" href="#faq">Read FAQs</a> <a class="button light" href="#policies">Store policies</a></div>');
+ '<div class="route-feature"><h2>We'll confirm your delivery details</h2><p>Delivery availability, charges and estimated timelines depend on your location. Please message us on WhatsApp and we will confirm the details before your order is placed.</p><p>We'll confirm the delivery fee and estimated date with you before your order is placed.</p><a class="button light" href="#faq">Read FAQs</a> <a class="button light" href="#policies">Store policies</a></div>');
 }
 
 function render(){
@@ -370,7 +370,7 @@ function render(){
  if(r==='contact')return renderContact();
 
  if(r==='care')return renderPolicies();
- if(r==='recently-viewed'){infoRoute('IQA WATCHES · SAVED','Recently viewed','Your recently viewed watches will appear here.','<div class="route-feature"><p class="route-disabled">The watches you've recently explored will appear here when available.</p><a class="button" href="#shop">Explore watches</a></div>');return;}
+ if(r==='recently-viewed'){infoRoute('IQA WATCHES · SAVED','Recently viewed','Your recently viewed watches will appear here.','<div class="route-feature"><p class="route-disabled">The watches you have recently explored will appear here when available.</p><a class="button" href="#shop">Explore watches</a></div>');return;}
  if(r==='journal'){infoRoute('IQA WATCHES · JOURNAL','The Watch Journal','Thoughtful guides, watch-care notes and product stories are on the way.','<div class="route-feature"><p>We'll share model-specific guidance using information for the exact watch.</p><a class="button" href="#shop">Explore watches</a></div>');return;}
  if(r==='finder'){showHomeSection('finderCard');return;}
  if(r==='comparison'){showHomeSection('compareCard');return;}
