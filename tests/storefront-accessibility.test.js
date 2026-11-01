@@ -30,3 +30,28 @@ test('product card controls have product-specific accessible names and wishlist 
  assert.ok(html.includes("aria-label=\"View details for '+escapeHtml(p.name)+'\""));
  assert.ok(html.includes("aria-label=\"Add '+escapeHtml(p.name)+' to preview bag\""));
 });
+
+test('shop and Watch Finder share one price-range configuration',()=>{
+ assert.match(html,/const PRICE_RANGES=Object\.freeze\(\[/);
+ assert.ok(html.includes("$('priceFilter').innerHTML=priceRangeOptions('Any price')"));
+ assert.ok(html.includes("finderBudget.innerHTML=priceRangeOptions('Any budget')"));
+ assert.ok(html.includes("priceOk=price==='all'||matchesPriceRange(p.price,price)"));
+ assert.ok(html.includes("budget==='all'||matchesPriceRange(p.price,budget)"));
+});
+test('shared price ranges cover boundaries exactly once',()=>{
+ const start=html.indexOf('const PRICE_RANGES=Object.freeze([');
+ const end=html.indexOf('\nfunction priceRangeOptions',start);
+ assert.ok(start>=0&&end>start,'shared price configuration and matcher must exist');
+ const source=html.slice(start,end);
+ const sandbox={};
+ vm.runInNewContext(source+';this.matchesPriceRange=matchesPriceRange;this.PRICE_RANGES=PRICE_RANGES;',sandbox);
+ const matches=price=>sandbox.PRICE_RANGES.filter(range=>sandbox.matchesPriceRange(price,range.id)).map(range=>range.id);
+ assert.deepEqual(matches(999),['under1000']);
+ assert.deepEqual(matches(1000),['1000to1500']);
+ assert.deepEqual(matches(1499.99),['1000to1500']);
+ assert.deepEqual(matches(1500),['1000to1500']);
+ assert.deepEqual(matches(1500.01),['over1500']);
+ assert.deepEqual(matches(2500),['over1500']);
+ assert.deepEqual(matches(5000),['over1500']);
+ assert.deepEqual(matches(-1),[]);
+});
