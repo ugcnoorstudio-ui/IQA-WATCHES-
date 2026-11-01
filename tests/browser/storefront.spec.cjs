@@ -13,13 +13,25 @@ async function openStore(page) {
 
 async function navigateToHash(page, route) {
   const hash = '#' + route;
-  await page.evaluate(value => { location.hash = value; }, hash);
-  await page.waitForFunction(expected => location.hash === expected, hash);
   const homeToolRoute = ['finder', 'comparison'].includes(route.split('/')[0]);
+  // Wait for the browser's hashchange event, not merely for the URL assignment.
+  // The previous helper could pass immediately when the root already had the
+  // expected class, before the route renderer had processed the new hash.
+  await page.evaluate(value => {
+    if (location.hash === value) {
+      window.dispatchEvent(new HashChangeEvent('hashchange'));
+      return;
+    }
+    window.addEventListener('hashchange', () => {}, { once: true });
+    const changed = new Promise(resolve => window.addEventListener('hashchange', resolve, { once: true }));
+    location.hash = value;
+    return changed;
+  }, hash);
   await page.waitForFunction(({ expectedHash, expectHidden }) => {
     if (location.hash !== expectedHash) return false;
     const root = document.getElementById('routeView');
-    return Boolean(root) && root.classList.contains('hidden') === expectHidden;
+    if (!root) return false;
+    return root.hidden === false && root.classList.contains('hidden') === expectHidden;
   }, { expectedHash: hash, expectHidden: homeToolRoute });
 }
 
