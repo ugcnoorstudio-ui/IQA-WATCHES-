@@ -151,7 +151,7 @@ test('premium mobile drawer shows grouped navigation, editorial header and foote
   await expect(menu.locator('.drawer-footer')).toContainText('MADE FOR EVERY MOMENT');
   await expect(menu.locator('a[href="#shop"]')).toBeVisible();
   await expect(menu.locator('a[href="#policies"]')).toBeVisible();
-  await expect(menu.locator('a')).toHaveCount(17);
+  await expect(menu.locator('a')).toHaveCount(21);
   await expect(page.locator('.storefront-shortcuts')).toHaveCount(0);
   await expect(page.locator('.hero')).toBeVisible();
   await page.keyboard.press('Escape');
@@ -170,11 +170,15 @@ test('every mobile menu link opens its real destination and closes the menu', as
     ['search', /Search the collection/i],
     ['finder', '#finderCard'],
     ['comparison', '#compareCard'],
+    ['compare', /Compare watches/i],
+    ['recently-viewed', /Recently viewed/i],
     ['wishlist', /wishlist/i],
     ['bag', /shopping bag/i],
     ['journal', /Watch Journal is coming soon/i],
     ['story', /Our point of view/i],
     ['care', /Store policies/i],
+    ['delivery', /Delivery setup is not active/i],
+    ['offers', /Offers & rewards|Sign in/i],
     ['contact', /Contact us/i],
     ['account', /Sign in|Account unavailable/i],
     ['orders', /Sign in/i],
