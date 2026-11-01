@@ -331,7 +331,8 @@ function render(){
  if(r==='buy-now')return renderBuyNow(arg);
  if(r==='bag'||r==='cart')return renderBagRoute();
  if(r==='wishlist')return renderWishlistRoute();
- if(r==='payment'){showHomeSection('payment');return;}\n if(r==='checkout'||r==='checkout-review'||r==='checkout-payment')return renderCheckoutRoute();
+ if(r==='payment'){showHomeSection('payment');return;}
+ if(r==='checkout'||r==='checkout-review'||r==='checkout-payment')return renderCheckoutRoute();
  if(r==='login')return renderAuth('login');
  if(r==='signup')return renderAuth('signup');
  if(r==='account'||r==='profile')return renderAccount();
