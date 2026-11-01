@@ -227,7 +227,7 @@ function renderSearch(){
 }
 
 function normalizeCollectionText(value){
- return String(value??'').normalize('NFKD').replace(/[\\u0300-\\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,' ').trim().replace(/\\s+/g,' ');
+ return String(value??'').normalize('NFKD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,' ').trim().replace(/\s+/g,' ');
 }
 function matchesCollectionTerm(value,term){
  const normalizedValue=' '+normalizeCollectionText(value)+' ';
