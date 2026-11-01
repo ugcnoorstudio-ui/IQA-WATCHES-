@@ -78,6 +78,11 @@ function recordViewed(){
  if(!(typeof products!=='undefined'?products:[]).some(p=>p.id===id))return;
  state.recent=[id,...state.recent.filter(x=>x!==id)].slice(0,12);persist();
 }
+window.addEventListener('iqa:product-viewed',event=>{
+ const id=event.detail?.productId;
+ if(!id||!(typeof products!=='undefined'?products:[]).some(p=>p.id===id))return;
+ state.recent=[id,...state.recent.filter(x=>x!==id)].slice(0,12);persist();
+});
 function addCompareButtons(){
  document.querySelectorAll('.product-card,.route-card').forEach(el=>{
   const link=el.querySelector('a[href^="#product/"]');if(!link)return;
