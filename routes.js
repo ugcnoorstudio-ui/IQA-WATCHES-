@@ -120,7 +120,7 @@ function routeCard(title,description,href,label='Explore'){
 }
 function renderAbout(){
  infoRoute('IQA WATCHES · OUR STORY','Time, with intention.','Thoughtful watch styling for everyday life.',
- '<div class="route-columns"><div class="route-feature"><h2>Our point of view</h2><p>IQA WATCHES is built around considered design, useful details and watches chosen to complement everyday moments.</p><p>We aim to make product information clear, keep the shopping experience straightforward and treat customer trust as essential.</p></div><div class="route-feature"><h2>Our promise</h2><p>Clear product details, transparent pricing and a straightforward shopping experience. We'll confirm availability, delivery details and applicable policies before your order.</p><a class="button light" href="#shop">Explore the collection</a></div></div>');
+ '<div class="route-columns"><div class="route-feature"><h2>Our point of view</h2><p>IQA WATCHES is built around considered design, useful details and watches chosen to complement everyday moments.</p><p>We aim to make product information clear, keep the shopping experience straightforward and treat customer trust as essential.</p></div><div class="route-feature"><h2>Our promise</h2><p>Clear product details, transparent pricing and a straightforward shopping experience. We will confirm availability, delivery details and applicable policies before your order.</p><a class="button light" href="#shop">Explore the collection</a></div></div>');
 }
 function renderFaq(){
  const faqs=[
@@ -129,7 +129,7 @@ function renderFaq(){
  ['Can I place an order online?','Cash on Delivery orders can be submitted through secure checkout when your account, delivery address and stock are verified. Online payments are coming soon.'],
  ['How can I check delivery availability?','Please message us on WhatsApp to confirm delivery availability and estimated timelines for your PIN code.'],
  ['Can I cancel my order?','A pending Cash on Delivery order can be cancelled from My Account → My orders. Once an order moves beyond pending, contact customer support; online cancellation is not available for later stages.'],
- ['What is the return policy?','Please contact us before returning an item. We'll guide you through the applicable return and refund terms for your order.'],
+ ['What is the return policy?','Please contact us before returning an item. We will guide you through the applicable return and refund terms for your order.'],
  ['How do I contact support?','For help with an order, please use the WhatsApp order link on our home page.'],
  ['Are all watches covered by a manufacturer warranty?','Warranty terms vary by watch and seller. Please check the information listed for your selected watch before ordering.']
  ];
@@ -151,7 +151,7 @@ function renderPolicies(){
 }
 function renderContact(){
  infoRoute('IQA WATCHES · GET IN TOUCH','Contact us','For order enquiries, please message us on WhatsApp using the order link on our home page.',
- '<div class="route-feature"><h2>We are here to help</h2><p>For help with an order, please message us using the WhatsApp order link on our home page.</p><p>We'll be happy to help with your order or product questions.</p><a class="button light" href="#faq">Read FAQs</a></div>');
+ '<div class="route-feature"><h2>We are here to help</h2><p>For help with an order, please message us using the WhatsApp order link on our home page.</p><p>We will be happy to help with your order or product questions.</p><a class="button light" href="#faq">Read FAQs</a></div>');
 }
 function renderAuth(mode='login'){
  const signup=mode==='signup';
@@ -319,7 +319,7 @@ function renderSearch(){
 
 function normalizeCollectionTag(value){return String(value??'').normalize('NFKD').replace(/[\u0300-\u036f]/g,'').trim().toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'')}
 function matchesAudienceCollection(product,terms){const values=[product.audience,product.category,product.style,...(Array.isArray(product.tags)?product.tags:[])].filter(Boolean).map(normalizeCollectionTag);return values.some(value=>terms.includes(value)||value.split('-').some(token=>terms.includes(token)))}
-function collectionForRoute(route){const definitions={shop:{title:'Shop all watches',description:'Browse all watches currently in stock.',matches:()=>true},men:{title:'Men’s watches',description:'Explore watches listed in our men's collection.',matches:p=>matchesAudienceCollection(p,['men','mens'])},women:{title:'Women’s watches',description:'Explore watches listed in our women's collection.',matches:p=>matchesAudienceCollection(p,['women','womens'])},unisex:{title:'Unisex watches',description:'Explore watches listed in our unisex collection.',matches:p=>matchesAudienceCollection(p,['unisex'])},'new-arrivals':{title:'New arrivals',description:'Discover watches featured in our New Arrivals collection.',matches:p=>(Array.isArray(p.tags)?p.tags:[]).some(tag=>['new-arrival','new-arrivals'].includes(normalizeCollectionTag(tag)))},bestsellers:{title:'Bestsellers',description:'Explore customer favourites in our Bestsellers collection.',matches:p=>(Array.isArray(p.tags)?p.tags:[]).some(tag=>['bestseller','bestsellers','best-seller'].includes(normalizeCollectionTag(tag)))}};return definitions[route]||definitions.shop}
+function collectionForRoute(route){const definitions={shop:{title:'Shop all watches',description:'Browse all watches currently in stock.',matches:()=>true},men:{title:'Men’s watches',description:'Explore watches listed in our collection for men.',matches:p=>matchesAudienceCollection(p,['men','mens'])},women:{title:'Women’s watches',description:'Explore watches listed in our wocollection for men.',matches:p=>matchesAudienceCollection(p,['women','womens'])},unisex:{title:'Unisex watches',description:'Explore watches listed in our unisex collection.',matches:p=>matchesAudienceCollection(p,['unisex'])},'new-arrivals':{title:'New arrivals',description:'Discover watches featured in our New Arrivals collection.',matches:p=>(Array.isArray(p.tags)?p.tags:[]).some(tag=>['new-arrival','new-arrivals'].includes(normalizeCollectionTag(tag)))},bestsellers:{title:'Bestsellers',description:'Explore customer favourites in our Bestsellers collection.',matches:p=>(Array.isArray(p.tags)?p.tags:[]).some(tag=>['bestseller','bestsellers','best-seller'].includes(normalizeCollectionTag(tag)))}};return definitions[route]||definitions.shop}
 window.IQA_ROUTE_COLLECTIONS=Object.freeze({normalizeTag:normalizeCollectionTag,collectionForRoute});
 function showHomeSection(id){const home=document.getElementById('home');if(!home)return;root.classList.add('hidden');document.getElementById('mobileMenu')?.classList.remove('open');document.getElementById('menuToggle')?.setAttribute('aria-expanded','false');Array.from(home.children).forEach(x=>{if(x!==root)x.classList.remove('hidden')});requestAnimationFrame(()=>document.getElementById(id)?.scrollIntoView({behavior:'smooth',block:'start'}));}
 
@@ -338,7 +338,7 @@ function renderCategories(selectedCategory=''){
 }
 function renderDelivery(){
  infoRoute('IQA WATCHES · DELIVERY','Delivery information','Enter your PIN code and message us on WhatsApp to confirm delivery availability and estimated timelines.',
- '<div class="route-feature"><h2>We'll confirm your delivery details</h2><p>Delivery availability, charges and estimated timelines depend on your location. Please message us on WhatsApp and we will confirm the details before your order is placed.</p><p>We'll confirm the delivery fee and estimated date with you before your order is placed.</p><a class="button light" href="#faq">Read FAQs</a> <a class="button light" href="#policies">Store policies</a></div>');
+ '<div class="route-feature"><h2>We will confirm your delivery details</h2><p>Delivery availability, charges and estimated timelines depend on your location. Please message us on WhatsApp and we will confirm the details before your order is placed.</p><p>We will confirm the delivery fee and estimated date with you before your order is placed.</p><a class="button light" href="#faq">Read FAQs</a> <a class="button light" href="#policies">Store policies</a></div>');
 }
 
 function render(){
@@ -371,7 +371,7 @@ function render(){
 
  if(r==='care')return renderPolicies();
  if(r==='recently-viewed'){infoRoute('IQA WATCHES · SAVED','Recently viewed','Your recently viewed watches will appear here.','<div class="route-feature"><p class="route-disabled">The watches you have recently explored will appear here when available.</p><a class="button" href="#shop">Explore watches</a></div>');return;}
- if(r==='journal'){infoRoute('IQA WATCHES · JOURNAL','The Watch Journal','Thoughtful guides, watch-care notes and product stories are on the way.','<div class="route-feature"><p>We'll share model-specific guidance using information for the exact watch.</p><a class="button" href="#shop">Explore watches</a></div>');return;}
+ if(r==='journal'){infoRoute('IQA WATCHES · JOURNAL','The Watch Journal','Thoughtful guides, watch-care notes and product stories are on the way.','<div class="route-feature"><p>We will share model-specific guidance using information for the exact watch.</p><a class="button" href="#shop">Explore watches</a></div>');return;}
  if(r==='finder'){showHomeSection('finderCard');return;}
  if(r==='comparison'){showHomeSection('compareCard');return;}
  if(['shop','men','women','unisex','new-arrivals','bestsellers'].includes(r)){
