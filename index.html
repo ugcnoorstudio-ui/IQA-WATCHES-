@@ -585,6 +585,25 @@ body.menu-open::before{content:"";position:fixed;inset:0;background:rgba(13,13,1
 }
 </style>
 
+
+<style id="mobile-drawer-spacing-and-brand-fix">
+@media (max-width:680px) {
+  /* Keep the drawer clearly below the sticky homepage header. */
+  body.menu-open .mobile-menu.open {
+    top:72px !important;
+    bottom:0 !important;
+    max-height:calc(100dvh - 72px) !important;
+    max-height:calc(100vh - 72px) !important;
+    overflow-y:auto;
+    overscroll-behavior:contain;
+  }
+  .mobile-menu-head {
+    padding-top:18px;
+    padding-bottom:16px;
+  }
+}
+</style>
+
 </head>
 <body>
 
@@ -594,7 +613,7 @@ body.menu-open::before{content:"";position:fixed;inset:0;background:rgba(13,13,1
 <div class="nav-links"><a href="#home" aria-current="page">Home</a><a href="#shop">Shop all</a><a href="#men">Men</a><a href="#women">Women</a><a href="#unisex">Unisex</a><a href="#new-arrivals">New arrivals</a><a href="#bestsellers">Bestsellers</a><a href="#story">Our story</a><a href="#faq">Help</a></div>
 <div class="nav-actions"><button class="icon-btn" id="headerSearch" type="button" aria-label="Open search">⌕</button><a class="icon-btn nav-account" href="#account" aria-label="My account">Account</a><button class="icon-btn" id="wishlistOpen" aria-label="Open wishlist">♡ <span class="count" id="wishCount" aria-live="polite" aria-atomic="true">0</span></button><button class="icon-btn" id="cartOpen" aria-label="Open shopping bag">Bag <span class="count" id="cartCount" aria-live="polite" aria-atomic="true">0</span></button></div>
 <div class="mobile-menu" id="mobileMenu" role="dialog" aria-modal="true" aria-labelledby="mobileMenuTitle" aria-describedby="mobileMenuDescription" aria-hidden="true" tabindex="-1">
-<div class="mobile-menu-head"><div class="drawer-brand"><span class="drawer-kicker">THE ART OF TIME</span><span class="drawer-wordmark" id="mobileMenuTitle">IQA WATCHES</span><span class="drawer-tagline">Watches for every day.</span></div><button type="button" class="mobile-menu-close" id="mobileMenuClose" aria-label="Close navigation">×</button></div>
+<div class="mobile-menu-head"><div class="drawer-brand"><span class="drawer-kicker">THE ART OF TIME</span><span class="drawer-wordmark" id="mobileMenuTitle">IQA WATCHES</span><span class="drawer-tagline">Time is intention.</span></div><button type="button" class="mobile-menu-close" id="mobileMenuClose" aria-label="Close navigation">×</button></div>
 <div class="drawer-intro"><span class="drawer-eyebrow">DISCOVER IQA</span><p id="mobileMenuDescription">Find the details that make every moment yours.</p></div>
 <nav class="mobile-menu-nav" aria-label="Mobile navigation links">
 <div class="drawer-group-label">THE COLLECTION</div>
