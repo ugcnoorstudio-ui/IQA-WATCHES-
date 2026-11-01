@@ -98,8 +98,6 @@ test('every mobile menu link opens its real destination and closes the menu', as
   await openStore(page);
   const destinations = [
     ['shop', '#routeCatalogue'],
-    ['men', '#routeCatalogue'],
-    ['women', '#routeCatalogue'],
     ['unisex', '#routeCatalogue'],
     ['search', /Search the collection/i],
     ['finder', '#finderCard'],
@@ -433,15 +431,16 @@ test('header My Account opens the customer sign-in or safe unavailable panel', a
   await expect(page.locator('#routeView')).toContainText(/Sign in|Account unavailable/i);
 });
 
-test('category chips and brand filter navigate to their live catalogue controls', async ({ page }) => {
+test('homepage hides category and brand controls while keeping catalogue search and sorting', async ({ page }) => {
   await openStore(page);
-  const menCategory = page.locator('#categoryChips [data-category="Men"]');
-  await expect(menCategory).toBeVisible();
-  await menCategory.click();
-  await expect(menCategory).toHaveClass(/active/);
-  const brandFilter = page.locator('#brandFilter');
-  await brandFilter.focus();
-  await expect(brandFilter).toBeFocused();
+  await expect(page.locator('#categoryChips')).toBeHidden();
+  await expect(page.locator('#brandFilter')).toBeHidden();
+  await expect(page.locator('#searchInput')).toBeVisible();
+  await expect(page.locator('#priceFilter')).toBeVisible();
+  await expect(page.locator('#sortFilter')).toBeVisible();
+  await expect(page.locator('.nav-links a[href="#men"], .nav-links a[href="#women"]')).toHaveCount(0);
+  await expect(page.locator('#mobileMenu a[href="#men"], #mobileMenu a[href="#women"]')).toHaveCount(0);
+  await expect(page.locator('.footer h3').filter({ hasText: /^Explore$/ })).toHaveCount(0);
 });
 
 test('Buy Now adds the selected watch and opens the guarded checkout route', async ({ page }) => {
