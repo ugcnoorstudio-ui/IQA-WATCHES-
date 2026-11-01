@@ -74,6 +74,23 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
 }
 
 
+/* Product catalogue loading, error and empty states */
+.product-skeleton{min-width:0;padding:0 0 14px;background:rgba(255,253,248,.55);border:1px solid rgba(222,216,203,.75);overflow:hidden}
+.skeleton-image{aspect-ratio:4/4.8;width:100%;background:linear-gradient(100deg,#e8e2d7 20%,#f5f1e9 38%,#e8e2d7 58%);background-size:220% 100%;animation:iqa-skeleton-shimmer 1.35s ease-in-out infinite}
+.skeleton-line{height:9px;margin:14px 12px 0;border-radius:2px;background:linear-gradient(100deg,#e2dccf 20%,#f4f0e7 38%,#e2dccf 58%);background-size:220% 100%;animation:iqa-skeleton-shimmer 1.35s ease-in-out infinite}
+.skeleton-brand{width:32%;height:7px;margin-top:16px}
+.skeleton-title{width:76%;height:13px;margin-top:12px}
+.skeleton-price{width:28%;height:10px;margin-top:13px}
+.skeleton-actions{display:flex;gap:8px;margin:18px 12px 0}
+.skeleton-actions span{height:36px;flex:1;border:1px solid #e2dccf;background:#eee9df}
+.catalogue-message{min-height:190px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px}
+.catalogue-message h3{margin:0;color:var(--ink);font-family:var(--serif);font-size:clamp(21px,2.5vw,27px);font-weight:400}
+.catalogue-message p{margin:0 0 8px;max-width:420px;color:var(--muted);font-size:13px}
+.catalogue-message .button{min-height:44px;padding:11px 22px}
+@keyframes iqa-skeleton-shimmer{to{background-position-x:-220%}}
+@media(max-width:680px){.product-skeleton{padding-bottom:11px}.skeleton-line{margin-left:9px;margin-right:9px}.skeleton-actions{margin-left:9px;margin-right:9px;gap:6px}.catalogue-message{padding:38px 16px}.catalogue-message p{font-size:12px}}
+@media(prefers-reduced-motion:reduce){.skeleton-image,.skeleton-line{animation:none;background:#e8e2d7}}
+
 /* IQA storefront responsive refinement: catalogue cards, search and product detail */
 #shop .toolbar{display:grid;grid-template-columns:minmax(240px,1.6fr) repeat(3,minmax(145px,1fr));gap:12px;align-items:stretch}
 #shop .search-wrap{max-width:none;min-width:0;width:100%}
@@ -531,7 +548,7 @@ body.menu-open::before{content:"";position:fixed;inset:0;background:rgba(13,13,1
 <section class="section" id="shop"><div class="section-head"><div><div class="eyebrow">The collection · IQA WATCHES</div><h2>Find your timepiece.</h2></div><p class="section-sub">Explore Owner-approved watches with current catalogue pricing and images. Filter by category, brand and price; ordering is not yet enabled.</p></div>
 <div class="category-row" id="categoryChips" aria-label="Filter by category"><button class="chip active" data-category="All" aria-pressed="true">All styles</button><button class="chip" data-category="Men" aria-pressed="false">Men</button><button class="chip" data-category="Women" aria-pressed="false">Women</button><button class="chip" data-category="Unisex" aria-pressed="false">Unisex</button><button class="chip" data-category="Analog" aria-pressed="false">Analog</button><button class="chip" data-category="Chronograph" aria-pressed="false">Chronograph</button><button class="chip" data-category="New Arrivals" aria-pressed="false">New arrivals</button><button class="chip" data-category="Bestsellers" aria-pressed="false">Bestsellers</button></div>
 <div class="toolbar"><div class="search-wrap"><input id="searchInput" type="search" placeholder="Search watches or styles…" aria-label="Search watches"></div><select id="brandFilter" aria-label="Filter by brand"><option value="All">All brands</option></select><select id="priceFilter" aria-label="Filter by price"><option value="all">Any price</option><option value="under1000">Under ₹1,000</option><option value="1000to2500">₹1,000–₹2,500</option><option value="over2500">Over ₹2,500</option></select><select id="sortFilter" aria-label="Sort products"><option value="featured">Featured</option><option value="low">Price: low to high</option><option value="high">Price: high to low</option><option value="name">Name: A to Z</option></select></div>
-<div class="results-count" id="resultsCount" aria-live="polite">Loading collection…</div><div class="product-grid" id="productGrid"></div>
+<div class="results-count" id="resultsCount" aria-live="polite" aria-atomic="true">Loading watches…</div><div class="product-grid" id="productGrid"></div>
 <p class="disclaimer"><strong>Live approved catalogue. Product visibility requires Owner approval, verified product details, a primary image and available stock. Online ordering and payments are not enabled yet.</p>
 </section>
 
@@ -616,7 +633,22 @@ const $=id=>document.getElementById(id);
 function saveState(){try{localStorage.setItem('iqa-preview-cart',JSON.stringify(cart));localStorage.setItem('iqa-preview-wishlist',JSON.stringify(wishlist))}catch{}}
 function toast(msg){$('toast').textContent=msg;$('toast').classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>$('toast').classList.remove('show'),2400)}
 function updateCatalogueFilters(){const categoryValues=[...new Set(products.flatMap(p=>[p.category,p.audience,p.style]).filter(v=>v&&v!=='Not specified'))].sort((a,b)=>a.localeCompare(b));$('categoryChips').innerHTML='<button class="chip '+(activeCategory==='All'?'active':'')+'" data-category="All" aria-pressed="'+(activeCategory==='All'?'true':'false')+'">All watches</button>'+categoryValues.map(v=>'<button class="chip '+(activeCategory===v?'active':'')+'" data-category="'+escapeHtml(v)+'" aria-pressed="'+(activeCategory===v?'true':'false')+'">'+escapeHtml(v)+'</button>').join('');const brands=[...new Set(products.map(p=>p.brand).filter(Boolean))].sort((a,b)=>a.localeCompare(b));const selected=$('brandFilter').value;$('brandFilter').innerHTML='<option value="All">All brands</option>'+brands.map(v=>'<option value="'+escapeHtml(v)+'">'+escapeHtml(v)+'</option>').join('');$('brandFilter').value=brands.includes(selected)?selected:'All'}
+let catalogueRequestController=null,catalogueTimeoutId=null,catalogueRequestId=0;
 async function loadStorefrontCatalogue(){
+ const requestId=++catalogueRequestId;
+ if(catalogueTimeoutId)clearTimeout(catalogueTimeoutId);
+ if(catalogueRequestController)catalogueRequestController.abort();
+ const controller=new AbortController();
+ catalogueRequestController=controller;
+ catalogueState='loading';catalogueError='';products=[];
+ renderProducts();
+ let timedOut=false;
+ catalogueTimeoutId=setTimeout(()=>{
+  if(requestId!==catalogueRequestId)return;
+  timedOut=true;catalogueState='error';
+  catalogueError="Couldn't load watches. Please try again.";
+  controller.abort();renderProducts();
+ },10000);
  try{
   const config=window.IQA_SUPABASE_CONFIG;
   if(!window.supabase||!config?.url||!config?.publishableKey)throw new Error('Storefront catalogue configuration is missing.');
@@ -626,19 +658,20 @@ async function loadStorefrontCatalogue(){
   const {data:rows,error:productsError}=await storefrontClient.from('products')
    .select('id,name,brand,category,audience,description,selling_price,mrp,specs,state,is_sample,verified_sellable')
    .eq('state','published').eq('is_sample',false).eq('verified_sellable',true)
-   .order('name',{ascending:true}).limit(100);
+   .order('name',{ascending:true}).limit(100).abortSignal(controller.signal);
   if(productsError)throw productsError;
   const ids=(rows||[]).map(row=>row.id);
   let variants=[],media=[];
   if(ids.length){
    const [{data:variantRows,error:variantsError},{data:mediaRows,error:mediaError}]=await Promise.all([
-    storefrontClient.from('product_variants').select('id,product_id,options,selling_price,stock_on_hand,stock_reserved,active').in('product_id',ids),
-    storefrontClient.from('product_media').select('id,product_id,storage_path,alt_text,sort_order,is_primary').in('product_id',ids).order('sort_order',{ascending:true})
+    storefrontClient.from('product_variants').select('id,product_id,options,selling_price,stock_on_hand,stock_reserved,active').in('product_id',ids).abortSignal(controller.signal),
+    storefrontClient.from('product_media').select('id,product_id,storage_path,alt_text,sort_order,is_primary').in('product_id',ids).order('sort_order',{ascending:true}).abortSignal(controller.signal)
    ]);
    if(variantsError)throw variantsError;
    if(mediaError)throw mediaError;
    variants=variantRows||[];media=mediaRows||[];
   }
+  if(requestId!==catalogueRequestId||timedOut)return;
   const mediaByProduct=new Map();
   media.forEach(item=>{if(!mediaByProduct.has(item.product_id))mediaByProduct.set(item.product_id,[]);mediaByProduct.get(item.product_id).push(item)});
   products=(rows||[]).map(row=>{
@@ -661,12 +694,38 @@ async function loadStorefrontCatalogue(){
   catalogueState='ready';catalogueError='';updateCatalogueFilters();renderProducts();updateCounts();initSmartShopping();window.dispatchEvent(new Event('catalogue:ready'));
   if(location.hash.startsWith('#product/'))window.dispatchEvent(new Event('hashchange'));
  }catch(error){
-  catalogueState='error';catalogueError='Catalogue temporarily unavailable. Please try again shortly.';
-  console.error('IQA WATCHES catalogue load failed:',error);window.dispatchEvent(new Event('catalogue:error'));try{renderProducts();initSmartShopping()}catch(renderError){console.error('IQA WATCHES catalogue fallback render failed:',renderError)}
+  if(requestId!==catalogueRequestId||timedOut)return;
+  catalogueState='error';catalogueError="Couldn't load watches. Please try again.";
+  console.error('IQA WATCHES catalogue load failed:',error);window.dispatchEvent(new Event('catalogue:error'));
+  try{renderProducts();initSmartShopping()}catch(renderError){console.error('IQA WATCHES catalogue fallback render failed:',renderError)}
+ }finally{
+  if(requestId===catalogueRequestId&&catalogueTimeoutId){clearTimeout(catalogueTimeoutId);catalogueTimeoutId=null}
  }
 }
 function filteredProducts(){let list=products.filter(p=>{const q=$('searchInput').value.trim().toLowerCase();const tags=Array.isArray(p.tags)?p.tags:[];const searchOk=!q||[p.name,p.brand,p.category,p.audience,p.style,p.colour,p.dial,p.strap,p.sku,p.desc,...tags].filter(Boolean).join(' ').toLowerCase().includes(q);const categoryOk=activeCategory==='All'||p.category===activeCategory||p.audience===activeCategory||p.style===activeCategory||tags.includes(activeCategory);const brandOk=$('brandFilter').value==='All'||p.brand===$('brandFilter').value;const price=$('priceFilter').value;const priceOk=price==='all'||(price==='under1000'&&p.price<1000)||(price==='1000to2500'&&p.price>=1000&&p.price<=2500)||(price==='over2500'&&p.price>2500);return searchOk&&categoryOk&&brandOk&&priceOk});const sort=$('sortFilter').value;if(sort==='low')list.sort((a,b)=>a.price-b.price);if(sort==='high')list.sort((a,b)=>b.price-a.price);if(sort==='name')list.sort((a,b)=>a.name.localeCompare(b.name));return list}
-function renderProducts(){const list=filteredProducts();$('resultsCount').textContent=list.length+' verified '+(list.length===1?'watch':'watches');if(!list.length){const title=catalogueState==='loading'?'Loading the IQA collection…':catalogueState==='error'?'The collection is temporarily unavailable.':'No published watches yet';const detail=catalogueState==='loading'?'Fetching approved products and current availability.':catalogueState==='error'?catalogueError:products.length?'No watches match these filters. Try resetting your filters.':'Our verified collection will appear here after the Owner publishes products with available stock.';$('productGrid').innerHTML='<div class="empty-state"><h3>'+escapeHtml(title)+'</h3><p>'+escapeHtml(detail)+'</p>'+(products.length?'<button class="button light" id="resetFilters">Reset filters</button>':'')+'</div>';return}$('productGrid').innerHTML=list.map(p=>'<article class="product-card"><div class="product-image"><a class="product-image-link" href="#product/'+encodeURIComponent(p.id)+'" data-view="'+escapeHtml(p.id)+'" aria-label="View details for '+escapeHtml(p.name)+'"><img loading="lazy" src="'+escapeHtml(safeImageUrl(p.image))+'" alt="'+escapeHtml(p.imageAlt||p.name)+'"></a><span class="product-label">'+escapeHtml(p.label)+'</span><button class="wish-btn '+(wishlist.includes(p.id)?'selected':'')+'" data-wish="'+p.id+'" aria-label="'+(wishlist.includes(p.id)?'Remove '+escapeHtml(p.name)+' from wishlist':'Add '+escapeHtml(p.name)+' to wishlist')+'" aria-pressed="'+(wishlist.includes(p.id)?'true':'false')+'">♡</button></div><div class="product-info"><div class="product-brand">'+escapeHtml(p.brand)+'</div><h3 class="product-title"><a href="#product/'+encodeURIComponent(p.id)+'" data-view="'+escapeHtml(p.id)+'">'+escapeHtml(p.name)+'</a></h3><p class="product-desc">'+escapeHtml(p.category)+' · '+escapeHtml(p.style)+'</p><div class="price-line"><span class="price">'+money(p.price)+'</span>'+(p.compareAt>p.price?'<span class="old-price">'+money(p.compareAt)+'</span>':'')+'</div><div class="card-actions"><a class="quick-view" href="#product/'+encodeURIComponent(p.id)+'" aria-label="View details for '+escapeHtml(p.name)+'">View details</a><button class="add-cart" type="button" data-add="'+escapeHtml(p.id)+'" aria-label="Add '+escapeHtml(p.name)+' to bag">Add to Bag</button></div></div></article>').join('')}
+function renderProducts(){
+ const grid=$('productGrid'),count=$('resultsCount');
+ if(catalogueState==='loading'){
+  count.textContent='Loading watches…';
+  grid.setAttribute('aria-busy','true');
+  grid.innerHTML=Array.from({length:6},()=>'<article class="product-skeleton" aria-hidden="true"><div class="skeleton-image"></div><div class="skeleton-line skeleton-brand"></div><div class="skeleton-line skeleton-title"></div><div class="skeleton-line skeleton-price"></div><div class="skeleton-actions"><span></span><span></span></div></article>').join('');
+  return;
+ }
+ grid.setAttribute('aria-busy','false');
+ const list=filteredProducts();
+ count.textContent=list.length+' verified '+(list.length===1?'watch':'watches');
+ if(!list.length){
+  if(catalogueState==='error'){
+   grid.innerHTML='<div class="empty-state catalogue-message" role="alert"><h3>Couldn\'t load watches. Please try again.</h3><p>The collection may be temporarily unavailable.</p><button class="button light" type="button" data-catalogue-retry>Retry</button></div>';
+  }else if(products.length){
+   grid.innerHTML='<div class="empty-state catalogue-message"><h3>No watches match your filters</h3><p>Try changing your search or filter selections.</p><button class="button light" type="button" data-clear-catalogue-filters>Clear filters</button></div>';
+  }else{
+   grid.innerHTML='<div class="empty-state catalogue-message"><h3>No published watches yet</h3><p>Our verified collection will appear here after the Owner publishes products with available stock.</p></div>';
+  }
+  return;
+ }
+ grid.innerHTML=list.map(p=>'<article class="product-card"><div class="product-image"><a class="product-image-link" href="#product/'+encodeURIComponent(p.id)+'" data-view="'+escapeHtml(p.id)+'" aria-label="View details for '+escapeHtml(p.name)+'"><img loading="lazy" src="'+escapeHtml(safeImageUrl(p.image))+'" alt="'+escapeHtml(p.imageAlt||p.name)+'"></a><span class="product-label">'+escapeHtml(p.label)+'</span><button class="wish-btn '+(wishlist.includes(p.id)?'selected':'')+'" data-wish="'+p.id+'" aria-label="'+(wishlist.includes(p.id)?'Remove '+escapeHtml(p.name)+' from wishlist':'Add '+escapeHtml(p.name)+' to wishlist')+'" aria-pressed="'+(wishlist.includes(p.id)?'true':'false')+'">♡</button></div><div class="product-info"><div class="product-brand">'+escapeHtml(p.brand)+'</div><h3 class="product-title"><a href="#product/'+encodeURIComponent(p.id)+'" data-view="'+escapeHtml(p.id)+'">'+escapeHtml(p.name)+'</a></h3><p class="product-desc">'+escapeHtml(p.category)+' · '+escapeHtml(p.style)+'</p><div class="price-line"><span class="price">'+money(p.price)+'</span>'+(p.compareAt>p.price?'<span class="old-price">'+money(p.compareAt)+'</span>':'')+'</div><div class="card-actions"><a class="quick-view" href="#product/'+encodeURIComponent(p.id)+'" aria-label="View details for '+escapeHtml(p.name)+'">View details</a><button class="add-cart" type="button" data-add="'+escapeHtml(p.id)+'" aria-label="Add '+escapeHtml(p.name)+' to bag">Add to Bag</button></div></div></article>').join('');
+}
 function updateCounts(){$('cartCount').textContent=Object.values(cart).reduce((a,b)=>a+b,0);$('wishCount').textContent=wishlist.length;saveState()}
 function openPanel(mode){$('overlay').classList.add('open');$('drawer').classList.add('open');$('drawer').setAttribute('aria-hidden','false');document.body.classList.add('locked');$('drawerTitle').textContent=mode==='wishlist'?'Your wishlist':'Your bag';renderPanel(mode)}
 function closePanel(){$('overlay').classList.remove('open');$('drawer').classList.remove('open');$('drawer').setAttribute('aria-hidden','true');document.body.classList.remove('locked')}
@@ -715,6 +774,12 @@ function openPolicyFromHash(){const match=location.hash.match(/^#policy-(.+)$/);
 function setCategory(category){activeCategory=category;document.querySelectorAll('[data-category]').forEach(b=>{const selected=b.dataset.category===category;b.classList.toggle('active',selected);b.setAttribute('aria-pressed',String(selected))});renderProducts()}
 function resetFilters(){$('searchInput').value='';$('brandFilter').value='All';$('priceFilter').value='all';$('sortFilter').value='featured';setCategory('All')}
 [$('searchInput'),$('brandFilter'),$('priceFilter'),$('sortFilter')].forEach(el=>el.addEventListener(el.tagName==='INPUT'?'input':'change',renderProducts));
+document.addEventListener('click',event=>{
+ const retry=event.target.closest('[data-catalogue-retry]');
+ if(retry){retry.disabled=true;retry.textContent='Retrying…';loadStorefrontCatalogue();return}
+ if(event.target.closest('[data-clear-catalogue-filters]'))resetFilters();
+});
+
 $('cartOpen').addEventListener('click',()=>{if(location.hash!=='#bag')location.hash='bag';else if(typeof window.renderRouteFromHash==='function')window.renderRouteFromHash();});$('wishlistOpen').addEventListener('click',()=>{if(location.hash!=='#wishlist')location.hash='wishlist';else if(typeof window.renderRouteFromHash==='function')window.renderRouteFromHash();});
 function openSearchPanel(){if(location.hash!=='#search')location.hash='search';else if(typeof window.renderRouteFromHash==='function')window.renderRouteFromHash();setTimeout(()=>document.getElementById('routeSearchInput')?.focus({preventScroll:true}),80)}
 function closeSearchPanel(){const panel=$('searchOverlay');panel.classList.remove('open');panel.setAttribute('aria-hidden','true');document.body.classList.toggle('locked',$('drawer').classList.contains('open')||$('modalWrap').classList.contains('open')||$('mobileMenu').classList.contains('open'));$('headerSearch').focus({preventScroll:true})}
