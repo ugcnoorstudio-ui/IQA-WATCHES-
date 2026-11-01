@@ -54,7 +54,7 @@ test('local asset intake performs bounded format checks without network or persi
   const html = read('admin/index.html');
   const studio = read('admin/motion-studio.js');
   assert.match(source, /0x46546c67/);
-  assert.match(source, /declaredLength !== buffer.byteLength/);
+  assert.match(source, /view\.getUint32\(8,true\)!==buffer\.byteLength/);
   assert.match(source, /JSON\.parse/);
   assert.match(source, /URL\.createObjectURL/);
   assert.match(source, /URL\.revokeObjectURL/);
