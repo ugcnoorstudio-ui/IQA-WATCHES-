@@ -194,3 +194,29 @@ test('catalogue search finds products by model code and description', async ({ p
   await page.locator('#searchInput').fill(descriptionToken);
   await expect(page.locator('#productGrid [data-add="' + samples.descriptionId + '"]')).toHaveCount(1);
 });
+
+
+test('collection routes show only products matching approved audience and explicit tags', async ({ page }) => {
+  await openStore(page);
+  const routes = ['men', 'women', 'unisex', 'new-arrivals', 'bestsellers'];
+  for (const route of routes) {
+    const expectedIds = await page.evaluate((value) => {
+      const normalize = input => String(input || '').trim().toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+      const definitions = {
+        men: product => normalize(product.audience) === 'men',
+        women: product => normalize(product.audience) === 'women',
+        unisex: product => normalize(product.audience) === 'unisex',
+        'new-arrivals': product => (Array.isArray(product.tags) ? product.tags : []).some(tag => ['new-arrival', 'new-arrivals'].includes(normalize(tag))),
+        bestsellers: product => (Array.isArray(product.tags) ? product.tags : []).some(tag => ['bestseller', 'bestsellers', 'best-seller'].includes(normalize(tag)))
+      };
+      return products.filter(definitions[value]).map(product => product.id).sort();
+    }, route);
+
+    await navigateToHash(page, route);
+    const actualIds = await page.locator('#routeCatalogue a[href^="#product/"]').evaluateAll(links =>
+      links.map(link => decodeURIComponent(link.getAttribute('href').slice('#product/'.length))).sort()
+    );
+    expect(actualIds, route + ' collection should match approved catalogue metadata exactly').toEqual(expectedIds);
+    if (!expectedIds.length) await expect(page.locator('#routeCatalogue .route-empty')).toBeVisible();
+  }
+});
