@@ -95,7 +95,7 @@ test('GLB parser rejects malformed accessor bounds and invalid index formats',()
  assert.equal(parse(makeGlb(base,geometry)).triangles,1);
  const badBounds=structuredClone(base);badBounds.bufferViews[0].byteLength=8;
  assert.throws(()=>parse(makeGlb(badBounds,geometry)),/buffer view/);
- const badIndex=structuredClone(base);badIndex.accessors[1].componentType=5126;
+ const badIndex=structuredClone(base);badIndex.accessors[1].componentType=5126;badIndex.accessors[1].count=1;
  assert.throws(()=>parse(makeGlb(badIndex,geometry)),/unsigned SCALAR/);
  const outside=structuredClone(base);new DataView(geometry).setUint16(40,9,true);
  assert.throws(()=>parse(makeGlb(outside,geometry)),/outside POSITION/);
