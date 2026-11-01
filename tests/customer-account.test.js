@@ -86,3 +86,25 @@ test('all inline storefront JavaScript blocks parse without syntax errors', asyn
   assert.ok(scripts.length > 0, 'expected inline storefront scripts');
   scripts.forEach((source, index) => assert.doesNotThrow(() => new vm.Script(source), `inline script ${index + 1}`));
 });
+
+
+test('brands and categories routes render only catalogue-backed groups and products', () => {
+  assert.match(routes, /if\(r==='brands'\)return renderBrands\(arg\)/);
+  assert.match(routes, /if\(r==='categories'\|\|r==='category'\)return renderCategories\(arg\)/);
+  assert.match(routes, /new Set\(products\.map\(p=>p\.brand\)/);
+  assert.match(routes, /p\.category===selectedCategory\|\|p\.audience===selectedCategory/);
+});
+
+test('comparison route supports two to four products and removal without enabling checkout', () => {
+  assert.match(routes, /if\(r==='comparison'\|\|r==='compare'\)return renderComparison\(\)/);
+  assert.match(routes, /routeCompareIds\.length>=4/);
+  assert.match(routes, /data-route-uncompare/);
+  assert.match(routes, /Select at least two watches to compare side by side/);
+});
+
+test('delivery route does not invent serviceability, fees, or delivery estimates', () => {
+  assert.match(routes, /if\(r==='delivery'\|\|r==='shipping'\)return renderDelivery\(\)/);
+  assert.match(routes, /PIN-code serviceability, courier partners, shipping charges, handling times and delivery estimates are not currently connected/);
+  assert.match(routes, /Checkout remains disabled/);
+});
+
