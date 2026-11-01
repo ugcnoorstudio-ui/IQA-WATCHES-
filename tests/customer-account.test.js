@@ -107,3 +107,71 @@ test('delivery route does not invent serviceability, fees, or delivery estimates
   assert.match(routes, /PIN-code serviceability, courier partners, shipping charges, handling times and delivery estimates are not currently connected/);
   assert.match(routes, /Checkout remains disabled/);
 });
+
+
+test('brand directory handles an empty catalogue and safely navigates encoded brand names', () => {
+  const start = routes.indexOf('function renderBrands(');
+  const end = routes.indexOf('function renderCategories(', start);
+  assert.ok(start >= 0 && end > start);
+  const source = routes.slice(start, end);
+  const context = {
+    products: [
+      { id: 'p1', brand: 'A/B & Co', name: 'Watch <One>', image: '/watch.png', price: 1200 },
+      { id: 'p2', brand: 'A/B & Co', name: 'Watch Two', image: '/watch-2.png', price: 1500 }
+    ],
+    esc: value => String(value ?? '').replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;').replaceAll('"', '&quot;'),
+    safeImageUrl: value => value,
+    money: value => '₹' + value,
+    infoRoute: (_kicker, _title, _description, body) => { context.body = body; }
+  };
+  vm.runInNewContext(source, context);
+  context.renderBrands();
+  assert.match(context.body, /A\/B &amp; Co/);
+  assert.match(context.body, /#brands\/A%2FB%20%26%20Co/);
+  context.renderBrands('A/B & Co');
+  assert.match(context.body, /Watch &lt;One&gt;/);
+  assert.equal((context.body.match(/route-card/g) || []).length, 2);
+  context.products = [];
+  context.renderBrands();
+  assert.match(context.body, /No brands are currently listed/);
+});
+
+test('comparison route enforces unique selections, a four-watch limit, removal and clear', () => {
+  const start = routes.indexOf('let routeCompareIds=[];');
+  const end = routes.indexOf('function render(){', start);
+  assert.ok(start >= 0 && end > start);
+  const source = routes.slice(start, end);
+  const elements = {};
+  const element = id => elements[id] ||= {
+    value: '', textContent: '', innerHTML: '', listeners: {},
+    addEventListener(type, callback) { this.listeners[type] = callback; }
+  };
+  const products = Array.from({ length: 5 }, (_, i) => ({
+    id: 'p' + (i + 1), name: 'Watch ' + (i + 1), brand: 'Brand',
+    sku: 'SKU-' + (i + 1), price: 1000 + i, category: 'Digital',
+    style: 'Sport', stock: 3
+  }));
+  const context = {
+    products,
+    $r: element,
+    esc: value => String(value ?? '').replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;').replaceAll('"', '&quot;'),
+    money: value => '₹' + value,
+    infoRoute: () => {},
+  };
+  vm.runInNewContext(source, context);
+  context.renderComparison();
+  const chooseAndAdd = id => { element('routeCompareProduct').value = id; element('routeCompareAdd').listeners.click(); };
+  assert.match(element('routeCompareResults').innerHTML, /Select at least two watches/);
+  chooseAndAdd('p1');
+  chooseAndAdd('p1');
+  assert.match(element('routeCompareStatus').textContent, /already selected/);
+  chooseAndAdd('p2');
+  assert.match(element('routeCompareResults').innerHTML, /Watch 1/);
+  assert.match(element('routeCompareResults').innerHTML, /Watch 2/);
+  chooseAndAdd('p3'); chooseAndAdd('p4'); chooseAndAdd('p5');
+  assert.match(element('routeCompareStatus').textContent, /up to four watches/);
+  element('routeCompareResults').listeners.click({ target: { closest: () => ({ dataset: { routeUncompare: 'p2' } }) } });
+  assert.doesNotMatch(element('routeCompareResults').innerHTML, /Watch 2/);
+  element('routeCompareClear').listeners.click();
+  assert.match(element('routeCompareResults').innerHTML, /Select at least two watches/);
+});
