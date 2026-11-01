@@ -37,7 +37,8 @@ let baseUrl;
 
 test.before(async () => {
   server = createServer(async (req, res) => {
-    const pathname = decodeURIComponent(new URL(req.url, 'http://localhost').pathname);
+    const requestedPath = decodeURIComponent(new URL(req.url, 'http://localhost').pathname);
+    const pathname = requestedPath === '/' ? '/index.html' : requestedPath;
     const filePath = resolve(root, '.' + pathname);
     if (filePath !== root && !filePath.startsWith(root + sep)) {
       res.writeHead(403).end('Forbidden');
