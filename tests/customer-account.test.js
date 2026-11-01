@@ -87,3 +87,58 @@ test('customer comparison supports individual removal and prunes IDs missing fro
   assert.match(storefront, /const valid=state\.compare\.filter/);
   assert.match(storefront, /state\.compare=valid;persist\(\)/);
 });
+
+
+test('product routes wait for catalogue readiness and expose a safe error state', () => {
+  assert.match(routes, /catalogueState==='loading'[\\s\\S]*?Loading product details/);
+  assert.match(routes, /catalogueState==='error'[\\s\\S]*?Product temporarily unavailable/);
+  assert.match(routes, /catalogue:ready/);
+  assert.match(routes, /catalogue:error/);
+});
+
+test('route renderer catches runtime failures and offers a recovery action', () => {
+  assert.match(routes, /IQA WATCHES route render failed/);
+  assert.match(routes, /role="alert"/);
+  assert.match(routes, /Return home/);
+});
+
+test('async account rendering does not overwrite a newer route', () => {
+  assert.match(routes, /const requestedHash=location\\.hash/);
+  assert.match(routes, /if\\(location\\.hash!==requestedHash\\)return/);
+});
+
+test('brand and category directories are catalogue-backed and support empty catalogues', () => {
+  assert.match(storefront, /function renderBrands\\(/);
+  assert.match(storefront, /function renderCategories\\(/);
+  assert.match(storefront, /if\\(route==='brands'\\)/);
+  assert.match(storefront, /if\\(route==='categories'\\)/);
+  assert.match(storefront, /No brands are currently listed/);
+});
+
+test('delivery checker does not promise unverified serviceability, charges or dates', () => {
+  assert.match(storefront, /function renderDelivery\\(/);
+  assert.match(storefront, /No delivery date or fee is being promised/);
+  assert.match(storefront, /No delivery date or fee can be confirmed/);
+});
+
+test('comparison state is normalized, capped and synchronized across tabs', () => {
+  assert.match(storefront, /const cleanIds=\\(value,limit\\)/);
+  assert.match(storefront, /cleanIds\\(initialState\\?\\.compare,4\\)/);
+  assert.match(storefront, /cleanIds\\(initialState\\?\\.recent,12\\)/);
+  assert.match(storefront, /window\\.addEventListener\\('storage'/);
+  assert.match(storefront, /const valid=state\\.compare\\.filter/);
+});
+
+test('return history is scoped to the authenticated customer and only schema-supported request kinds are offered', () => {
+  assert.match(routes, /from\\('return_requests'\\)\\.select\\('id,order_id,kind,reason,state,created_at,orders!inner\\(customer_id\\)'\\)\\.eq\\('orders\\.customer_id',customerId\\)/);
+  assert.ok(routes.includes('<option value="return">Return</option><option value="refund">Refund</option><option value="warranty">Warranty</option>'));
+  assert.ok(!routes.includes('<option value="exchange">Exchange</option>'));
+});
+
+test('cart and wishlist restore only known catalogue items and enforce stock limits', () => {
+  assert.match(await readFile(new URL('../index.html', import.meta.url), 'utf8'), /safeLoad\\('iqa-preview-cart',\\{\\}\\)/);
+  const html = await readFile(new URL('../index.html', import.meta.url), 'utf8');
+  assert.match(html, /knownProductIds\\.has\\(id\\)/);
+  assert.match(html, /Math\\.min\\(qty,10,products\\.find\\(p=>p\\.id===id\\)\\?\\.stock\\|\\|0\\)/);
+  assert.match(html, /compare-table-wrap\\{overflow-x:auto/);
+});
