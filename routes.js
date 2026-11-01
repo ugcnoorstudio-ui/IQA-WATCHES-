@@ -88,7 +88,7 @@ async function renderCheckoutRoute(){
    if(metaError)throw metaError;
   };
   const paymentInputs=document.querySelectorAll('input[name="payment_method"]');
-  paymentInputs.forEach(input=>input.addEventListener('change',()=>{const message=$r('checkoutMessage');if(message)message.textContent=input.value==='cash_on_delivery'?'COD selected. Delivery configuration is still required before an order can be accepted.':'This payment method is not active yet.';}));
+  paymentInputs.forEach(input=>input.addEventListener('change',()=>{const message=$r('checkoutMessage');if(message)message.textContent=input.value==='cash_on_delivery'?'COD selected. ₹40 delivery applies up to ₹500; delivery is free above ₹500. Orders can be accepted after delivery PIN codes are enabled.':'This payment method is not active yet.';}));
   if(submit)submit.addEventListener('click',async()=>{const msg=$r('checkoutMessage');try{await saveContact();if(!document.querySelector('input[name="address_id"]:checked'))throw new Error('Please select or add a delivery address.');msg.textContent='Contact details saved. Delivery charges: '+(shippingFee===0?'FREE':money(shippingFee))+ '. COD will be available once your delivery PIN code is enabled.';}catch(err){msg.textContent=err.message||'Could not save your contact details.';}});
  }catch(err){
   if(location.hash!==requestedHash)return;
