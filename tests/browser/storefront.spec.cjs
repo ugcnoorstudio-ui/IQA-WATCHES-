@@ -433,6 +433,29 @@ test('header My Account opens the customer sign-in or safe unavailable panel', a
   await expect(page.locator('#routeView')).toContainText(/Sign in|Account unavailable/i);
 });
 
+test('prominent category and brand shortcuts navigate to their live catalogue controls', async ({ page }) => {
+  await openStore(page);
+  const shortcuts = page.getByRole('navigation', { name: 'Browse watch collections' });
+  await expect(shortcuts).toBeVisible();
+  await shortcuts.getByRole('button', { name: 'Men', exact: true }).click();
+  await expect(page.locator('#categoryChips [data-category="Men"]')).toHaveClass(/active/);
+  await shortcuts.getByRole('button', { name: 'Brands', exact: true }).click();
+  await expect(page.locator('#brandFilter')).toBeFocused();
+});
+
+test('Buy Now adds the selected watch and opens the guarded checkout route', async ({ page }) => {
+  await openStore(page);
+  const card = page.locator('#productGrid .product-card').first();
+  await card.locator('.product-image-link').click();
+  const modal = page.locator('#modalWrap');
+  await expect(modal).toHaveClass(/open/);
+  await modal.locator('[data-buy-now]').click();
+  await expect.poll(() => page.evaluate(() => location.hash)).toBe('#checkout');
+  await expect(page.locator('#routeView')).toContainText(/Checkout is not available yet/i);
+  await expect(page.locator('#routeView')).toContainText(/No order can be submitted/i);
+  await expect(page.locator('#routeView [data-qty]')).toHaveCount(0);
+});
+
 test('collection, search and wishlist product cards open the same quick-view modal', async ({ page }) => {
   await openStore(page);
   await navigateToHash(page, 'shop');
