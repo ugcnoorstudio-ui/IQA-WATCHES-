@@ -629,7 +629,7 @@ const PRICE_RANGES=Object.freeze([
 ]);
 function matchesPriceRange(price,rangeId){
  const range=PRICE_RANGES.find(item=>item.id===rangeId),value=Number(price);
- if(!range||!Number.isFinite(value))return false;
+ if(!range||!Number.isFinite(value)||value<0)return false;
  return (range.min===undefined||(range.minExclusive?value>range.min:value>=range.min))&&
   (range.max===undefined||(range.maxInclusive?value<=range.max:value<range.max));
 }
