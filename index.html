@@ -287,6 +287,60 @@ body.menu-open::before{content:"";position:fixed;inset:0;background:rgba(13,13,1
   .nav-actions > a[aria-label="My account"] { display: none; }
   .nav-links { display: none; }
 }
+/* Premium mobile drawer — editorial typography, grouped navigation, warm luxury palette. */
+@media(max-width:680px){
+  .mobile-menu.open{
+    top:0;
+    right:0;
+    bottom:0;
+    width:min(88vw,390px);
+    max-width:390px;
+    padding:0 0 max(22px,env(safe-area-inset-bottom));
+    gap:0;
+    background:#f5f1e8;
+    color:#211f1a;
+    border-left:1px solid rgba(174,145,91,.35);
+    box-shadow:-24px 0 64px rgba(16,14,10,.24);
+    animation:drawerReveal .28s cubic-bezier(.2,.75,.25,1) both;
+  }
+  .mobile-menu-head{
+    position:relative;
+    padding:25px 22px 20px;
+    min-height:106px;
+    background:linear-gradient(135deg,#f8f5ee 0%,#eee7d9 100%);
+    border-bottom:1px solid #d8cdbb;
+  }
+  .drawer-brand{display:flex;flex-direction:column;gap:3px}
+  .drawer-kicker,.drawer-eyebrow,.drawer-group-label,.drawer-footer{
+    font-family:Arial,sans-serif;
+    font-size:9px;
+    line-height:1.5;
+    letter-spacing:2px;
+    font-weight:600;
+    color:#947746;
+  }
+  .drawer-wordmark{font-family:var(--serif);font-size:24px;line-height:1.1;letter-spacing:1.5px;color:#211f1a}
+  .drawer-tagline{font-size:10px;letter-spacing:.5px;color:#777064}
+  .mobile-menu-close{
+    flex:0 0 42px;width:42px;height:42px;border:1px solid #cfc2ac;border-radius:50%;
+    background:rgba(255,255,255,.45);font-size:25px;color:#332f27;cursor:pointer;
+  }
+  .drawer-intro{padding:20px 24px 13px}
+  .drawer-intro p{margin:5px 0 0;font-family:var(--serif);font-size:17px;line-height:1.4;color:#4c463b}
+  .drawer-group-label{padding:16px 24px 7px;border-top:1px solid #e1d9cc}
+  .mobile-menu>a{
+    display:flex;align-items:center;justify-content:space-between;gap:16px;
+    min-height:48px;padding:11px 24px;border:0;border-bottom:1px solid #e6dfd3;
+    background:transparent;color:#29261f;font-family:var(--serif);font-size:16px;
+    font-weight:400;letter-spacing:.15px;text-transform:none;
+    transition:background .18s ease,padding .18s ease,color .18s ease;
+  }
+  .mobile-menu>a span{font-family:Arial,sans-serif;font-size:14px;color:#a78b58}
+  .mobile-menu>a:active,.mobile-menu>a:focus-visible{background:#ebe3d5;padding-left:28px;color:#806638;outline:none}
+  .drawer-footer{display:flex;flex-direction:column;gap:4px;margin:18px 24px 0;padding-top:14px;border-top:1px solid #d8cdbb;font-size:8px;letter-spacing:1.5px;color:#8c806c}
+}
+@keyframes drawerReveal{from{opacity:.7;transform:translateX(18px)}to{opacity:1;transform:translateX(0)}}
+@media(prefers-reduced-motion:reduce){.mobile-menu.open{animation:none}.mobile-menu>a{transition:none}}
 </style>
 <link rel="stylesheet" href="./assets/cinematic-story.css">
 </head>
@@ -297,7 +351,17 @@ body.menu-open::before{content:"";position:fixed;inset:0;background:rgba(13,13,1
 <a class="brand" href="#home" aria-label="IQA WATCHES home"><img class="brand-logo" src="./assets/iqa-watches-header-logo.svg" alt="IQA WATCHES — Timeless design. Everyday precision."></a>
 <div class="nav-links"><a href="#shop">Shop all</a><a href="#men">Men</a><a href="#women">Women</a><a href="#unisex">Unisex</a><a href="#new-arrivals">New arrivals</a><a href="#bestsellers">Bestsellers</a><a href="#story">Our story</a><a href="#faq">Help</a></div>
 <div class="nav-actions"><button class="icon-btn" id="headerSearch" aria-label="Search products">⌕</button><button class="icon-btn" id="voiceSearch" type="button" aria-label="Voice search" title="Voice search">🎙</button><a class="icon-btn" href="#account" aria-label="My account">Account</a><button class="icon-btn" id="wishlistOpen" aria-label="Open wishlist">♡ <span class="count" id="wishCount" aria-live="polite" aria-atomic="true">0</span></button><button class="icon-btn" id="cartOpen" aria-label="Open shopping bag">Bag <span class="count" id="cartCount" aria-live="polite" aria-atomic="true">0</span></button></div>
-<div class="mobile-menu" id="mobileMenu"><div class="mobile-menu-head"><span>IQA WATCHES</span><button type="button" class="mobile-menu-close" id="mobileMenuClose" aria-label="Close navigation">×</button></div><a href="#shop">Shop all</a><a href="#men">Men watches</a><a href="#women">Women watches</a><a href="#unisex">Unisex watches</a><a href="#search">Search</a><a href="#finder">Watch Finder</a><a href="#comparison">Compare</a><a href="#wishlist">Wishlist</a><a href="#bag">Shopping bag</a><a href="#journal">Watch Journal</a><a href="#story">Our story</a><a href="#care">Customer care</a><a href="#contact">Contact</a><a href="#account">My account</a><a href="#orders">My orders</a><a href="#faq">FAQs</a><a href="#policies">Store policies</a></div>
+<div class="mobile-menu" id="mobileMenu" aria-label="Mobile navigation">
+<div class="mobile-menu-head"><div class="drawer-brand"><span class="drawer-kicker">THE ART OF TIME</span><span class="drawer-wordmark">IQA WATCHES</span><span class="drawer-tagline">Timeless design. Everyday precision.</span></div><button type="button" class="mobile-menu-close" id="mobileMenuClose" aria-label="Close navigation">×</button></div>
+<div class="drawer-intro"><span class="drawer-eyebrow">DISCOVER IQA</span><p>Find the details that make every moment yours.</p></div>
+<div class="drawer-group-label">THE COLLECTION</div>
+<a href="#shop">Shop all <span aria-hidden="true">↗</span></a><a href="#men">Men watches <span aria-hidden="true">↗</span></a><a href="#women">Women watches <span aria-hidden="true">↗</span></a><a href="#unisex">Unisex watches <span aria-hidden="true">↗</span></a>
+<div class="drawer-group-label">TOOLS &amp; SAVED</div>
+<a href="#search">Search <span aria-hidden="true">↗</span></a><a href="#finder">Watch Finder <span aria-hidden="true">↗</span></a><a href="#comparison">Compare <span aria-hidden="true">↗</span></a><a href="#wishlist">Wishlist <span aria-hidden="true">↗</span></a><a href="#bag">Shopping bag <span aria-hidden="true">↗</span></a>
+<div class="drawer-group-label">THE IQA EXPERIENCE</div>
+<a href="#journal">Watch Journal <span aria-hidden="true">↗</span></a><a href="#story">Our story <span aria-hidden="true">↗</span></a><a href="#care">Customer care <span aria-hidden="true">↗</span></a><a href="#contact">Contact <span aria-hidden="true">↗</span></a><a href="#account">My account <span aria-hidden="true">↗</span></a><a href="#orders">My orders <span aria-hidden="true">↗</span></a><a href="#faq">FAQs <span aria-hidden="true">↗</span></a><a href="#policies">Store policies <span aria-hidden="true">↗</span></a>
+<div class="drawer-footer"><span>MADE FOR EVERY MOMENT</span><span>TIMELESS · CONSIDERED · PERSONAL</span></div>
+</div>
 </nav></header>
 
 <main><div id="home">
