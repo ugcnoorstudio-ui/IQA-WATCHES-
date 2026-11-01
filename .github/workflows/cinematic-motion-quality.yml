@@ -35,5 +35,10 @@ jobs:
           node --check routes.js
       - name: Run local asset viewer and customer account security tests
         run: node --test tests/asset-intake.test.js tests/customer-account.test.js
+      - name: Run storefront cart, wishlist and compare browser tests in Chromium
+        run: |
+          npm install --no-save --package-lock=false playwright@1.55.0
+          npx playwright install --with-deps chromium
+          node --test tests/storefront-browser.test.js
       - name: Check patch whitespace
         run: git diff --check origin/main...HEAD
