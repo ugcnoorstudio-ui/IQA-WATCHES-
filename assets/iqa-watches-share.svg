@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+<defs><linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#11110F"/><stop offset="1" stop-color="#29251F"/></linearGradient><radialGradient id="glow"><stop offset="0" stop-color="#B99A5B" stop-opacity=".23"/><stop offset="1" stop-color="#B99A5B" stop-opacity="0"/></radialGradient></defs>
+<rect width="1200" height="630" fill="url(#bg)"/><circle cx="910" cy="310" r="390" fill="url(#glow)"/>
+<rect x="55" y="55" width="1090" height="520" rx="8" fill="none" stroke="#B99A5B" stroke-opacity=".65" stroke-width="2"/>
+<g transform="translate(760 118)"><circle cx="155" cy="150" r="126" fill="#F4F0E7" stroke="#B99A5B" stroke-width="8"/><g stroke="#B99A5B" stroke-width="7" stroke-linecap="square"><path d="M155 39v23m0 176v23M44 150h23m176 0h23M77 72l17 18m122 122 17 18M233 72l-17 18M94 212l-17 18"/></g><path d="M155 150 95 104m60 46 56-55" stroke="#11110F" stroke-width="11" stroke-linecap="round"/><circle cx="155" cy="150" r="10" fill="#B99A5B"/><text x="155" y="340" text-anchor="middle" fill="#F4F0E7" font-family="Georgia,serif" font-size="76" letter-spacing="6">IQA</text></g>
+<text x="125" y="245" fill="#B99A5B" font-family="Arial,sans-serif" font-size="18" letter-spacing="7">TIMELESS DESIGN · EVERYDAY PRECISION</text>
+<text x="120" y="335" fill="#F4F0E7" font-family="Georgia,serif" font-size="76">IQA WATCHES</text>
+<text x="125" y="405" fill="#D9C18B" font-family="Georgia,serif" font-size="43">Watches for every day.</text>
+<path d="M125 455h410" stroke="#B99A5B" stroke-width="2"/>
+<text x="125" y="500" fill="#C8C1B5" font-family="Arial,sans-serif" font-size="17" letter-spacing="3">DISCOVER THE EVERYDAY COLLECTION</text>
+</svg>
