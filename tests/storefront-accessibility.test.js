@@ -28,7 +28,7 @@ test('category filters expose and synchronize their pressed state',()=>{
 test('product card controls have product-specific accessible names and wishlist state',()=>{
  assert.ok(html.includes("aria-label=\"'+(wishlist.includes(p.id)?'Remove '+escapeHtml(p.name)+' from wishlist':'Add '+escapeHtml(p.name)+' to wishlist')+'\" aria-pressed=\"'+(wishlist.includes(p.id)?'true':'false')+'\""));
  assert.ok(html.includes("aria-label=\"View details for '+escapeHtml(p.name)+'\""));
- assert.ok(html.includes("aria-label=\"Add '+escapeHtml(p.name)+' to preview bag\""));
+ assert.ok(html.includes("aria-label=\"Add '+escapeHtml(p.name)+' to bag\""));
 });
 
 test('shop and Watch Finder share one price-range configuration',()=>{
