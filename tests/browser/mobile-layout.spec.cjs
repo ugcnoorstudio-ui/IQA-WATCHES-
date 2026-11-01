@@ -19,6 +19,7 @@ test('homepage has no stray literal newline markup or horizontal viewport overfl
 test('shop category chips and brand filter remain visible and functional without duplicate Explore shortcuts', async ({ page }) => {
   await page.goto('/');
   await expect(page.locator('.storefront-shortcuts')).toHaveCount(0);
+  await expect.poll(() => page.locator('#productGrid .product-card').count(), { timeout: 20000 }).toBeGreaterThan(0);
   const categories = page.locator('#categoryChips');
   await expect(categories).toBeVisible();
   await categories.locator('button').first().click();
