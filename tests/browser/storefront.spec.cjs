@@ -416,6 +416,8 @@ test('product cards open a complete quick-view modal and related watches replace
   await page.keyboard.press('Escape');
   await expect(modal).not.toHaveClass(/open/);
   await expect(card.locator('.product-image-link')).toBeFocused();
+  await page.evaluate(() => { location.hash = 'recently-viewed'; });
+  await expect(page.locator('#routeView')).toContainText(relatedName);
 });
 
 
