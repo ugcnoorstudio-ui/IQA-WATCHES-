@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - feature/cinematic-3d-motion-engine-v2
+      - feature/iqa-local-glb-viewer-v1
   pull_request:
     branches:
       - main
