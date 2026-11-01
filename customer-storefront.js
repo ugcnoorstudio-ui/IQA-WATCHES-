@@ -100,7 +100,7 @@ document.addEventListener('click',e=>{
 const observer=new MutationObserver(()=>addCompareButtons());
 if(document.body)observer.observe(document.body,{childList:true,subtree:true});
 window.addEventListener('hashchange',()=>{recordViewed();renderRoute();});
-window.addEventListener('load',()=>{installCustomerNav();recordViewed();renderRoute();addCompareButtons();});
+window.addEventListener('load',()=>{recordViewed();renderRoute();addCompareButtons();});
 window.addEventListener('catalogue:ready',()=>{renderRoute();addCompareButtons();});
-if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>{installCustomerNav();renderRoute();addCompareButtons()});else{installCustomerNav();renderRoute();addCompareButtons()}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>{renderRoute();addCompareButtons()});else{renderRoute();addCompareButtons()}
 })();
