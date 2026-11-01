@@ -87,8 +87,11 @@ test('mobile navigation opens and closes and viewport has no horizontal overflow
   await expect(toggle).toBeVisible();
   await toggle.click();
   await expect(page.locator('#mobileMenu')).toHaveClass(/open/);
-  await toggle.click();
+  const close = page.locator('#mobileMenuClose');
+  await expect(close).toBeVisible();
+  await close.click();
   await expect(page.locator('#mobileMenu')).not.toHaveClass(/open/);
+  await expect(toggle).toHaveAttribute('aria-expanded', 'false');
   const overflow = await page.evaluate(() => document.documentElement.scrollWidth > document.documentElement.clientWidth);
   expect(overflow, 'mobile page should not overflow horizontally').toBe(false);
 });
