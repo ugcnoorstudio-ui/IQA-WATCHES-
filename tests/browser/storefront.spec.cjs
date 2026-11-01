@@ -136,6 +136,28 @@ test('mobile header keeps its logo and action icons in one row without overflow'
   await expect(page.locator('.hero')).toBeVisible();
 });
 
+test('premium mobile drawer shows grouped navigation, editorial header and footer without restoring Explore', async ({ page, isMobile }) => {
+  test.skip(!isMobile, 'mobile viewport only');
+  await page.goto('/');
+  const menu = page.locator('#mobileMenu');
+  await page.locator('#menuToggle').click();
+  await expect(menu).toHaveClass(/open/);
+  await expect(menu.locator('.drawer-wordmark')).toHaveText('IQA WATCHES');
+  await expect(menu.locator('.drawer-intro')).toContainText('Find the details');
+  await expect(menu.locator('.drawer-group-label')).toHaveText([
+    'THE COLLECTION', 'TOOLS & SAVED', 'THE IQA EXPERIENCE'
+  ]);
+  await expect(menu.locator('.drawer-footer')).toContainText('MADE FOR EVERY MOMENT');
+  await expect(menu.locator('a[href="#shop"]')).toBeVisible();
+  await expect(menu.locator('a[href="#policies"]')).toBeVisible();
+  await expect(menu.locator('a')).toHaveCount(17);
+  await expect(page.locator('.storefront-shortcuts')).toHaveCount(0);
+  await expect(page.locator('.hero')).toBeVisible();
+  await page.keyboard.press('Escape');
+  await expect(menu).not.toHaveClass(/open/);
+  await expect(page.locator('#menuToggle')).toHaveAttribute('aria-expanded', 'false');
+});
+
 test('every mobile menu link opens its real destination and closes the menu', async ({ page, isMobile }) => {
   test.skip(!isMobile, 'mobile viewport only');
   await openStore(page);
