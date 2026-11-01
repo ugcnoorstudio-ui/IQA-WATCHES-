@@ -83,7 +83,7 @@ async function renderCheckoutRoute(){
    '<div class="checkout-layout"><div class="checkout-main"><section class="checkout-section"><div class="checkout-section-head"><span>03</span><div><h2>Payment method</h2><p>Online payments are coming soon.</p></div></div><div class="checkout-payments"><label class="checkout-payment-option"><input type="radio" name="payment_method" value="cash_on_delivery" checked><span><strong>Cash on Delivery (COD)</strong><small>Pay when your order is delivered.</small></span><b>COD</b></label><label class="checkout-payment-option is-unavailable"><input type="radio" disabled><span><strong>UPI · Google Pay · PhonePe · Paytm</strong><small>Coming soon</small></span><b>UPI</b></label><label class="checkout-payment-option is-unavailable"><input type="radio" disabled><span><strong>Credit / Debit Cards</strong><small>Coming soon</small></span><b>CARDS</b></label><label class="checkout-payment-option is-unavailable"><input type="radio" disabled><span><strong>Net Banking</strong><small>Coming soon</small></span><b>BANK</b></label><label class="checkout-payment-option is-unavailable"><input type="radio" disabled><span><strong>Wallets</strong><small>Coming soon</small></span><b>WALLET</b></label></div><p class="route-note checkout-setup-note">Pay by Cash on Delivery. Payment is collected when your watch is delivered.</p><p id="codOrderMessage" role="status" aria-live="polite"></p><button class="button checkout-submit" type="button" id="confirmCodOrder">Confirm COD Order</button><a class="button light" href="#checkout-review">Back to order review</a></section></div>'+summary+'</div>');
   $r('confirmCodOrder')?.addEventListener('click',async()=>{
    const button=$r('confirmCodOrder'),message=$r('codOrderMessage');if(!button||button.disabled)return;
-   button.disabled=true;button.textContent='Placing your order…';message.textContent='Please wait while we securely verify your watch, stock and delivery address.';
+   button.disabled=true;button.textContent='Placing your order…';message.textContent='Please wait while we check your watch, stock and delivery address.';
    try{
     const cfg=window.IQA_SUPABASE_CONFIG,session=(await client.auth.getSession()).data.session;
     if(!cfg?.url||!cfg?.publishableKey||!session?.access_token)throw new Error('Your secure session expired. Please sign in again.');
@@ -102,7 +102,7 @@ let customerClient=null;
 function customerAuthClient(){
  if(customerClient)return customerClient;
  const cfg=window.IQA_SUPABASE_CONFIG;
- if(!window.supabase||!cfg?.url||!cfg?.publishableKey)throw new Error('Secure customer sign-in is not configured.');
+ if(!window.supabase||!cfg?.url||!cfg?.publishableKey)throw new Error('Sign-in is temporarily unavailable. Please try again later.');
  customerClient=window.supabase.createClient(cfg.url,cfg.publishableKey,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true,flowType:'pkce'}});
  // Keep the public catalogue client stateless; only this customer client persists a session.
  customerClient.auth.onAuthStateChange((event,session)=>{
