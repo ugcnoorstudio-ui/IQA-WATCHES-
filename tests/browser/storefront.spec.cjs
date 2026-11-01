@@ -268,7 +268,7 @@ test('real approved catalogue normalizes required sellable fields and optional a
     image: product.image,
     tagsAreArray: Array.isArray(product.tags),
     galleryIsArray: Array.isArray(product.gallery),
-    galleryUrlsValid: product.gallery.every(item => typeof item.src === 'string' && /^https?:\\/\\//i.test(item.src))
+    galleryUrlsValid: product.gallery.every(item => { try { return ['http:', 'https:'].includes(new URL(item.src).protocol); } catch { return false; } })
   })));
   expect(catalogue.length, 'real approved catalogue should contain sellable products').toBeGreaterThan(0);
   for (const product of catalogue) {
@@ -276,7 +276,7 @@ test('real approved catalogue normalizes required sellable fields and optional a
     expect(product.name).toBeTruthy();
     expect(product.price).toBeGreaterThan(0);
     expect(product.stock).toBeGreaterThan(0);
-    expect(product.image).toMatch(/^https?:\\/\\//i);
+    expect(['http:', 'https:']).toContain(new URL(product.image).protocol);
     expect(product.tagsAreArray).toBe(true);
     expect(product.galleryIsArray).toBe(true);
     expect(product.galleryUrlsValid).toBe(true);
