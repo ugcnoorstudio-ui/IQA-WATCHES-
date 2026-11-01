@@ -152,7 +152,7 @@
 
   async function mutate(action, payload) {
     requireRole(["owner"]);
-    if (!["create_product", "adjust_inventory", "create_category", "create_brand", "assign_product_taxonomy", "add_product_image", "publish_product", "update_product", "update_product_variant", "update_category", "archive_category", "update_brand", "archive_brand"].includes(action)) throw new Error("Unsupported administrative action.");
+    if (!["create_product", "adjust_inventory", "create_category", "create_brand", "assign_product_taxonomy", "add_product_image", "publish_product", "update_product", "update_product_variant", "update_category", "archive_category", "update_brand", "archive_brand", "update_order_status"].includes(action)) throw new Error("Unsupported administrative action.");
     const requestPayload = Object.assign({}, payload || {});
     if (!requestPayload.request_id) {
       if (!global.crypto || typeof global.crypto.randomUUID !== "function") {
