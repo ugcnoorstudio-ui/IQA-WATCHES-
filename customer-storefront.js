@@ -107,6 +107,6 @@ if(document.body)observer.observe(document.body,{childList:true,subtree:true});
 window.addEventListener('storage',event=>{if(event.key!==KEY)return;const next=saved(KEY,{});state.compare=cleanIds(next?.compare,4);state.recent=cleanIds(next?.recent,12);if((location.hash||'')==='#compare')renderCompare();});
 window.addEventListener('hashchange',()=>{recordViewed();renderRoute();});
 window.addEventListener('load',()=>{installCustomerNav();recordViewed();renderRoute();addCompareButtons();});
-window.addEventListener('catalogue:ready',()=>{renderRoute();addCompareButtons();});
+window.addEventListener('catalogue:ready',()=>{const valid=state.compare.filter(id=>(typeof products!=='undefined'?products:[]).some(p=>p.id===id));if(valid.length!==state.compare.length){state.compare=valid;persist()}renderRoute();addCompareButtons();});
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>{installCustomerNav();renderRoute();addCompareButtons()});else{installCustomerNav();renderRoute();addCompareButtons()}
 })();
