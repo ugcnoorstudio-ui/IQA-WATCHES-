@@ -399,7 +399,10 @@ test('product cards open a complete quick-view modal and related watches replace
   await expect(page.locator('#modalContent h2')).toHaveText(expectedName);
   await expect(page.locator('#modalContent .product-modal-image img')).toBeVisible();
   await expect(page.locator('#modalContent .spec-list')).toBeVisible();
-  await expect(page.locator('#modalContent')).toHaveAttribute('aria-labelledby', 'modalTitle');
+  await expect(modal).toHaveAttribute('role', 'dialog');
+  await expect(modal).toHaveAttribute('aria-modal', 'true');
+  await expect(modal).toHaveAttribute('aria-labelledby', 'modalTitle');
+  await expect(page.locator('#modalContent h2#modalTitle')).toBeVisible();
   const close = page.locator('#modalClose');
   await expect(close).toBeFocused();
   await expect(page.locator('#modalContent .related-product')).not.toHaveCount(0);
