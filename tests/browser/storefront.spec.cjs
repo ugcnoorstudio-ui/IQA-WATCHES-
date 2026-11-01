@@ -468,22 +468,28 @@ test('product cards open a complete quick-view modal and related watches replace
 });
 
 
-test('header My Account opens the customer sign-in or safe unavailable panel', async ({ page }) => {
+test('account navigation opens the customer sign-in or safe unavailable panel', async ({ page, isMobile }) => {
   await page.goto('/');
-  await page.locator('a[aria-label="My account"]').first().click();
+  if (isMobile) {
+    await page.locator('#menuToggle').click();
+    await expect(page.locator('#mobileMenu')).toHaveClass(/open/);
+    await page.locator('#mobileMenu a[href="#account"]').click();
+  } else {
+    await page.locator('a[aria-label="My account"]').first().click();
+  }
   await expect.poll(() => page.evaluate(() => location.hash)).toBe('#account');
   await expect(page.locator('#routeView')).toBeVisible();
   await expect(page.locator('#routeView')).toContainText(/Sign in|Account unavailable/i);
 });
 
-test('prominent category and brand shortcuts navigate to their live catalogue controls', async ({ page }) => {
+test('homepage Explore shortcuts remain removed while the hero and catalogue controls stay available', async ({ page }) => {
   await openStore(page);
-  const shortcuts = page.getByRole('navigation', { name: 'Browse watch collections' });
-  await expect(shortcuts).toBeVisible();
-  await shortcuts.getByRole('button', { name: 'Men', exact: true }).click();
-  await expect(page.locator('#categoryChips [data-category="Men"]')).toHaveClass(/active/);
-  await shortcuts.getByRole('button', { name: 'Brands', exact: true }).click();
-  await expect(page.locator('#brandFilter')).toBeFocused();
+  await expect(page.locator('.storefront-shortcuts')).toHaveCount(0);
+  await expect(page.getByRole('navigation', { name: 'Browse watch collections' })).toHaveCount(0);
+  await expect(page.locator('.hero')).toBeVisible();
+  await expect(page.locator('#searchInput')).toBeVisible();
+  await expect(page.locator('#priceFilter')).toBeVisible();
+  await expect(page.locator('#sortFilter')).toBeVisible();
 });
 
 test('Buy Now adds the selected watch and opens the guarded checkout route', async ({ page }) => {
