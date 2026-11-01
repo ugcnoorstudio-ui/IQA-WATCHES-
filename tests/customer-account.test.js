@@ -106,7 +106,8 @@ test('return history is scoped to the authenticated customer order and uses supp
 });
 
 
-test('customer navigation does not duplicate the storefront category and brand shortcut row',()=>{
- assert.match(storefront,/document\.querySelector\('\.storefront-shortcuts'\)/);
- assert.match(storefront,/if\(!header\|\|!nav\|\|document\.getElementById\('customerQuickNav'\)\|\|document\.querySelector\('\.storefront-shortcuts'\)\)return/);
+test('customer navigation does not inject a second homepage shortcuts row',()=>{
+ assert.match(storefront,/function installCustomerNav\(\)/);
+ assert.doesNotMatch(storefront,/customerQuickNav/);
+ assert.doesNotMatch(storefront,/Browse watch collections/);
 });
