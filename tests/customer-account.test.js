@@ -95,11 +95,10 @@ test('brands and categories routes render only catalogue-backed groups and produ
   assert.match(routes, /p\.category===selectedCategory\|\|p\.audience===selectedCategory/);
 });
 
-test('comparison route supports two to four products and removal without enabling checkout', () => {
-  assert.match(routes, /if\(r==='comparison'\|\|r==='compare'\)return renderComparison\(\)/);
-  assert.match(routes, /routeCompareIds\.length>=4/);
-  assert.match(routes, /data-route-uncompare/);
-  assert.match(routes, /Select at least two watches to compare side by side/);
+test('legacy comparison URL redirects to the persistent customer comparison route', () => {
+  assert.match(routes, /if\(r==='comparison'\)\{location\.hash='compare';return;\}/);
+  assert.match(routes, /if\(r==='compare'\)return;/);
+  assert.doesNotMatch(routes, /routeCompareIds|function renderComparison\(/);
 });
 
 test('delivery route does not invent serviceability, fees, or delivery estimates', () => {
@@ -136,44 +135,28 @@ test('brand directory handles an empty catalogue and safely navigates encoded br
   assert.match(context.body, /No brands are currently listed/);
 });
 
-test('comparison route enforces unique selections, a four-watch limit, removal and clear', () => {
-  const start = routes.indexOf('let routeCompareIds=[];');
-  const end = routes.indexOf('function render(){', start);
-  assert.ok(start >= 0 && end > start);
-  const source = routes.slice(start, end);
-  const elements = {};
-  const element = id => elements[id] ||= {
-    value: '', textContent: '', innerHTML: '', listeners: {},
-    addEventListener(type, callback) { this.listeners[type] = callback; }
-  };
-  const products = Array.from({ length: 5 }, (_, i) => ({
-    id: 'p' + (i + 1), name: 'Watch ' + (i + 1), brand: 'Brand',
-    sku: 'SKU-' + (i + 1), price: 1000 + i, category: 'Digital',
-    style: 'Sport', stock: 3
-  }));
-  const context = {
-    products,
-    $r: element,
-    esc: value => String(value ?? '').replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;').replaceAll('"', '&quot;'),
-    money: value => '₹' + value,
-    infoRoute: () => {},
-  };
-  vm.runInNewContext(source, context);
-  context.renderComparison();
-  const chooseAndAdd = id => { element('routeCompareProduct').value = id; element('routeCompareAdd').listeners.click(); };
-  assert.match(element('routeCompareResults').innerHTML, /Select at least two watches/);
-  chooseAndAdd('p1');
-  chooseAndAdd('p1');
-  assert.match(element('routeCompareStatus').textContent, /already selected/);
-  chooseAndAdd('p2');
-  assert.match(element('routeCompareResults').innerHTML, /Watch 1/);
-  assert.match(element('routeCompareResults').innerHTML, /Watch 2/);
-  chooseAndAdd('p3'); chooseAndAdd('p4'); chooseAndAdd('p5');
-  assert.match(element('routeCompareStatus').textContent, /up to four watches/);
-  element('routeCompareResults').listeners.click({ target: { closest: () => ({ dataset: { routeUncompare: 'p2' } }) } });
-  assert.doesNotMatch(element('routeCompareResults').innerHTML, /Watch 2/);
-  element('routeCompareClear').listeners.click();
-  assert.match(element('routeCompareResults').innerHTML, /Select at least two watches/);
+test('customer comparison selections are persisted, normalised, capped and removable', async () => {
+  const customer = await readFile(new URL('../customer-storefront.js', import.meta.url), 'utf8');
+  assert.match(customer, /const KEY='iqa-customer-storefront-v1'/);
+  assert.match(customer, /const state=\{compare:cleanIds\(initialState\?\.compare,4\),recent:cleanIds\(initialState\?\.recent,12\)\}/);
+  assert.match(customer, /localStorage\.setItem\(KEY,JSON\.stringify\(state\)\)/);
+  assert.match(customer, /state\.compare\.length>=4/);
+  assert.match(customer, /data-remove-customer-compare/);
+  assert.match(customer, /state\.compare=state\.compare\.filter\(id=>id!==button\.dataset\.removeCustomerCompare\)/);
+  assert.match(customer, /window\.addEventListener\('storage'/);
+  assert.match(customer, /if\(\(location\.hash\|\|'\)==='#compare'\)renderCompare\(\)/);
+});
+
+test('cart and wishlist persist locally, validate catalogue IDs and enforce available stock', async () => {
+  const html = await readFile(new URL('../index.html', import.meta.url), 'utf8');
+  assert.match(html, /safeLoad\('iqa-preview-cart',\{\}\)/);
+  assert.match(html, /safeLoad\('iqa-preview-wishlist',\[\]\)/);
+  assert.match(html, /localStorage\.setItem\('iqa-preview-cart',JSON\.stringify\(cart\)\)/);
+  assert.match(html, /localStorage\.setItem\('iqa-preview-wishlist',JSON\.stringify\(wishlist\)\)/);
+  assert.match(html, /knownProductIds\.has\(id\)/);
+  assert.match(html, /Math\.min\(qty,10,products\.find\(p=>p\.id===id\)\?\.stock\|\|0\)/);
+  assert.match(html, /if\(currentQty>=p\.stock\)/);
+  assert.match(html, /wishlist=Array\.isArray\(storedWishlist\)\?\[\.\.\.new Set\(storedWishlist\.filter\(id=>knownProductIds\.has\(id\)\)\)\]:\[\]/);
 });
 
 
