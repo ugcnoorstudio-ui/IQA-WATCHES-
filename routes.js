@@ -89,13 +89,13 @@ async function renderCheckoutRoute(){
     if(!cfg?.url||!cfg?.publishableKey||!session?.access_token)throw new Error('Your secure session expired. Please sign in again.');
     const requestKey=crypto.randomUUID(),orderItems=entries.map(x=>({sku:String(x.p.sku||''),quantity:x.qty}));
     if(orderItems.some(x=>!x.sku))throw new Error('A selected watch is missing its catalogue SKU. Please refresh your bag.');
-    const response=await fetch(cfg.url.replace(/\\/$/,'')+'/functions/v1/iqa-customer-checkout',{method:'POST',headers:{'Content-Type':'application/json','apikey':cfg.publishableKey,'Authorization':'Bearer '+session.access_token,'x-idempotency-key':requestKey},body:JSON.stringify({address_id:selected.id,items:orderItems})});
+    const response=await fetch(cfg.url.replace(/\/$/,'')+'/functions/v1/iqa-customer-checkout',{method:'POST',headers:{'Content-Type':'application/json','apikey':cfg.publishableKey,'Authorization':'Bearer '+session.access_token,'x-idempotency-key':requestKey},body:JSON.stringify({address_id:selected.id,items:orderItems})});
     const result=await response.json().catch(()=>({}));if(!response.ok||result.ok!==true)throw new Error(result.error||'We could not place your order. Please try again.');
     const order=result.order||{};
     infoRoute('IQA WATCHES · ORDER CONFIRMED','Thank you. Your order is placed.','Your Cash on Delivery order has been recorded successfully.','<section class="checkout-section order-success" role="status"><div class="eyebrow">ORDER CONFIRMATION</div><h2>Order placed successfully ✓</h2><p>Your order number is <strong>'+esc(order.order_number||'Confirmed')+'</strong>.</p><p>Payment method: <strong>Cash on Delivery</strong></p><p>Order total: <strong>'+money(Number(order.payable_total??total))+'</strong></p><p class="route-note">Please keep your phone available for delivery coordination. Payment is due when the watch is delivered.</p><a class="button" href="#orders">View my orders</a> <a class="button light" href="#shop">Continue shopping</a></section>');
    }catch(err){message.textContent=err.message||'Order could not be placed. Please try again.';button.disabled=false;button.textContent='Confirm COD Order';}
   });
-if(location.hash!==requestedHash)return;infoRoute('IQA WATCHES · CHECKOUT','Checkout could not be loaded','Your saved account data has not been changed.','<div class="route-disabled">'+esc(err.message||'Please try again later.')+'</div><a class="button light" href="#bag">Back to bag</a>');}
+ }catch(err){if(location.hash!==requestedHash)return;infoRoute('IQA WATCHES · CHECKOUT','Checkout could not be loaded','Your saved account data has not been changed.','<div class="route-disabled">'+esc(err.message||'Please try again later.')+'</div><a class="button light" href="#bag">Back to bag</a>');}
 }
 
 let customerClient=null;
