@@ -71,7 +71,17 @@ test('collection cards retain product details links and current stock display', 
   assert.match(routes, /Number\(p\.stock\)\+' available/);
 });
 
-test('gender collection matching uses word boundaries so women are not included in men', () => {
-  assert.match(routes, /replace\(\/\[\^a-z0-9\]\+\/g,' '\)/);
-  assert.match(routes, /values\.some\(value=>value===term\|\|value\.split\(' '\)\.includes\(term\)/);
+test('collection matching uses normalized whole-token and phrase boundaries', () => {
+  const start = routes.indexOf('function normalizeCollectionText');
+  const end = routes.indexOf('\\nfunction showHomeSection', start);
+  assert.ok(start >= 0 && end > start, 'collection matcher helpers must exist');
+  const helpers = routes.slice(start, end);
+  const matcher = new Function(helpers + '; return { normalizeCollectionText, matchesCollectionTerm, collectionProductMatches };')();
+  assert.equal(matcher.matchesCollectionTerm("Men's watches", 'men s'), true);
+  assert.equal(matcher.matchesCollectionTerm('watches designed for men', 'men'), true);
+  assert.equal(matcher.matchesCollectionTerm("Women's watches", 'men'), false);
+  assert.equal(matcher.matchesCollectionTerm('watches for women', 'men'), false);
+  assert.equal(matcher.matchesCollectionTerm('premium-watch collection', 'premium watch'), true);
+  assert.equal(matcher.collectionProductMatches({ audience: 'Unisex', tags: ['New-Arrivals'] }, ['new arrival', 'new arrivals']), true);
+  assert.equal(matcher.collectionProductMatches({ category: "Women's Watches" }, ['men', 'men s', 'mens']), false);
 });
