@@ -238,6 +238,23 @@ function renderSearch(){
 
 
 
+function renderBrands(selectedBrand=''){
+ const brands=[...new Set(products.map(p=>p.brand).filter(Boolean))].sort((a,b)=>a.localeCompare(b));
+ const chosen=selectedBrand?products.filter(p=>p.brand===selectedBrand):[];
+ const cards=(list)=>list.length?'<div class="route-grid">'+list.map(p=>'<article class="route-card"><a href="#product/'+encodeURIComponent(p.id)+'"><img src="'+esc(safeImageUrl(p.image))+'" alt="'+esc(p.name)+'" loading="lazy"></a><div class="route-card-copy"><div class="product-brand">'+esc(p.brand)+'</div><h3><a href="#product/'+encodeURIComponent(p.id)+'">'+esc(p.name)+'</a></h3><p>'+money(p.price)+'</p><a class="button light" href="#product/'+encodeURIComponent(p.id)+'">View product</a></div></article>').join('')+'</div>':'<div class="route-empty">No currently published products are listed for this brand.</div>';
+ infoRoute('IQA WATCHES · BRANDS',selectedBrand||'Explore our brands','Browse brands represented in the currently approved product catalogue.',selectedBrand?'<p><a class="button light" href="#brands">All brands</a></p>'+cards(chosen):(brands.length?'<div class="route-grid">'+brands.map(b=>'<article class="route-feature"><h2>'+esc(b)+'</h2><p>'+products.filter(p=>p.brand===b).length+' catalogue item(s)</p><a class="button light" href="#brands/'+encodeURIComponent(b)+'">Explore brand</a></article>').join('')+'</div>':'<div class="route-empty">No brands are currently listed in the approved catalogue.</div>'));
+}
+function renderCategories(selectedCategory=''){
+ const values=[...new Set(products.flatMap(p=>[p.category,p.audience,p.style,...(Array.isArray(p.tags)?p.tags:[])]).filter(v=>typeof v==='string'&&v.trim()))].sort((a,b)=>a.localeCompare(b));
+ const matches=selectedCategory?products.filter(p=>p.category===selectedCategory||p.audience===selectedCategory||p.style===selectedCategory||(Array.isArray(p.tags)&&p.tags.includes(selectedCategory))):[];
+ const cards=list=>list.length?'<div class="route-grid">'+list.map(p=>'<article class="route-card"><a href="#product/'+encodeURIComponent(p.id)+'"><img src="'+esc(safeImageUrl(p.image))+'" alt="'+esc(p.name)+'" loading="lazy"></a><div class="route-card-copy"><div class="product-brand">'+esc(p.brand)+'</div><h3><a href="#product/'+encodeURIComponent(p.id)+'">'+esc(p.name)+'</a></h3><p>'+money(p.price)+'</p><a class="button light" href="#product/'+encodeURIComponent(p.id)+'">View product</a></div></article>').join('')+'</div>':'<div class="route-empty">No published products currently match this category.</div>';
+ infoRoute('IQA WATCHES · CATEGORIES',selectedCategory||'Shop by category','Explore categories derived from approved catalogue attributes.',selectedCategory?'<p><a class="button light" href="#categories">All categories</a></p>'+cards(matches):'<div class="route-grid">'+values.map(v=>'<article class="route-feature"><h2>'+esc(v)+'</h2><p>'+products.filter(p=>p.category===v||p.audience===v||p.style===v||(Array.isArray(p.tags)&&p.tags.includes(v))).length+' matching catalogue item(s)</p><a class="button light" href="#categories/'+encodeURIComponent(v)+'">Explore category</a></article>').join('')+'</div>');
+}
+function renderDelivery(){
+ infoRoute('IQA WATCHES · DELIVERY','Delivery information','Delivery coverage and estimates will be displayed only after verified shipping configuration is connected.',
+ '<div class="route-feature"><h2>Delivery setup is not active</h2><p>PIN-code serviceability, courier partners, shipping charges, handling times and delivery estimates are not currently connected to this storefront.</p><p>No delivery date, fee or serviceability promise can be made from this page. Checkout remains disabled.</p><a class="button light" href="#faq">Read FAQs</a> <a class="button light" href="#policies">Store policies</a></div>');
+}
+
 function render(){
  try{
  const raw=(location.hash||'#home').slice(1),parts=raw.split('/'),r=parts[0]||'home';
