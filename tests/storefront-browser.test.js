@@ -125,7 +125,8 @@ test('Cart quantity persists, respects stock and can be removed in Chromium', as
     await page.locator('[data-add="watch-1"]').first().click();
     assert.equal(await page.locator('#cartCount').textContent(), '1');
     await page.reload({ waitUntil: 'domcontentloaded' });
-    await page.locator('.product-card').first().waitFor();
+    await page.goto(baseUrl + '#home', { waitUntil: 'domcontentloaded' });
+    await page.locator('.product-card').first().waitFor({ state: 'visible' });
     assert.equal(await page.locator('#cartCount').textContent(), '1');
     await page.locator('#cartOpen').click();
     const plus = page.locator('#routeView [data-qty="watch-1"][data-delta="1"]');
@@ -135,7 +136,8 @@ test('Cart quantity persists, respects stock and can be removed in Chromium', as
     await plus.click({ force: true });
     assert.equal(await page.locator('#routeView .cart-row .qty span').textContent(), '2', 'stock limit must prevent a third unit');
     await page.reload({ waitUntil: 'domcontentloaded' });
-    await page.locator('.product-card').first().waitFor();
+    await page.goto(baseUrl + '#home', { waitUntil: 'domcontentloaded' });
+    await page.locator('.product-card').first().waitFor({ state: 'visible' });
     assert.equal(await page.locator('#cartCount').textContent(), '2');
     await page.locator('#cartOpen').click();
     await page.locator('#routeView [data-remove="watch-1"]').click({ force: true });
