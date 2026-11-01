@@ -16,7 +16,7 @@ test('Supabase product_media rows are mapped into safe public gallery image URLs
   assert.match(html, /from\('product_media'\)\.select\('id,product_id,storage_path,alt_text,sort_order,is_primary'\)/);
   assert.match(html, /storage\.from\('product-images'\)\.getPublicUrl\(item\.storage_path\)/);
   assert.match(html, /gallery:galleryImages/);
-  assert.match(html, /const gallery=mediaByProduct\.get\(row\.id\)\|\|\[\]/);
+  assert.match(html, /const gallery=\(mediaByProduct\.get\(row\.id\)\|\|\[\]\)/);
 });
 
 test('product detail modal renders available photos with keyboard-operable thumbnail controls', () => {
@@ -52,10 +52,18 @@ test('product detail modal renders real gallery photos and only supplied dimensi
     escapeHtml: value => String(value ?? '').replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch])),
     money: value => '₹' + value,
     document: { body: { classList: { add() {} } } },
-    $: id => id === 'modalContent' ? modalContent : modalWrap
+    window: { dispatchEvent() {} },
+    CustomEvent: function () {},
+    productModalReturnFocus: null,
+    $: id => id === 'modalContent' ? modalContent : id === 'modalWrap' ? modalWrap : id === 'modalClose' ? modalClose : null
   };
-  const modalContent = { innerHTML: '' };
-  const modalWrap = { classList: { add() {} } };
+  const modalContent = {
+    innerHTML: '',
+    querySelector: () => ({ addEventListener() {} }),
+    querySelectorAll: () => []
+  };
+  const modalWrap = { classList: { add() {}, contains: () => false } };
+  const modalClose = { focus() {} };
   vm.runInNewContext(html.slice(start, end), context);
   context.openProduct('watch-1');
   assert.match(modalContent.innerHTML, /Front view/);
