@@ -431,13 +431,15 @@ test('header My Account opens the customer sign-in or safe unavailable panel', a
   await expect(page.locator('#routeView')).toContainText(/Sign in|Account unavailable/i);
 });
 
-test('homepage hides category and brand controls while keeping catalogue search and sorting', async ({ page }) => {
+test('homepage removes duplicate Explore shortcuts while keeping shop category and brand filters', async ({ page }) => {
   await openStore(page);
-  await expect(page.locator('#categoryChips')).toBeHidden();
-  await expect(page.locator('#brandFilter')).toBeHidden();
+  await expect(page.locator('.storefront-shortcuts')).toHaveCount(0);
+  await expect(page.locator('#shop #categoryChips')).toBeVisible();
+  await expect(page.locator('#shop #brandFilter')).toBeVisible();
   await expect(page.locator('#searchInput')).toBeVisible();
   await expect(page.locator('#priceFilter')).toBeVisible();
   await expect(page.locator('#sortFilter')).toBeVisible();
+  await expect(page.locator('.cinematic-story')).toBeVisible();
   await expect(page.locator('.nav-links a[href="#men"], .nav-links a[href="#women"]')).toHaveCount(0);
   await expect(page.locator('#mobileMenu a[href="#men"], #mobileMenu a[href="#women"]')).toHaveCount(0);
   await expect(page.locator('.footer h3').filter({ hasText: /^Explore$/ })).toHaveCount(0);
