@@ -1,4 +1,5 @@
 const { test, expect } = require('@playwright/test');
+// Re-run this hotfix against the current main integration (PR #48).
 
 test('homepage has no stray literal newline markup or horizontal viewport overflow', async ({ page }) => {
   const response = await page.goto('/');
