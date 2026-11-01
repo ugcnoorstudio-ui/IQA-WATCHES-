@@ -107,4 +107,3 @@ test('delivery route does not invent serviceability, fees, or delivery estimates
   assert.match(routes, /PIN-code serviceability, courier partners, shipping charges, handling times and delivery estimates are not currently connected/);
   assert.match(routes, /Checkout remains disabled/);
 });
-
