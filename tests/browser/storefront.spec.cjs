@@ -180,6 +180,7 @@ test('wishlist persists in browser storage after reload and can be removed', asy
 
 test('comparison accepts two distinct catalogue products and clears', async ({ page }) => {
   await openStore(page);
+  const initialHash = await page.evaluate(() => location.hash);
   await page.evaluate(() => { location.hash = 'comparison'; });
   await expect(page.locator('#compareCard')).toBeVisible();
   const select = page.locator('#compareProduct');
@@ -411,7 +412,7 @@ test('product cards open a complete quick-view modal and related watches replace
   await related.click();
   await expect(modal).toHaveClass(/open/);
   await expect(page.locator('#modalContent h2')).toHaveText(relatedName);
-  await expect(page).toHaveURL(/#home$/);
+  await expect.poll(() => page.evaluate(() => location.hash)).toBe(initialHash);
   await page.keyboard.press('Escape');
   await expect(modal).not.toHaveClass(/open/);
   await expect(card.locator('.product-image-link')).toBeFocused();
@@ -424,4 +425,15 @@ test('header My Account opens the customer sign-in or safe unavailable panel', a
   await expect.poll(() => page.evaluate(() => location.hash)).toBe('#account');
   await expect(page.locator('#routeView')).toBeVisible();
   await expect(page.locator('#routeView')).toContainText(/Sign in|Account unavailable/i);
+});
+
+test('collection, search and wishlist product cards open the same quick-view modal', async ({ page }) => {
+  await openStore(page);
+  await navigateToHash(page, 'shop');
+  const collectionCard = page.locator('#routeCatalogue .route-card').first();
+  await collectionCard.locator('a[data-view]').first().click();
+  await expect(page.locator('#modalWrap')).toHaveClass(/open/);
+  await expect(page.locator('#modalContent .product-modal-copy h2')).not.toBeEmpty();
+  await page.keyboard.press('Escape');
+  await expect(page.locator('#modalWrap')).not.toHaveClass(/open/);
 });
