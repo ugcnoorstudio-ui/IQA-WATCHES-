@@ -40,12 +40,12 @@ function renderRecent(){
  shell('Recently viewed','Your recently opened watches on this device.',productList(items));
 }
 function renderDelivery(){
- shell('Delivery availability','Check delivery information for your PIN code. Enter your PIN code and we'll help confirm delivery availability, charges and estimated timelines.',
+ shell('Delivery availability','Check delivery information for your PIN code. Enter your PIN code and we will help confirm delivery availability, charges and estimated timelines.',
  '<div class="route-columns"><div class="route-feature"><h2>Check your PIN code</h2><form id="deliveryCheckForm" class="route-form"><label>6-digit PIN code<input name="pin" inputmode="numeric" pattern="[0-9]{6}" maxlength="6" required placeholder="Enter delivery PIN code"></label><button class="button" type="submit">Check availability</button><p id="deliveryCheckMessage" role="status" aria-live="polite"></p></form></div><div class="route-feature"><h2>Delivery status</h2><p id="deliveryConfigStatus">Please message us on WhatsApp to confirm delivery availability, charges and estimated timelines for your PIN code.</p><a class="button light" href="#policies">Read shipping policy</a></div></div>');
  const form=$('deliveryCheckForm');form.addEventListener('submit',async e=>{
   e.preventDefault();const pin=String(new FormData(form).get('pin')||'').trim(),msg=$('deliveryCheckMessage');
   if(!/^[0-9]{6}$/.test(pin)){msg.textContent='Please enter a valid 6-digit PIN code.';return;}
-  msg.textContent='We can't confirm delivery automatically just yet. Please message us on WhatsApp to check delivery for '+pin+'. .';
+  msg.textContent='We cannot confirm delivery automatically just yet. Please message us on WhatsApp to check delivery for '+pin+'. .';
  });
 }
 function renderOffers(){
