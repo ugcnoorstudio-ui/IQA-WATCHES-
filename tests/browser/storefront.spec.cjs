@@ -204,18 +204,31 @@ test('watch finder returns matches and reset restores defaults', async ({ page }
   await expect(page.locator('#finderResults')).toContainText(/choose your preferences/i);
 });
 
-test('product detail route displays product content and gallery controls', async ({ page }) => {
+test('product detail route displays product content and switches gallery images', async ({ page }) => {
   await openStore(page);
   const productLink = page.locator('#productGrid a[href^="#product/"]').first();
-  await productLink.click();
+  const href = await productLink.getAttribute('href');
+  const productId = decodeURIComponent(href.slice('#product/'.length));
+  const primaryImage = await page.locator('#productGrid .product-card').first().locator('.product-image img').getAttribute('src');
+  const secondaryImage = primaryImage + '#gallery-second-frame';
+  await page.evaluate(({ id, primary, secondary }) => {
+    const product = products.find(item => item.id === id);
+    product.gallery = [
+      { src: primary, alt: 'Primary product image' },
+      { src: secondary, alt: 'Secondary product image' }
+    ];
+    location.hash = '#product/' + encodeURIComponent(id);
+  }, { id: productId, primary: primaryImage, secondary: secondaryImage });
   await expect(page.locator('#routeView')).toBeVisible();
   await expect(page.locator('#routeView')).toContainText(/product/i);
   await expect(page.locator('#routeMainImage')).toBeVisible();
+  await expect(page.locator('#routeMainImage')).toHaveAttribute('src', primaryImage);
   const thumbnails = page.locator('#routeView [data-gallery-src]');
-  if (await thumbnails.count()) {
-    await thumbnails.first().click();
-    await expect(page.locator('#routeMainImage')).toHaveAttribute('src', await thumbnails.first().getAttribute('data-gallery-src'));
-  }
+  await expect(thumbnails).toHaveCount(2);
+  await thumbnails.nth(1).click();
+  await expect(page.locator('#routeMainImage')).toHaveAttribute('src', secondaryImage);
+  await expect(thumbnails.nth(0)).toHaveAttribute('aria-pressed', 'false');
+  await expect(thumbnails.nth(1)).toHaveAttribute('aria-pressed', 'true');
 });
 
 
@@ -243,6 +256,32 @@ test('catalogue search finds products by model code and description', async ({ p
 });
 
 
+
+
+test('real approved catalogue normalizes required sellable fields and optional arrays', async ({ page }) => {
+  await openStore(page);
+  const catalogue = await page.evaluate(() => products.map(product => ({
+    id: product.id,
+    name: product.name,
+    price: product.price,
+    stock: product.stock,
+    image: product.image,
+    tagsAreArray: Array.isArray(product.tags),
+    galleryIsArray: Array.isArray(product.gallery),
+    galleryUrlsValid: product.gallery.every(item => typeof item.src === 'string' && /^https?:\\/\\//i.test(item.src))
+  })));
+  expect(catalogue.length, 'real approved catalogue should contain sellable products').toBeGreaterThan(0);
+  for (const product of catalogue) {
+    expect(product.id).toBeTruthy();
+    expect(product.name).toBeTruthy();
+    expect(product.price).toBeGreaterThan(0);
+    expect(product.stock).toBeGreaterThan(0);
+    expect(product.image).toMatch(/^https?:\\/\\//i);
+    expect(product.tagsAreArray).toBe(true);
+    expect(product.galleryIsArray).toBe(true);
+    expect(product.galleryUrlsValid).toBe(true);
+  }
+});
 
 test('product detail tolerates null optional fields and ignores invalid gallery media', async ({ page }) => {
   await openStore(page);
