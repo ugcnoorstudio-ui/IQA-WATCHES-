@@ -303,8 +303,19 @@ body.menu-open::before{content:"";position:fixed;inset:0;background:rgba(13,13,1
     box-shadow:-24px 0 64px rgba(16,14,10,.24);
     animation:drawerReveal .28s cubic-bezier(.2,.75,.25,1) both;
   }
+  .mobile-menu.open{
+    max-height:100vh;
+    max-height:100dvh;
+    overflow-y:auto;
+    overscroll-behavior:contain;
+    -webkit-overflow-scrolling:touch;
+  }
   .mobile-menu-head{
     position:relative;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:16px;
     padding:25px 22px 20px;
     min-height:106px;
     background:linear-gradient(135deg,#f8f5ee 0%,#eee7d9 100%);
@@ -322,9 +333,21 @@ body.menu-open::before{content:"";position:fixed;inset:0;background:rgba(13,13,1
   .drawer-wordmark{font-family:var(--serif);font-size:24px;line-height:1.1;letter-spacing:1.5px;color:#211f1a}
   .drawer-tagline{font-size:10px;letter-spacing:.5px;color:#777064}
   .mobile-menu-close{
-    flex:0 0 42px;width:42px;height:42px;border:1px solid #cfc2ac;border-radius:50%;
-    background:rgba(255,255,255,.45);font-size:25px;color:#332f27;cursor:pointer;
+    flex:0 0 44px;width:44px;height:44px;min-width:44px;min-height:44px;
+    display:grid;place-items:center;border:1px solid #cfc2ac;border-radius:50%;
+    background:rgba(255,255,255,.62);font-size:25px;line-height:1;color:#332f27;cursor:pointer;
+    transition:background .18s ease,border-color .18s ease,transform .18s ease;
   }
+  .mobile-menu-close:hover{background:#fffaf0;border-color:#aa8c56}
+  .mobile-menu-close:focus-visible,.mobile-menu>a:focus-visible{
+    outline:2px solid #8d6d35;outline-offset:3px;position:relative;z-index:1;
+  }
+  .mobile-menu-nav{display:flex;flex-direction:column;gap:0}
+  .mobile-menu-nav>a{min-height:52px;padding-top:13px;padding-bottom:13px}
+  .mobile-menu-nav>a:hover{background:#eee7d9;color:#765a2d}
+  .mobile-menu-nav>a:focus-visible{background:#eee7d9;padding-left:28px}
+  .mobile-menu-nav .drawer-group-label{padding-top:18px}
+  .drawer-footer{padding-bottom:8px}
   .drawer-intro{padding:20px 24px 13px}
   .drawer-intro p{margin:5px 0 0;font-family:var(--serif);font-size:17px;line-height:1.4;color:#4c463b}
   .drawer-group-label{padding:16px 24px 7px;border-top:1px solid #e1d9cc}
@@ -340,26 +363,28 @@ body.menu-open::before{content:"";position:fixed;inset:0;background:rgba(13,13,1
   .drawer-footer{display:flex;flex-direction:column;gap:4px;margin:18px 24px 0;padding-top:14px;border-top:1px solid #d8cdbb;font-size:8px;letter-spacing:1.5px;color:#8c806c}
 }
 @keyframes drawerReveal{from{opacity:.7;transform:translateX(18px)}to{opacity:1;transform:translateX(0)}}
-@media(prefers-reduced-motion:reduce){.mobile-menu.open{animation:none}.mobile-menu>a{transition:none}}
+@media(prefers-reduced-motion:reduce){.mobile-menu.open{animation:none}.mobile-menu-nav>a,.mobile-menu-close{transition:none}}
 </style>
 <link rel="stylesheet" href="./assets/cinematic-story.css">
 </head>
 <body>
 <div class="announcement">A considered collection · Designed for everyday</div>
 <header class="site-header"><nav class="nav" aria-label="Main navigation">
-<button class="icon-btn menu-btn" id="menuToggle" aria-label="Open navigation" aria-expanded="false">☰</button>
+<button class="icon-btn menu-btn" id="menuToggle" aria-label="Open navigation" aria-expanded="false" aria-controls="mobileMenu">☰</button>
 <a class="brand" href="#home" aria-label="IQA WATCHES home"><img class="brand-logo" src="./assets/iqa-watches-header-logo.svg" alt="IQA WATCHES — Timeless design. Everyday precision."></a>
 <div class="nav-links"><a href="#shop">Shop all</a><a href="#men">Men</a><a href="#women">Women</a><a href="#unisex">Unisex</a><a href="#new-arrivals">New arrivals</a><a href="#bestsellers">Bestsellers</a><a href="#story">Our story</a><a href="#faq">Help</a></div>
 <div class="nav-actions"><button class="icon-btn" id="headerSearch" aria-label="Search products">⌕</button><button class="icon-btn" id="voiceSearch" type="button" aria-label="Voice search" title="Voice search">🎙</button><a class="icon-btn" href="#account" aria-label="My account">Account</a><button class="icon-btn" id="wishlistOpen" aria-label="Open wishlist">♡ <span class="count" id="wishCount" aria-live="polite" aria-atomic="true">0</span></button><button class="icon-btn" id="cartOpen" aria-label="Open shopping bag">Bag <span class="count" id="cartCount" aria-live="polite" aria-atomic="true">0</span></button></div>
-<div class="mobile-menu" id="mobileMenu" aria-label="Mobile navigation">
-<div class="mobile-menu-head"><div class="drawer-brand"><span class="drawer-kicker">THE ART OF TIME</span><span class="drawer-wordmark">IQA WATCHES</span><span class="drawer-tagline">Timeless design. Everyday precision.</span></div><button type="button" class="mobile-menu-close" id="mobileMenuClose" aria-label="Close navigation">×</button></div>
-<div class="drawer-intro"><span class="drawer-eyebrow">DISCOVER IQA</span><p>Find the details that make every moment yours.</p></div>
+<div class="mobile-menu" id="mobileMenu" role="dialog" aria-modal="true" aria-labelledby="mobileMenuTitle" aria-describedby="mobileMenuDescription" aria-hidden="true" tabindex="-1">
+<div class="mobile-menu-head"><div class="drawer-brand"><span class="drawer-kicker">THE ART OF TIME</span><span class="drawer-wordmark" id="mobileMenuTitle">IQA WATCHES</span><span class="drawer-tagline">Timeless design. Everyday precision.</span></div><button type="button" class="mobile-menu-close" id="mobileMenuClose" aria-label="Close navigation">×</button></div>
+<div class="drawer-intro"><span class="drawer-eyebrow">DISCOVER IQA</span><p id="mobileMenuDescription">Find the details that make every moment yours.</p></div>
+<nav class="mobile-menu-nav" aria-label="Mobile navigation links">
 <div class="drawer-group-label">THE COLLECTION</div>
 <a href="#shop">Shop all <span aria-hidden="true">↗</span></a><a href="#men">Men watches <span aria-hidden="true">↗</span></a><a href="#women">Women watches <span aria-hidden="true">↗</span></a><a href="#unisex">Unisex watches <span aria-hidden="true">↗</span></a>
 <div class="drawer-group-label">TOOLS &amp; SAVED</div>
 <a href="#search">Search <span aria-hidden="true">↗</span></a><a href="#finder">Watch Finder <span aria-hidden="true">↗</span></a><a href="#comparison">Compare <span aria-hidden="true">↗</span></a><a href="#wishlist">Wishlist <span aria-hidden="true">↗</span></a><a href="#bag">Shopping bag <span aria-hidden="true">↗</span></a>
 <div class="drawer-group-label">THE IQA EXPERIENCE</div>
 <a href="#journal">Watch Journal <span aria-hidden="true">↗</span></a><a href="#story">Our story <span aria-hidden="true">↗</span></a><a href="#care">Customer care <span aria-hidden="true">↗</span></a><a href="#contact">Contact <span aria-hidden="true">↗</span></a><a href="#account">My account <span aria-hidden="true">↗</span></a><a href="#orders">My orders <span aria-hidden="true">↗</span></a><a href="#faq">FAQs <span aria-hidden="true">↗</span></a><a href="#policies">Store policies <span aria-hidden="true">↗</span></a>
+</nav>
 <div class="drawer-footer"><span>MADE FOR EVERY MOMENT</span><span>TIMELESS · CONSIDERED · PERSONAL</span></div>
 </div>
 </nav></header>
@@ -528,7 +553,45 @@ $('voiceSearch').addEventListener('click',()=>{
   try{const recognition=new Speech();recognition.lang='en-IN';recognition.interimResults=false;recognition.maxAlternatives=1;status.textContent='Listening… Please speak now.';recognition.onresult=event=>{input.value=event.results?.[0]?.[0]?.transcript||'';status.textContent=input.value?'Voice captured. Tap Search to view matching watches.':'No speech was recognised. Please try again.';};recognition.onerror=event=>{status.textContent=event.error==='not-allowed'?'Microphone permission was denied. Allow microphone access or type your search.':'Voice search could not start ('+event.error+'). You can type your search instead.';};recognition.onend=()=>{if(status.textContent==='Listening… Please speak now.')status.textContent='No speech was captured. Tap Start voice search to try again.';};recognition.start();}catch(error){status.textContent='Voice search could not start. Please type your search instead.';}
  });
 });
-$('drawerClose').addEventListener('click',closePanel);$('overlay').addEventListener('click',closePanel);$('modalWrap').addEventListener('click',e=>{if(e.target===$('modalWrap'))closeModal()});$('headerSearch').addEventListener('click',()=>{if(location.hash!=='#home')location.hash='home';setTimeout(()=>{$('shop').scrollIntoView({behavior:'smooth',block:'start'});$('searchInput').focus({preventScroll:true})},90)});document.body.appendChild($('mobileMenu'));function setMobileMenu(open){$('mobileMenu').classList.toggle('open',open);document.body.classList.toggle('menu-open',open);$('menuToggle').setAttribute('aria-expanded',String(open));$('menuToggle').setAttribute('aria-label',open?'Close navigation':'Open navigation')} $('menuToggle').addEventListener('click',()=>setMobileMenu(!$('mobileMenu').classList.contains('open')));$('mobileMenuClose').addEventListener('click',()=>setMobileMenu(false));$('mobileMenu').addEventListener('click',e=>{if(e.target.closest('a'))setMobileMenu(false)});$('newsletterForm').addEventListener('submit',e=>{e.preventDefault();toast('Preview only: signup is not connected and no email was sent.');$('newsletterEmail').value=''});document.addEventListener('keydown',e=>{if(e.key==='Escape'){closePanel();closeModal();setMobileMenu(false);return}if(e.key==='Tab'&&$('modalWrap').classList.contains('open')){const focusable=Array.from($('modalContent').querySelectorAll('a[href],button:not([disabled]),input:not([disabled]),select:not([disabled]),textarea:not([disabled]),[tabindex]:not([tabindex="-1"])')).filter(el=>el.getClientRects().length);if(!focusable.length){e.preventDefault();return}const first=focusable[0],last=focusable[focusable.length-1];if(e.shiftKey&&(document.activeElement===first||!$('modalContent').contains(document.activeElement))){e.preventDefault();last.focus()}else if(!e.shiftKey&&(document.activeElement===last||!$('modalContent').contains(document.activeElement))){e.preventDefault();first.focus()}}});$('year').textContent=new Date().getFullYear();renderProducts();updateCounts();openPolicyFromHash();loadStorefrontCatalogue();
+$('drawerClose').addEventListener('click',closePanel);$('overlay').addEventListener('click',closePanel);$('modalWrap').addEventListener('click',e=>{if(e.target===$('modalWrap'))closeModal()});$('headerSearch').addEventListener('click',()=>{if(location.hash!=='#home')location.hash='home';setTimeout(()=>{$('shop').scrollIntoView({behavior:'smooth',block:'start'});$('searchInput').focus({preventScroll:true})},90)});document.body.appendChild($('mobileMenu'));
+let mobileMenuReturnFocus=null;
+let mobileMenuInertSiblings=[];
+function setMobileMenu(open){
+ const menu=$('mobileMenu');
+ const toggle=$('menuToggle');
+ if(open){
+  if(menu.classList.contains('open'))return;
+  mobileMenuReturnFocus=document.activeElement;
+  mobileMenuInertSiblings=Array.from(document.body.children)
+   .filter(element=>element!==menu&&element.tagName!=='SCRIPT')
+   .map(element=>({element,inert:element.inert}));
+  mobileMenuInertSiblings.forEach(item=>{item.element.inert=true;});
+  menu.classList.add('open');
+  menu.setAttribute('aria-hidden','false');
+  document.body.classList.add('menu-open');
+  document.body.classList.add('locked');
+  toggle.setAttribute('aria-expanded','true');
+  toggle.setAttribute('aria-label','Close navigation');
+  $('mobileMenuClose').focus();
+  return;
+ }
+ if(!menu.classList.contains('open'))return;
+ menu.classList.remove('open');
+ menu.setAttribute('aria-hidden','true');
+ document.body.classList.remove('menu-open');
+ document.body.classList.remove('locked');
+ toggle.setAttribute('aria-expanded','false');
+ toggle.setAttribute('aria-label','Open navigation');
+ mobileMenuInertSiblings.forEach(item=>{item.element.inert=item.inert;});
+ mobileMenuInertSiblings=[];
+ const returnTarget=mobileMenuReturnFocus;
+ mobileMenuReturnFocus=null;
+ if(returnTarget?.isConnected&&!returnTarget.closest('[inert]'))returnTarget.focus();
+ else toggle.focus();
+}
+$('menuToggle').addEventListener('click',()=>setMobileMenu(!$('mobileMenu').classList.contains('open')));
+$('mobileMenuClose').addEventListener('click',()=>setMobileMenu(false));
+$('mobileMenu').addEventListener('click',e=>{if(e.target.closest('a'))setMobileMenu(false)});$('newsletterForm').addEventListener('submit',e=>{e.preventDefault();toast('Preview only: signup is not connected and no email was sent.');$('newsletterEmail').value=''});document.addEventListener('keydown',e=>{if(e.key==='Escape'){closePanel();closeModal();setMobileMenu(false);return}if(e.key==='Tab'&&$('mobileMenu').classList.contains('open')){const focusable=Array.from($('mobileMenu').querySelectorAll('a[href],button:not([disabled]),[tabindex]:not([tabindex="-1"])')).filter(el=>el.getClientRects().length);if(!focusable.length){e.preventDefault();return}const first=focusable[0],last=focusable[focusable.length-1];if(e.shiftKey&&(document.activeElement===first||!$('mobileMenu').contains(document.activeElement))){e.preventDefault();last.focus()}else if(!e.shiftKey&&(document.activeElement===last||!$('mobileMenu').contains(document.activeElement))){e.preventDefault();first.focus()}return}if(e.key==='Tab'&&$('modalWrap').classList.contains('open')){const focusable=Array.from($('modalContent').querySelectorAll('a[href],button:not([disabled]),input:not([disabled]),select:not([disabled]),textarea:not([disabled]),[tabindex]:not([tabindex="-1"])')).filter(el=>el.getClientRects().length);if(!focusable.length){e.preventDefault();return}const first=focusable[0],last=focusable[focusable.length-1];if(e.shiftKey&&(document.activeElement===first||!$('modalContent').contains(document.activeElement))){e.preventDefault();last.focus()}else if(!e.shiftKey&&(document.activeElement===last||!$('modalContent').contains(document.activeElement))){e.preventDefault();first.focus()}}});$('year').textContent=new Date().getFullYear();renderProducts();updateCounts();openPolicyFromHash();loadStorefrontCatalogue();
 </script>
 <script>
 /* Progressive enhancement: content stays visible if JS/observers fail. */
