@@ -55,7 +55,7 @@ function renderOffers(){
 
 function installCustomerNav(){
  const header=document.querySelector('.site-header'),nav=document.querySelector('.site-header .nav');
- if(!header||!nav||document.getElementById('customerQuickNav'))return;
+ if(!header||!nav||document.getElementById('customerQuickNav')||document.querySelector('.storefront-shortcuts'))return;
  const style=document.createElement('style');
  style.textContent='#customerQuickNav{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;padding:8px 4%;border-top:1px solid var(--line);background:var(--white)}#customerQuickNav a{font-size:9px;letter-spacing:1px;text-transform:uppercase;padding:7px 10px;border:1px solid transparent;white-space:nowrap}#customerQuickNav a:hover,#customerQuickNav a:focus-visible{border-color:var(--gold);color:#8c6f3c}@media(max-width:720px){#customerQuickNav{justify-content:flex-start;flex-wrap:nowrap;overflow-x:auto;scrollbar-width:thin}#customerQuickNav a{flex:0 0 auto}}';
  document.head.appendChild(style);

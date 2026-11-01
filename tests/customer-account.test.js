@@ -104,3 +104,9 @@ test('return history is scoped to the authenticated customer order and uses supp
  assert.ok(routes.includes('<option value="return">Return</option><option value="refund">Refund</option><option value="warranty">Warranty</option>'));
  assert.ok(!routes.includes('<option value="exchange">Exchange</option>'));
 });
+
+
+test('customer navigation does not duplicate the storefront category and brand shortcut row',()=>{
+ assert.match(storefront,/document\.querySelector\('\.storefront-shortcuts'\)/);
+ assert.match(storefront,/if\(!header\|\|!nav\|\|document\.getElementById\('customerQuickNav'\)\|\|document\.querySelector\('\.storefront-shortcuts'\)\)return/);
+});
