@@ -73,7 +73,7 @@ test('collection cards retain product details links and current stock display', 
 
 test('collection matching uses normalized whole-token and phrase boundaries', () => {
   const start = routes.indexOf('function normalizeCollectionText');
-  const end = routes.indexOf('\\nfunction showHomeSection', start);
+  const end = routes.indexOf('\nfunction showHomeSection', start);
   assert.ok(start >= 0 && end > start, 'collection matcher helpers must exist');
   const helpers = routes.slice(start, end);
   const matcher = new Function(helpers + '; return { normalizeCollectionText, matchesCollectionTerm, collectionProductMatches };')();
