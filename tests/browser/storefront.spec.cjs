@@ -177,7 +177,7 @@ test('every mobile menu link opens its real destination and closes the menu', as
     ['journal', /Watch Journal is coming soon/i],
     ['story', /Our point of view/i],
     ['care', /Store policies/i],
-    ['delivery', /Delivery setup is not active/i],
+    ['delivery', /Delivery availability/i],
     ['offers', /Offers & rewards|Sign in/i],
     ['contact', /Contact us/i],
     ['account', /Sign in|Account unavailable/i],
@@ -584,7 +584,7 @@ test('mobile drawer exposes modal navigation semantics, traps focus and restores
   await expect(page.locator('#mobileMenuClose')).toBeFocused();
 
   const links = menu.locator('a');
-  await expect(links).toHaveCount(17);
+  await expect(links).toHaveCount(21);
   await page.keyboard.press('Shift+Tab');
   await expect(links.last()).toBeFocused();
   await page.keyboard.press('Tab');
