@@ -417,6 +417,46 @@ body.menu-open::before{content:"";position:fixed;inset:0;background:rgba(13,13,1
 .route-description-more p{margin:14px 0 4px;color:var(--muted);font-size:13px;line-height:1.8}
 @media(max-width:680px){.route-purchase-actions{grid-template-columns:1fr 1fr}.route-purchase-actions .button:first-child{grid-column:1/-1}}
 </style>
+
+<style id="storefront-product-interface-refresh">
+/* Dedicated product detail and Buy Now interfaces — existing IQA palette retained. */
+.route-hero{padding-top:42px;padding-bottom:30px}
+.route-product-layout{gap:clamp(24px,5vw,68px);align-items:start}
+.route-product-media{background:var(--white);border:1px solid var(--line);padding:clamp(12px,2vw,24px)}
+.route-gallery-main{background:var(--white);min-height:clamp(320px,42vw,560px)}
+.route-gallery-main img{max-height:620px}
+.route-product-copy{background:var(--white);border:1px solid var(--line);padding:clamp(20px,3vw,34px)}
+.route-product-copy h2{font-size:clamp(30px,3.5vw,44px)!important}
+.route-product-price{margin:10px 0;font-size:clamp(27px,3vw,36px);color:var(--ink)}
+.route-purchase-actions{grid-template-columns:1fr 1.15fr;gap:10px;margin:22px 0}
+.route-purchase-actions .button{min-height:54px;font-weight:700;letter-spacing:1.3px}
+.route-purchase-actions .route-add-button{background:transparent;color:var(--ink);border:1px solid var(--ink)}
+.route-purchase-actions .route-buy-button,.route-buy-button{background:var(--gold);border-color:var(--gold);color:var(--ink);font-weight:800;box-shadow:0 5px 14px #b99a5b38}
+.route-purchase-actions .route-buy-button:hover,.route-buy-button:hover{background:var(--ink);border-color:var(--ink);color:var(--white)}
+.route-purchase-actions .route-wish-button{grid-column:1/-1;min-height:42px}
+.route-description-more{margin-top:24px;padding:18px 0}
+.route-description-more summary{font-size:13px}
+.route-description-more p{font-size:13px;line-height:1.9}
+.buy-now-panel{display:grid;grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr);gap:clamp(20px,4vw,48px);background:var(--white);border:1px solid var(--line);padding:clamp(18px,4vw,42px);max-width:1050px;margin:0 auto}
+.buy-now-image{background:#e7e1d6;display:grid;place-items:center;min-height:320px}
+.buy-now-image img{width:100%;height:100%;max-height:520px;object-fit:contain;padding:5%}
+.buy-now-copy{align-self:center}
+.buy-now-copy h2{font:400 clamp(30px,4vw,46px)/1.12 var(--serif);margin:12px 0}
+.buy-now-price{font-size:30px;font-weight:700;margin:8px 0}
+.buy-now-description{color:var(--muted);font-size:13px;line-height:1.8}
+.buy-now-status{margin:22px 0;padding:15px;border-left:3px solid var(--gold);background:#f0eadf;color:#514b40;font-size:12px;line-height:1.8}
+.buy-now-actions{display:grid;gap:10px}
+.buy-now-actions .button{width:100%;min-height:50px}
+@media(max-width:680px){
+ .route-product-layout,.buy-now-panel{grid-template-columns:1fr}
+ .route-product-media{min-height:0}
+ .route-gallery-main{min-height:280px}
+ .route-product-copy{padding:22px 18px}
+ .route-purchase-actions{grid-template-columns:1fr 1fr}
+ .route-purchase-actions .button{min-height:54px;font-size:10px;padding:12px 8px}
+ .buy-now-image{min-height:260px;max-height:340px}
+}
+</style>
 </head>
 <body>
 
@@ -569,7 +609,7 @@ function initSmartShopping(){
  document.getElementById('sizeCard').addEventListener('click',e=>{if(e.target.id!=='checkSize')return;const raw=Number(document.getElementById('wristValue').value),unit=document.getElementById('wristUnit').value,pref=document.getElementById('fitPreference').value,out=document.getElementById('sizeResults');if(!Number.isFinite(raw)||raw<=0||raw>(unit==='cm'?40:16)){out.textContent='Enter a valid wrist circumference measurement.';return}const cm=unit==='cm'?raw:raw*2.54;out.innerHTML='<strong>Measurement: '+cm.toFixed(1)+' cm ('+(cm/2.54).toFixed(2)+' in)</strong><p>Preferred look: '+({compact:'Compact',balanced:'Balanced',large:'Larger-looking'}[pref])+'. The current catalogue does not contain verified case diameter and lug-to-lug measurements, so a responsible product-specific size recommendation cannot yet be made.</p><p>Case diameter alone does not guarantee fit. Compare case diameter, lug-to-lug length, thickness, strap adjustment range and personal preference when verified dimensions are added.</p>'});
 }
 
-document.addEventListener('click',e=>{const mobileMenuLink=e.target.closest('#mobileMenu a');if(mobileMenuLink){$('mobileMenu').classList.remove('open');$('menuToggle').setAttribute('aria-expanded','false')}const add=e.target.closest('[data-add]');if(add){if(addCart(add.dataset.add))location.hash='bag';return}const buyNow=e.target.closest('[data-buy-now]');if(buyNow){if(addCart(buyNow.dataset.buyNow))location.hash='checkout';return}const brandBrowse=e.target.closest('[data-browse-brands]');if(brandBrowse){$('shop').scrollIntoView({behavior:'smooth'});setTimeout(()=>$('brandFilter')?.focus({preventScroll:true}),250);return}const wish=e.target.closest('[data-wish]');if(wish){toggleWish(wish.dataset.wish);return}const view=e.target.closest('[data-view]');if(view){if(view.tagName==='A')e.preventDefault();location.hash='product/'+encodeURIComponent(view.dataset.view);return}const qty=e.target.closest('[data-qty]');if(qty){const id=qty.dataset.qty,next=(cart[id]||0)+Number(qty.dataset.delta);if(next<=0)delete cart[id];else{const product=products.find(p=>p.id===id);const cap=Math.min(10,Number(product?.stock||0));if(next>cap){toast('Only '+cap+' unit(s) currently available.');return}cart[id]=next;}updateCounts();renderPanel('cart');return}const remove=e.target.closest('[data-remove]');if(remove){delete cart[remove.dataset.remove];updateCounts();renderPanel('cart');return}const catLink=e.target.closest('[data-category-link]');if(catLink){e.preventDefault();setCategory(catLink.dataset.categoryLink);$('mobileMenu').classList.remove('open');$('menuToggle').setAttribute('aria-expanded','false');$('shop').scrollIntoView({behavior:'smooth'});return}const chip=e.target.closest('[data-category]');if(chip){setCategory(chip.dataset.category);return}const policy=e.target.closest('[data-policy]');if(policy){e.preventDefault();location.hash=policy.dataset.policy==='Contact'?'contact':'care/'+({'About IQA WATCHES':'about-iqa-watches','Returns & refunds':'returns-refunds','Watch care':'watch-care','Authenticity':'authenticity','Grievance':'grievance','Shipping':'shipping','Warranty':'warranty','FAQ':'faq','Privacy':'privacy','Terms':'terms','Contact':'contact'}[policy.dataset.policy]||'faq');return}if(e.target.closest('#policyBack')){closeModal();history.pushState({},'',location.pathname+location.search+'#home');return}if(e.target.closest('#resetFilters')){resetFilters();return}if(e.target.closest('#continueShopping')){closePanel();location.hash='shop';return}if(e.target.closest('#checkoutDemo')){toast('Checkout is disabled until secure backend and payment verification are implemented.');return}if(e.target.closest('#drawerClose')){closePanel();return}if(e.target.closest('#modalClose')||e.target===$('modalWrap')){closeModal();return}});
+document.addEventListener('click',e=>{const mobileMenuLink=e.target.closest('#mobileMenu a');if(mobileMenuLink){$('mobileMenu').classList.remove('open');$('menuToggle').setAttribute('aria-expanded','false')}const add=e.target.closest('[data-add]');if(add){if(addCart(add.dataset.add)){if(add.closest('.route-product-copy'))location.hash='bag';else location.hash='bag'}return}const buyNow=e.target.closest('[data-buy-now]');if(buyNow){const id=buyNow.dataset.buyNow;if(!addCart(id))return;if(location.hash!=='#buy-now/'+encodeURIComponent(id))location.hash='buy-now/'+encodeURIComponent(id);else if(typeof window.renderRouteFromHash==='function')window.renderRouteFromHash();return}const brandBrowse=e.target.closest('[data-browse-brands]');if(brandBrowse){$('shop').scrollIntoView({behavior:'smooth'});setTimeout(()=>$('brandFilter')?.focus({preventScroll:true}),250);return}const wish=e.target.closest('[data-wish]');if(wish){toggleWish(wish.dataset.wish);return}const view=e.target.closest('[data-view]');if(view){if(view.tagName==='A')e.preventDefault();location.hash='product/'+encodeURIComponent(view.dataset.view);return}const qty=e.target.closest('[data-qty]');if(qty){const id=qty.dataset.qty,next=(cart[id]||0)+Number(qty.dataset.delta);if(next<=0)delete cart[id];else{const product=products.find(p=>p.id===id);const cap=Math.min(10,Number(product?.stock||0));if(next>cap){toast('Only '+cap+' unit(s) currently available.');return}cart[id]=next;}updateCounts();renderPanel('cart');return}const remove=e.target.closest('[data-remove]');if(remove){delete cart[remove.dataset.remove];updateCounts();renderPanel('cart');return}const catLink=e.target.closest('[data-category-link]');if(catLink){e.preventDefault();setCategory(catLink.dataset.categoryLink);$('mobileMenu').classList.remove('open');$('menuToggle').setAttribute('aria-expanded','false');$('shop').scrollIntoView({behavior:'smooth'});return}const chip=e.target.closest('[data-category]');if(chip){setCategory(chip.dataset.category);return}const policy=e.target.closest('[data-policy]');if(policy){e.preventDefault();location.hash=policy.dataset.policy==='Contact'?'contact':'care/'+({'About IQA WATCHES':'about-iqa-watches','Returns & refunds':'returns-refunds','Watch care':'watch-care','Authenticity':'authenticity','Grievance':'grievance','Shipping':'shipping','Warranty':'warranty','FAQ':'faq','Privacy':'privacy','Terms':'terms','Contact':'contact'}[policy.dataset.policy]||'faq');return}if(e.target.closest('#policyBack')){closeModal();history.pushState({},'',location.pathname+location.search+'#home');return}if(e.target.closest('#resetFilters')){resetFilters();return}if(e.target.closest('#continueShopping')){closePanel();location.hash='shop';return}if(e.target.closest('#checkoutDemo')){toast('Checkout is disabled until secure backend and payment verification are implemented.');return}if(e.target.closest('#drawerClose')){closePanel();return}if(e.target.closest('#modalClose')||e.target===$('modalWrap')){closeModal();return}});
 
 const policyPages={
 'About IQA WATCHES':{title:'About IQA WATCHES',body:'<p>IQA WATCHES is presented here as a watch-shopping concept with the tagline “Watches for every day.” This website is currently a development preview, not a live retail operation.</p><p>Business history, registered entity details, sourcing relationships, and brand authorisations have not been verified and are intentionally not claimed here.</p>'},
