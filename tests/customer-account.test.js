@@ -180,7 +180,7 @@ test('comparison route enforces unique selections, a four-watch limit, removal a
 test('narrow-phone navigation stays compact with usable tap targets and menu search fallback', async () => {
   const html = await readFile(new URL('../index.html', import.meta.url), 'utf8');
   const start = html.indexOf('@media(max-width:360px){');
-  const end = html.indexOf('\\n}', start);
+  const end = html.indexOf('</style>', start);
   assert.ok(start >= 0 && end > start, 'expected narrow-phone navigation breakpoint');
   const css = html.slice(start, end);
   assert.match(css, /\.brand-logo\{width:clamp\(112px,34vw,122px\)/);
