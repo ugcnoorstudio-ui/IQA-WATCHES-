@@ -6,7 +6,9 @@ const esc=v=>typeof escapeHtml==='function'?escapeHtml(v):String(v??'');
 const money=v=>new Intl.NumberFormat('en-IN',{style:'currency',currency:'INR',maximumFractionDigits:0}).format(Number(v||0));
 const root=()=>document.getElementById('routeView');
 const saved=(key,fallback)=>{try{return JSON.parse(localStorage.getItem(key))??fallback}catch{return fallback}};
-const state=saved(KEY,{compare:[],recent:[]});
+const initialState=saved(KEY,{});
+const cleanIds=(value,limit)=>Array.isArray(value)?[...new Set(value.filter(id=>typeof id==='string'&&id.trim()).map(id=>id.trim()))].slice(0,limit):[];
+const state={compare:cleanIds(initialState?.compare,4),recent:cleanIds(initialState?.recent,12)};
 function persist(){try{localStorage.setItem(KEY,JSON.stringify(state))}catch(_){}}
 function hero(title,sub){return '<header class="route-hero"><div class="eyebrow">IQA WATCHES · CUSTOMER STORE</div><h1>'+esc(title)+'</h1><p>'+esc(sub)+'</p></header>'}
 function shell(title,sub,body){const r=root();if(!r)return;r.classList.remove('hidden');r.innerHTML=hero(title,sub)+'<div class="route-content">'+body+'</div>';window.scrollTo(0,0)}
@@ -16,10 +18,12 @@ function renderCompare(){
  const items=state.compare.map(id=>(typeof products!=='undefined'?products:[]).find(p=>p.id===id)).filter(Boolean);
  shell('Compare watches','Compare up to four currently approved watches side by side.',
  '<div class="route-feature"><p>Select Compare on product cards to add watches here. You can compare up to four products.</p><button class="button light" id="clearCustomerCompare" type="button">Clear comparison</button></div>'+
- (items.length?'<div class="route-feature" style="overflow-x:auto"><table class="route-specs"><thead><tr><th>Feature</th>'+items.map(p=>'<th>'+esc(p.name)+'</th>').join('')+'</tr></thead><tbody>'+
+ (items.length?'<div class="route-feature" style="overflow-x:auto"><table class="route-specs"><thead><tr><th>Feature</th>'+items.map(p=>'<th>'+esc(p.name)+'<br><button class="button light" type="button" data-remove-customer-compare="'+esc(p.id)+'">Remove</button></th>').join('')+'</tr></thead><tbody>'+
  [['Brand',p=>p.brand],['Price',p=>money(p.price)],['Category',p=>p.category],['Style',p=>p.style],['Colour',p=>p.colour],['Strap',p=>p.strap],['SKU',p=>p.sku],['Available units',p=>p.stock]].map(([label,fn])=>'<tr><th>'+label+'</th>'+items.map(p=>'<td>'+esc(fn(p)??'Not specified')+'</td>').join('')+'</tr>').join('')+
  '</tbody></table></div>':'<div class="route-empty">No watches selected yet. <a href="#shop">Browse the collection</a>.</div>'));
  const clear=$('clearCustomerCompare');if(clear)clear.addEventListener('click',()=>{state.compare=[];persist();renderCompare()});
+ const table=root()?.querySelector('[data-remove-customer-compare]')?.closest('table');
+ if(table)table.addEventListener('click',e=>{const button=e.target.closest('[data-remove-customer-compare]');if(!button)return;state.compare=state.compare.filter(id=>id!==button.dataset.removeCustomerCompare);persist();renderCompare()});
 }
 function renderBrands(){
  const groups=[...new Set((typeof products!=='undefined'?products:[]).map(p=>p.brand).filter(Boolean))].sort();
@@ -91,6 +95,7 @@ function addCompareButtons(){
 document.addEventListener('click',e=>{
  const btn=e.target.closest('[data-customer-compare]');if(!btn)return;
  const id=btn.dataset.customerCompare;
+ if(typeof id!=='string'||!id.trim()||!(typeof products!=='undefined'?products:[]).some(p=>p.id===id))return;
  if(state.compare.includes(id))state.compare=state.compare.filter(x=>x!==id);
  else if(state.compare.length>=4){if(typeof toast==='function')toast('Compare up to four watches at a time.');return}
  else state.compare.push(id);
@@ -99,6 +104,7 @@ document.addEventListener('click',e=>{
 });
 const observer=new MutationObserver(()=>addCompareButtons());
 if(document.body)observer.observe(document.body,{childList:true,subtree:true});
+window.addEventListener('storage',event=>{if(event.key!==KEY)return;const next=saved(KEY,{});state.compare=cleanIds(next?.compare,4);state.recent=cleanIds(next?.recent,12);if((location.hash||'')==='#compare')renderCompare();});
 window.addEventListener('hashchange',()=>{recordViewed();renderRoute();});
 window.addEventListener('load',()=>{installCustomerNav();recordViewed();renderRoute();addCompareButtons();});
 window.addEventListener('catalogue:ready',()=>{renderRoute();addCompareButtons();});
