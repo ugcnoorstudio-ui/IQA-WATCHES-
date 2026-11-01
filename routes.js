@@ -317,7 +317,7 @@ function render(){
  if(r==='buy-now')return renderBuyNow(arg);
  if(r==='bag'||r==='cart')return renderBagRoute();
  if(r==='wishlist')return renderWishlistRoute();
- if(r==='checkout')return renderCheckoutRoute();
+ if(r==='checkout'||r==='checkout-review'||r==='payment')return renderCheckoutRoute();
  if(r==='login')return renderAuth('login');
  if(r==='signup')return renderAuth('signup');
  if(r==='account'||r==='profile')return renderAccount();
