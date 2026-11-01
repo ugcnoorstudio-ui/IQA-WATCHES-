@@ -37,3 +37,17 @@ test('mobile navigation fits narrow 360px and 390px viewports', async ({ page })
     await expect(page.getByRole('navigation', { name: 'Browse watch collections' })).toBeVisible();
   }
 });
+
+test('clicking a watch image, title or Details opens its product detail panel', async ({ page }) => {
+  await page.goto('/');
+  await expect.poll(() => page.locator('#productGrid .product-card').count(), { timeout: 20000 }).toBeGreaterThan(0);
+  const card = page.locator('#productGrid .product-card').first();
+  await card.locator('.product-image-link').click();
+  await expect(page.locator('#modalWrap')).toHaveClass(/open/);
+  await expect(page.locator('#modalContent .product-modal')).toBeVisible();
+  await expect(page.locator('#modalContent h2')).not.toBeEmpty();
+  await page.locator('#modalContent #modalClose').click();
+  await expect(page.locator('#modalWrap')).not.toHaveClass(/open/);
+  await card.locator('.product-title a').click();
+  await expect(page.locator('#modalWrap')).toHaveClass(/open/);
+});
