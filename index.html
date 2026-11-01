@@ -518,6 +518,44 @@ body.menu-open::before{content:"";position:fixed;inset:0;background:rgba(13,13,1
  .buy-now-copy h2{font-size:32px}
 }
 </style>
+<style id="desktop-navigation-drawer">
+@media(min-width:681px){
+  .menu-btn{display:inline-flex;flex:0 0 42px;width:42px;min-width:42px;height:42px;font-size:23px;order:-1}
+  .nav{justify-content:flex-start;gap:22px}
+  .brand{flex:0 0 auto}
+  .nav-links{flex:1;justify-content:center;gap:clamp(10px,1.5vw,25px)}
+  .nav-actions{flex:0 0 auto}
+  .mobile-menu.open{
+    display:flex;position:fixed;inset:0 auto 0 0;top:0;left:0;right:auto;bottom:0;
+    width:min(390px,88vw);max-width:390px;max-height:100vh;max-height:100dvh;
+    overflow-y:auto;overscroll-behavior:contain;padding:0 0 24px;gap:0;
+    flex-direction:column;background:#f5f1e8;color:#211f1a;
+    border-right:1px solid rgba(174,145,91,.35);
+    box-shadow:24px 0 64px rgba(16,14,10,.24);z-index:41;
+    animation:drawerReveal .28s cubic-bezier(.2,.75,.25,1) both
+  }
+  .mobile-menu-head{display:flex;align-items:center;justify-content:space-between;gap:16px;
+    padding:25px 22px 20px;min-height:106px;background:linear-gradient(135deg,#f8f5ee 0%,#eee7d9 100%);
+    border-bottom:1px solid #d8cdbb}
+  .drawer-brand{display:flex;flex-direction:column;gap:3px}
+  .drawer-kicker,.drawer-eyebrow,.drawer-group-label{font-family:Arial,sans-serif;font-size:9px;
+    line-height:1.5;letter-spacing:2px;font-weight:600;color:#947746}
+  .drawer-wordmark{font-family:var(--serif);font-size:24px;line-height:1.1;letter-spacing:1.5px;color:#211f1a}
+  .drawer-tagline{font-size:10px;letter-spacing:.5px;color:#777064}
+  .mobile-menu-close{flex:0 0 44px;width:44px;height:44px;min-width:44px;min-height:44px;
+    display:grid;place-items:center;border:1px solid #cfc2ac;border-radius:50%;
+    background:rgba(255,255,255,.62);font-size:25px;line-height:1;color:#332f27}
+  .drawer-intro{padding:20px 24px 13px}
+  .drawer-intro p{margin:5px 0 0;font-family:var(--serif);font-size:17px;line-height:1.4;color:#4c463b}
+  .mobile-menu-nav{display:flex;flex-direction:column;gap:0}
+  .drawer-group-label{padding:16px 24px 7px;border-top:1px solid #e1d9cc}
+  .mobile-menu-nav>a{display:flex;align-items:center;justify-content:space-between;gap:16px;
+    min-height:48px;padding:11px 24px;border:0;border-bottom:1px solid #e6dfd3;
+    background:transparent;color:#29261f;font-family:var(--serif);font-size:16px;
+    letter-spacing:.15px;text-transform:none}
+  .mobile-menu-nav>a span{font-family:Arial,sans-serif;font-size:14px;color:#a78b58}
+}
+</style>
 </head>
 <body>
 
@@ -537,7 +575,7 @@ body.menu-open::before{content:"";position:fixed;inset:0;background:rgba(13,13,1
 <div class="drawer-group-label">THE IQA EXPERIENCE</div>
 <a href="#journal">Watch Journal <span aria-hidden="true">↗</span></a><a href="#story">Our story <span aria-hidden="true">↗</span></a><a href="#care">Customer care <span aria-hidden="true">↗</span></a><a href="#delivery">Delivery information <span aria-hidden="true">↗</span></a><a href="#offers">Offers <span aria-hidden="true">↗</span></a><a href="#contact">Contact <span aria-hidden="true">↗</span></a><a href="#account">My account <span aria-hidden="true">↗</span></a><a href="#orders">My orders <span aria-hidden="true">↗</span></a><a href="#faq">FAQs <span aria-hidden="true">↗</span></a><a href="#policies">Store policies <span aria-hidden="true">↗</span></a>
 </nav>
-<div class="drawer-footer"><span>MADE FOR EVERY MOMENT</span><span>TIMELESS · CONSIDERED · PERSONAL</span></div>
+
 </div>
 </nav></header>
 
