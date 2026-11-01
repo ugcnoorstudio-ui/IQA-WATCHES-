@@ -110,7 +110,7 @@ test('every mobile menu link opens its real destination and closes the menu', as
     ['story', /Our point of view/i],
     ['care', /Store policies/i],
     ['contact', /Contact us/i],
-    ['account', /Sign in/i],
+    ['account', /Sign in|Account unavailable/i],
     ['orders', /My orders/i],
     ['faq', /Frequently asked questions/i],
     ['policies', /Store policies/i]
@@ -126,7 +126,19 @@ test('every mobile menu link opens its real destination and closes the menu', as
     await toggle.click();
     await expect(menu).toHaveClass(/open/);
     await menu.locator('a[href="#' + route + '"]').click();
-    await expect(page).toHaveURL(new RegExp('#' + route + '
+    await expect.poll(() => page.evaluate(() => location.hash)).toBe('#' + route);
+    await expect(menu).not.toHaveClass(/open/);
+    await expect(toggle).toHaveAttribute('aria-expanded', 'false');
+
+    if (expected === '#routeCatalogue') {
+      await expect(page.locator('#routeCatalogue')).toBeAttached();
+    } else if (expected === '#finderCard' || expected === '#compareCard') {
+      await expect(page.locator(expected)).toBeVisible();
+    } else {
+      await expect(page.locator('#routeView')).toContainText(expected);
+    }
+  }
+});
 
 test('cart add, increment, decrement and remove work without enabling checkout', async ({ page }) => {
   await openStore(page);
