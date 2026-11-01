@@ -237,45 +237,6 @@ function renderSearch(){
 }
 
 
-let routeCompareIds=[];
-function renderBrands(selectedBrand=''){
- const brands=[...new Set(products.map(p=>p.brand).filter(Boolean))].sort((a,b)=>a.localeCompare(b));
- const chosen=selectedBrand?products.filter(p=>p.brand===selectedBrand):[];
- const cards=(list)=>list.length?'<div class="route-grid">'+list.map(p=>'<article class="route-card"><a href="#product/'+encodeURIComponent(p.id)+'"><img src="'+esc(safeImageUrl(p.image))+'" alt="'+esc(p.name)+'" loading="lazy"></a><div class="route-card-copy"><div class="product-brand">'+esc(p.brand)+'</div><h3><a href="#product/'+encodeURIComponent(p.id)+'">'+esc(p.name)+'</a></h3><p>'+money(p.price)+'</p><a class="button light" href="#product/'+encodeURIComponent(p.id)+'">View product</a></div></article>').join('')+'</div>':'<div class="route-empty">No currently published products are listed for this brand.</div>';
- infoRoute('IQA WATCHES · BRANDS',selectedBrand||'Explore our brands','Browse brands represented in the currently approved product catalogue.',selectedBrand?'<p><a class="button light" href="#brands">All brands</a></p>'+cards(chosen):(brands.length?'<div class="route-grid">'+brands.map(b=>'<article class="route-feature"><h2>'+esc(b)+'</h2><p>'+products.filter(p=>p.brand===b).length+' catalogue item(s)</p><a class="button light" href="#brands/'+encodeURIComponent(b)+'">Explore brand</a></article>').join('')+'</div>':'<div class="route-empty">No brands are currently listed in the approved catalogue.</div>'));
-}
-function renderCategories(selectedCategory=''){
- const values=[...new Set(products.flatMap(p=>[p.category,p.audience,p.style,...(Array.isArray(p.tags)?p.tags:[])]).filter(v=>typeof v==='string'&&v.trim()))].sort((a,b)=>a.localeCompare(b));
- const matches=selectedCategory?products.filter(p=>p.category===selectedCategory||p.audience===selectedCategory||p.style===selectedCategory||(Array.isArray(p.tags)&&p.tags.includes(selectedCategory))):[];
- const cards=list=>list.length?'<div class="route-grid">'+list.map(p=>'<article class="route-card"><a href="#product/'+encodeURIComponent(p.id)+'"><img src="'+esc(safeImageUrl(p.image))+'" alt="'+esc(p.name)+'" loading="lazy"></a><div class="route-card-copy"><div class="product-brand">'+esc(p.brand)+'</div><h3><a href="#product/'+encodeURIComponent(p.id)+'">'+esc(p.name)+'</a></h3><p>'+money(p.price)+'</p><a class="button light" href="#product/'+encodeURIComponent(p.id)+'">View product</a></div></article>').join('')+'</div>':'<div class="route-empty">No published products currently match this category.</div>';
- infoRoute('IQA WATCHES · CATEGORIES',selectedCategory||'Shop by category','Explore categories derived from approved catalogue attributes.',selectedCategory?'<p><a class="button light" href="#categories">All categories</a></p>'+cards(matches):'<div class="route-grid">'+values.map(v=>'<article class="route-feature"><h2>'+esc(v)+'</h2><p>'+products.filter(p=>p.category===v||p.audience===v||p.style===v||(Array.isArray(p.tags)&&p.tags.includes(v))).length+' matching catalogue item(s)</p><a class="button light" href="#categories/'+encodeURIComponent(v)+'">Explore category</a></article>').join('')+'</div>');
-}
-function renderDelivery(){
- infoRoute('IQA WATCHES · DELIVERY','Delivery information','Delivery coverage and estimates will be displayed only after verified shipping configuration is connected.',
- '<div class="route-feature"><h2>Delivery setup is not active</h2><p>PIN-code serviceability, courier partners, shipping charges, handling times and delivery estimates are not currently connected to this storefront.</p><p>No delivery date, fee or serviceability promise can be made from this page. Checkout remains disabled.</p><a class="button light" href="#faq">Read FAQs</a> <a class="button light" href="#policies">Store policies</a></div>');
-}
-function renderComparison(){
- const available=products.filter(p=>p&&p.id);
- const options=available.map(p=>'<option value="'+esc(p.id)+'">'+esc(p.brand)+' · '+esc(p.name)+'</option>').join('');
- const draw=()=>{
-  const selected=routeCompareIds.map(id=>available.find(p=>p.id===id)).filter(Boolean);
-  const attrs=[['Brand',p=>p.brand||'Not specified'],['Model / SKU',p=>p.sku||'Not specified'],['Price',p=>money(p.price)],['Category',p=>p.category||'Not specified'],['Style',p=>p.style||'Not specified'],['Dial colour',p=>p.dial||'Not specified'],['Case diameter',p=>p.caseDiameter?p.caseDiameter+' mm':'Not specified'],['Movement',p=>p.movement||'Not specified'],['Water resistance',p=>p.waterResistance||'Not specified'],['Warranty',p=>p.warranty||'Not verified'],['Availability',p=>Number(p.stock)>0?'Available at last catalogue check':'Unavailable']];
-  const table=selected.length>=2?'<div class="compare-table-wrap"><table class="compare-table"><thead><tr><th>Specification</th>'+selected.map(p=>'<th>'+esc(p.name)+'<br><button type="button" class="button light" data-route-uncompare="'+esc(p.id)+'">Remove</button></th>').join('')+'</tr></thead><tbody>'+attrs.map(([label,fn])=>'<tr><th>'+label+'</th>'+selected.map(p=>'<td>'+esc(fn(p))+'</td>').join('')+'</tr>').join('')+'</tbody></table></div>':'<div class="route-empty">Select at least two watches to compare side by side. You can compare up to four.</div>';
-  const host=$r('routeCompareResults');if(host)host.innerHTML=table;
- };
- infoRoute('IQA WATCHES · COMPARE','Compare watches','Compare two to four approved catalogue items. Missing specifications are labelled rather than guessed.',
- '<div class="route-feature"><label for="routeCompareProduct">Choose a watch</label><select id="routeCompareProduct"><option value="">Select product</option>'+options+'</select> <button type="button" class="button" id="routeCompareAdd">Add to comparison</button> <button type="button" class="button light" id="routeCompareClear">Clear</button><p class="route-note" id="routeCompareStatus" role="status" aria-live="polite"></p></div><div id="routeCompareResults"></div>');
- $r('routeCompareAdd').addEventListener('click',()=>{
-  const id=$r('routeCompareProduct').value,status=$r('routeCompareStatus');
-  if(!id){status.textContent='Choose a product first.';return}
-  if(routeCompareIds.includes(id)){status.textContent='This watch is already selected.';return}
-  if(routeCompareIds.length>=4){status.textContent='You can compare up to four watches. Remove one first.';return}
-  routeCompareIds.push(id);status.textContent=routeCompareIds.length+' watch(es) selected.';draw();
- });
- $r('routeCompareClear').addEventListener('click',()=>{routeCompareIds=[];$r('routeCompareStatus').textContent='Comparison cleared.';draw()});
- $r('routeCompareResults').addEventListener('click',e=>{const b=e.target.closest('[data-route-uncompare]');if(!b)return;routeCompareIds=routeCompareIds.filter(id=>id!==b.dataset.routeUncompare);draw();});
- draw();
-}
 
 function render(){
  try{
@@ -296,7 +257,8 @@ function render(){
  if(r==='orders'||r==='tracking'||r==='addresses'||r==='reviews'||r==='support'||r==='returns'||r==='coupons'||r==='offers')return renderCustomerDataPage(r);
  if(r==='brands')return renderBrands(arg);
  if(r==='categories'||r==='category')return renderCategories(arg);
- if(r==='comparison'||r==='compare')return renderComparison();
+ if(r==='comparison'){location.hash='compare';return;}
+ if(r==='compare')return;
  if(r==='delivery'||r==='shipping')return renderDelivery();
  if(r==='search')return renderSearch();
  if(r==='about'||r==='story')return renderAbout();
