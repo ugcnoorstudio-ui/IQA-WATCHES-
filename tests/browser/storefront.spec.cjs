@@ -398,7 +398,14 @@ test('product cards open a complete quick-view modal and related watches replace
   await expect(page.locator('#modalContent h2')).toHaveText(expectedName);
   await expect(page.locator('#modalContent .product-modal-image img')).toBeVisible();
   await expect(page.locator('#modalContent .spec-list')).toBeVisible();
+  await expect(page.locator('#modalContent')).toHaveAttribute('aria-labelledby', 'modalTitle');
+  const close = page.locator('#modalClose');
+  await expect(close).toBeFocused();
   await expect(page.locator('#modalContent .related-product')).not.toHaveCount(0);
+  await page.keyboard.press('Shift+Tab');
+  await expect(page.locator('#modalContent .related-product').last()).toBeFocused();
+  await page.keyboard.press('Tab');
+  await expect(close).toBeFocused();
   const related = page.locator('#modalContent .related-product').first();
   const relatedName = (await related.locator('span').innerText()).trim();
   await related.click();
@@ -407,4 +414,14 @@ test('product cards open a complete quick-view modal and related watches replace
   await expect(page).toHaveURL(/#home$/);
   await page.keyboard.press('Escape');
   await expect(modal).not.toHaveClass(/open/);
+  await expect(card.locator('.product-image-link')).toBeFocused();
+});
+
+
+test('header My Account opens the customer sign-in or safe unavailable panel', async ({ page }) => {
+  await page.goto('/');
+  await page.locator('a[aria-label="My account"]').first().click();
+  await expect.poll(() => page.evaluate(() => location.hash)).toBe('#account');
+  await expect(page.locator('#routeView')).toBeVisible();
+  await expect(page.locator('#routeView')).toContainText(/Sign in|Account unavailable/i);
 });
