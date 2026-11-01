@@ -146,7 +146,7 @@ test('customer comparison selections are persisted, normalised, capped and remov
   assert.match(customer, /window\.addEventListener\('storage'/);
   assert.match(customer, /const valid=state\.compare\.filter\(id=>\(typeof products!=='undefined'\?products:\[\]\)\.some\(p=>p\.id===id\)\)/);
   assert.doesNotThrow(() => new vm.Script(customer), 'customer storefront script must parse');
-  assert.match(customer, /if\(\(location\.hash\|\|'\)==='#compare'\)renderCompare\(\)/);
+  assert.match(customer, /if\(\(location\.hash\|\|''\)==='#compare'\)renderCompare\(\)/);
 });
 
 test('cart and wishlist persist locally, validate catalogue IDs and enforce available stock', async () => {
