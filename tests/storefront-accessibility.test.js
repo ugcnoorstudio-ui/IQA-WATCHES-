@@ -45,7 +45,7 @@ test('shared price ranges cover boundaries exactly once',()=>{
  const source=html.slice(start,end);
  const sandbox={};
  vm.runInNewContext(source+';this.matchesPriceRange=matchesPriceRange;this.PRICE_RANGES=PRICE_RANGES;',sandbox);
- const matches=price=>sandbox.PRICE_RANGES.filter(range=>sandbox.matchesPriceRange(price,range.id)).map(range=>range.id);
+ const matches=price=>Array.from(sandbox.PRICE_RANGES).filter(range=>sandbox.matchesPriceRange(price,range.id)).map(range=>range.id);
  assert.deepEqual(matches(999),['under1000']);
  assert.deepEqual(matches(1000),['1000to1500']);
  assert.deepEqual(matches(1499.99),['1000to1500']);
