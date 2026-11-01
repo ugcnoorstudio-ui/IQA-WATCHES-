@@ -215,6 +215,79 @@ body.menu-open::before{content:"";position:fixed;inset:0;background:rgba(13,13,1
 .menu-btn{font-size:30px;line-height:1}
 @media(max-width:680px){body.menu-open .site-header{z-index:62}.mobile-menu.open{top:68px;width:min(calc(100vw - 64px),390px)}.mobile-menu>a{min-height:56px;font-size:16px}}
 </style>
+<style>
+/* Mobile header: one compact row with a flexible logo and accessible icon actions. */
+@media (max-width: 680px) {
+  .nav {
+    display: grid;
+    grid-template-columns: 40px minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 6px;
+    width: 100%;
+    min-width: 0;
+    min-height: 64px;
+    box-sizing: border-box;
+    padding: 8px 8px;
+  }
+  .menu-btn {
+    display: inline-flex;
+    width: 40px;
+    min-width: 40px;
+    min-height: 44px;
+    padding: 0;
+    justify-self: start;
+  }
+  .brand {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 0;
+    max-width: 100%;
+    overflow: hidden;
+  }
+  .brand-logo {
+    display: block;
+    width: clamp(108px, 30vw, 150px);
+    max-width: 100%;
+    max-height: 44px;
+    height: auto;
+    object-fit: contain;
+  }
+  .nav-actions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 2px;
+    min-width: 0;
+  }
+  .nav-actions .icon-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 32px;
+    width: 32px;
+    min-width: 32px;
+    height: 42px;
+    min-height: 42px;
+    padding: 0;
+    gap: 0;
+    font-size: 0;
+  }
+  #headerSearch { font-size: 23px; }
+  #voiceSearch { font-size: 17px; }
+  #wishlistOpen { font-size: 20px; }
+  #cartOpen { font-size: 0; }
+  #wishCount, #cartCount {
+    display: inline-grid;
+    flex: 0 0 16px;
+    width: 16px;
+    height: 16px;
+    font-size: 10px;
+  }
+  .nav-actions > a[aria-label="My account"] { display: none; }
+  .nav-links { display: none; }
+}
+</style>
 <link rel="stylesheet" href="./assets/cinematic-story.css">
 </head>
 <body>
