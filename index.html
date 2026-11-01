@@ -558,6 +558,33 @@ body.menu-open::before{content:"";position:fixed;inset:0;background:rgba(13,13,1
   .mobile-menu-nav>a span{font-family:Arial,sans-serif;font-size:14px;color:#a78b58}
 }
 </style>
+
+<style id="desktop-menu-toggle-visibility-fix">
+@media (min-width:681px) {
+  header.site-header .nav > #menuToggle.menu-btn {
+    display:inline-flex !important;
+    visibility:visible !important;
+    opacity:1 !important;
+    position:relative !important;
+    flex:0 0 42px !important;
+    width:42px !important;
+    min-width:42px !important;
+    height:42px !important;
+    margin:0 !important;
+    padding:0 !important;
+    order:-1 !important;
+    align-items:center !important;
+    justify-content:center !important;
+    font-family:Arial,Helvetica,sans-serif !important;
+    font-size:27px !important;
+    line-height:1 !important;
+    color:var(--ink) !important;
+    z-index:2;
+  }
+  header.site-header .nav { gap:18px; }
+}
+</style>
+
 </head>
 <body>
 
