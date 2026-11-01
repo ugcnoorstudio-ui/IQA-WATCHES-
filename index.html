@@ -214,6 +214,24 @@ body.menu-open::before{content:"";position:fixed;inset:0;background:rgba(13,13,1
 .icon-btn{min-width:44px;min-height:44px;font-size:14px}
 .menu-btn{font-size:30px;line-height:1}
 @media(max-width:680px){body.menu-open .site-header{z-index:62}.mobile-menu.open{top:68px;width:min(calc(100vw - 64px),390px)}.mobile-menu>a{min-height:56px;font-size:16px}}
+
+/* Consolidated mobile viewport hardening from related storefront PRs. */
+html,body{width:100%;max-width:100%;overflow-x:clip}
+body{min-width:0}
+main,.site-header,.announcement,.hero,.section,.footer{max-width:100%;min-width:0}
+@media(max-width:680px){
+ .nav{width:100%;min-width:0;gap:6px;padding:9px 3%;justify-content:space-between}
+ .brand{min-width:0;flex:0 1 auto}
+ .brand-logo{width:clamp(118px,38vw,150px);max-width:100%;height:auto}
+ .nav-actions{min-width:0;flex:0 0 auto;gap:2px}
+ .nav-actions .icon-btn{min-width:30px;width:30px;padding:0 2px;font-size:9px}
+ .nav-actions #voiceSearch,.nav-actions a[aria-label="My account"]{display:none}
+ .storefront-shortcuts{justify-content:flex-start;padding:9px 4%;gap:7px}
+ .storefront-shortcuts .shortcut-label{font-size:9px}
+ .storefront-shortcuts button{padding:8px 11px;font-size:9px}
+ .hero-copy,.hero-visual,.section,.product-grid,.product-card{min-width:0;max-width:100%}
+ .hero h1{overflow-wrap:anywhere}
+}
 </style>
 <link rel="stylesheet" href="./assets/cinematic-story.css">
 </head>

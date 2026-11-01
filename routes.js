@@ -192,8 +192,8 @@ async function renderCustomerDataPage(route){
   }
   if(route==='returns'){
    const {data:orders,error}=await client.from('orders').select('id,order_number,state,created_at').eq('customer_id',customerId).order('created_at',{ascending:false});if(error)throw error;
-   const {data:existing,error:retError}=await client.from('return_requests').select('id,order_id,kind,reason,state,created_at').order('created_at',{ascending:false});if(retError)throw retError;
-   host.innerHTML='<h2>Request a return</h2><form id="returnForm" class="route-form"><label>Order<select name="order_id" required><option value="">Choose your order</option>'+(orders||[]).map(o=>'<option value="'+esc(o.id)+'">'+esc(o.order_number||o.id.slice(0,8))+' · '+esc(o.state)+'</option>').join('')+'</select></label><label>Request type<select name="kind"><option value="return">Return</option><option value="exchange">Exchange</option></select></label><label>Reason<textarea name="reason" required minlength="5" maxlength="1000"></textarea></label><button class="button" type="submit">Submit request</button><p id="returnMessage" role="status"></p></form><h3>Previous requests</h3>'+((existing||[]).map(x=>'<p>Request '+esc(x.id.slice(0,8))+' · '+esc(x.kind)+' · '+esc(x.state)+' — '+esc(x.reason)+'</p>').join('')||'<p>No return requests yet.</p>')+'<p class="route-note">Requests are subject to the final published return policy and staff review. Submitting does not guarantee approval.</p>';
+   const {data:existing,error:retError}=await client.from('return_requests').select('id,order_id,kind,reason,state,created_at,orders!inner(customer_id)').eq('orders.customer_id',customerId).order('created_at',{ascending:false});if(retError)throw retError;
+   host.innerHTML='<h2>Request a return</h2><form id="returnForm" class="route-form"><label>Order<select name="order_id" required><option value="">Choose your order</option>'+(orders||[]).map(o=>'<option value="'+esc(o.id)+'">'+esc(o.order_number||o.id.slice(0,8))+' · '+esc(o.state)+'</option>').join('')+'</select></label><label>Request type<select name="kind"><option value="return">Return</option><option value="refund">Refund</option><option value="warranty">Warranty</option></select></label><label>Reason<textarea name="reason" required minlength="5" maxlength="1000"></textarea></label><button class="button" type="submit">Submit request</button><p id="returnMessage" role="status"></p></form><h3>Previous requests</h3>'+((existing||[]).map(x=>'<p>Request '+esc(x.id.slice(0,8))+' · '+esc(x.kind)+' · '+esc(x.state)+' — '+esc(x.reason)+'</p>').join('')||'<p>No return requests yet.</p>')+'<p class="route-note">Requests are subject to the final published return policy and staff review. Submitting does not guarantee approval.</p>';
    $r('returnForm').addEventListener('submit',async e=>{e.preventDefault();const fd=new FormData(e.currentTarget);const {error}=await client.from('return_requests').insert({order_id:fd.get('order_id'),kind:fd.get('kind'),reason:String(fd.get('reason')).trim(),state:'requested'});if(error){customerMessage('returnMessage',error.message,true);return;}customerMessage('returnMessage','Return request submitted for review.');e.currentTarget.reset();});return;
   }
   if(route==='reviews'){
@@ -242,6 +242,24 @@ function collectionForRoute(route){const definitions={shop:{title:'Shop all watc
 window.IQA_ROUTE_COLLECTIONS=Object.freeze({normalizeTag:normalizeCollectionTag,collectionForRoute});
 function showHomeSection(id){const home=document.getElementById('home');if(!home)return;root.classList.add('hidden');document.getElementById('mobileMenu')?.classList.remove('open');document.getElementById('menuToggle')?.setAttribute('aria-expanded','false');Array.from(home.children).forEach(x=>{if(x!==root)x.classList.remove('hidden')});requestAnimationFrame(()=>document.getElementById(id)?.scrollIntoView({behavior:'smooth',block:'start'}));}
 
+
+function renderBrands(selectedBrand=''){
+ const brands=[...new Set(products.map(p=>p.brand).filter(Boolean))].sort();
+ const chosen=selectedBrand?products.filter(p=>p.brand===selectedBrand):[];
+ const cards=list=>list.length?'<div class="route-grid">'+list.map(p=>'<article class="route-card"><a href="#product/'+encodeURIComponent(p.id)+'" data-view="'+esc(p.id)+'"><img src="'+esc(safeImageUrl(p.image))+'" alt="'+esc(p.name)+'" loading="lazy"></a><div class="route-card-copy"><div class="product-brand">'+esc(p.brand)+'</div><h3><a href="#product/'+encodeURIComponent(p.id)+'" data-view="'+esc(p.id)+'">'+esc(p.name)+'</a></h3><p>'+money(p.price)+'</p><a class="button light" href="#product/'+encodeURIComponent(p.id)+'" data-view="'+esc(p.id)+'">View product</a></div></article>').join('')+'</div>':'<div class="route-empty">No currently published products are listed for this brand.</div>';
+ infoRoute('IQA WATCHES · BRANDS',selectedBrand||'Explore our brands','Browse brands represented in the currently approved product catalogue.',selectedBrand?'<p><a class="button light" href="#brands">All brands</a></p>'+cards(chosen):(brands.length?'<div class="route-grid">'+brands.map(b=>'<article class="route-feature"><h2>'+esc(b)+'</h2><p>'+products.filter(p=>p.brand===b).length+' catalogue item(s)</p><a class="button light" href="#brands/'+encodeURIComponent(b)+'">Explore brand</a></article>').join('')+'</div>':'<div class="route-empty">No brands are currently listed in the approved catalogue.</div>'));
+}
+function renderCategories(selectedCategory=''){
+ const values=[...new Set(products.flatMap(p=>[p.category,p.audience,p.style,...(Array.isArray(p.tags)?p.tags:[])]).filter(v=>typeof v==='string'&&v.trim()))].sort();
+ const matches=selectedCategory?products.filter(p=>p.category===selectedCategory||p.audience===selectedCategory||p.style===selectedCategory||(Array.isArray(p.tags)&&p.tags.includes(selectedCategory))):[];
+ const cards=list=>list.length?'<div class="route-grid">'+list.map(p=>'<article class="route-card"><a href="#product/'+encodeURIComponent(p.id)+'" data-view="'+esc(p.id)+'"><img src="'+esc(safeImageUrl(p.image))+'" alt="'+esc(p.name)+'" loading="lazy"></a><div class="route-card-copy"><div class="product-brand">'+esc(p.brand)+'</div><h3><a href="#product/'+encodeURIComponent(p.id)+'" data-view="'+esc(p.id)+'">'+esc(p.name)+'</a></h3><p>'+money(p.price)+'</p><a class="button light" href="#product/'+encodeURIComponent(p.id)+'" data-view="'+esc(p.id)+'">View product</a></div></article>').join('')+'</div>':'<div class="route-empty">No published products currently match this category.</div>';
+ infoRoute('IQA WATCHES · CATEGORIES',selectedCategory||'Shop by category','Explore categories derived from approved catalogue attributes.',selectedCategory?'<p><a class="button light" href="#categories">All categories</a></p>'+cards(matches):'<div class="route-grid">'+values.map(v=>'<article class="route-feature"><h2>'+esc(v)+'</h2><p>'+products.filter(p=>p.category===v||p.audience===v||p.style===v||(Array.isArray(p.tags)&&p.tags.includes(v))).length+' matching catalogue item(s)</p><a class="button light" href="#categories/'+encodeURIComponent(v)+'">Explore category</a></article>').join('')+'</div>');
+}
+function renderDelivery(){
+ infoRoute('IQA WATCHES · DELIVERY','Delivery information','Delivery coverage and estimates will be displayed only after verified shipping configuration is connected.',
+ '<div class="route-feature"><h2>Delivery setup is not active</h2><p>PIN-code serviceability, courier partners, shipping charges, handling times and delivery estimates are not currently connected to this storefront.</p><p>No delivery date, fee or serviceability promise can be made from this page. Checkout remains disabled.</p><a class="button light" href="#faq">Read FAQs</a> <a class="button light" href="#policies">Store policies</a></div>');
+}
+
 function render(){
  try{
  const raw=(location.hash||'#home').slice(1),parts=raw.split('/'),r=parts[0]||'home';
@@ -259,6 +277,9 @@ function render(){
  if(r==='signup')return renderAuth('signup');
  if(r==='account'||r==='profile')return renderAccount();
  if(r==='orders'||r==='tracking'||r==='addresses'||r==='reviews'||r==='support'||r==='returns'||r==='coupons'||r==='offers')return renderCustomerDataPage(r);
+ if(r==='brands')return renderBrands(arg);
+ if(r==='categories'||r==='category')return renderCategories(arg);
+ if(r==='delivery'||r==='shipping')return renderDelivery();
  if(r==='search')return renderSearch();
  if(r==='about'||r==='story')return renderAbout();
  if(r==='faq')return renderFaq();
