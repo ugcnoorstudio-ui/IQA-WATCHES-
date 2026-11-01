@@ -5,6 +5,7 @@ on:
     branches:
       - main
       - feature/cinematic-3d-motion-engine-v2
+      - feat/premium-mobile-drawer-2026-11-01
   pull_request:
     branches:
       - main
