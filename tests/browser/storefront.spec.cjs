@@ -111,7 +111,7 @@ test('every mobile menu link opens its real destination and closes the menu', as
     ['care', /Store policies/i],
     ['contact', /Contact us/i],
     ['account', /Sign in|Account unavailable/i],
-    ['orders', /My orders/i],
+    ['orders', /Sign in/i],
     ['faq', /Frequently asked questions/i],
     ['policies', /Store policies/i]
   ];
@@ -119,14 +119,23 @@ test('every mobile menu link opens its real destination and closes the menu', as
     links.map(link => link.getAttribute('href').replace(/^#/, ''))
   );
   expect(menuLinks).toEqual(destinations.map(([route]) => route));
+  await page.evaluate(() => {
+    window.__iqaMenuHashHistory = [];
+    window.addEventListener('hashchange', () => window.__iqaMenuHashHistory.push(location.hash));
+  });
 
   for (const [route, expected] of destinations) {
     const toggle = page.locator('#menuToggle');
     const menu = page.locator('#mobileMenu');
     await toggle.click();
     await expect(menu).toHaveClass(/open/);
+    await page.evaluate(() => { window.__iqaMenuHashHistory = []; });
     await menu.locator('a[href="#' + route + '"]').click();
-    await expect.poll(() => page.evaluate(() => location.hash)).toBe('#' + route);
+    const expectedHash = route === 'orders' ? '#login' : '#' + route;
+    await expect.poll(() => page.evaluate(() => location.hash)).toBe(expectedHash);
+    if (route === 'orders') {
+      await expect.poll(() => page.evaluate(() => window.__iqaMenuHashHistory)).toContain('#orders');
+    }
     await expect(menu).not.toHaveClass(/open/);
     await expect(toggle).toHaveAttribute('aria-expanded', 'false');
 
