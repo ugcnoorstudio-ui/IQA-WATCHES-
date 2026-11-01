@@ -144,6 +144,8 @@ test('customer comparison selections are persisted, normalised, capped and remov
   assert.match(customer, /data-remove-customer-compare/);
   assert.match(customer, /state\.compare=state\.compare\.filter\(id=>id!==button\.dataset\.removeCustomerCompare\)/);
   assert.match(customer, /window\.addEventListener\('storage'/);
+  assert.match(customer, /const valid=state\.compare\.filter\(id=>\(typeof products!=='undefined'\?products:\[\]\)\.some\(p=>p\.id===id\)\)/);
+  assert.doesNotThrow(() => new vm.Script(customer), 'customer storefront script must parse');
   assert.match(customer, /if\(\(location\.hash\|\|'\)==='#compare'\)renderCompare\(\)/);
 });
 
