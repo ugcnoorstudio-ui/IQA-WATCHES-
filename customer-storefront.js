@@ -14,7 +14,7 @@ function card(p){return '<article class="route-card"><a href="#product/'+encodeU
 function productList(items){return '<div class="route-grid">'+(items.length?items.map(card).join(''):'<div class="route-empty">No matching products are currently published.</div>')+'</div>'}
 function renderCompare(){
  const items=state.compare.map(id=>(typeof products!=='undefined'?products:[]).find(p=>p.id===id)).filter(Boolean);
- shell('Compare watches','Compare up to four currently approved watches side by side.',
+ shell('Compare watches','Compare up to four watches side by side.',
  '<div class="route-feature"><p>Select Compare on product cards to add watches here. You can compare up to four products.</p><button class="button light" id="clearCustomerCompare" type="button">Clear comparison</button></div>'+
  (items.length?'<div class="route-feature" style="overflow-x:auto"><table class="route-specs"><thead><tr><th>Feature</th>'+items.map(p=>'<th>'+esc(p.name)+'<br><button class="button light" type="button" data-remove-customer-compare="'+esc(p.id)+'">Remove</button></th>').join('')+'</tr></thead><tbody>'+
  [['Brand',p=>p.brand],['Price',p=>money(p.price)],['Category',p=>p.category],['Style',p=>p.style],['Colour',p=>p.colour],['Strap',p=>p.strap],['SKU',p=>p.sku],['Available units',p=>p.stock]].map(([label,fn])=>'<tr><th>'+label+'</th>'+items.map(p=>'<td>'+esc(fn(p)??'Not specified')+'</td>').join('')+'</tr>').join('')+
@@ -25,10 +25,10 @@ function renderCompare(){
 }
 function renderBrands(){
  const groups=[...new Set((typeof products!=='undefined'?products:[]).map(p=>p.brand).filter(Boolean))].sort();
- shell('Shop by brand','Explore the brands represented in the approved catalogue.',
+ shell('Shop by brand','Discover the brands featured in our collection.',
  '<div class="route-grid">'+groups.map(b=>{const count=(typeof products!=='undefined'?products:[]).filter(p=>p.brand===b).length;return '<article class="route-feature"><h2>'+esc(b)+'</h2><p>'+count+' available catalogue '+(count===1?'watch':'watches')+'</p><a class="button light" href="#brand/'+encodeURIComponent(b)+'">View brand</a></article>'}).join('')+'</div>');
 }
-function renderBrand(name){const items=(typeof products!=='undefined'?products:[]).filter(p=>p.brand===name);shell(name,'Explore approved '+name+' watches.',productList(items))}
+function renderBrand(name){const items=(typeof products!=='undefined'?products:[]).filter(p=>p.brand===name);shell(name,'Explore '+name+' watches.',productList(items))}
 function renderCategories(){
  const groups=[...new Set((typeof products!=='undefined'?products:[]).map(p=>p.category).filter(Boolean))].sort();
  shell('Shop by category','Choose a category to explore matching watches.',
@@ -40,17 +40,17 @@ function renderRecent(){
  shell('Recently viewed','Your recently opened watches on this device.',productList(items));
 }
 function renderDelivery(){
- shell('Delivery availability','Check delivery information for your PIN code. Delivery estimates are shown only after the store configures verified service areas and shipping rules.',
- '<div class="route-columns"><div class="route-feature"><h2>Check your PIN code</h2><form id="deliveryCheckForm" class="route-form"><label>6-digit PIN code<input name="pin" inputmode="numeric" pattern="[0-9]{6}" maxlength="6" required placeholder="Enter delivery PIN code"></label><button class="button" type="submit">Check availability</button><p id="deliveryCheckMessage" role="status" aria-live="polite"></p></form></div><div class="route-feature"><h2>Delivery status</h2><p id="deliveryConfigStatus">The delivery network has not yet been configured with verified serviceable PIN codes, shipping charges and handling times. No delivery date or fee is being promised.</p><a class="button light" href="#policies">Read shipping policy</a></div></div>');
+ shell('Delivery availability','Check delivery information for your PIN code. Enter your PIN code and we'll help confirm delivery availability, charges and estimated timelines.',
+ '<div class="route-columns"><div class="route-feature"><h2>Check your PIN code</h2><form id="deliveryCheckForm" class="route-form"><label>6-digit PIN code<input name="pin" inputmode="numeric" pattern="[0-9]{6}" maxlength="6" required placeholder="Enter delivery PIN code"></label><button class="button" type="submit">Check availability</button><p id="deliveryCheckMessage" role="status" aria-live="polite"></p></form></div><div class="route-feature"><h2>Delivery status</h2><p id="deliveryConfigStatus">Please message us on WhatsApp to confirm delivery availability, charges and estimated timelines for your PIN code.</p><a class="button light" href="#policies">Read shipping policy</a></div></div>');
  const form=$('deliveryCheckForm');form.addEventListener('submit',async e=>{
   e.preventDefault();const pin=String(new FormData(form).get('pin')||'').trim(),msg=$('deliveryCheckMessage');
   if(!/^[0-9]{6}$/.test(pin)){msg.textContent='Please enter a valid 6-digit PIN code.';return;}
-  msg.textContent='Delivery coverage checker is not active yet. No delivery date or fee can be confirmed for '+pin+'. Please check back after the secure delivery integration is enabled.';
+  msg.textContent='We can't confirm delivery automatically just yet. Please message us on WhatsApp to check delivery for '+pin+'. .';
  });
 }
 function renderOffers(){
  shell('Offers & promotions','Browse currently published promotions.',
- '<div class="route-feature"><p>Offers will appear here only when active promotion rules are configured. Coupon validity, minimum order value and eligibility will be checked again during checkout.</p><a class="button light" href="#coupons">My coupons</a></div>');
+ '<div class="route-feature"><p>Explore the offers listed here. Coupon validity, minimum order value and eligibility will be confirmed at checkout.</p><a class="button light" href="#coupons">My coupons</a></div>');
 }
 
 function installCustomerNav(){
