@@ -28,13 +28,13 @@ function renderCompare(){
 function renderBrands(){
  const groups=[...new Set((typeof products!=='undefined'?products:[]).map(p=>p.brand).filter(Boolean))].sort();
  shell('Shop by brand','Explore the brands represented in the approved catalogue.',
- '<div class="route-grid">'+groups.map(b=>{const count=(typeof products!=='undefined'?products:[]).filter(p=>p.brand===b).length;return '<article class="route-feature"><h2>'+esc(b)+'</h2><p>'+count+' available catalogue '+(count===1?'watch':'watches')+'</p><a class="button light" href="#brand/'+encodeURIComponent(b)+'">View brand</a></article>'}).join('')+'</div>');
+ groups.length?'<div class="route-grid">'+groups.map(b=>{const count=(typeof products!=='undefined'?products:[]).filter(p=>p.brand===b).length;return '<article class="route-feature"><h2>'+esc(b)+'</h2><p>'+count+' available catalogue '+(count===1?'watch':'watches')+'</p><a class="button light" href="#brand/'+encodeURIComponent(b)+'">View brand</a></article>'}).join('')+'</div>':'<div class="route-empty">No brands are currently listed in the approved catalogue.</div>');
 }
 function renderBrand(name){const items=(typeof products!=='undefined'?products:[]).filter(p=>p.brand===name);shell(name,'Explore approved '+name+' watches.',productList(items))}
 function renderCategories(){
  const groups=[...new Set((typeof products!=='undefined'?products:[]).map(p=>p.category).filter(Boolean))].sort();
  shell('Shop by category','Choose a category to explore matching watches.',
- '<div class="route-grid">'+groups.map(c=>{const count=(typeof products!=='undefined'?products:[]).filter(p=>p.category===c).length;return '<article class="route-feature"><h2>'+esc(c)+'</h2><p>'+count+' catalogue '+(count===1?'watch':'watches')+'</p><a class="button light" href="#category/'+encodeURIComponent(c)+'">Explore category</a></article>'}).join('')+'</div>');
+ groups.length?'<div class="route-grid">'+groups.map(c=>{const count=(typeof products!=='undefined'?products:[]).filter(p=>p.category===c).length;return '<article class="route-feature"><h2>'+esc(c)+'</h2><p>'+count+' catalogue '+(count===1?'watch':'watches')+'</p><a class="button light" href="#category/'+encodeURIComponent(c)+'">Explore category</a></article>'}).join('')+'</div>':'<div class="route-empty">No categories are currently listed in the approved catalogue.</div>');
 }
 function renderCategory(name){const items=(typeof products!=='undefined'?products:[]).filter(p=>p.category===name||p.audience===name||p.style===name);shell(name,'Watches listed under '+name+'.',productList(items))}
 function renderRecent(){
