@@ -136,6 +136,33 @@ test('mobile header keeps its logo and action icons in one row without overflow'
   await expect(page.locator('.hero')).toBeVisible();
 });
 
+test('premium mobile drawer has grouped navigation, accessible state and focus handling', async ({ page, isMobile }) => {
+  test.skip(!isMobile, 'mobile viewport only');
+  await page.goto('/');
+  const toggle = page.locator('#menuToggle');
+  const menu = page.locator('#mobileMenu');
+  await expect(menu).toHaveAttribute('aria-hidden', 'true');
+  await toggle.click();
+  await expect(menu).toHaveClass(/open/);
+  await expect(menu).toHaveAttribute('aria-hidden', 'false');
+  await expect(toggle).toHaveAttribute('aria-expanded', 'true');
+  await expect(page.locator('#mobileMenuClose')).toBeFocused();
+  for (const label of ['Shop', 'Discover', 'Your account', 'Help and support']) {
+    await expect(menu.locator('section[aria-label="' + label + '"]')).toBeVisible();
+  }
+  await expect(menu.locator('.mobile-menu-title')).toHaveText('IQA WATCHES');
+  await expect(menu.locator('a')).toHaveCount(17);
+  await page.locator('#mobileMenuClose').click();
+  await expect(menu).not.toHaveClass(/open/);
+  await expect(menu).toHaveAttribute('aria-hidden', 'true');
+  await expect(toggle).toHaveAttribute('aria-expanded', 'false');
+  await expect(toggle).toBeFocused();
+  await expect(page.locator('.storefront-shortcuts')).toHaveCount(0);
+  await expect(page.locator('.hero')).toBeVisible();
+  const overflow = await page.evaluate(() => document.documentElement.scrollWidth > document.documentElement.clientWidth);
+  expect(overflow, 'drawer must not cause page horizontal overflow').toBe(false);
+});
+
 test('every mobile menu link opens its real destination and closes the menu', async ({ page, isMobile }) => {
   test.skip(!isMobile, 'mobile viewport only');
   await openStore(page);
