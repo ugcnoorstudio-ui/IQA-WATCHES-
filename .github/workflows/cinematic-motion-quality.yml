@@ -5,6 +5,7 @@ on:
     branches:
       - main
       - feature/cinematic-3d-motion-engine-v2
+      - fix/storefront-functional-audit-2026-11-01
   pull_request:
     branches:
       - main
@@ -33,7 +34,13 @@ jobs:
           node --check admin/admin.js
           node --check admin/auth.js
           node --check routes.js
-      - name: Run local asset viewer and customer account security tests
-        run: node --test tests/asset-intake.test.js tests/customer-account.test.js
+      - name: Run all storefront and local regression tests
+        run: node --test tests/*.test.js
+      - name: Install Playwright test runner
+        run: npm install --no-save --no-package-lock @playwright/test
+      - name: Install Chromium browser
+        run: npx playwright install --with-deps chromium
+      - name: Run desktop and mobile browser regression tests
+        run: npx playwright test
       - name: Check patch whitespace
         run: git diff --check origin/main...HEAD
