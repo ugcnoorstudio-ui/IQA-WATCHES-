@@ -1,5 +1,5 @@
 /* IQA WATCHES cinematic story — isolated, additive styles */
-.cinematic-story{--cs-ink:#101114;--cs-paper:#f7f4ed;--cs-gold:#c6a66b;background:var(--cs-ink);color:var(--cs-paper);padding:clamp(56px,8vw,112px) max(5%,calc((100vw - 1320px)/2));overflow:clip}
+.cinematic-story{--cs-ink:#292014;--cs-paper:#fff9ed;--cs-gold:#f0c66d;background:radial-gradient(ellipse at 78% 8%,#80602d66 0%,transparent 38%),linear-gradient(125deg,#49351f 0%,#282219 48%,#594020 100%);color:var(--cs-paper);padding:clamp(56px,8vw,112px) max(5%,calc((100vw - 1320px)/2));overflow:clip;border-top:1px solid #b38a4c;border-bottom:1px solid #b38a4c;box-shadow:inset 0 1px 0 #f5d99a22,inset 0 -1px 0 #f5d99a22}
 .cinematic-story *{box-sizing:border-box}
 .cinematic-story-head{display:flex;align-items:end;justify-content:space-between;gap:24px;margin:0 0 28px}
 .cinematic-story .eyebrow{color:var(--cs-gold)}
@@ -7,11 +7,11 @@
 .cinematic-story-intro{max-width:430px;color:#c7c4bd;font-size:13px;line-height:1.8}
 .cinematic-story-skip{display:inline-flex;margin:0 0 20px;padding:9px 13px;border:1px solid #77736a;color:var(--cs-paper);font-size:10px;letter-spacing:.12em;text-transform:uppercase}
 .cinematic-story-track{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px;margin:24px 0 18px}
-.cinematic-story-step{height:2px;background:#4a4945;position:relative;overflow:hidden}
+.cinematic-story-step{height:4px;background:#6d5a3a;border-radius:8px;position:relative;overflow:hidden}
 .cinematic-story-step span{display:block;height:100%;width:0;background:var(--cs-gold);transition:width .35s ease}
 .cinematic-story-step.is-active span,.cinematic-story-step.is-seen span{width:100%}
 .cinematic-scenes{display:grid;gap:16px}
-.cinematic-scene{min-height:min(70vh,680px);display:grid;grid-template-columns:minmax(0,1.15fr) minmax(260px,.85fr);background:#191a1d;border:1px solid #343438;overflow:hidden;align-items:stretch;scroll-margin-top:110px}
+.cinematic-scene{min-height:min(70vh,680px);display:grid;grid-template-columns:minmax(0,1.15fr) minmax(260px,.85fr);background:#211c14;border:1px solid #8b7044;overflow:hidden;align-items:stretch;scroll-margin-top:110px}
 .cinematic-scene:nth-child(even){grid-template-columns:minmax(260px,.85fr) minmax(0,1.15fr)}
 .cinematic-scene:nth-child(even) .cinematic-scene-media{order:2}
 .cinematic-scene-media{position:relative;min-height:340px;background:#242326;overflow:hidden}
