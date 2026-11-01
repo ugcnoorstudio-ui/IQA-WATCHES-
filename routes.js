@@ -87,8 +87,8 @@ async function renderCheckoutRoute(){
    try{
     const cfg=window.IQA_SUPABASE_CONFIG,session=(await client.auth.getSession()).data.session;
     if(!cfg?.url||!cfg?.publishableKey||!session?.access_token)throw new Error('Your secure session expired. Please sign in again.');
-    const requestKey=crypto.randomUUID(),orderItems=entries.map(x=>({sku:String(x.p.sku||''),quantity:x.qty}));
-    if(orderItems.some(x=>!x.sku))throw new Error('A selected watch is missing its catalogue SKU. Please refresh your bag.');
+    const requestKey=crypto.randomUUID(),orderItems=entries.map(x=>({product_id:String(x.p.id||''),quantity:x.qty}));
+    if(orderItems.some(x=>!(/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(x.product_id))))throw new Error('A selected watch is missing its catalogue product reference. Please refresh your bag.');
     const response=await fetch(cfg.url.replace(/\/$/,'')+'/functions/v1/iqa-customer-checkout',{method:'POST',headers:{'Content-Type':'application/json','apikey':cfg.publishableKey,'Authorization':'Bearer '+session.access_token,'x-idempotency-key':requestKey},body:JSON.stringify({address_id:selected.id,items:orderItems})});
     const result=await response.json().catch(()=>({}));if(!response.ok||result.ok!==true)throw new Error(result.error||'We could not place your order. Please try again.');
     const order=result.order||{};
