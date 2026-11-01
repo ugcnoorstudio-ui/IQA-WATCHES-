@@ -2,6 +2,11 @@ const { test, expect } = require('@playwright/test');
 
 async function openStore(page) {
   await page.goto('/');
+  // Wait for the asynchronous approved catalogue hydration before interacting.
+  await expect.poll(
+    () => page.evaluate(() => typeof catalogueState === 'undefined' ? 'missing' : catalogueState),
+    { timeout: 20000 }
+  ).toBe('ready');
   await expect(page.locator('#productGrid')).toBeVisible();
   await expect.poll(async () => page.locator('#productGrid .product-card').count(), { timeout: 20000 }).toBeGreaterThan(0);
 }
@@ -37,7 +42,9 @@ test('customer routes render their actual destinations', async ({ page }) => {
   for (const [route, expected] of routes) {
     await page.evaluate(value => { location.hash = value; }, route);
     if (route === 'shop' || ['men','women','unisex','new-arrivals','bestsellers'].includes(route)) {
-      await expect(page.locator('#routeCatalogue, #routeView .route-empty')).toBeAttached();
+      const catalogue = page.locator('#routeCatalogue');
+      await expect(catalogue).toBeAttached();
+      await expect(catalogue.locator('.route-card, .route-empty')).not.toHaveCount(0);
     } else {
       await expect(page.locator('#routeView')).toBeVisible();
       await expect(page.locator('#routeView')).toContainText(new RegExp(expected, 'i'));
@@ -87,6 +94,10 @@ test('wishlist persists in browser storage after reload and can be removed', asy
   await card.locator('[data-wish]').click();
   await expect.poll(() => page.evaluate(() => JSON.parse(localStorage.getItem('iqa-preview-wishlist') || '[]'))).toContain(productId);
   await page.reload();
+  await expect.poll(
+    () => page.evaluate(() => typeof catalogueState === 'undefined' ? 'missing' : catalogueState),
+    { timeout: 20000 }
+  ).toBe('ready');
   await expect.poll(() => page.evaluate(() => JSON.parse(localStorage.getItem('iqa-preview-wishlist') || '[]'))).toContain(productId);
   await page.evaluate(() => { location.hash = 'wishlist'; });
   await expect(page.locator('#routeView')).toContainText(/wishlist/i);
