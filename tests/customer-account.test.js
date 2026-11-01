@@ -51,7 +51,6 @@ test('desktop and mobile account links always render the account route on repeat
   assert.ok(routes.includes("if(location.hash!=='#account')location.hash='account';render();"));
 });
 
-
 test('storefront menu destinations resolve to the matching page or shopping tool', () => {
   assert.match(routes, /if\(r==='finder'\)\{showHomeSection\('finderCard'\);return;\}/);
   assert.match(routes, /if\(r==='comparison'\)\{showHomeSection\('compareCard'\);return;\}/);
@@ -68,7 +67,8 @@ test('collection routes filter by catalogue audience, category, style and tags',
 
 test('collection cards retain product details links and current stock display', () => {
   assert.match(routes, /href="#product\/'\+encodeURIComponent\(p\.id\)/);
-  assert.match(routes, /Number\(p\.stock\)\+' available/);
+  // Product detail availability is rendered as "<stock> units available".
+  assert.match(routes, /Number\(p\.stock\)\+' units available'/);
 });
 
 test('collection matching uses normalized whole-token and phrase boundaries', () => {
