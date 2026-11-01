@@ -135,9 +135,9 @@ test('return history is scoped to the authenticated customer and only schema-sup
   assert.ok(!routes.includes('<option value="exchange">Exchange</option>'));
 });
 
-test('cart and wishlist restore only known catalogue items and enforce stock limits', () => {
-  assert.match(await readFile(new URL('../index.html', import.meta.url), 'utf8'), /safeLoad\\('iqa-preview-cart',\\{\\}\\)/);
+test('cart and wishlist restore only known catalogue items and enforce stock limits', async () => {
   const html = await readFile(new URL('../index.html', import.meta.url), 'utf8');
+  assert.match(html, /safeLoad\\('iqa-preview-cart',\\{\\}\\)/);
   assert.match(html, /knownProductIds\\.has\\(id\\)/);
   assert.match(html, /Math\\.min\\(qty,10,products\\.find\\(p=>p\\.id===id\\)\\?\\.stock\\|\\|0\\)/);
   assert.match(html, /compare-table-wrap\\{overflow-x:auto/);
