@@ -60,15 +60,15 @@ test('storefront menu destinations resolve to the matching page or shopping tool
 
 test('collection routes filter by catalogue audience, category, style and tags', () => {
   assert.match(routes, /const terms=\{men:/);
-  assert.match(routes, /p\.audience,p\.category,p\.style/);
-  assert.match(routes, /Array\.isArray\(p\.tags\)/);
+  assert.match(routes, /product\.audience,product\.category,product\.style/);
+  assert.match(routes, /Array\.isArray\(product\.tags\)/);
   assert.match(routes, /No watches are currently tagged for this collection/);
 });
 
 test('collection cards retain product details links and current stock display', () => {
   assert.match(routes, /href="#product\/'\+encodeURIComponent\(p\.id\)/);
-  // Product detail availability is rendered as "<stock> units available".
-  assert.match(routes, /Number\(p\.stock\)\+' units available'/);
+  // Collection cards render the live stock count followed by "available".
+  assert.match(routes, /Number\(p\.stock\)\+' available<\/p>/);
 });
 
 test('collection matching uses normalized whole-token and phrase boundaries', () => {
