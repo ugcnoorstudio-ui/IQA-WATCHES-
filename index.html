@@ -579,7 +579,7 @@ function setMobileMenu(open){
  menu.classList.remove('open');
  menu.setAttribute('aria-hidden','true');
  document.body.classList.remove('menu-open');
- document.body.classList.remove('locked');
+ document.body.classList.toggle('locked',$('drawer').classList.contains('open')||$('modalWrap').classList.contains('open'));
  toggle.setAttribute('aria-expanded','false');
  toggle.setAttribute('aria-label','Open navigation');
  mobileMenuInertSiblings.forEach(item=>{item.element.inert=item.inert;});
