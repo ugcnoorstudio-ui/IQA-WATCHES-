@@ -213,8 +213,11 @@ test('collection routes show only products matching approved audience and explic
     }, route);
 
     await navigateToHash(page, route);
-    const actualIds = await page.locator('#routeCatalogue a[href^="#product/"]').evaluateAll(links =>
-      links.map(link => decodeURIComponent(link.getAttribute('href').slice('#product/'.length))).sort()
+    const actualIds = await page.locator('#routeCatalogue .route-card').evaluateAll(cards =>
+      cards.map(card => {
+        const link = card.querySelector('a[href^="#product/"]');
+        return link ? decodeURIComponent(link.getAttribute('href').slice('#product/'.length)) : null;
+      }).filter(Boolean).sort()
     );
     expect(actualIds, route + ' collection should match approved catalogue metadata exactly').toEqual(expectedIds);
     if (!expectedIds.length) await expect(page.locator('#routeCatalogue .route-empty')).toBeVisible();
