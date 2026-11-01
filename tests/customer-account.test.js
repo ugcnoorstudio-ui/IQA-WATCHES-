@@ -38,13 +38,21 @@ test('order history and line items use customer RLS-scoped queries', () => {
   assert.match(routes, /from\('order_status_events'\)\.select\([\s\S]*?\.in\('order_id',ids\)/);
 });
 
-test('checkout remains disabled and no order creation call is introduced', () => {
+test('checkout requires an authenticated customer and securely submits COD orders', () => {
   const start = routes.indexOf('function renderCheckoutRoute()');
   const end = routes.indexOf('\n}', start);
   const checkout = routes.slice(start, end);
   assert.ok(start >= 0 && end > start);
-  assert.match(checkout, /Checkout is not available yet/);
-  assert.doesNotMatch(checkout, /\.rpc\(/);
+  assert.match(checkout, /customerAuthClient\(\)/);
+  assert.match(checkout, /auth\.getSession\(\)/);
+  assert.match(checkout, /ensureCustomer\(client,user\)/);
+  assert.match(checkout, /checkout-review/);
+  assert.match(checkout, /checkout-payment/);
+  assert.match(checkout, /Confirm COD Order/);
+  assert.match(checkout, /functions\/v1\/iqa-customer-checkout/);
+  assert.match(checkout, /x-idempotency-key/);
+  assert.match(checkout, /address_id:selected\.id/);
+  assert.match(checkout, /variant_id:String\(x\.p\.variantId\|\|''\)/);
 });
 
 test('desktop and mobile account links always render the account route on repeated taps', () => {
@@ -95,8 +103,8 @@ test('brand, category and delivery destinations are catalogue-backed and avoid u
  assert.match(routes,/if\(r==='brands'\)return renderBrands\(arg\)/);
  assert.match(routes,/if\(r==='categories'\|\|r==='category'\)return renderCategories\(arg\)/);
  assert.match(routes,/if\(r==='delivery'\|\|r==='shipping'\)return renderDelivery\(\)/);
- assert.match(routes,/PIN-code serviceability, courier partners, shipping charges, handling times and delivery estimates are not currently connected/);
- assert.match(routes,/No brands are currently listed in the approved catalogue/);
+ assert.match(routes,/Delivery availability, charges and estimated timelines depend on your location/);
+ assert.match(routes,/No brands are listed here just yet/);
 });
 
 test('return history is scoped to the authenticated customer order and uses supported request kinds',()=>{
