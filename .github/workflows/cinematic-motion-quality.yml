@@ -35,5 +35,11 @@ jobs:
           node --check routes.js
       - name: Run local asset viewer and customer account security tests
         run: node --test tests/asset-intake.test.js tests/customer-account.test.js
+      - name: Install Playwright test runner
+        run: npm install --no-save --no-package-lock @playwright/test
+      - name: Install Chromium browser
+        run: npx playwright install --with-deps chromium
+      - name: Run mobile storefront browser regression tests
+        run: npx playwright test
       - name: Check patch whitespace
         run: git diff --check origin/main...HEAD
