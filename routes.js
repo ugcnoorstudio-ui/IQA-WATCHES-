@@ -226,6 +226,18 @@ function renderSearch(){
  $r('routeSearchInput').addEventListener('input',update);$r('routeBrand').addEventListener('change',update);$r('routePrice').addEventListener('change',update);update();
 }
 
+function normalizeCollectionText(value){
+ return String(value??'').normalize('NFKD').replace(/[\\u0300-\\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,' ').trim().replace(/\\s+/g,' ');
+}
+function matchesCollectionTerm(value,term){
+ const normalizedValue=' '+normalizeCollectionText(value)+' ';
+ const normalizedTerm=' '+normalizeCollectionText(term)+' ';
+ return normalizedTerm.length>2&&normalizedValue.includes(normalizedTerm);
+}
+function collectionProductMatches(product,terms){
+ const values=[product.audience,product.category,product.style,...(Array.isArray(product.tags)?product.tags:[])].filter(value=>value!=null&&String(value).trim()!=='');
+ return terms.some(term=>values.some(value=>matchesCollectionTerm(value,term)));
+}
 function showHomeSection(id){
  const home=document.getElementById('home');
  if(!home)return;
@@ -266,10 +278,7 @@ function render(){
  if(['shop','men','women','unisex','new-arrivals','bestsellers'].includes(r)){
   const terms={men:['men','men s','mens'],women:['women','women s','womens'],unisex:['unisex'],'new-arrivals':['new arrival','new arrivals','new-arrival','new-arrivals'],bestsellers:['bestseller','best seller','best-seller']};
   const matches=terms[r];
-  const collection=matches?products.filter(p=>{
-   const values=[p.audience,p.category,p.style,...(Array.isArray(p.tags)?p.tags:[])].filter(Boolean).map(value=>String(value).toLowerCase().replace(/[^a-z0-9]+/g,' ').trim());
-   return matches.some(term=>values.some(value=>value===term||value.split(' ').includes(term)||value.includes(term+' ')));
-  }):products;
+  const collection=matches?products.filter(p=>collectionProductMatches(p,matches)):products;
   const label=({shop:'All watches',men:'Men',women:'Women',unisex:'Unisex','new-arrivals':'New arrivals',bestsellers:'Bestsellers'})[r];
   root.innerHTML=hero('IQA WATCHES · COLLECTION',label,'Browse currently approved, in-stock watches in this collection.')+'<div class="route-content"><div id="routeCatalogue" class="route-grid" style="margin-top:22px"></div></div>';
   const grid=$r('routeCatalogue');
