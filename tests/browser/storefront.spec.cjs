@@ -594,4 +594,3 @@ test('mobile drawer exposes modal navigation semantics, traps focus and restores
   await expect(page.locator('.hero')).toBeVisible();
   await expect(page.locator('.storefront-shortcuts')).toHaveCount(0);
 });
-
