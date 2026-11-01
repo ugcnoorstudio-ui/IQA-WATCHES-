@@ -241,7 +241,7 @@ async function renderCustomerDataPage(route){
    };await draw();return;
   }
   if(route==='orders'||route==='tracking'){
-   const {data:orders,error}=await client.from('orders').select('id,order_number,state,payment_state,currency,item_total,discount_total,shipping_total,tax_total,payable_total,created_at,delivery_snapshot').eq('customer_id',customerId).order('created_at',{ascending:false});
+   const {data:orders,error}=await client.from('orders').select('id,order_number,state,payment_state,currency,item_total,discount_total,shipping_total,tax_total,payable_total,created_at,delivery_snapshot').eq('customer_id',customerId).neq('state','pending').order('created_at',{ascending:false});
    if(error)throw error;
    if(!orders?.length){host.innerHTML='<h2>'+titles[route]+'</h2><p>No orders are linked to this account yet.</p><a class="button light" href="#shop">Explore watches</a>';return;}
    const ids=orders.map(o=>o.id);
@@ -249,10 +249,15 @@ async function renderCustomerDataPage(route){
    if(itemError)throw itemError;if(eventError)throw eventError;
    host.innerHTML='<h2>'+titles[route]+'</h2>'+orders.map(o=>{
     const oi=(items||[]).filter(i=>i.order_id===o.id),ev=(events||[]).filter(x=>x.order_id===o.id);
-    const canCancel=route==='orders'&&o.state==='pending'&&o.payment_state==='pending'&&o.delivery_snapshot?.payment_method==='cash_on_delivery';
-    const cancelButton=canCancel?'<button class="button light" type="button" data-cancel-order="'+esc(o.id)+'">Cancel order</button><p class="route-note">Cancellation is available while this COD order is still pending.</p>':'';
-    return '<article class="route-feature"><h3>Order '+esc(o.order_number||o.id.slice(0,8))+'</h3><p>'+new Date(o.created_at).toLocaleString('en-IN')+' · '+esc(o.state)+' · Payment: '+esc(o.payment_state)+'</p><p><strong>₹'+Number(o.payable_total||0).toLocaleString('en-IN')+'</strong></p><ul>'+oi.map(i=>'<li>'+esc(i.product_snapshot?.name||i.sku_snapshot||'Product')+' × '+Number(i.quantity)+' — ₹'+Number(i.line_total||0).toLocaleString('en-IN')+'</li>').join('')+'</ul>'+(route==='tracking'?'<h4>Order status history</h4><ol>'+ev.map(x=>'<li>'+esc(x.new_state)+' · '+new Date(x.created_at).toLocaleString('en-IN')+(x.reason?' — '+esc(x.reason):'')+'</li>').join('')+'</ol><p>Courier location tracking is shown only when a verified carrier integration supplies it.</p>':'<a class="button light" href="#tracking">Track this order</a> <a class="button light" href="#returns">Request return</a>'+cancelButton)+'</article>';
+    const canCancel=route==='orders'&&o.state==='confirmed'&&o.payment_state==='pending'&&o.delivery_snapshot?.payment_method==='cash_on_delivery';
+    const cancelButton=canCancel?'<button class="button light" type="button" data-cancel-order="'+esc(o.id)+'">Cancel order</button><p class="route-note">Cancellation is available until processing begins.</p>':'';
+    return '<article class="route-feature"><h3>Order '+esc(o.order_number||o.id.slice(0,8))+'</h3><p>'+new Date(o.created_at).toLocaleString('en-IN')+' · '+esc(({confirmed:'Order Confirmed',processing:'Processing',packed:'Ready for dispatch',shipped:'Out for delivery',delivered:'Delivered',cancelled:'Cancelled',returned:'Returned',refunded:'Refunded',refund_pending:'Refund pending',return_requested:'Return requested',payment_failed:'Payment failed'})[o.state]||o.state)+' · Payment: '+esc(o.payment_state)+'</p><p><strong>₹'+Number(o.payable_total||0).toLocaleString('en-IN')+'</strong></p><ul>'+oi.map(i=>'<li>'+esc(i.product_snapshot?.name||i.sku_snapshot||'Product')+' × '+Number(i.quantity)+' — ₹'+Number(i.line_total||0).toLocaleString('en-IN')+'</li>').join('')+'</ul>'+(route==='tracking'?'<h4>Order status history</h4><ol>'+ev.map(x=>'<li>'+esc(({confirmed:'Order Confirmed',processing:'Processing',packed:'Ready for dispatch',shipped:'Out for delivery',delivered:'Delivered',cancelled:'Cancelled',returned:'Returned',refunded:'Refunded',refund_pending:'Refund pending',return_requested:'Return requested',payment_failed:'Payment failed'})[x.new_state]||x.new_state)+' · '+new Date(x.created_at).toLocaleString('en-IN')+(x.reason?' — '+esc(x.reason):'')+'</li>').join('')+'</ol><p>Courier location tracking is shown only when a verified carrier integration supplies it.</p>':'<a class="button light" href="#tracking">Track this order</a> <a class="button light" href="#returns">Request return</a>'+cancelButton)+'</article>';
    }).join('');
+   if(window.__iqaOrderRefreshTimer)clearInterval(window.__iqaOrderRefreshTimer);
+   window.__iqaOrderRefreshTimer=setInterval(()=>{
+    if(['orders','tracking'].includes((location.hash||'').slice(1).split('/')[0]))renderCustomerDataPage(route);
+    else clearInterval(window.__iqaOrderRefreshTimer);
+   },15000);
    host.querySelectorAll('[data-cancel-order]').forEach(button=>button.addEventListener('click',async()=>{
     const orderId=button.dataset.cancelOrder;
     if(!orderId||button.disabled)return;
