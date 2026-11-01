@@ -174,14 +174,14 @@ test('every mobile menu link opens its real destination and closes the menu', as
     ['search', /Search the collection/i],
     ['finder', '#finderCard'],
     ['comparison', '#compareCard'],
-    ['wishlist', /wishlist/i],
-    ['bag', /shopping bag/i],
     ['journal', /Watch Journal is coming soon/i],
     ['story', /Our point of view/i],
-    ['care', /Store policies/i],
-    ['contact', /Contact us/i],
+    ['wishlist', /wishlist/i],
+    ['bag', /shopping bag/i],
     ['account', /Sign in|Account unavailable/i],
     ['orders', /Sign in/i],
+    ['care', /Store policies/i],
+    ['contact', /Contact us/i],
     ['faq', /Frequently asked questions/i],
     ['policies', /Store policies/i]
   ];
