@@ -57,7 +57,7 @@ test('clicking a watch image, title or Details opens its product detail panel', 
 test('homepage keeps the cinematic slider without the duplicate customer shortcut row', async ({ page }) => {
   await page.goto('/');
   await expect(page.locator('[data-cinematic-story]')).toBeVisible();
-  await expect(page.locator('#customerQuickNav')).toHaveCount(0);
+  await expect(page.locator('.storefront-shortcuts')).toHaveCount(0);
 });
 
 test('mobile watch details use a large scrollable image-first panel', async ({ page }) => {
