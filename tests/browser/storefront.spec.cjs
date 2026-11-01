@@ -594,3 +594,29 @@ test('mobile drawer exposes modal navigation semantics, traps focus and restores
   await expect(page.locator('.hero')).toBeVisible();
   await expect(page.locator('.storefront-shortcuts')).toHaveCount(0);
 });
+
+
+test('mobile watch detail opens as a large image-first bottom panel', async ({ page, isMobile }) => {
+  test.skip(!isMobile, 'mobile viewport only');
+  await openStore(page);
+  const card = page.locator('#productGrid .product-card').first();
+  await card.locator('.product-image-link').click();
+  const modal = page.locator('#modalWrap');
+  await expect(modal).toHaveClass(/open/);
+  const layout = await page.locator('#modalContent').evaluate(el => {
+    const image = el.querySelector('.product-modal-image');
+    return {
+      panelHeight: el.getBoundingClientRect().height,
+      viewportHeight: window.innerHeight,
+      imageHeight: image.getBoundingClientRect().height,
+      columns: getComputedStyle(el.querySelector('.product-modal')).gridTemplateColumns,
+      align: getComputedStyle(document.querySelector('.modal-wrap')).alignItems
+    };
+  });
+  expect(layout.panelHeight).toBeLessThanOrEqual(layout.viewportHeight * 0.95);
+  expect(layout.imageHeight).toBeGreaterThan(220);
+  expect(layout.columns.split(' ').length).toBe(1);
+  expect(layout.align).toBe('end');
+  await expect(page.locator('#modalContent h2')).not.toBeEmpty();
+  await page.locator('#modalContent #modalClose').click();
+});
