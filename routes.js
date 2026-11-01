@@ -41,9 +41,59 @@ function renderWishlistRoute(){
  const items=(wishlist||[]).map(id=>products.find(p=>p.id===id)).filter(Boolean);
  root.innerHTML=hero('IQA WATCHES · YOUR EDIT','Wishlist','Keep your favourite pieces together.')+'<div class="route-content"><div class="route-grid">'+(items.length?items.map(p=>'<article class="route-card"><a href="#product/'+encodeURIComponent(p.id)+'" data-view="'+esc(p.id)+'"><img src="'+esc(safeImageUrl(p.image))+'" alt="'+esc(p.name)+'"></a><div class="route-card-copy"><div class="product-brand">'+esc(p.brand)+'</div><h3><a href="#product/'+encodeURIComponent(p.id)+'" data-view="'+esc(p.id)+'">'+esc(p.name)+'</a></h3><p>'+money(p.price)+'</p><div class="route-actions"><button class="button" data-add="'+esc(p.id)+'">Add to bag</button><button class="button light" data-wish="'+esc(p.id)+'">Remove</button></div></div></article>').join(''):'<div class="route-empty">Your wishlist is empty. Save products using the heart icon.<br><a class="button" href="#shop">Discover watches</a></div>')+'</div></div>';
 }
-async function renderCheckoutRoute(){
- infoRoute('IQA WATCHES · SECURE CHECKOUT','Checkout is not available yet','Your bag is saved, but orders and payments are temporarily disabled while customer verification and end-to-end security checks are completed.',
-  '<div class="route-disabled"><strong>Checkout is disabled.</strong><p>No order can be submitted and no payment will be collected from this page.</p><p>Customer account, verified email, saved delivery address ownership, stock reservation and payment setup must all pass final QA before checkout is enabled.</p></div><a class="button light" href="#bag">Return to bag</a> <a class="button" href="#account">My account</a>');
+async async function renderCheckoutRoute(){
+ const requestedHash=location.hash;
+ const client=customerAuthClient();
+ const {data:sessionData,error:sessionError}=await client.auth.getSession();
+ if(sessionError){infoRoute('IQA WATCHES · CHECKOUT','Account check failed','Please try again.', '<div class="route-disabled">'+esc(sessionError.message)+'</div>');return;}
+ const user=sessionData.session?.user;
+ if(!user){sessionStorage.setItem('iqa-checkout-return','#checkout');renderAuth('login');return;}
+ try{
+  const customerId=await ensureCustomer(client,user);
+  if(location.hash!==requestedHash)return;
+  const [{data:profile,error:profileError},{data:addresses,error:addressError}]=await Promise.all([
+   client.from('customers').select('full_name,phone,email').eq('id',customerId).single(),
+   client.from('customer_addresses').select('id,label,recipient_name,phone,address_line1,address_line2,landmark,city,state,postal_code,country,is_default').eq('customer_id',customerId).order('is_default',{ascending:false}).order('created_at',{ascending:false})
+  ]);
+  if(profileError)throw profileError;if(addressError)throw addressError;
+  if(location.hash!==requestedHash)return;
+  const entries=Object.entries(cart||{}).map(([id,qty])=>({p:products.find(x=>x.id===id),qty:Number(qty)})).filter(x=>x.p&&x.qty>0);
+  if(!entries.length){infoRoute('IQA WATCHES · CHECKOUT','Your bag is empty','Add a watch before continuing.','<a class="button" href="#shop">Explore watches</a>');return;}
+  const subtotal=entries.reduce((sum,x)=>sum+x.p.price*x.qty,0);
+  const addressOptions=(addresses||[]).map(a=>'<label class="checkout-address-option"><input type="radio" name="address_id" value="'+esc(a.id)+'" '+(a.is_default?'checked':'')+' required><span><strong>'+esc(a.label)+(a.is_default?' · Default':'')+'</strong><br>'+esc(a.recipient_name)+' · '+esc(a.phone)+'<br>'+esc(a.address_line1)+' '+esc(a.address_line2||'')+(a.landmark?' · '+esc(a.landmark):'')+'<br>'+esc(a.city)+', '+esc(a.state)+' '+esc(a.postal_code)+', '+esc(a.country)+'</span></label>').join('');
+  const items=entries.map(x=>'<div class="checkout-item"><img src="'+esc(safeImageUrl(x.p.image))+'" alt="'+esc(x.p.name)+'"><div><strong>'+esc(x.p.name)+'</strong><small>Qty '+x.qty+' · '+money(x.p.price)+'</small></div><b>'+money(x.p.price*x.qty)+'</b></div>').join('');
+  infoRoute('IQA WATCHES · SECURE CHECKOUT','Complete your order','Your account, contact details, saved delivery address and payment choice are brought together here.',
+   '<div class="checkout-layout"><div class="checkout-main">'+
+    '<section class="checkout-section"><div class="checkout-section-head"><span>01</span><div><h2>Contact details</h2><p>Used for order updates and delivery coordination.</p></div></div><form id="checkoutProfileForm" class="route-form checkout-contact"><label>Full name<input name="full_name" autocomplete="name" maxlength="100" required value="'+esc(profile.full_name||user.user_metadata?.full_name||'')+'"></label><label>Email address<input type="email" value="'+esc(user.email||'')+'" disabled></label><label>Mobile number<input name="phone" type="tel" autocomplete="tel" inputmode="tel" maxlength="20" required value="'+esc(profile.phone||'')+'" placeholder="+91 98765 43210"></label><p class="route-note">Your mobile number is saved to your IQA account for future orders. Phone OTP verification is not configured yet.</p></form></section>'+
+    '<section class="checkout-section"><div class="checkout-section-head"><span>02</span><div><h2>Delivery address</h2><p>Choose a saved address or add a new one.</p></div></div>'+(addressOptions?'<div class="checkout-address-list">'+addressOptions+'</div>':'<div class="route-disabled">You have not saved a delivery address yet.</div>')+'<a class="button light" href="#addresses">+ Add or manage saved addresses</a></section>'+
+    '<section class="checkout-section"><div class="checkout-section-head"><span>03</span><div><h2>Payment method</h2><p>Choose how you would like to pay.</p></div></div><div class="checkout-payments">'+
+     '<label class="checkout-payment-option"><input type="radio" name="payment_method" value="cash_on_delivery" checked><span><strong>Cash on Delivery (COD)</strong><small>Pay when your order is delivered · pending delivery setup</small></span><b>COD</b></label>'+
+     '<label class="checkout-payment-option is-unavailable"><input type="radio" name="payment_method" value="upi" disabled><span><strong>UPI</strong><small>Google Pay · PhonePe · Paytm · BHIM — gateway setup pending</small></span><b>UPI</b></label>'+
+     '<label class="checkout-payment-option is-unavailable"><input type="radio" name="payment_method" value="card" disabled><span><strong>Credit / Debit Cards</strong><small>Visa · Mastercard · RuPay — gateway setup pending</small></span><b>CARDS</b></label>'+
+     '<label class="checkout-payment-option is-unavailable"><input type="radio" name="payment_method" value="netbanking" disabled><span><strong>Net Banking</strong><small>Supported banks will appear after payment gateway activation.</small></span><b>BANK</b></label>'+
+     '<label class="checkout-payment-option is-unavailable"><input type="radio" name="payment_method" value="wallet" disabled><span><strong>Wallets</strong><small>Eligible wallets will appear after payment gateway activation.</small></span><b>WALLET</b></label>'+
+    '</div><div class="route-disabled checkout-setup-note"><strong>Payment setup is not complete.</strong> COD is designed into the order flow, but checkout is not accepting orders yet because IQA WATCHES has not configured serviceable PIN codes, delivery charges and delivery estimates. Online methods will activate only after a payment gateway is securely connected and verified.</div></section>'+
+   '</div><aside class="checkout-summary"><h2>Order summary</h2>'+items+'<div class="total-row"><span>Subtotal</span><strong>'+money(subtotal)+'</strong></div><div class="total-row"><span>Delivery</span><span>Calculated after PIN-code setup</span></div><div class="total-row checkout-grand-total"><strong>Total</strong><strong>'+money(subtotal)+' + delivery</strong></div><button class="button checkout-submit" type="button" disabled>Checkout setup pending</button><p class="route-note" id="checkoutMessage" role="status" aria-live="polite">No order will be placed and no payment will be collected until delivery and payment configuration is verified.</p><a class="button light" href="#bag">Back to bag</a></aside></div>');
+  const profileForm=$r('checkoutProfileForm');
+  profileForm.addEventListener('change',()=>{const button=$r('checkoutSubmit');if(button)button.disabled=true;});
+  const submit=$r('checkoutSubmit');
+  // Explicitly preserve the customer profile on this device/account when the shopper leaves checkout.
+  profileForm.addEventListener('submit',e=>e.preventDefault());
+  const saveContact=async()=>{
+   const fd=new FormData(profileForm),full_name=String(fd.get('full_name')||'').trim(),phone=String(fd.get('phone')||'').trim();
+   if(!full_name||!phone)throw new Error('Please enter your full name and mobile number.');
+   const {error}=await client.from('customers').update({full_name,phone,email:user.email||null}).eq('id',customerId).eq('auth_user_id',user.id);
+   if(error)throw error;
+   const {error:metaError}=await client.auth.updateUser({data:{full_name,phone}});
+   if(metaError)throw metaError;
+  };
+  const paymentInputs=document.querySelectorAll('input[name="payment_method"]');
+  paymentInputs.forEach(input=>input.addEventListener('change',()=>{const message=$r('checkoutMessage');if(message)message.textContent=input.value==='cash_on_delivery'?'COD selected. Delivery configuration is still required before an order can be accepted.':'This payment method is not active yet.';}));
+  if(submit)submit.addEventListener('click',async()=>{const msg=$r('checkoutMessage');try{await saveContact();if(!document.querySelector('input[name="address_id"]:checked'))throw new Error('Please select or add a delivery address.');msg.textContent='Contact details saved. Checkout will open once verified delivery and payment settings are configured.';}catch(err){msg.textContent=err.message||'Could not save your contact details.';}});
+ }catch(err){
+  if(location.hash!==requestedHash)return;
+  infoRoute('IQA WATCHES · CHECKOUT','Checkout could not be loaded','Your saved account data has not been changed.','<div class="route-disabled">'+esc(err.message||'Please try again later.')+'</div><a class="button light" href="#bag">Back to bag</a>');
+ }
 }
 
 let customerClient=null;
@@ -115,10 +165,10 @@ function renderAuth(mode='login'){
     const {data,error}=await client.auth.signUp({email,password,options:{data:{full_name}}});
     if(error)throw error;
     msg.textContent=data.session?'Account created. Opening your account…':'Account request created. Check your email to confirm the address, then sign in.';
-    if(data.session)location.hash='account';
+    if(data.session){const next=sessionStorage.getItem('iqa-checkout-return');sessionStorage.removeItem('iqa-checkout-return');location.hash=next||'account';}
    }else{
     const {error}=await client.auth.signInWithPassword({email,password});if(error)throw error;
-    location.hash='account';
+    const next=sessionStorage.getItem('iqa-checkout-return');sessionStorage.removeItem('iqa-checkout-return');location.hash=next||'account';
    }
   }catch(err){msg.textContent=err.message||'Sign-in could not be completed.';}
   finally{button.disabled=false;}
