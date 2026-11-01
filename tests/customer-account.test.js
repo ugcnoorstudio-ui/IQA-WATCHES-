@@ -175,3 +175,25 @@ test('comparison route enforces unique selections, a four-watch limit, removal a
   element('routeCompareClear').listeners.click();
   assert.match(element('routeCompareResults').innerHTML, /Select at least two watches/);
 });
+
+
+test('narrow-phone navigation stays compact with usable tap targets and menu search fallback', async () => {
+  const html = await readFile(new URL('../index.html', import.meta.url), 'utf8');
+  const start = html.indexOf('@media(max-width:360px){');
+  const end = html.indexOf('\\n}', start);
+  assert.ok(start >= 0 && end > start, 'expected narrow-phone navigation breakpoint');
+  const css = html.slice(start, end);
+  assert.match(css, /\.brand-logo\{width:clamp\(112px,34vw,122px\)/);
+  assert.match(css, /#headerSearch,#voiceSearch\{display:none\}/);
+  assert.match(css, /\.nav-actions \.icon-btn\{width:40px;min-width:40px;min-height:40px/);
+  assert.match(html, /<div class="mobile-menu" id="mobileMenu">[\\s\\S]*?<a href="#search">Search<\\/a>/);
+  assert.match(css, /#wishlistOpen::before/);
+  assert.match(css, /#cartOpen::before/);
+});
+
+test('mobile comparison table scrolls inside its own container instead of widening the page', async () => {
+  const html = await readFile(new URL('../index.html', import.meta.url), 'utf8');
+  assert.match(html, /\.compare-table-wrap\{overflow-x:auto/);
+  assert.match(html, /\.compare-table\{width:100%;min-width:560px/);
+  assert.match(html, /html,body\{width:100%;max-width:100%;min-width:0;overflow-x:hidden\}/);
+});
