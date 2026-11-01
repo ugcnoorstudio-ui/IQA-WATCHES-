@@ -370,6 +370,7 @@ function render(){
  if(r==='contact')return renderContact();
 
  if(r==='care')return renderPolicies();
+ if(r==='recently-viewed'){infoRoute('IQA WATCHES · SAVED','Recently viewed','Your recently viewed watches will appear here soon.','<div class="route-feature"><p class="route-disabled">Coming soon — a private list of the watches you have recently explored is being prepared.</p><a class="button" href="#shop">Explore watches</a></div>');return;}
  if(r==='journal'){infoRoute('IQA WATCHES · JOURNAL','The Watch Journal is coming soon','Guides, watch-care notes and product education are being prepared.','<div class="route-feature"><p>We will publish model-specific guides only when product details and manufacturer information have been verified.</p><a class="button" href="#shop">Explore watches</a></div>');return;}
  if(r==='finder'){showHomeSection('finderCard');return;}
  if(r==='comparison'){showHomeSection('compareCard');return;}
