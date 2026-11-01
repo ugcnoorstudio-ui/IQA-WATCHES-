@@ -128,7 +128,7 @@ function renderFaq(){
  ['How do I add a watch to my bag?','Open a product and choose Add to Bag. Your current bag is saved in this browser.'],
  ['Can I place an order online?','Cash on Delivery orders can be submitted through secure checkout when your account, delivery address and stock are verified. Online payments are coming soon.'],
  ['How can I check delivery availability?','Delivery coverage and delivery estimates are not yet connected, so we do not display unverified delivery promises.'],
- ['Can I cancel my order?','A pending Cash on Delivery order can be cancelled from My Account → My orders. Once an order moves beyond pending, contact customer support; online cancellation is not available for later stages.'],
+ ['Can I cancel my order?','A confirmed Cash on Delivery order can be cancelled from My Account → My orders until processing begins.'],
  ['What is the return policy?','The return and refund policy is being finalized. Please do not assume a return window until the final policy is published.'],
  ['How do I contact support?','Customer support channels are being configured. The support form will become available after customer-data access controls are in place.'],
  ['Are all watches covered by a manufacturer warranty?','Warranty terms vary by product and seller. Check the product-specific warranty information before purchase; do not assume manufacturer coverage.']
@@ -261,7 +261,7 @@ async function renderCustomerDataPage(route){
    host.querySelectorAll('[data-cancel-order]').forEach(button=>button.addEventListener('click',async()=>{
     const orderId=button.dataset.cancelOrder;
     if(!orderId||button.disabled)return;
-    if(!window.confirm('Cancel this pending Cash on Delivery order? The reserved stock will be released.'))return;
+    if(!window.confirm('Cancel this confirmed Cash on Delivery order? The reserved stock will be released.'))return;
     button.disabled=true;button.textContent='Cancelling…';
     try{
      const {data,error}=await client.functions.invoke('iqa-customer-cancel-order',{body:{order_id:orderId}});
