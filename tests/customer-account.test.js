@@ -80,3 +80,10 @@ test('normalized audience matching prevents women being classified as men', () =
   assert.match(routes, /normalizeCollectionTag\(p\.audience\)==='men'/);
   assert.match(routes, /normalizeCollectionTag\(p\.audience\)==='women'/);
 });
+
+
+test('customer comparison supports individual removal and prunes IDs missing from the live catalogue', () => {
+  assert.ok(storefront.includes('data-remove-customer-compare'));
+  assert.match(storefront, /const valid=state\.compare\.filter/);
+  assert.match(storefront, /state\.compare=valid;persist\(\)/);
+});

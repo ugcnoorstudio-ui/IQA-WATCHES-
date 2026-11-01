@@ -1,13 +1,7 @@
 name: Deploy IQA WATCHES to GitHub Pages
 
 on:
-  workflow_run:
-    workflows:
-      - Cinematic motion quality checks
-    types:
-      - completed
-    branches:
-      - main
+  # Production releases are manual-only; pull request merges never deploy.
   workflow_dispatch:
 
 permissions:
@@ -21,7 +15,6 @@ concurrency:
 
 jobs:
   validate-and-deploy:
-    if: github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success'
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}

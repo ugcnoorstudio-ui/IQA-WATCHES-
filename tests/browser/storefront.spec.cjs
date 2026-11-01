@@ -362,9 +362,9 @@ test('collection routes show only products matching approved audience and explic
     const expectedIds = await page.evaluate((value) => {
       const normalize = input => String(input || '').trim().toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
       const definitions = {
-        men: product => normalize(product.audience) === 'men',
-        women: product => normalize(product.audience) === 'women',
-        unisex: product => normalize(product.audience) === 'unisex',
+        men: product => [product.audience, product.category, product.style, ...(Array.isArray(product.tags) ? product.tags : [])].some(value => ['men','mens'].includes(normalize(value)) || ['men','mens'].includes(normalize(value).split('-')[0])),
+        women: product => [product.audience, product.category, product.style, ...(Array.isArray(product.tags) ? product.tags : [])].some(value => ['women','womens'].includes(normalize(value)) || ['women','womens'].includes(normalize(value).split('-')[0])),
+        unisex: product => [product.audience, product.category, product.style, ...(Array.isArray(product.tags) ? product.tags : [])].some(value => normalize(value) === 'unisex' || normalize(value).split('-')[0] === 'unisex'),
         'new-arrivals': product => (Array.isArray(product.tags) ? product.tags : []).some(tag => ['new-arrival', 'new-arrivals'].includes(normalize(tag))),
         bestsellers: product => (Array.isArray(product.tags) ? product.tags : []).some(tag => ['bestseller', 'bestsellers', 'best-seller'].includes(normalize(tag)))
       };
@@ -465,4 +465,29 @@ test('collection, search and wishlist product cards open the same quick-view mod
   await expect(page.locator('#modalContent .product-modal-copy h2')).not.toBeEmpty();
   await page.keyboard.press('Escape');
   await expect(page.locator('#modalWrap')).not.toHaveClass(/open/);
+});
+
+
+test('customer comparison removes individual watches and prunes stale catalogue IDs', async ({ page }) => {
+  await openStore(page);
+  const cards = page.locator('#productGrid .product-card');
+  const firstButton = cards.nth(0).locator('[data-customer-compare]');
+  const secondButton = cards.nth(1).locator('[data-customer-compare]');
+  await expect(firstButton).toBeVisible();
+  await expect(secondButton).toBeVisible();
+  const firstId = await firstButton.getAttribute('data-customer-compare');
+  const secondId = await secondButton.getAttribute('data-customer-compare');
+  await firstButton.click();
+  await secondButton.click();
+  await navigateToHash(page, 'compare');
+  await expect(page.locator('[data-remove-customer-compare]')).toHaveCount(2);
+  await page.locator('[data-remove-customer-compare="' + firstId + '"]').click();
+  await expect(page.locator('[data-remove-customer-compare]')).toHaveCount(1);
+  await expect(page.locator('[data-remove-customer-compare="' + secondId + '"]')).toBeVisible();
+  await page.evaluate(id => localStorage.setItem('iqa-customer-storefront-v1', JSON.stringify({ compare: [id, 'deleted-catalogue-product'], recent: [] })), secondId);
+  await page.reload();
+  await openStore(page);
+  await navigateToHash(page, 'compare');
+  await expect(page.locator('[data-remove-customer-compare]')).toHaveCount(1);
+  await expect(page.locator('[data-remove-customer-compare="' + secondId + '"]')).toBeVisible();
 });

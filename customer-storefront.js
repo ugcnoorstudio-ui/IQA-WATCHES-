@@ -16,10 +16,12 @@ function renderCompare(){
  const items=state.compare.map(id=>(typeof products!=='undefined'?products:[]).find(p=>p.id===id)).filter(Boolean);
  shell('Compare watches','Compare up to four currently approved watches side by side.',
  '<div class="route-feature"><p>Select Compare on product cards to add watches here. You can compare up to four products.</p><button class="button light" id="clearCustomerCompare" type="button">Clear comparison</button></div>'+
- (items.length?'<div class="route-feature" style="overflow-x:auto"><table class="route-specs"><thead><tr><th>Feature</th>'+items.map(p=>'<th>'+esc(p.name)+'</th>').join('')+'</tr></thead><tbody>'+
+ (items.length?'<div class="route-feature" style="overflow-x:auto"><table class="route-specs"><thead><tr><th>Feature</th>'+items.map(p=>'<th>'+esc(p.name)+'<br><button class="button light" type="button" data-remove-customer-compare="'+esc(p.id)+'">Remove</button></th>').join('')+'</tr></thead><tbody>'+
  [['Brand',p=>p.brand],['Price',p=>money(p.price)],['Category',p=>p.category],['Style',p=>p.style],['Colour',p=>p.colour],['Strap',p=>p.strap],['SKU',p=>p.sku],['Available units',p=>p.stock]].map(([label,fn])=>'<tr><th>'+label+'</th>'+items.map(p=>'<td>'+esc(fn(p)??'Not specified')+'</td>').join('')+'</tr>').join('')+
  '</tbody></table></div>':'<div class="route-empty">No watches selected yet. <a href="#shop">Browse the collection</a>.</div>'));
  const clear=$('clearCustomerCompare');if(clear)clear.addEventListener('click',()=>{state.compare=[];persist();renderCompare()});
+ const table=root()?.querySelector('[data-remove-customer-compare]')?.closest('table');
+ if(table)table.addEventListener('click',e=>{const button=e.target.closest('[data-remove-customer-compare]');if(!button)return;state.compare=state.compare.filter(id=>id!==button.dataset.removeCustomerCompare);persist();renderCompare()});
 }
 function renderBrands(){
  const groups=[...new Set((typeof products!=='undefined'?products:[]).map(p=>p.brand).filter(Boolean))].sort();
@@ -106,6 +108,6 @@ const observer=new MutationObserver(()=>addCompareButtons());
 if(document.body)observer.observe(document.body,{childList:true,subtree:true});
 window.addEventListener('hashchange',()=>{recordViewed();renderRoute();});
 window.addEventListener('load',()=>{installCustomerNav();recordViewed();renderRoute();addCompareButtons();});
-window.addEventListener('catalogue:ready',()=>{renderRoute();addCompareButtons();});
+window.addEventListener('catalogue:ready',()=>{const valid=state.compare.filter(id=>(typeof products!=='undefined'?products:[]).some(p=>p.id===id));if(valid.length!==state.compare.length){state.compare=valid;persist()}renderRoute();addCompareButtons();});
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>{installCustomerNav();renderRoute();addCompareButtons()});else{installCustomerNav();renderRoute();addCompareButtons()}
 })();

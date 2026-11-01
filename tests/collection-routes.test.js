@@ -26,9 +26,14 @@ test('audience collection routes include only products assigned to that audience
  const men=api.collectionForRoute('men'),women=api.collectionForRoute('women'),unisex=api.collectionForRoute('unisex');
  assert.equal(men.matches({audience:'Men'}),true);
  assert.equal(men.matches({audience:'Women'}),false);
+ assert.equal(men.matches({category:"Women's Watches"}),false);
+ assert.equal(men.matches({category:"Men's Watches"}),true);
+ assert.equal(men.matches({style:'Mens Classic'}),true);
  assert.equal(women.matches({audience:'Women'}),true);
+ assert.equal(women.matches({category:"Women's Watches"}),true);
  assert.equal(women.matches({audience:'Unisex'}),false);
  assert.equal(unisex.matches({audience:'Unisex'}),true);
+ assert.equal(unisex.matches({style:'Unisex Analog'}),true);
  assert.equal(unisex.matches({audience:''}),false);
 });
 
