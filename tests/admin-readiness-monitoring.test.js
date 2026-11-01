@@ -8,9 +8,9 @@ const read = file => fs.readFileSync(path.join(__dirname, '..', file), 'utf8');
 test('admin readiness distinguishes database checks from external providers and recovery', () => {
   const admin = read('admin/admin.js');
   assert.match(admin, /Payment gateway, transactional email and courier providers/);
-  assert.match(admin, /No provider credentials or verified webhook are configured/);
+  assert.match(admin, /None is currently connected or verified/);
   assert.match(admin, /19 table-access checks/);
-  assert.match(admin, /Full backup retention, restore drills/);
+  assert.match(admin, /Backup retention, restore testing, alert delivery and webhook\/signature monitoring/);
 });
 
 test('admin readiness explains recurring public health schedule and its coverage', () => {
