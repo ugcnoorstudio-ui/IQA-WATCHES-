@@ -164,7 +164,7 @@ function renderLiveModule(route,sets){
   };
   const values=rows.map(r=>{
    if(table==='orders'&&route==='orders'){
-    const states=[['processing','Processing'],['packed','Ready for dispatch'],['shipped','Out for delivery'],['delivered','Delivered'],['cancelled','Cancelled']];
+    const states=[['processing','Processing'],['packed','Packed'],['ready_for_pickup','Ready for Pickup'],['shipped','Out for delivery'],['delivered','Delivered'],['cancelled','Cancelled']];
     const options=states.map(([value,label])=>'<option value="'+value+'">'+label+'</option>').join('');
     return '<tr><td><strong>'+esc(r.order_number||r.id.slice(0,8))+'</strong><div class="muted">'+esc(r.id.slice(0,8))+'</div></td><td>'+stateTag(r.state)+'</td><td>'+esc(r.payment_state)+'</td><td>'+money(r.payable_total)+'</td><td>'+esc(r.created_at?new Date(r.created_at).toLocaleString('en-IN'):'—')+'</td><td><form data-order-status data-order-id="'+esc(r.id)+'"><select name="state" required><option value="">Update status…</option>'+options+'</select><input name="reason" minlength="5" maxlength="500" required placeholder="Reason for status update" aria-label="Reason for status update"><button class="btn primary" type="submit">Save</button></form></td></tr>';
    }
