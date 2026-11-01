@@ -6,7 +6,9 @@ const esc=v=>typeof escapeHtml==='function'?escapeHtml(v):String(v??'');
 const money=v=>new Intl.NumberFormat('en-IN',{style:'currency',currency:'INR',maximumFractionDigits:0}).format(Number(v||0));
 const root=()=>document.getElementById('routeView');
 const saved=(key,fallback)=>{try{return JSON.parse(localStorage.getItem(key))??fallback}catch{return fallback}};
-const state=saved(KEY,{compare:[],recent:[]});
+const initialState=saved(KEY,{});
+const cleanIds=(value,limit)=>Array.isArray(value)?[...new Set(value.filter(id=>typeof id==='string'&&id.trim()).map(id=>id.trim()))].slice(0,limit):[];
+const state={compare:cleanIds(initialState?.compare,4),recent:cleanIds(initialState?.recent,12)};
 function persist(){try{localStorage.setItem(KEY,JSON.stringify(state))}catch(_){}}
 function hero(title,sub){return '<header class="route-hero"><div class="eyebrow">IQA WATCHES · CUSTOMER STORE</div><h1>'+esc(title)+'</h1><p>'+esc(sub)+'</p></header>'}
 function shell(title,sub,body){const r=root();if(!r)return;r.classList.remove('hidden');r.innerHTML=hero(title,sub)+'<div class="route-content">'+body+'</div>';window.scrollTo(0,0)}
@@ -108,6 +110,7 @@ const observer=new MutationObserver(()=>addCompareButtons());
 if(document.body)observer.observe(document.body,{childList:true,subtree:true});
 window.addEventListener('hashchange',()=>{recordViewed();renderRoute();});
 window.addEventListener('load',()=>{installCustomerNav();recordViewed();renderRoute();addCompareButtons();});
+window.addEventListener('storage',event=>{if(event.key!==KEY)return;const next=saved(KEY,{});state.compare=cleanIds(next?.compare,4);state.recent=cleanIds(next?.recent,12);if((location.hash||'')==='#compare')renderCompare();});
 window.addEventListener('catalogue:ready',()=>{const valid=state.compare.filter(id=>(typeof products!=='undefined'?products:[]).some(p=>p.id===id));if(valid.length!==state.compare.length){state.compare=valid;persist()}renderRoute();addCompareButtons();});
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>{installCustomerNav();renderRoute();addCompareButtons()});else{installCustomerNav();renderRoute();addCompareButtons()}
 })();
