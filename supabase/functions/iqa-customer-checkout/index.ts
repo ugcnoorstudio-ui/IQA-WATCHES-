@@ -71,10 +71,21 @@ Deno.serve(async (req: Request) => {
       return reply(409, { ok: false, error: "Online ordering is not open yet. Delivery coverage, shipping charges and Cash on Delivery must first be configured and verified by IQA WATCHES." });
     }
 
+    // Bind every checkout address lookup to the authenticated customer's own profile.
+    // The database RPC repeats this ownership check inside the order transaction.
+    const { data: customer, error: customerError } = await admin.from("customers")
+      .select("id")
+      .eq("auth_user_id", authData.user.id)
+      .maybeSingle();
+    if (customerError) throw new Error("Customer profile could not be verified.");
+    if (!customer) return reply(409, { ok: false, error: "Complete your customer profile before checkout." });
+
     const { data: address, error: addressError } = await admin.from("customer_addresses")
       .select("id,recipient_name,phone,address_line1,address_line2,landmark,city,state,postal_code,country")
-      .eq("id", body.address_id).maybeSingle();
-    if (addressError || !address) return reply(400, { ok: false, error: "The selected delivery address could not be verified." });
+      .eq("id", body.address_id)
+      .eq("customer_id", customer.id)
+      .maybeSingle();
+    if (addressError || !address) return reply(400, { ok: false, error: "The selected delivery address could not be verified for your account." });
     if (!shipping.serviceable_pincodes.map(String).includes(String(address.postal_code))) {
       return reply(409, { ok: false, error: "Delivery is not available for the selected PIN code." });
     }
