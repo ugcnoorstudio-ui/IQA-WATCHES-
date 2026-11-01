@@ -126,8 +126,9 @@ function renderFaq(){
  const faqs=[
  ['How do I find a watch?','Use Shop All, product search, brand and price filters. Open a product to review its available details.'],
  ['How do I add a watch to my bag?','Open a product and choose Add to Bag. Your current bag is saved in this browser.'],
- ['Can I place an order online?','Secure checkout and payment are not enabled yet. No order or payment can currently be submitted through this website.'],
+ ['Can I place an order online?','Cash on Delivery orders can be submitted through secure checkout when your account, delivery address and stock are verified. Online payments are coming soon.'],
  ['How can I check delivery availability?','Delivery coverage and delivery estimates are not yet connected, so we do not display unverified delivery promises.'],
+ ['Can I cancel my order?','A pending Cash on Delivery order can be cancelled from My Account → My orders. Once an order moves beyond pending, contact customer support; online cancellation is not available for later stages.'],
  ['What is the return policy?','The return and refund policy is being finalized. Please do not assume a return window until the final policy is published.'],
  ['How do I contact support?','Customer support channels are being configured. The support form will become available after customer-data access controls are in place.'],
  ['Are all watches covered by a manufacturer warranty?','Warranty terms vary by product and seller. Check the product-specific warranty information before purchase; do not assume manufacturer coverage.']
@@ -246,7 +247,29 @@ async function renderCustomerDataPage(route){
    const ids=orders.map(o=>o.id);
    const [{data:items,error:itemError},{data:events,error:eventError}]=await Promise.all([client.from('order_items').select('order_id,sku_snapshot,product_snapshot,quantity,unit_price,line_total').in('order_id',ids),client.from('order_status_events').select('order_id,previous_state,new_state,reason,created_at').in('order_id',ids).order('created_at',{ascending:false})]);
    if(itemError)throw itemError;if(eventError)throw eventError;
-   host.innerHTML='<h2>'+titles[route]+'</h2>'+orders.map(o=>{const oi=(items||[]).filter(i=>i.order_id===o.id),ev=(events||[]).filter(x=>x.order_id===o.id);return '<article class="route-feature"><h3>Order '+esc(o.order_number||o.id.slice(0,8))+'</h3><p>'+new Date(o.created_at).toLocaleString('en-IN')+' · '+esc(o.state)+' · Payment: '+esc(o.payment_state)+'</p><p><strong>₹'+Number(o.payable_total||0).toLocaleString('en-IN')+'</strong></p><ul>'+oi.map(i=>'<li>'+esc(i.product_snapshot?.name||i.sku_snapshot||'Product')+' × '+Number(i.quantity)+' — ₹'+Number(i.line_total||0).toLocaleString('en-IN')+'</li>').join('')+'</ul>'+(route==='tracking'?'<h4>Order status history</h4><ol>'+ev.map(x=>'<li>'+esc(x.new_state)+' · '+new Date(x.created_at).toLocaleString('en-IN')+(x.reason?' — '+esc(x.reason):'')+'</li>').join('')+'</ol><p>Courier location tracking is shown only when a verified carrier integration supplies it.</p>':'<a class="button light" href="#tracking">Track this order</a> <a class="button light" href="#returns">Request return</a>')+'</article>';}).join('');return;
+   host.innerHTML='<h2>'+titles[route]+'</h2>'+orders.map(o=>{
+    const oi=(items||[]).filter(i=>i.order_id===o.id),ev=(events||[]).filter(x=>x.order_id===o.id);
+    const canCancel=route==='orders'&&o.state==='pending'&&o.payment_state==='pending'&&o.delivery_snapshot?.payment_method==='cash_on_delivery';
+    const cancelButton=canCancel?'<button class="button light" type="button" data-cancel-order="'+esc(o.id)+'">Cancel order</button><p class="route-note">Cancellation is available while this COD order is still pending.</p>':'';
+    return '<article class="route-feature"><h3>Order '+esc(o.order_number||o.id.slice(0,8))+'</h3><p>'+new Date(o.created_at).toLocaleString('en-IN')+' · '+esc(o.state)+' · Payment: '+esc(o.payment_state)+'</p><p><strong>₹'+Number(o.payable_total||0).toLocaleString('en-IN')+'</strong></p><ul>'+oi.map(i=>'<li>'+esc(i.product_snapshot?.name||i.sku_snapshot||'Product')+' × '+Number(i.quantity)+' — ₹'+Number(i.line_total||0).toLocaleString('en-IN')+'</li>').join('')+'</ul>'+(route==='tracking'?'<h4>Order status history</h4><ol>'+ev.map(x=>'<li>'+esc(x.new_state)+' · '+new Date(x.created_at).toLocaleString('en-IN')+(x.reason?' — '+esc(x.reason):'')+'</li>').join('')+'</ol><p>Courier location tracking is shown only when a verified carrier integration supplies it.</p>':'<a class="button light" href="#tracking">Track this order</a> <a class="button light" href="#returns">Request return</a>'+cancelButton)+'</article>';
+   }).join('');
+   host.querySelectorAll('[data-cancel-order]').forEach(button=>button.addEventListener('click',async()=>{
+    const orderId=button.dataset.cancelOrder;
+    if(!orderId||button.disabled)return;
+    if(!window.confirm('Cancel this pending Cash on Delivery order? The reserved stock will be released.'))return;
+    button.disabled=true;button.textContent='Cancelling…';
+    try{
+     const {data,error}=await client.functions.invoke('iqa-customer-cancel-order',{body:{order_id:orderId}});
+     if(error)throw error;
+     if(!data?.ok)throw new Error(data?.error||'Order cancellation was not confirmed.');
+     await renderCustomerDataPage('orders');
+    }catch(err){
+     button.disabled=false;button.textContent='Cancel order';
+     const note=button.nextElementSibling;
+     if(note)note.textContent=err.message||'Could not cancel this order. Please try again.';
+    }
+   }));
+   return;
   }
   if(route==='returns'){
    const {data:orders,error}=await client.from('orders').select('id,order_number,state,created_at').eq('customer_id',customerId).order('created_at',{ascending:false});if(error)throw error;
