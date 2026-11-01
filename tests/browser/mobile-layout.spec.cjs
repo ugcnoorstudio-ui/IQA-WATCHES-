@@ -16,13 +16,12 @@ test('homepage has no stray literal newline markup or horizontal viewport overfl
   expect(dimensions.body, JSON.stringify(dimensions)).toBeLessThanOrEqual(dimensions.viewport);
 });
 
-test('prominent Categories and Brands controls are visible and functional', async ({ page }) => {
+test('shop category chips and brand filter remain available after removing duplicate shortcut row', async ({ page }) => {
   await page.goto('/');
-  const nav = page.getByRole('navigation', { name: 'Browse watch collections' });
-  await expect(nav).toBeVisible();
-  await nav.getByRole('button', { name: 'Men', exact: true }).click();
+  await expect(page.locator('#categoryChips')).toBeVisible();
+  await page.locator('#categoryChips [data-category="Men"]').click();
   await expect(page.locator('#categoryChips [data-category="Men"]')).toHaveClass(/active/);
-  await nav.getByRole('button', { name: 'Brands', exact: true }).click();
+  await page.locator('#brandFilter').focus();
   await expect(page.locator('#brandFilter')).toBeFocused();
 });
 
@@ -35,7 +34,7 @@ test('mobile navigation fits narrow 360px and 390px viewports', async ({ page })
       document: document.documentElement.scrollWidth
     }));
     expect(dimensions.document, JSON.stringify(dimensions)).toBeLessThanOrEqual(dimensions.viewport);
-    await expect(page.getByRole('navigation', { name: 'Browse watch collections' })).toBeVisible();
+    await expect(page.locator('#categoryChips')).toBeVisible();
   }
 });
 
