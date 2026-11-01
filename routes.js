@@ -41,7 +41,7 @@ function renderWishlistRoute(){
  const items=(wishlist||[]).map(id=>products.find(p=>p.id===id)).filter(Boolean);
  root.innerHTML=hero('IQA WATCHES · YOUR EDIT','Wishlist','Keep your favourite pieces together.')+'<div class="route-content"><div class="route-grid">'+(items.length?items.map(p=>'<article class="route-card"><a href="#product/'+encodeURIComponent(p.id)+'" data-view="'+esc(p.id)+'"><img src="'+esc(safeImageUrl(p.image))+'" alt="'+esc(p.name)+'"></a><div class="route-card-copy"><div class="product-brand">'+esc(p.brand)+'</div><h3><a href="#product/'+encodeURIComponent(p.id)+'" data-view="'+esc(p.id)+'">'+esc(p.name)+'</a></h3><p>'+money(p.price)+'</p><div class="route-actions"><button class="button" data-add="'+esc(p.id)+'">Add to bag</button><button class="button light" data-wish="'+esc(p.id)+'">Remove</button></div></div></article>').join(''):'<div class="route-empty">Your wishlist is empty. Save products using the heart icon.<br><a class="button" href="#shop">Discover watches</a></div>')+'</div></div>';
 }
-async async function renderCheckoutRoute(){
+async function renderCheckoutRoute(){
  const requestedHash=location.hash;
  const client=customerAuthClient();
  const {data:sessionData,error:sessionError}=await client.auth.getSession();
@@ -75,7 +75,6 @@ async async function renderCheckoutRoute(){
     '</div><div class="route-disabled checkout-setup-note"><strong>Payment setup is not complete.</strong> COD is designed into the order flow, but checkout is not accepting orders yet because IQA WATCHES has not configured serviceable PIN codes, delivery charges and delivery estimates. Online methods will activate only after a payment gateway is securely connected and verified.</div></section>'+
    '</div><aside class="checkout-summary"><h2>Order summary</h2>'+items+'<div class="total-row"><span>Subtotal</span><strong>'+money(subtotal)+'</strong></div><div class="total-row"><span>Delivery</span><span>Calculated after PIN-code setup</span></div><div class="total-row checkout-grand-total"><strong>Total</strong><strong>'+money(subtotal)+' + delivery</strong></div><button class="button checkout-submit" id="checkoutSubmit" type="button">Save details &amp; check readiness</button><p class="route-note" id="checkoutMessage" role="status" aria-live="polite">No order will be placed and no payment will be collected until delivery and payment configuration is verified.</p><a class="button light" href="#bag">Back to bag</a></aside></div>');
   const profileForm=$r('checkoutProfileForm');
-  profileForm.addEventListener('change',()=>{const button=$r('checkoutSubmit');if(button)button.disabled=true;});
   const submit=$r('checkoutSubmit');
   // Explicitly preserve the customer profile on this device/account when the shopper leaves checkout.
   profileForm.addEventListener('submit',e=>e.preventDefault());
