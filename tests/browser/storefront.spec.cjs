@@ -1,64 +1,136 @@
 const { test, expect } = require('@playwright/test');
 
-const customerRoutes = [
-  ['shop', 'collection'], ['men', 'collection'], ['women', 'collection'],
-  ['unisex', 'collection'], ['new-arrivals', 'collection'], ['bestsellers', 'collection'],
-  ['care', 'Store policies'], ['journal', 'coming soon'], ['faq', 'Frequently asked questions'],
-  ['contact', 'Contact us'], ['finder', 'finderCard'], ['comparison', 'compareCard'],
-  ['bag', 'shopping bag'], ['wishlist', 'Wishlist'], ['search', 'Search']
-];
+async function openStore(page) {
+  await page.goto('/');
+  await expect(page.locator('#productGrid')).toBeVisible();
+  await expect.poll(async () => page.locator('#productGrid .product-card').count(), { timeout: 20000 }).toBeGreaterThan(0);
+}
 
-test('homepage loads without horizontal overflow', async ({ page }) => {
+async function firstProductId(page) {
+  const card = page.locator('#productGrid .product-card').first();
+  const wish = card.locator('[data-wish]');
+  const add = card.locator('[data-add]');
+  const id = await (await wish.count() ? wish : add).getAttribute('data-wish').catch(() => null);
+  if (id) return id;
+  return await add.getAttribute('data-add');
+}
+
+test('homepage loads without horizontal overflow or uncaught page errors', async ({ page }) => {
   const pageErrors = [];
   page.on('pageerror', error => pageErrors.push(error.message));
   await page.goto('/');
   await expect(page).toHaveTitle(/IQA WATCHES/i);
-  await expect(page.locator('body')).toBeVisible();
+  await expect(page.locator('#home')).toBeVisible();
   const overflow = await page.evaluate(() => document.documentElement.scrollWidth > document.documentElement.clientWidth);
   expect(overflow, 'homepage should not overflow horizontally').toBe(false);
   expect(pageErrors, 'uncaught browser errors').toEqual([]);
 });
 
-test('customer routes render or reach their intended homepage tool', async ({ page }) => {
+test('customer routes render their actual destinations', async ({ page }) => {
   await page.goto('/');
-  for (const [route, expected] of customerRoutes) {
+  const routes = [
+    ['shop', 'routeCatalogue'], ['men', 'routeCatalogue'], ['women', 'routeCatalogue'],
+    ['unisex', 'routeCatalogue'], ['new-arrivals', 'routeCatalogue'], ['bestsellers', 'routeCatalogue'],
+    ['care', 'Store policies'], ['journal', 'coming soon'], ['faq', 'Frequently asked questions'],
+    ['contact', 'Contact'], ['search', 'Search'], ['bag', 'shopping bag'], ['wishlist', 'wishlist']
+  ];
+  for (const [route, expected] of routes) {
     await page.evaluate(value => { location.hash = value; }, route);
-    await page.waitForTimeout(100);
-    if (route === 'finder' || route === 'comparison') {
-      await expect(page.locator('#' + expected)).toBeAttached();
-    } else if (route === 'shop' || ['men','women','unisex','new-arrivals','bestsellers'].includes(route)) {
-      await expect(page.locator('#routeView')).toContainText(/collection|watches|match/i);
+    if (route === 'shop' || ['men','women','unisex','new-arrivals','bestsellers'].includes(route)) {
+      await expect(page.locator('#routeCatalogue, #routeView .route-empty')).toBeAttached();
     } else {
       await expect(page.locator('#routeView')).toBeVisible();
+      await expect(page.locator('#routeView')).toContainText(new RegExp(expected, 'i'));
     }
   }
+  await page.evaluate(() => { location.hash = 'finder'; });
+  await expect(page.locator('#finderCard')).toBeVisible();
+  await page.evaluate(() => { location.hash = 'comparison'; });
+  await expect(page.locator('#compareCard')).toBeVisible();
 });
 
-test('mobile navigation opens and closes', async ({ page, isMobile }) => {
+test('mobile navigation opens and closes and viewport has no horizontal overflow', async ({ page, isMobile }) => {
   test.skip(!isMobile, 'mobile viewport only');
   await page.goto('/');
   const toggle = page.locator('#menuToggle');
   await expect(toggle).toBeVisible();
   await toggle.click();
   await expect(page.locator('#mobileMenu')).toHaveClass(/open/);
-  const shopLink = page.locator('#mobileMenu a[href="#shop"]').first();
-  if (await shopLink.count()) {
-    await shopLink.click();
-    await expect(page.locator('#mobileMenu')).not.toHaveClass(/open/);
-  } else {
-    await toggle.click();
-    await expect(page.locator('#mobileMenu')).not.toHaveClass(/open/);
-  }
+  await toggle.click();
+  await expect(page.locator('#mobileMenu')).not.toHaveClass(/open/);
   const overflow = await page.evaluate(() => document.documentElement.scrollWidth > document.documentElement.clientWidth);
   expect(overflow, 'mobile page should not overflow horizontally').toBe(false);
 });
 
-test('product detail route handles an available product link', async ({ page }) => {
-  await page.goto('/');
-  const productLink = page.locator('a[href^="#product/"]').first();
-  await expect(productLink).toBeAttached({ timeout: 15000 });
+test('cart add, increment, decrement and remove work without enabling checkout', async ({ page }) => {
+  await openStore(page);
+  const card = page.locator('#productGrid .product-card').first();
+  const productId = await card.locator('[data-add]').getAttribute('data-add');
+  await card.locator('[data-add]').click();
+  await page.evaluate(() => { location.hash = 'bag'; });
+  const bag = page.locator('#routeView');
+  await expect(bag).toContainText(/shopping bag/i);
+  await expect(bag.locator('[data-qty][data-delta="1"]')).toBeVisible();
+  await bag.locator('[data-qty][data-delta="1"]').click();
+  await expect(bag.locator('.qty')).toContainText('2');
+  await bag.locator('[data-qty][data-delta="-1"]').click();
+  await expect(bag.locator('.qty')).toContainText('1');
+  await bag.locator('[data-remove="' + productId + '"]').click();
+  await expect(bag).toContainText(/bag is empty/i);
+  await expect(bag).toContainText(/checkout.*disabled|not enabled/i);
+});
+
+test('wishlist persists in browser storage after reload and can be removed', async ({ page }) => {
+  await openStore(page);
+  const card = page.locator('#productGrid .product-card').first();
+  const productId = await card.locator('[data-wish]').getAttribute('data-wish');
+  await card.locator('[data-wish]').click();
+  await expect.poll(() => page.evaluate(() => JSON.parse(localStorage.getItem('iqa-preview-wishlist') || '[]'))).toContain(productId);
+  await page.reload();
+  await expect.poll(() => page.evaluate(() => JSON.parse(localStorage.getItem('iqa-preview-wishlist') || '[]'))).toContain(productId);
+  await page.evaluate(() => { location.hash = 'wishlist'; });
+  await expect(page.locator('#routeView')).toContainText(/wishlist/i);
+  await expect(page.locator('#routeView')).toContainText((await card.locator('.product-title').textContent()).trim());
+  await page.locator('#routeView [data-wish="' + productId + '"]').click();
+  await expect.poll(() => page.evaluate(() => JSON.parse(localStorage.getItem('iqa-preview-wishlist') || '[]'))).not.toContain(productId);
+});
+
+test('comparison accepts two distinct catalogue products and clears', async ({ page }) => {
+  await openStore(page);
+  await page.evaluate(() => { location.hash = 'comparison'; });
+  await expect(page.locator('#compareCard')).toBeVisible();
+  const select = page.locator('#compareProduct');
+  await expect.poll(() => select.locator('option').count()).toBeGreaterThan(2);
+  const values = await select.locator('option').evaluateAll(options => options.map(o => o.value).filter(Boolean));
+  await select.selectOption(values[0]);
+  await page.locator('#addCompare').click();
+  await select.selectOption(values[1]);
+  await page.locator('#addCompare').click();
+  await expect(page.locator('#compareResults')).toContainText(/Specification/i);
+  await page.locator('#clearCompare').click();
+  await expect(page.locator('#compareResults')).toContainText(/select at least two/i);
+});
+
+test('watch finder returns matches and reset restores defaults', async ({ page }) => {
+  await openStore(page);
+  await page.evaluate(() => { location.hash = 'finder'; });
+  await expect(page.locator('#finderCard')).toBeVisible();
+  await page.locator('#runFinder').click();
+  await expect(page.locator('#finderResults')).not.toContainText(/choose your preferences/i);
+  await page.locator('#resetFinder').click();
+  await expect(page.locator('#finderResults')).toContainText(/choose your preferences/i);
+});
+
+test('product detail route displays product content and gallery controls', async ({ page }) => {
+  await openStore(page);
+  const productLink = page.locator('#productGrid a[href^="#product/"]').first();
   await productLink.click();
-  await expect(page.locator('#routeView')).toContainText(/product|catalogue|unavailable|not found/i);
-  const mainImage = page.locator('#routeMainImage');
-  if (await mainImage.count()) await expect(mainImage).toBeVisible();
+  await expect(page.locator('#routeView')).toBeVisible();
+  await expect(page.locator('#routeView')).toContainText(/product/i);
+  await expect(page.locator('#routeMainImage')).toBeVisible();
+  const thumbnails = page.locator('#routeView [data-gallery-src]');
+  if (await thumbnails.count()) {
+    await thumbnails.first().click();
+    await expect(page.locator('#routeMainImage')).toHaveAttribute('src', await thumbnails.first().getAttribute('data-gallery-src'));
+  }
 });
