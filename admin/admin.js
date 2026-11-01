@@ -126,7 +126,7 @@ function renderLiveModule(route,sets){
  const target=$('content'),host=target.querySelector('[data-live-module]');
  if(!host)return;
  const headings={
- orders:['Order','State','Payment','Payable','Created'],order_items:['Order','SKU','Product snapshot','Qty','Unit price','Line total'],order_status_events:['Order','Previous state','New state','Reason','Time'],customers:['Customer','Email','Phone','Consent','Created'],
+ orders:['Order','State','Payment','Payable','Created','Update status'],order_items:['Order','SKU','Product snapshot','Qty','Unit price','Line total'],order_status_events:['Order','Previous state','New state','Reason','Time'],customers:['Customer','Email','Phone','Consent','Created'],
  payments:['Reference','Order','Gateway','State','Amount','Verified'],refunds:['Order','Amount','State','Reason','Created'],
  shipping:['Order','State','Delivery snapshot','Created'],coupons:['Code','Type','Value','Minimum','Active','Created'],
  content:['Title','Type','Slug','State','Publish at'],reviews:['Product','Rating','Verified purchase','State','Created'],
@@ -137,6 +137,7 @@ function renderLiveModule(route,sets){
  logs:['Actor role','Action','Entity','Outcome','Reason','Time'],integration_events:['Integration','Event','Outcome','Time']
  };
  const renderSet=([table,columns],rows,error)=>{
+  if(table==='orders')rows=rows.filter(r=>r.state!=='pending');
   if(error)return panel(table.replaceAll('_',' ')+' · unavailable','<div class="notice" role="status">'+esc(error.message||'This table could not be loaded. Other Orders records may still be available.')+'</div>');
   const isShipping=route==='shipping'&&table==='orders';
   const isReport=route==='reports'&&table==='orders';
@@ -162,6 +163,11 @@ function renderLiveModule(route,sets){
    integration_events:r=>[r.integration,r.event_type,r.outcome,r.created_at]
   };
   const values=rows.map(r=>{
+   if(table==='orders'&&route==='orders'){
+    const states=[['processing','Processing'],['packed','Ready for dispatch'],['shipped','Out for delivery'],['delivered','Delivered'],['cancelled','Cancelled']];
+    const options=states.map(([value,label])=>'<option value="'+value+'">'+label+'</option>').join('');
+    return '<tr><td><strong>'+esc(r.order_number||r.id.slice(0,8))+'</strong><div class="muted">'+esc(r.id.slice(0,8))+'</div></td><td>'+stateTag(r.state)+'</td><td>'+esc(r.payment_state)+'</td><td>'+money(r.payable_total)+'</td><td>'+esc(r.created_at?new Date(r.created_at).toLocaleString('en-IN'):'—')+'</td><td><form data-order-status data-order-id="'+esc(r.id)+'"><select name="state" required><option value="">Update status…</option>'+options+'</select><input name="reason" minlength="5" maxlength="500" required placeholder="Reason for status update" aria-label="Reason for status update"><button class="btn primary" type="submit">Save</button></form></td></tr>';
+   }
    const cells=isShipping?[r.order_number,r.state,r.delivery_snapshot,r.created_at]:isReport?[r.state,money(r.item_total),money(r.discount_total),money(r.shipping_total),money(r.tax_total),money(r.payable_total),r.payment_state]:map[table](r);
    return '<tr>'+cells.map(v=>'<td>'+safeCell(v)+'</td>').join('')+'</tr>';
   });
@@ -169,7 +175,7 @@ function renderLiveModule(route,sets){
  };
  const sections=sets.map((entry)=>renderSet(entry[0],entry[1],entry[2])).join('');
  const failed=sets.filter(entry=>entry[2]).length;
- host.innerHTML=sections+'<div class="notice" role="status" style="margin-top:14px">'+(failed?failed+' of '+sets.length+' Orders data sources could not be loaded. Review the affected section above. ':'All Orders data sources responded. ')+'Live database connection · Owner-only read access · Changes are disabled until this module has its own audited server workflow. No preview data is shown as real.</div>';
+ host.innerHTML=sections+'<div class="notice" role="status" style="margin-top:14px">'+(failed?failed+' of '+sets.length+' Orders data sources could not be loaded. Review the affected section above. ':'All Orders data sources responded. ')+'Live database connection · Owner-only read access · Order status updates are enabled through the audited owner-only order workflow. Pending checkout records are intentionally hidden from this list.</div>';
 }
 function loadReadOnlyData(route){
 if(route==='health')return; // Health checks run through the authenticated server diagnostics function, not a direct table read.
@@ -280,7 +286,7 @@ function render(){current=location.hash.slice(1).split('/')[0]||'overview';if(!a
 if(current==='overview')body=dashboard();
 else if(current==='not-found')body=pageIntro('404 · ADMIN ROUTE','Page not found','This admin route does not exist. Choose a workspace from the sidebar.','<button class="btn primary" data-route="overview">Back to overview</button>')+empty('Unknown admin destination','No data or protected action was loaded.');
 else if(current==='motion-studio')body=window.IQA_MOTION_STUDIO?window.IQA_MOTION_STUDIO.render():empty('Motion studio unavailable','Reload the authenticated admin workspace to try again.');
-else{const title=activeName();if(current==='products'||current==='inventory'||current==='categories'){const owner=window.IQA_ADMIN_BACKEND?.currentProfile()?.role==='owner';body=pageIntro('SECURE LIVE WORKSPACE',title,current==='products'?'Create and review product drafts. Publishing is a separate Owner-only action and requires verified product details and explicit approval.':current==='categories'?'Create and review brand and category taxonomy. Existing-record editing and archive controls are not yet available.':'Review live stock and apply reason-required, owner-approved adjustments with a transactional audit trail.','<span class="tag">'+(owner?'Owner access':'Read only')+'</span>')+(owner?(current==='products'?productWriteForm()+productEditForms()+productCatalogueToolsForm():current==='categories'?categoryBrandWriteForm()+taxonomyEditArchiveForm():inventoryWriteForm()):panel('Owner approval required','<p class="muted">Only the active Owner account can change catalogue, taxonomy or stock. The database enforces this restriction.</p>'))+(current==='categories'?'<div data-live-taxonomy>'+panel('Loading taxonomy','<p class="muted">Reading authorized categories and brands…</p>')+'</div>':'<div data-live-records>'+panel('Loading live records','<p class="muted">Checking your active staff permissions…</p>')+'</div>')+(current==='inventory'?'<div data-live-movements></div>':'')}else if(liveModules[current]){body=pageIntro(current==='staff'?'LIVE PROFILE WORKSPACE':'LIVE OWNER WORKSPACE',title,descriptions[current],'<span class="tag">Connected · Read only</span>')+panel('Connection status','<div class="setup-row"><span class="tag">Connected</span><div><b>Supabase live records</b><p>'+(current==='staff'?'The database currently limits staff_profiles reads to the signed-in user’s own profile. Other staff records are intentionally not exposed.':'Owner-only row-level security is active. This module is connected for live reading.')+' Write actions stay disabled until a dedicated audited server workflow and any required external provider are configured.</p></div></div>')+'<div data-live-module>'+panel('Loading live records','<p class="muted">Checking owner authorization…</p>')+'</div>'+(current==='health'?setupPanel()+'<section class="panel"><div class="panel-head"><div><h2>Live system diagnostics</h2><p>Run authenticated checks against the connected Supabase project.</p></div><button class="btn primary" data-action="run-health-check">Run diagnostics</button></div><div id="healthResults"><p class="muted">Diagnostics have not been run in this session.</p></div></section>':'')}else{body=pageIntro('MANAGEMENT WORKSPACE',title,descriptions[current],'<span class="tag">Preview only</span>')+panel('Connection status','<div class="setup-row"><span class="tag red">Not connected</span><div><b>Live data is unavailable</b><p>This workspace does not query a production service. Form submissions are not saved and no real records are exposed.</p></div></div>')+formFor(current)+tablePanel(current);if(current==='health')body+=setupPanel()}}
+else{const title=activeName();if(current==='products'||current==='inventory'||current==='categories'){const owner=window.IQA_ADMIN_BACKEND?.currentProfile()?.role==='owner';body=pageIntro('SECURE LIVE WORKSPACE',title,current==='products'?'Create and review product drafts. Publishing is a separate Owner-only action and requires verified product details and explicit approval.':current==='categories'?'Create and review brand and category taxonomy. Existing-record editing and archive controls are not yet available.':'Review live stock and apply reason-required, owner-approved adjustments with a transactional audit trail.','<span class="tag">'+(owner?'Owner access':'Read only')+'</span>')+(owner?(current==='products'?productWriteForm()+productEditForms()+productCatalogueToolsForm():current==='categories'?categoryBrandWriteForm()+taxonomyEditArchiveForm():inventoryWriteForm()):panel('Owner approval required','<p class="muted">Only the active Owner account can change catalogue, taxonomy or stock. The database enforces this restriction.</p>'))+(current==='categories'?'<div data-live-taxonomy>'+panel('Loading taxonomy','<p class="muted">Reading authorized categories and brands…</p>')+'</div>':'<div data-live-records>'+panel('Loading live records','<p class="muted">Checking your active staff permissions…</p>')+'</div>')+(current==='inventory'?'<div data-live-movements></div>':'')}else if(liveModules[current]){body=pageIntro(current==='staff'?'LIVE PROFILE WORKSPACE':'LIVE OWNER WORKSPACE',title,descriptions[current],current==='orders'?'<span class="tag">Owner · Status updates enabled</span>':'<span class="tag">Connected · Read only</span>')+panel('Connection status','<div class="setup-row"><span class="tag">Connected</span><div><b>Supabase live records</b><p>'+(current==='staff'?'The database currently limits staff_profiles reads to the signed-in user’s own profile. Other staff records are intentionally not exposed.':'Owner-only row-level security is active. This module is connected for live reading.')+' Write actions stay disabled until a dedicated audited server workflow and any required external provider are configured.</p></div></div>')+'<div data-live-module>'+panel('Loading live records','<p class="muted">Checking owner authorization…</p>')+'</div>'+(current==='health'?setupPanel()+'<section class="panel"><div class="panel-head"><div><h2>Live system diagnostics</h2><p>Run authenticated checks against the connected Supabase project.</p></div><button class="btn primary" data-action="run-health-check">Run diagnostics</button></div><div id="healthResults"><p class="muted">Diagnostics have not been run in this session.</p></div></section>':'')}else{body=pageIntro('MANAGEMENT WORKSPACE',title,descriptions[current],'<span class="tag">Preview only</span>')+panel('Connection status','<div class="setup-row"><span class="tag red">Not connected</span><div><b>Live data is unavailable</b><p>This workspace does not query a production service. Form submissions are not saved and no real records are exposed.</p></div></div>')+formFor(current)+tablePanel(current);if(current==='health')body+=setupPanel()}}
 $('content').innerHTML=body;if(current==='overview'){loadDashboardMetrics();loadRecentDashboardOrders()}loadReadOnlyData(current);if(current==='motion-studio'&&window.IQA_MOTION_STUDIO)window.IQA_MOTION_STUDIO.bind($('content'));syncMobileNav();$('globalSearch').placeholder=current==='overview'?'Search workspaces':'Search this preview';}
 function toast(msg){const n=$('notice');n.textContent=msg;n.hidden=false;clearTimeout(toastTimer);toastTimer=setTimeout(()=>n.hidden=true,5000)}
 function showConfirm(title,text){$('dialogTitle').textContent=title;$('dialogText').textContent=text;const d=$('confirmDialog');if(typeof d.showModal==='function')d.showModal();else toast(text)}
@@ -313,6 +319,21 @@ document.addEventListener('change',e=>{
    if(isNew)input.focus();
   }
  });
+});
+document.addEventListener('submit',async e=>{
+ const form=e.target;
+ if(!form.matches('[data-order-status]'))return;
+ e.preventDefault();
+ const button=form.querySelector('button[type="submit"]');button.disabled=true;
+ const values=Object.fromEntries(new FormData(form).entries());
+ try{
+  const api=window.IQA_ADMIN_BACKEND;api.requireRole(['owner']);
+  const result=await api.mutate('update_order_status',{order_id:form.dataset.orderId,state:values.state,reason:values.reason});
+  if(!result||result.ok!==true)throw new Error('Order status update was not confirmed.');
+  toast('Order '+(result.order_number||'')+' updated to '+result.state+'. Customer order view will refresh automatically.');
+  render();
+ }catch(error){toast(error.message||'Order status could not be updated.');button.disabled=false;}
+ return;
 });
 document.addEventListener('submit',async e=>{
 const form=e.target;
