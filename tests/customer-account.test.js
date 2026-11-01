@@ -130,7 +130,7 @@ test('brand directory handles an empty catalogue and safely navigates encoded br
   assert.match(context.body, /#brands\/A%2FB%20%26%20Co/);
   context.renderBrands('A/B & Co');
   assert.match(context.body, /Watch &lt;One&gt;/);
-  assert.equal((context.body.match(/route-card/g) || []).length, 2);
+  assert.equal((context.body.match(/<article class=\"route-card\">/g) || []).length, 2);
   context.products = [];
   context.renderBrands();
   assert.match(context.body, /No brands are currently listed/);
