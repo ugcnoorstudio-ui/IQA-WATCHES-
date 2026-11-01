@@ -885,7 +885,7 @@ $('mobileMenu').addEventListener('click',e=>{if(e.target.closest('a'))setMobileM
  'use strict';
  const WA_NUMBER='919956683755';
  const waUrl=message=>'https://wa.me/'+WA_NUMBER+'?text='+encodeURIComponent(message);
- const productFor=id=>(Array.isArray(window.products)?window.products:[]).find(p=>String(p.id)===String(id));
+ const productFor=id=>(typeof products!=='undefined'&&Array.isArray(products)?products:[]).find(p=>String(p.id)===String(id));
  const productMessage=p=>'Hi IQA WATCHES, I would like to order '+p.name+' (₹'+Number(p.price).toLocaleString('en-IN')+'). Is it available?';
  const float=document.createElement('a');
  float.className='iqa-whatsapp-float';
