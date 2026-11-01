@@ -142,7 +142,6 @@ test('Compare is interactive, capped at four, persistent, removable and clearabl
     for (let index = 1; index <= 5; index += 1) {
       await page.locator('[data-customer-compare="watch-' + index + '"]').click();
     }
-    await page.locator('#compare').waitFor().catch(() => {});
     await page.goto(baseUrl + '#compare');
     await page.getByRole('heading', { name: 'Compare watches' }).waitFor();
     assert.equal(await page.locator('.route-specs thead th').count(), 5, 'feature column plus four watch columns');
@@ -153,8 +152,8 @@ test('Compare is interactive, capped at four, persistent, removable and clearabl
     await page.locator('[data-remove-customer-compare="watch-2"]').click();
     assert.equal(await page.locator('.route-specs thead th').count(), 4);
     await page.locator('#clearCustomerCompare').click();
-    assert.equal(await page.locator('#drawer').count(), 1);
     await page.locator('.route-empty').getByText('No watches selected yet').waitFor();
+    assert.equal(await page.locator('.route-specs').count(), 0);
   } finally {
     await page.close();
   }
