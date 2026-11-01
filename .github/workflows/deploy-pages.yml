@@ -1,9 +1,7 @@
 name: Deploy IQA WATCHES to GitHub Pages
 
 on:
-  push:
-    branches:
-      - main
+  # Production releases are manual-only; pull request merges never deploy.
   workflow_dispatch:
 
 permissions:
@@ -13,7 +11,7 @@ permissions:
 
 concurrency:
   group: github-pages
-  cancel-in-progress: true
+  queue: max
 
 jobs:
   validate-and-deploy:

@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 
 const routes = await readFile(new URL('../routes.js', import.meta.url), 'utf8');
+const storefront = await readFile(new URL('../customer-storefront.js', import.meta.url), 'utf8');
 
 test('customer auth persists sessions with refresh and PKCE callback handling', () => {
   assert.match(routes, /persistSession:\s*true/);
@@ -49,4 +50,40 @@ test('checkout remains disabled and no order creation call is introduced', () =>
 test('desktop and mobile account links always render the account route on repeated taps', () => {
   assert.ok(routes.includes("e.target.closest('a[href=\"#account\"]')"));
   assert.ok(routes.includes("if(location.hash!=='#account')location.hash='account';render();"));
+});
+
+
+test('storefront menu destinations resolve to the matching page or shopping tool', () => {
+  assert.match(routes, /if\(r==='finder'\)\{showHomeSection\('finderCard'\);return;\}/);
+  assert.match(routes, /if\(r==='comparison'\)\{showHomeSection\('compareCard'\);return;\}/);
+  assert.match(routes, /if\(r==='journal'\)\{/);
+  assert.match(routes, /if\(r==='care'\)return renderPolicies\(\)/);
+});
+
+test('collection routes use normalized exact audience and explicit collection tags', () => {
+  assert.match(routes, /function normalizeCollectionTag\(/);
+  assert.match(routes, /function collectionForRoute\(/);
+  assert.match(routes, /matches:p=>matchesAudienceCollection\(p,\['men','mens'\]\)/);
+  assert.match(routes, /matches:p=>matchesAudienceCollection\(p,\['women','womens'\]\)/);
+  assert.match(routes, /Array\.isArray\(p\.tags\)/);
+  assert.match(routes, /No watches currently match this collection/);
+});
+
+test('collection cards retain product detail links and stock display', () => {
+  assert.ok(storefront.includes('function card(p)'));
+  assert.ok(storefront.includes('encodeURIComponent(p.id)'));
+  assert.ok(routes.includes('Number(p.stock)'));
+  assert.ok(routes.includes('available</p>'));
+});
+
+test('normalized audience matching prevents women being classified as men', () => {
+  assert.match(routes, /matchesAudienceCollection\(p,\['men','mens'\]\)/);
+  assert.match(routes, /matchesAudienceCollection\(p,\['women','womens'\]\)/);
+});
+
+
+test('customer comparison supports individual removal and prunes IDs missing from the live catalogue', () => {
+  assert.ok(storefront.includes('data-remove-customer-compare'));
+  assert.match(storefront, /const valid=state\.compare\.filter/);
+  assert.match(storefront, /state\.compare=valid;persist\(\)/);
 });
