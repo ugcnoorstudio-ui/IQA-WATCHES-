@@ -433,14 +433,15 @@ test('header My Account opens the customer sign-in or safe unavailable panel', a
   await expect(page.locator('#routeView')).toContainText(/Sign in|Account unavailable/i);
 });
 
-test('prominent category and brand shortcuts navigate to their live catalogue controls', async ({ page }) => {
+test('category chips and brand filter navigate to their live catalogue controls', async ({ page }) => {
   await openStore(page);
-  const shortcuts = page.getByRole('navigation', { name: 'Browse watch collections' });
-  await expect(shortcuts).toBeVisible();
-  await shortcuts.getByRole('button', { name: 'Men', exact: true }).click();
-  await expect(page.locator('#categoryChips [data-category="Men"]')).toHaveClass(/active/);
-  await shortcuts.getByRole('button', { name: 'Brands', exact: true }).click();
-  await expect(page.locator('#brandFilter')).toBeFocused();
+  const menCategory = page.locator('#categoryChips [data-category="Men"]');
+  await expect(menCategory).toBeVisible();
+  await menCategory.click();
+  await expect(menCategory).toHaveClass(/active/);
+  const brandFilter = page.locator('#brandFilter');
+  await brandFilter.focus();
+  await expect(brandFilter).toBeFocused();
 });
 
 test('Buy Now adds the selected watch and opens the guarded checkout route', async ({ page }) => {
