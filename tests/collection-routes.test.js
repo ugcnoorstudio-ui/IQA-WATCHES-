@@ -28,6 +28,9 @@ test('audience collection routes include only products assigned to that audience
  assert.equal(men.matches({audience:'Women'}),false);
  assert.equal(men.matches({category:"Women's Watches"}),false);
  assert.equal(men.matches({category:"Men's Watches"}),true);
+ assert.equal(men.matches({category:'Watches for Men S'}),true);
+ assert.equal(men.matches({tags:["Mén's watches"]}),true);
+ assert.equal(women.matches({category:"Mén's watches"}),false);
  assert.equal(men.matches({style:'Mens Classic'}),true);
  assert.equal(women.matches({audience:'Women'}),true);
  assert.equal(women.matches({category:"Women's Watches"}),true);
