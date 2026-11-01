@@ -386,6 +386,7 @@ test('collection routes show only products matching approved audience and explic
 
 test('product cards open a complete quick-view modal and related watches replace its content', async ({ page }) => {
   await openStore(page);
+  const initialHash = await page.evaluate(() => location.hash);
   await page.evaluate(() => {
     const first = products[0];
     products.push({ ...first, id: first.id + '-quick-view-fixture', name: first.name + ' Related QA Watch' });
