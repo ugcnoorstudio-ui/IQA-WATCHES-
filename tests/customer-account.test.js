@@ -197,3 +197,10 @@ test('mobile comparison table scrolls inside its own container instead of wideni
   assert.match(html, /\.compare-table\{width:100%;min-width:560px/);
   assert.match(html, /html,body\{width:100%;max-width:100%;min-width:0;overflow-x:hidden\}/);
 });
+
+
+test('return history is scoped through the authenticated customer order and uses schema-supported request kinds', () => {
+  assert.match(routes, /from\('return_requests'\)\.select\('id,order_id,kind,reason,state,created_at,orders!inner\(customer_id\)'\)\.eq\('orders\.customer_id',customerId\)/);
+  assert.match(routes, /<option value="return">Return<\\/option><option value="refund">Refund<\\/option><option value="warranty">Warranty<\\/option>/);
+  assert.doesNotMatch(routes, /<option value="exchange">Exchange<\\/option>/);
+});
