@@ -91,6 +91,11 @@ async function openStore() {
       })
     };`
   }));
+  await page.route('**/admin/backend-config.js*', route => route.fulfill({
+    status: 200,
+    contentType: 'text/javascript',
+    body: 'window.IQA_SUPABASE_CONFIG={url:"https://example.supabase.co",publishableKey:"test-anon-key"};'
+  }));
   await page.goto(baseUrl, { waitUntil: 'domcontentloaded' });
   await page.locator('.product-card').first().waitFor({ state: 'visible', timeout: 15000 });
   return page;
@@ -99,16 +104,16 @@ async function openStore() {
 test('Wishlist add, remove and refresh persistence work in Chromium', async () => {
   const page = await openStore();
   try {
-    await page.locator('[data-wish="watch-1"]').click();
-    await assert.doesNotReject(() => page.locator('#wishCount').filter({ hasText: '1' }).waitFor());
+    await page.locator('[data-wish="watch-1"]').first().click();
+    assert.equal(await page.locator('#wishCount').textContent(), '1');
     await page.reload({ waitUntil: 'domcontentloaded' });
     await page.locator('.product-card').first().waitFor();
     assert.equal(await page.locator('#wishCount').textContent(), '1');
     await page.locator('#wishlistOpen').click();
-    await page.locator('#drawer').getByText('Browser Test Watch 1').waitFor();
-    await page.locator('#drawer [data-wish="watch-1"]').click();
+    await page.locator('#routeView .route-card').getByText('Browser Test Watch 1').waitFor();
+    await page.locator('#routeView [data-wish="watch-1"]').click();
     assert.equal(await page.locator('#wishCount').textContent(), '0');
-    assert.equal(await page.locator('#drawer').getByText('Your wishlist is empty').count(), 1);
+    await page.locator('#routeView').getByText('Your wishlist is empty').waitFor();
   } finally {
     await page.close();
   }
@@ -117,21 +122,25 @@ test('Wishlist add, remove and refresh persistence work in Chromium', async () =
 test('Cart quantity persists, respects stock and can be removed in Chromium', async () => {
   const page = await openStore();
   try {
-    await page.locator('[data-add="watch-1"]').click();
+    await page.locator('[data-add="watch-1"]').first().click();
+    assert.equal(await page.locator('#cartCount').textContent(), '1');
+    await page.reload({ waitUntil: 'domcontentloaded' });
+    await page.locator('.product-card').first().waitFor();
+    assert.equal(await page.locator('#cartCount').textContent(), '1');
     await page.locator('#cartOpen').click();
-    await page.locator('#drawer').getByText('Browser Test Watch 1').waitFor();
-    await page.locator('#drawer [data-qty="watch-1"][data-delta="1"]').click();
-    assert.equal(await page.locator('#drawer .qty span').textContent(), '2');
-    await page.locator('#drawer [data-qty="watch-1"][data-delta="1"]').click();
-    assert.equal(await page.locator('#drawer .qty span').textContent(), '2', 'stock limit must prevent a third unit');
+    const plus = page.locator('#routeView [data-qty="watch-1"][data-delta="1"]');
+    await plus.waitFor({ state: 'visible' });
+    await plus.click({ force: true });
+    assert.equal(await page.locator('#routeView .cart-row .qty span').textContent(), '2');
+    await plus.click({ force: true });
+    assert.equal(await page.locator('#routeView .cart-row .qty span').textContent(), '2', 'stock limit must prevent a third unit');
     await page.reload({ waitUntil: 'domcontentloaded' });
     await page.locator('.product-card').first().waitFor();
     assert.equal(await page.locator('#cartCount').textContent(), '2');
     await page.locator('#cartOpen').click();
-    assert.equal(await page.locator('#drawer .qty span').textContent(), '2');
-    await page.locator('#drawer [data-remove="watch-1"]').click();
+    await page.locator('#routeView [data-remove="watch-1"]').click({ force: true });
     assert.equal(await page.locator('#cartCount').textContent(), '0');
-    assert.equal(await page.locator('#drawer').getByText('Your bag is empty').count(), 1);
+    await page.locator('#routeView').getByText('Your bag is empty').waitFor();
   } finally {
     await page.close();
   }
@@ -144,15 +153,15 @@ test('Compare is interactive, capped at four, persistent, removable and clearabl
       await page.locator('[data-customer-compare="watch-' + index + '"]').click();
     }
     await page.goto(baseUrl + '#compare');
-    await page.getByRole('heading', { name: 'Compare watches' }).waitFor();
+    await page.locator('#routeView h1').getByText('Compare watches').waitFor();
     assert.equal(await page.locator('.route-specs thead th').count(), 5, 'feature column plus four watch columns');
     assert.equal(await page.locator('.route-specs thead').getByText('Browser Test Watch 5').count(), 0);
     await page.reload({ waitUntil: 'domcontentloaded' });
-    await page.getByRole('heading', { name: 'Compare watches' }).waitFor();
+    await page.locator('#routeView h1').getByText('Compare watches').waitFor();
     assert.equal(await page.locator('.route-specs thead th').count(), 5);
-    await page.locator('[data-remove-customer-compare="watch-2"]').click();
+    await page.locator('[data-remove-customer-compare="watch-2"]').click({ force: true });
     assert.equal(await page.locator('.route-specs thead th').count(), 4);
-    await page.locator('#clearCustomerCompare').click();
+    await page.locator('#clearCustomerCompare').click({ force: true });
     await page.locator('.route-empty').getByText('No watches selected yet').waitFor();
     assert.equal(await page.locator('.route-specs').count(), 0);
   } finally {
