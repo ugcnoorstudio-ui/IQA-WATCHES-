@@ -42,7 +42,7 @@ function renderWishlistRoute(){
  root.innerHTML=hero('IQA WATCHES · YOUR EDIT','Wishlist','Keep your favourite pieces together.')+'<div class="route-content"><div class="route-grid">'+(items.length?items.map(p=>'<article class="route-card"><a href="#product/'+encodeURIComponent(p.id)+'" data-view="'+esc(p.id)+'"><img src="'+esc(safeImageUrl(p.image))+'" alt="'+esc(p.name)+'"></a><div class="route-card-copy"><div class="product-brand">'+esc(p.brand)+'</div><h3><a href="#product/'+encodeURIComponent(p.id)+'" data-view="'+esc(p.id)+'">'+esc(p.name)+'</a></h3><p>'+money(p.price)+'</p><div class="route-actions"><button class="button" data-add="'+esc(p.id)+'">Add to bag</button><button class="button light" data-wish="'+esc(p.id)+'">Remove</button></div></div></article>').join(''):'<div class="route-empty">Your wishlist is empty. Save products using the heart icon.<br><a class="button" href="#shop">Discover watches</a></div>')+'</div></div>';
 }
 async function renderCheckoutRoute(){
- const requestedHash=location.hash,stage=requestedHash==='#payment'?'payment':requestedHash==='#checkout-review'?'review':'details';
+ const requestedHash=location.hash,stage=requestedHash==='#checkout-payment'?'payment':requestedHash==='#checkout-review'?'review':'details';
  const client=customerAuthClient();
  const {data:sessionData,error:sessionError}=await client.auth.getSession();
  if(sessionError){infoRoute('IQA WATCHES · CHECKOUT','Account check failed','Please try again.','<div class="route-disabled">'+esc(sessionError.message)+'</div>');return;}
@@ -77,7 +77,7 @@ async function renderCheckoutRoute(){
   if(stage==='review'){
    infoRoute('IQA WATCHES · STEP 02 OF 03','Review your order','Check your delivery address and order total before proceeding to payment.',
     '<div class="checkout-layout"><div class="checkout-main"><section class="checkout-section"><div class="checkout-section-head"><span>✓</span><div><h2>Contact details saved</h2><p>'+esc(profile.full_name||user.user_metadata?.full_name||'')+' · '+esc(profile.phone||'')+'</p></div></div></section><section class="checkout-section"><div class="checkout-section-head"><span>02</span><div><h2>Delivery address</h2></div></div><p>'+addressText(selected)+'</p><a class="button light" href="#checkout">Change details / address</a></section><button class="button checkout-submit" id="checkoutPlaceOrder" type="button">Place Order · Continue to Payment</button></div>'+summary+'</div>');
-   $r('checkoutPlaceOrder')?.addEventListener('click',()=>{sessionStorage.setItem('iqa-checkout-address',selected.id);location.hash='payment';});return;
+   $r('checkoutPlaceOrder')?.addEventListener('click',()=>{sessionStorage.setItem('iqa-checkout-address',selected.id);location.hash='checkout-payment';});return;
   }
   infoRoute('IQA WATCHES · STEP 03 OF 03','Choose your payment','Select how you would like to pay for your order.',
    '<div class="checkout-layout"><div class="checkout-main"><section class="checkout-section"><div class="checkout-section-head"><span>03</span><div><h2>Payment method</h2><p>Online payments will be activated after gateway setup.</p></div></div><div class="checkout-payments"><label class="checkout-payment-option"><input type="radio" name="payment_method" value="cash_on_delivery" checked><span><strong>Cash on Delivery (COD)</strong><small>Pay when your order is delivered.</small></span><b>COD</b></label><label class="checkout-payment-option is-unavailable"><input type="radio" disabled><span><strong>UPI · Google Pay · PhonePe · Paytm</strong><small>Coming Soon</small></span><b>UPI</b></label><label class="checkout-payment-option is-unavailable"><input type="radio" disabled><span><strong>Credit / Debit Cards</strong><small>Coming Soon</small></span><b>CARDS</b></label><label class="checkout-payment-option is-unavailable"><input type="radio" disabled><span><strong>Net Banking</strong><small>Coming Soon</small></span><b>BANK</b></label><label class="checkout-payment-option is-unavailable"><input type="radio" disabled><span><strong>Wallets</strong><small>Coming Soon</small></span><b>WALLET</b></label></div><p class="route-note checkout-setup-note">COD is available. Your order will be created securely and payment will be collected only at delivery.</p><p id="codOrderMessage" role="status" aria-live="polite"></p><button class="button checkout-submit" type="button" id="confirmCodOrder">Confirm COD Order</button><a class="button light" href="#checkout-review">Back to order review</a></section></div>'+summary+'</div>');
@@ -331,7 +331,8 @@ function render(){
  if(r==='buy-now')return renderBuyNow(arg);
  if(r==='bag'||r==='cart')return renderBagRoute();
  if(r==='wishlist')return renderWishlistRoute();
- if(r==='checkout'||r==='checkout-review'||r==='payment')return renderCheckoutRoute();
+ if(r==='payment'){showHomeSection('payment');return;}
+ if(r==='checkout'||r==='checkout-review'||r==='checkout-payment')return renderCheckoutRoute();
  if(r==='login')return renderAuth('login');
  if(r==='signup')return renderAuth('signup');
  if(r==='account'||r==='profile')return renderAccount();
