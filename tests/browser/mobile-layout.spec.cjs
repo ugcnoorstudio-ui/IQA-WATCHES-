@@ -52,3 +52,26 @@ test('clicking a watch image, title or Details opens its product detail panel', 
   await card.locator('.product-title a').click();
   await expect(page.locator('#modalWrap')).toHaveClass(/open/);
 });
+
+
+test('homepage keeps the cinematic slider without the duplicate customer shortcut row', async ({ page }) => {
+  await page.goto('/');
+  await expect(page.locator('[data-cinematic-story]')).toBeVisible();
+  await expect(page.locator('#customerQuickNav')).toHaveCount(0);
+});
+
+test('mobile watch details use a large scrollable image-first panel', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto('/');
+  await expect.poll(() => page.locator('#productGrid .product-card').count(), { timeout: 20000 }).toBeGreaterThan(0);
+  await page.locator('#productGrid .product-card').first().locator('.product-image-link').click();
+  await expect(page.locator('#modalWrap')).toHaveClass(/open/);
+  const layout = await page.locator('#modalContent').evaluate(el => ({
+    width: el.getBoundingClientRect().width,
+    maxHeight: getComputedStyle(el).maxHeight,
+    imageFirst: getComputedStyle(el.querySelector('.product-modal')).gridTemplateColumns
+  }));
+  expect(layout.width).toBeGreaterThan(350);
+  expect(layout.maxHeight).toContain('94');
+  await expect(page.locator('#modalContent .product-modal-image img')).toBeVisible();
+});
