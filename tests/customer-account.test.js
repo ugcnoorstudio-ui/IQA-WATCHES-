@@ -87,3 +87,27 @@ test('customer comparison supports individual removal and prunes IDs missing fro
   assert.match(storefront, /const valid=state\.compare\.filter/);
   assert.match(storefront, /state\.compare=valid;persist\(\)/);
 });
+
+
+test('brand, category and delivery destinations are catalogue-backed and avoid unsupported shipping promises',()=>{
+ assert.match(routes,/function renderBrands\(/);
+ assert.match(routes,/function renderCategories\(/);
+ assert.match(routes,/if\(r==='brands'\)return renderBrands\(arg\)/);
+ assert.match(routes,/if\(r==='categories'\|\|r==='category'\)return renderCategories\(arg\)/);
+ assert.match(routes,/if\(r==='delivery'\|\|r==='shipping'\)return renderDelivery\(\)/);
+ assert.match(routes,/PIN-code serviceability, courier partners, shipping charges, handling times and delivery estimates are not currently connected/);
+ assert.match(routes,/No brands are currently listed in the approved catalogue/);
+});
+
+test('return history is scoped to the authenticated customer order and uses supported request kinds',()=>{
+ assert.match(routes,/from\('return_requests'\)\.select\('id,order_id,kind,reason,state,created_at,orders!inner\(customer_id\)'\)\.eq\('orders\.customer_id',customerId\)/);
+ assert.ok(routes.includes('<option value="return">Return</option><option value="refund">Refund</option><option value="warranty">Warranty</option>'));
+ assert.ok(!routes.includes('<option value="exchange">Exchange</option>'));
+});
+
+
+test('customer navigation does not inject a second homepage shortcuts row',()=>{
+ assert.match(storefront,/function installCustomerNav\(\)/);
+ assert.doesNotMatch(storefront,/customerQuickNav/);
+ assert.doesNotMatch(storefront,/Browse watch collections/);
+});
