@@ -89,7 +89,8 @@ test('mobile navigation opens and closes and viewport has no horizontal overflow
   await expect(toggle).toBeVisible();
   await toggle.click();
   await expect(page.locator('#mobileMenu')).toHaveClass(/open/);
-  await toggle.click();
+  // The trigger is correctly inert behind the modal; close it from its own dialog control.
+  await page.locator('#mobileMenuClose').click();
   await expect(page.locator('#mobileMenu')).not.toHaveClass(/open/);
   const overflow = await page.evaluate(() => document.documentElement.scrollWidth > document.documentElement.clientWidth);
   expect(overflow, 'mobile page should not overflow horizontally').toBe(false);
