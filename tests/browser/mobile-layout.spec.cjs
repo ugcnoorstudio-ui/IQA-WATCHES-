@@ -71,6 +71,8 @@ test('mobile watch details use a large scrollable image-first panel', async ({ p
     imageFirst: getComputedStyle(el.querySelector('.product-modal')).gridTemplateColumns
   }));
   expect(layout.width).toBeGreaterThan(350);
-  expect(layout.maxHeight).toContain('94');
+  // Computed CSS resolves 94dvh to pixels (793.36px at an 844px viewport),
+  // so assert the actual viewport-relative size instead of searching for "94".
+  expect(Number.parseFloat(layout.maxHeight)).toBeCloseTo(844 * 0.94, 0);
   await expect(page.locator('#modalContent .product-modal-image img')).toBeVisible();
 });
