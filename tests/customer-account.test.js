@@ -68,7 +68,7 @@ test('collection routes filter by catalogue audience, category, style and tags',
 
 test('collection cards retain product details links and current stock display', () => {
   assert.match(routes, /href="#product\/'\+encodeURIComponent\(p\.id\)/);
-  assert.match(routes, /Number\(p\.stock\)\+' available'/);
+  assert.match(routes, /Number\(p\.stock\)\+' available/);
 });
 
 test('gender collection matching uses word boundaries so women are not included in men', () => {
