@@ -361,7 +361,7 @@ function renderSearch(){
   $r('searchCount').textContent=list.length+' matching products';
  };
  const brands=[...new Set(products.map(p=>p.brand).filter(Boolean))].sort();
- infoRoute('SEARCH','Find your watch','Search by watch name, brand, style or model number.',
+ infoRoute('SEARCH','Search the collection','Search by watch name, brand, style or model number.',
  '<div class="toolbar"><input id="routeSearchInput" type="search" placeholder="Search watches, brands or model…" aria-label="Search products"><select id="routeBrand"><option value="All">All brands</option>'+brands.map(b=>'<option value="'+esc(b)+'">'+esc(b)+'</option>').join('')+'</select><select id="routePrice"><option value="all">Any price</option><option value="under1000">Under ₹1,000</option><option value="1000to2500">₹1,000–₹2,500</option><option value="over2500">Over ₹2,500</option></select></div><p class="results-count" id="searchCount"></p><div id="searchResults" class="route-grid"></div>');
  const update=()=>draw($r('routeSearchInput').value,$r('routeBrand').value,$r('routePrice').value);
  $r('routeSearchInput').addEventListener('input',update);$r('routeBrand').addEventListener('change',update);$r('routePrice').addEventListener('change',update);update();
