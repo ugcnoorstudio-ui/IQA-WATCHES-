@@ -210,7 +210,7 @@ test('every mobile menu link opens its real destination and closes the menu', as
   }
 });
 
-test('cart add, increment, decrement and remove work without enabling checkout', async ({ page }) => {
+test('cart add, increment, decrement and remove work with responsive order summary', async ({ page, isMobile }) => {
   await openStore(page);
   const card = page.locator('#productGrid .product-card').first();
   const productId = await card.locator('[data-add]').getAttribute('data-add');
@@ -218,14 +218,24 @@ test('cart add, increment, decrement and remove work without enabling checkout',
   await navigateToHash(page, 'bag');
   const bag = page.locator('#routeView');
   await expect(bag).toContainText(/shopping bag/i);
+  await expect(bag.locator('.shopping-progress')).toBeVisible();
+  await expect(bag.locator('.shopping-progress [aria-current="step"]')).toContainText(/shopping bag/i);
+  await expect(bag.locator('.shopping-layout')).toBeVisible();
+  await expect(bag.locator('.shopping-items')).toBeVisible();
+  await expect(bag.locator('.shopping-summary')).toContainText(/order summary/i);
+  await expect(bag.locator('.shopping-checkout-button')).toHaveAttribute('href', '#checkout');
   await expect(bag.locator('[data-qty][data-delta="1"]')).toBeVisible();
+  if (isMobile) {
+    const overflow = await page.evaluate(() => document.documentElement.scrollWidth > document.documentElement.clientWidth);
+    expect(overflow, 'shopping bag should not overflow on mobile').toBe(false);
+  }
   await bag.locator('[data-qty][data-delta="1"]').click();
   await expect(bag.locator('.qty')).toContainText('2');
   await bag.locator('[data-qty][data-delta="-1"]').click();
   await expect(bag.locator('.qty')).toContainText('1');
   await bag.locator('[data-remove="' + productId + '"]').click();
   await expect(bag).toContainText(/bag is empty/i);
-  await expect(bag).toContainText(/checkout.*disabled|not enabled/i);
+  await expect(bag).toContainText(/checkout.*unavailable/i);
 });
 
 test('wishlist persists in browser storage after reload and can be removed', async ({ page }) => {
