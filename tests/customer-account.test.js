@@ -46,7 +46,7 @@ test('COD checkout uses the authenticated server-side order endpoint', () => {
   assert.match(checkout, /Cash on Delivery \(COD\)/);
   assert.match(checkout, /Confirm COD Order/);
   assert.match(checkout, /functions\/v1\/iqa-customer-checkout/);
-  assert.match(checkout, /Authorization:'Bearer '\+session\.access_token/);
+  assert.match(checkout, /'Authorization':'Bearer '\+session\.access_token/);
   assert.match(checkout, /x-idempotency-key/);
   assert.match(checkout, /result\.ok!==true/);
 });
