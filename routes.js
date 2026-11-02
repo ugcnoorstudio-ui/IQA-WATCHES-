@@ -137,6 +137,31 @@ function renderFaq(){
  infoRoute('IQA WATCHES · CUSTOMER CARE','Frequently asked questions','Helpful information about browsing and the current store status.',
  '<div class="route-feature">'+faqs.map((x,i)=>'<details class="faq-item"><summary>'+esc(x[0])+'</summary><p>'+esc(x[1])+'</p></details>').join('')+'</div>');
 }
+
+function renderCare(){
+ infoRoute('IQA WATCHES · CUSTOMER CARE','We are here to help.','Find clear answers about shopping, delivery, orders and product care. We only publish information that has been verified for this store.',
+ '<div class="route-columns">'+
+ routeCard('Frequently asked questions','Answers about browsing, your bag, orders and product information.','#faq','View FAQs')+
+ routeCard('Delivery information','Current delivery setup, serviceability and what to expect.','#delivery','Delivery details')+
+ routeCard('Orders & tracking','Sign in to review your order history and any available order updates.','#orders','My orders')+
+ routeCard('Returns & store policies','Read the current policy status before making a purchase decision.','#policies','Read policies')+
+ routeCard('Contact IQA WATCHES','See the currently available customer-care contact options.','#contact','Contact us')+
+ routeCard('Explore the collection','Return to the watches currently listed in our catalogue.','#shop','Shop watches')+
+ '</div><div class="route-feature" style="margin-top:22px"><h2>Need help with an existing order?</h2><p>Sign in with the account used for the order, then open My Orders. Order information is shown only to the authenticated customer.</p><a class="button" href="#login">Sign in securely</a> <a class="button light" href="#orders">View my orders</a></div>');
+}
+function renderJournal(){
+ const stories=[
+  ['01 · THE BUYING GUIDE','How to choose a watch for everyday wear','Start with how and where you plan to wear it. Think about comfort, readability, size, style and the level of care you are happy to give it. Compare the product dimensions and features listed on each watch page rather than relying on appearance alone.','Look for a comfortable fit, a dial you can read easily and product specifications that match your needs.'],
+  ['02 · WATCH KNOWLEDGE','A simple guide to watch movements','Quartz watches are typically battery-powered; mechanical watches use a wound mainspring, while automatic mechanical watches are designed to wind through wrist movement. The exact movement type should always be confirmed from the individual product listing or manufacturer documentation.','Check the movement field on the product page. If it is not listed, treat the movement as unconfirmed and ask before purchasing.'],
+  ['03 · EVERYDAY CARE','Small habits that help care for your watch','Wipe the case and strap gently with a soft, dry cloth, store the watch away from knocks and follow the care instructions supplied for its exact model. Avoid assuming that a watch is water resistant based only on its appearance.','Water resistance, cleaning methods and battery servicing are model-specific. Follow the manufacturer guidance supplied with your watch.'],
+  ['04 · FIT & STYLE','Finding a comfortable fit','A watch should feel secure without pinching or sliding excessively. Case dimensions, strap material and adjustment options all affect comfort. Use the listed case measurements as a guide and check whether the strap can be adjusted to your wrist.','Compare the stated case size and strap details across products before choosing a style.']
+ ];
+ infoRoute('IQA WATCHES · THE JOURNAL','The Watch Journal','A considered guide to choosing, understanding and caring for watches. Practical notes first; model-specific facts only when verified.',
+ '<div class="route-feature journal-intro"><p>Good watch choices begin with clear information. Explore these short guides, then use the product pages to check the exact specifications of each watch.</p><a class="button" href="#shop">Explore the collection</a></div>'+
+ '<div class="route-columns journal-grid">'+stories.map((x,i)=>'<article class="route-feature journal-story"><p class="drawer-eyebrow">'+esc(x[0])+'</p><h2>'+esc(x[1])+'</h2><p>'+esc(x[2])+'</p><details class="faq-item"><summary>Key takeaway</summary><p>'+esc(x[3])+'</p></details></article>').join('')+'</div>'+
+ '<div class="route-feature" style="margin-top:22px"><h2>Have a question about a specific watch?</h2><p>Product specifications and care requirements can differ by model. Check the individual listing or visit Customer Care for help.</p><a class="button light" href="#care">Visit Customer Care</a> <a class="button light" href="#faq">Read FAQs</a></div>');
+}
+
 function renderPolicies(){
  const entries=[
  ['Shipping','Delivery partners, shipping charges, serviceable PIN codes and delivery timelines are not yet configured. No delivery promise is currently made.'],
@@ -414,9 +439,9 @@ function render(){
  if(r==='policies')return renderPolicies();
  if(r==='contact')return renderContact();
 
- if(r==='care')return renderPolicies();
+ if(r==='care')return renderCare();
  if(r==='recently-viewed'){infoRoute('IQA WATCHES · SAVED','Recently viewed','Your recently viewed watches will appear here soon.','<div class="route-feature"><p class="route-disabled">Coming soon — a private list of the watches you have recently explored is being prepared.</p><a class="button" href="#shop">Explore watches</a></div>');return;}
- if(r==='journal'){infoRoute('IQA WATCHES · JOURNAL','The Watch Journal is coming soon','Guides, watch-care notes and product education are being prepared.','<div class="route-feature"><p>We will publish model-specific guides only when product details and manufacturer information have been verified.</p><a class="button" href="#shop">Explore watches</a></div>');return;}
+ if(r==='journal')return renderJournal();
  if(r==='finder'){showHomeSection('finderCard');return;}
  if(r==='comparison'){showHomeSection('compareCard');return;}
  if(['shop','men','women','unisex','new-arrivals','bestsellers'].includes(r)){
