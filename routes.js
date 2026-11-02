@@ -127,10 +127,10 @@ function renderFaq(){
  const faqs=[
  ['How do I find a watch?','Use Shop All, product search, brand and price filters. Open a product to review its available details.'],
  ['How do I add a watch to my bag?','Open a product and choose Add to Bag. Your current bag is saved in this browser.'],
- ['Can I place an order online?','Cash on Delivery orders can be submitted through secure checkout when your account, delivery address and stock are verified. Online payments are coming soon.'],
+ ['Can I place an order online?','Online checkout is not currently enabled. You can browse the catalogue and save watches, but an order cannot be submitted from this storefront yet.'],
  ['How can I check delivery availability?','Delivery coverage and delivery estimates are not yet connected, so we do not display unverified delivery promises.'],
- ['Can I cancel my order?','A confirmed Cash on Delivery order can be cancelled from My Account → My orders until processing begins.'],
- ['What is the return policy?','The return and refund policy is being finalized. Please do not assume a return window until the final policy is published.'],
+ ['How can I review an existing order?','Sign in with the account used to place the order and open My Orders. Only order information available to that authenticated account will be shown.'],
+ ['What is the return policy?','The final return, exchange and refund policy has not yet been published. Please review the Store Policies page before relying on any return or refund terms.'],
  ['How do I contact support?','Customer support channels are being configured. The support form will become available after customer-data access controls are in place.'],
  ['Are all watches covered by a manufacturer warranty?','Warranty terms vary by product and seller. Check the product-specific warranty information before purchase; do not assume manufacturer coverage.']
  ];
