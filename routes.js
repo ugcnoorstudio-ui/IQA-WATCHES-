@@ -155,8 +155,13 @@ function renderContact(){
 }
 function renderAuth(mode='login'){
  const signup=mode==='signup';
- infoRoute('IQA WATCHES · MY ACCOUNT',signup?'Create your account':'Sign in','Secure account access powered by Supabase Authentication.',
- '<div class="route-auth-layout"><div class="route-feature"><div class="auth-tabs"><a class="chip '+(!signup?'active':'')+'" href="#login">Sign in</a><a class="chip '+(signup?'active':'')+'" href="#signup">Create account</a></div><form id="customerAuthForm" class="route-form">'+(signup?'<label>Full name<input name="full_name" autocomplete="name" required maxlength="100"></label>':'')+'<label>Email address<input name="email" type="email" autocomplete="email" required></label><label>Password<input name="password" type="password" autocomplete="'+(signup?'new-password':'current-password')+'" minlength="8" required></label><button class="button" type="submit">'+(signup?'Create account':'Sign in securely')+'</button><p class="route-note" id="authMessage" role="status" aria-live="polite"></p></form><p class="route-note">Never share your password or one-time codes. Email confirmation may be required for new accounts.</p></div><div class="route-feature"><h2>Your IQA account</h2><p>Account access is available. Orders, saved addresses and support history will appear once their customer-specific database permissions are ready.</p></div></div>');
+ const returnAfterAuth=()=>{const next=sessionStorage.getItem('iqa-checkout-return');sessionStorage.removeItem('iqa-checkout-return');location.hash=next||'account';};
+ infoRoute('IQA WATCHES · MY ACCOUNT',signup?'Create your account':'Sign in','Choose a secure way to access your IQA WATCHES account.',
+ '<div class="route-auth-layout"><div class="route-feature"><div class="auth-tabs"><a class="chip '+(!signup?'active':'')+'" href="#login">Sign in</a><a class="chip '+(signup?'active':'')+'" href="#signup">Create account</a></div>'+
+ '<div class="auth-methods"><button class="button light" type="button" id="customerGoogleSignIn">Continue with Google</button><div class="auth-divider">OR CONTINUE WITH EMAIL</div></div>'+
+ '<form id="customerAuthForm" class="route-form">'+(signup?'<label>Full name<input name="full_name" autocomplete="name" required maxlength="100"></label>':'')+'<label>Email address<input name="email" type="email" autocomplete="email" required></label><label>Password<input name="password" type="password" autocomplete="'+(signup?'new-password':'current-password')+'" minlength="8" required></label><button class="button" type="submit">'+(signup?'Create account':'Sign in with email')+'</button><p class="route-note" id="authMessage" role="status" aria-live="polite"></p></form>'+
+ '<div class="auth-divider">OR SIGN IN WITH MOBILE</div><form id="customerPhoneForm" class="route-form"><label>Mobile number<input name="phone" type="tel" inputmode="tel" autocomplete="tel" maxlength="16" placeholder="+91 98765 43210" required></label><label id="phoneOtpLabel" hidden>6-digit verification code<input name="otp" type="text" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]{6}" maxlength="6"></label><button class="button" type="submit" id="customerPhoneSubmit">Send OTP</button><p class="route-note" id="phoneAuthMessage" role="status" aria-live="polite"></p></form>'+
+ '<p class="route-note">Never share your password or one-time codes. New email accounts may require email confirmation. Mobile sign-in requires SMS delivery to be configured.</p></div><div class="route-feature"><h2>Your IQA account</h2><p>Use your account to manage delivery details and view your orders. Your selected checkout journey will continue after successful sign-in.</p></div></div>');
  const form=$r('customerAuthForm');
  form.addEventListener('submit',async e=>{
   e.preventDefault();const button=form.querySelector('button[type="submit"]'),msg=$r('authMessage'),fd=new FormData(form);
@@ -168,12 +173,44 @@ function renderAuth(mode='login'){
     const {data,error}=await client.auth.signUp({email,password,options:{data:{full_name}}});
     if(error)throw error;
     msg.textContent=data.session?'Account created. Opening your account…':'Account request created. Check your email to confirm the address, then sign in.';
-    if(data.session){const next=sessionStorage.getItem('iqa-checkout-return');sessionStorage.removeItem('iqa-checkout-return');location.hash=next||'account';}
+    if(data.session)returnAfterAuth();
    }else{
     const {error}=await client.auth.signInWithPassword({email,password});if(error)throw error;
-    const next=sessionStorage.getItem('iqa-checkout-return');sessionStorage.removeItem('iqa-checkout-return');location.hash=next||'account';
+    returnAfterAuth();
    }
   }catch(err){msg.textContent=err.message||'Sign-in could not be completed.';}
+  finally{button.disabled=false;}
+ });
+ $r('customerGoogleSignIn').addEventListener('click',async e=>{
+  const button=e.currentTarget;button.disabled=true;
+  try{
+   const client=customerAuthClient();
+   const {error}=await client.auth.signInWithOAuth({provider:'google',options:{redirectTo:location.origin+location.pathname+location.search}});
+   if(error)throw error;
+  }catch(err){$r('authMessage').textContent=err.message||'Google sign-in could not be started.';button.disabled=false;}
+ });
+ let otpRequested=false,requestedPhone='';
+ const phoneForm=$r('customerPhoneForm');
+ phoneForm.addEventListener('submit',async e=>{
+  e.preventDefault();const button=$r('customerPhoneSubmit'),msg=$r('phoneAuthMessage'),fd=new FormData(phoneForm);
+  const phone=String(fd.get('phone')||'').trim(),otp=String(fd.get('otp')||'').trim();
+  button.disabled=true;msg.textContent='Please wait…';
+  try{
+   const client=customerAuthClient();
+   if(!otpRequested){
+    if(!/^\\+[1-9]\\d{7,14}$/.test(phone))throw new Error('Enter your mobile number with country code, e.g. +919876543210.');
+    const {error}=await client.auth.signInWithOtp({phone,options:{shouldCreateUser:true}});
+    if(error)throw error;
+    requestedPhone=phone;otpRequested=true;
+    $r('phoneOtpLabel').hidden=false;$r('customerPhoneForm').querySelector('[name="phone"]').readOnly=true;
+    button.textContent='Verify OTP';msg.textContent='A verification code has been requested. Enter the 6-digit code sent to your phone.';
+   }else{
+    if(!/^[0-9]{6}$/.test(otp))throw new Error('Enter the 6-digit verification code.');
+    const {error}=await client.auth.verifyOtp({phone:requestedPhone,token:otp,type:'sms'});
+    if(error)throw error;
+    returnAfterAuth();
+   }
+  }catch(err){msg.textContent=err.message||'Phone sign-in could not be completed.';}
   finally{button.disabled=false;}
  });
 }
