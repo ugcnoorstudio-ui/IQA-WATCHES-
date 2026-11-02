@@ -5,6 +5,7 @@ const path=require('node:path');
 const vm=require('node:vm');
 
 const html=fs.readFileSync(path.join(__dirname,'..','index.html'),'utf8');
+const routes=fs.readFileSync(path.join(__dirname,'..','routes.js'),'utf8');
 
 test('storefront inline JavaScript remains syntactically valid',()=>{
  const scripts=[...html.matchAll(/<script\b([^>]*)>([\s\S]*?)<\/script>/gi)]
@@ -29,4 +30,36 @@ test('product card controls have product-specific accessible names and wishlist 
  assert.ok(html.includes("aria-label=\"'+(wishlist.includes(p.id)?'Remove '+escapeHtml(p.name)+' from wishlist':'Add '+escapeHtml(p.name)+' to wishlist')+'\" aria-pressed=\"'+(wishlist.includes(p.id)?'true':'false')+'\""));
  assert.ok(html.includes("aria-label=\"View details for '+escapeHtml(p.name)+'\""));
  assert.ok(html.includes("aria-label=\"Add '+escapeHtml(p.name)+' to bag\""));
+});
+
+test('shop, Watch Finder and route search share one price-range configuration',()=>{
+ assert.match(html,/const PRICE_RANGES=Object\.freeze\(\[/);
+ assert.ok(html.includes("priceOk=price==='all'||matchesPriceRange(p.price,price)"));
+ assert.ok(html.includes("budget==='all'||matchesPriceRange(p.price,budget)"));
+ assert.ok(html.includes("window.IQA_PRICE_RANGES=PRICE_RANGES"));
+ assert.ok(routes.includes("window.IQA_MATCH_PRICE_RANGE(p.price,price)"));
+});
+test('shared price ranges cover boundaries exactly once',()=>{
+ const start=html.indexOf('const PRICE_RANGES=Object.freeze([');
+ const end=html.indexOf('\nfunction priceRangeOptions',start);
+ assert.ok(start>=0&&end>start,'shared price configuration and matcher must exist');
+ const sandbox={};
+ vm.runInNewContext(html.slice(start,end)+'\nthis.matchesPriceRange=matchesPriceRange;',sandbox);
+ const matches=sandbox.matchesPriceRange;
+ assert.equal(matches(999.99,'under1000'),true);
+ assert.equal(matches(1000,'under1000'),false);
+ assert.equal(matches(1000,'1000to1500'),true);
+ assert.equal(matches(1500,'1000to1500'),true);
+ assert.equal(matches(1500,'over1500'),false);
+ assert.equal(matches(1500.01,'over1500'),true);
+ assert.equal(matches(-1,'under1000'),false);
+ assert.equal(matches(1200,'unknown'),false);
+});
+
+test('official IQA WATCHES slogan is consistent across storefront branding',()=>{
+ assert.ok(html.includes('Timeless design, everyday precision.'));
+ assert.ok(html.includes('<title>IQA WATCHES | Timeless design, everyday precision.</title>'));
+ assert.ok(html.includes('<h1>Timeless design,<br><em>everyday precision.</em></h1>'));
+ assert.ok(html.includes('drawer-tagline">Timeless design, everyday precision.'));
+ assert.ok(html.includes('brand-tag">Timeless design, everyday precision.'));
 });

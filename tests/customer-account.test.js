@@ -38,7 +38,7 @@ test('order history and line items use customer RLS-scoped queries', () => {
   assert.match(routes, /from\('order_status_events'\)\.select\([\s\S]*?\.in\('order_id',ids\)/);
 });
 
-test('checkout requires an authenticated customer and does not create an order before payment integration', () => {
+test('checkout authenticates the customer and delegates COD order creation to the guarded Edge Function', () => {
   const start = routes.indexOf('async function renderCheckoutRoute()');
   const end = routes.indexOf('\n}', start);
   const checkout = routes.slice(start, end);
@@ -50,7 +50,12 @@ test('checkout requires an authenticated customer and does not create an order b
   assert.match(checkout, /STEP 02 OF 03/);
   assert.match(checkout, /STEP 03 OF 03/);
   assert.match(checkout, /cash_on_delivery/);
-  assert.doesNotMatch(checkout, /\.rpc\(/);
+  assert.match(checkout, /functions\/v1\/iqa-customer-checkout/);
+  assert.match(checkout, /'Authorization':'Bearer '\+session\.access_token/);
+  assert.match(checkout, /x-idempotency-key/);
+  assert.match(checkout, /address_id:selected\.id/);
+  assert.match(checkout, /variant_id:String\(x\.p\.variantId\|\|''\)/);
+  assert.match(checkout, /result\.ok!==true/);
   assert.doesNotMatch(checkout, /from\('orders'\)\.insert\(/);
 });
 

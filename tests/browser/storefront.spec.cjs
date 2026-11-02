@@ -465,6 +465,23 @@ test('collection routes show only products matching approved audience and explic
 });
 
 
+test('numeric catalogue IDs still open the product modal and detail route', async ({ page }) => {
+  await openStore(page);
+  await page.evaluate(() => {
+    products[0].id = 73001;
+    renderProducts();
+  });
+  const card = page.locator('#productGrid .product-card').first();
+  await card.locator('.product-image-link').click();
+  await expect(page.locator('#modalWrap')).toHaveClass(/open/);
+  await expect(page.locator('#modalContent h2')).not.toBeEmpty();
+  await page.keyboard.press('Escape');
+  await page.evaluate(() => { location.hash = '#product/73001'; });
+  await expect(page.locator('#routeView')).toBeVisible();
+  await expect(page.locator('#routeView')).toContainText(/product/i);
+  await expect(page.locator('#routeMainImage')).toBeVisible();
+});
+
 test('product cards open a complete quick-view modal and related watches replace its content', async ({ page }) => {
   await openStore(page);
   const initialHash = await page.evaluate(() => location.hash);
