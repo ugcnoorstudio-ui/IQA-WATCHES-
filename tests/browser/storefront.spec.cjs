@@ -210,7 +210,7 @@ test('every mobile menu link opens its real destination and closes the menu', as
   }
 });
 
-test('cart add, increment, decrement and remove work without enabling checkout', async ({ page }) => {
+test('cart add, increment, decrement and remove work with responsive order summary', async ({ page, isMobile }) => {
   await openStore(page);
   const card = page.locator('#productGrid .product-card').first();
   const productId = await card.locator('[data-add]').getAttribute('data-add');
@@ -218,14 +218,24 @@ test('cart add, increment, decrement and remove work without enabling checkout',
   await navigateToHash(page, 'bag');
   const bag = page.locator('#routeView');
   await expect(bag).toContainText(/shopping bag/i);
+  await expect(bag.locator('.shopping-progress')).toBeVisible();
+  await expect(bag.locator('.shopping-progress [aria-current="step"]')).toContainText(/shopping bag/i);
+  await expect(bag.locator('.shopping-layout')).toBeVisible();
+  await expect(bag.locator('.shopping-items')).toBeVisible();
+  await expect(bag.locator('.shopping-summary')).toContainText(/order summary/i);
+  await expect(bag.locator('.shopping-checkout-button')).toHaveAttribute('href', '#checkout');
   await expect(bag.locator('[data-qty][data-delta="1"]')).toBeVisible();
+  if (isMobile) {
+    const overflow = await page.evaluate(() => document.documentElement.scrollWidth > document.documentElement.clientWidth);
+    expect(overflow, 'shopping bag should not overflow on mobile').toBe(false);
+  }
   await bag.locator('[data-qty][data-delta="1"]').click();
   await expect(bag.locator('.qty')).toContainText('2');
   await bag.locator('[data-qty][data-delta="-1"]').click();
   await expect(bag.locator('.qty')).toContainText('1');
   await bag.locator('[data-remove="' + productId + '"]').click();
   await expect(bag).toContainText(/bag is empty/i);
-  await expect(bag).toContainText(/checkout.*disabled|not enabled/i);
+  await expect(bag).toContainText(/checkout.*unavailable/i);
 });
 
 test('wishlist persists in browser storage after reload and can be removed', async ({ page }) => {
@@ -371,7 +381,8 @@ test('product detail tolerates null optional fields and ignores invalid gallery 
   await expect(page.locator('#routeMainImage')).toBeVisible();
   await expect(page.locator('#routeMainImage')).toHaveAttribute('src', expectedImage);
   await expect(page.locator('#routeView [data-gallery-src]')).toHaveCount(0);
-  await expect(page.locator('#routeView')).toContainText(/Not specified/i);
+  await expect(page.locator('#routeView .route-specs')).toBeVisible();
+  await expect(page.locator('#routeView')).not.toContainText(/\b(?:null|undefined)\b/i);
   await expect(page.locator('#routeView')).toContainText(/IQA WATCHES/i);
 });
 
@@ -526,7 +537,9 @@ test('Buy Now adds the selected watch and opens the guarded checkout route', asy
   const modal = page.locator('#modalWrap');
   await expect(modal).toHaveClass(/open/);
   await modal.locator('[data-buy-now]').click();
-  await expect.poll(() => page.evaluate(() => location.hash)).toBe('#checkout');
+  const selectedId = await card.locator('.product-image-link').getAttribute('data-view');
+  await expect.poll(() => page.evaluate(() => location.hash)).toBe('#buy-now/' + encodeURIComponent(selectedId));
+  await expect(page.locator('#routeView')).toContainText(/A closer look before checkout/i);
   await expect(page.locator('#routeView')).toContainText(/Checkout is not available yet/i);
   await expect(page.locator('#routeView')).toContainText(/No order can be submitted/i);
   await expect(page.locator('#routeView [data-qty]')).toHaveCount(0);
