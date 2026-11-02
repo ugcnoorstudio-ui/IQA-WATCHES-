@@ -38,13 +38,15 @@ test('order history and line items use customer RLS-scoped queries', () => {
   assert.match(routes, /from\('order_status_events'\)\.select\([\s\S]*?\.in\('order_id',ids\)/);
 });
 
-test('checkout remains disabled and no order creation call is introduced', () => {
+test('checkout requires a verified customer session and customer-scoped delivery address', () => {
   const start = routes.indexOf('function renderCheckoutRoute()');
   const end = routes.indexOf('\n}', start);
   const checkout = routes.slice(start, end);
   assert.ok(start >= 0 && end > start);
-  assert.match(checkout, /Checkout is not available yet/);
-  assert.doesNotMatch(checkout, /\.rpc\(/);
+  assert.match(checkout, /await client\.auth\.getSession\(\)/);
+  assert.match(checkout, /if\(!user\)[\s\S]*?renderAuth\('login'\)/);
+  assert.match(checkout, /ensureCustomer\(client,user\)/);
+  assert.match(checkout, /from\('customer_addresses'\)[\s\S]*?\.eq\('customer_id',customerId\)/);
 });
 
 test('desktop and mobile account links always render the account route on repeated taps', () => {
@@ -56,8 +58,8 @@ test('desktop and mobile account links always render the account route on repeat
 test('storefront menu destinations resolve to the matching page or shopping tool', () => {
   assert.match(routes, /if\(r==='finder'\)\{showHomeSection\('finderCard'\);return;\}/);
   assert.match(routes, /if\(r==='comparison'\)\{showHomeSection\('compareCard'\);return;\}/);
-  assert.match(routes, /if\(r==='journal'\)\{/);
-  assert.match(routes, /if\(r==='care'\)return renderPolicies\(\)/);
+  assert.match(routes, /if\(r==='journal'\)return renderJournal\(\)/);
+  assert.match(routes, /if\(r==='care'\)return renderCare\(\)/);
 });
 
 test('collection routes use normalized exact audience and explicit collection tags', () => {

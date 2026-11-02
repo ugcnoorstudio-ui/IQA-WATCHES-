@@ -62,7 +62,7 @@ test('customer routes render their actual destinations', async ({ page }) => {
   const routes = [
     ['shop', 'routeCatalogue'], ['men', 'routeCatalogue'], ['women', 'routeCatalogue'],
     ['unisex', 'routeCatalogue'], ['new-arrivals', 'routeCatalogue'], ['bestsellers', 'routeCatalogue'],
-    ['care', 'Store policies'], ['journal', 'coming soon'], ['faq', 'Frequently asked questions'],
+    ['care', 'We are here to help'], ['journal', 'The Watch Journal'], ['faq', 'Frequently asked questions'],
     ['contact', 'Contact'], ['search', 'Search'], ['bag', 'shopping bag'], ['wishlist', 'wishlist']
   ];
   for (const [route, expected] of routes) {
@@ -80,6 +80,40 @@ test('customer routes render their actual destinations', async ({ page }) => {
   await expect(page.locator('#finderCard')).toBeVisible();
   await navigateToHash(page, 'comparison');
   await expect(page.locator('#compareCard')).toBeVisible();
+});
+
+
+test('Customer Care hub links open the correct help pages', async ({ page }) => {
+  await page.goto('/');
+  await navigateToHash(page, 'care');
+  await expect(page.locator('#routeView')).toContainText('We are here to help');
+  const links = [
+    ['View FAQs', 'faq', 'Frequently asked questions'],
+    ['Delivery details', 'delivery', 'Delivery information'],
+    ['My orders', 'orders', 'My orders'],
+    ['Read policies', 'policies', 'Store policies'],
+    ['Contact us', 'contact', 'Contact us'],
+    ['Shop watches', 'shop', 'IQA WATCHES']
+  ];
+  for (const [label, hash, expected] of links) {
+    await navigateToHash(page, 'care');
+    await page.getByRole('link', { name: new RegExp(label, 'i') }).click();
+    await expect(page).toHaveURL(new RegExp('#' + hash + '$'));
+    if (hash !== 'shop') await expect(page.locator('#routeView')).toContainText(new RegExp(expected, 'i'));
+    else await expect(page.locator('#routeCatalogue')).toBeAttached();
+  }
+});
+
+test('Watch Journal shows editorial guides and its customer-care links work', async ({ page }) => {
+  await page.goto('/');
+  await navigateToHash(page, 'journal');
+  await expect(page.locator('#routeView')).toContainText('How to choose a watch for everyday wear');
+  await expect(page.locator('#routeView')).toContainText('A simple guide to watch movements');
+  await expect(page.locator('#routeView')).toContainText('Small habits that help care for your watch');
+  await expect(page.locator('#routeView')).toContainText('Finding a comfortable fit');
+  await page.getByRole('link', { name: /Visit Customer Care/i }).click();
+  await expect(page).toHaveURL(/#care$/);
+  await expect(page.locator('#routeView')).toContainText('We are here to help');
 });
 
 test('mobile navigation opens and closes and viewport has no horizontal overflow', async ({ page, isMobile }) => {
