@@ -361,7 +361,7 @@ function renderSearch(){
   const list=products.filter(p=>{
    const text=[p.name,p.brand,p.category,p.style,p.sku,p.desc].join(' ').toLowerCase();
    const matchText=!q||text.includes(q),matchBrand=brand==='All'||p.brand===brand;
-   const matchPrice=price==='all'||(price==='under1000'&&p.price<1000)||(price==='1000to2500'&&p.price>=1000&&p.price<=2500)||(price==='over2500'&&p.price>2500);
+   const matchPrice=price==='all'||(typeof window.IQA_MATCH_PRICE_RANGE==='function'&&window.IQA_MATCH_PRICE_RANGE(p.price,price));
    return matchText&&matchBrand&&matchPrice;
   });
   const host=$r('searchResults');host.innerHTML=list.length?list.map(p=>'<article class="route-card"><a href="#product/'+encodeURIComponent(p.id)+'" data-view="'+esc(p.id)+'"><img src="'+esc(safeImageUrl(p.image))+'" alt="'+esc(p.name)+'"></a><div class="route-card-copy"><div class="product-brand">'+esc(p.brand)+'</div><h3><a href="#product/'+encodeURIComponent(p.id)+'" data-view="'+esc(p.id)+'">'+esc(p.name)+'</a></h3><p>'+money(p.price)+'</p><a class="button light" href="#product/'+encodeURIComponent(p.id)+'" data-view="'+esc(p.id)+'">View product</a></div></article>').join(''):'<div class="route-empty">No matching published products. Try a different search or filter.</div>';
@@ -369,7 +369,7 @@ function renderSearch(){
  };
  const brands=[...new Set(products.map(p=>p.brand).filter(Boolean))].sort();
  infoRoute('SEARCH','Search the collection','Search by watch name, brand, style or model number.',
- '<div class="toolbar"><input id="routeSearchInput" type="search" placeholder="Search watches, brands or model…" aria-label="Search products"><select id="routeBrand"><option value="All">All brands</option>'+brands.map(b=>'<option value="'+esc(b)+'">'+esc(b)+'</option>').join('')+'</select><select id="routePrice"><option value="all">Any price</option><option value="under1000">Under ₹1,000</option><option value="1000to2500">₹1,000–₹2,500</option><option value="over2500">Over ₹2,500</option></select></div><p class="results-count" id="searchCount"></p><div id="searchResults" class="route-grid"></div>');
+ '<div class="toolbar"><input id="routeSearchInput" type="search" placeholder="Search watches, brands or model…" aria-label="Search products"><select id="routeBrand"><option value="All">All brands</option>'+brands.map(b=>'<option value="'+esc(b)+'">'+esc(b)+'</option>').join('')+'</select><select id="routePrice"><option value="all">Any price</option>'+(window.IQA_PRICE_RANGES||[]).map(range=>'<option value="'+esc(range.id)+'">'+esc(range.label)+'</option>').join('')+'</select></div><p class="results-count" id="searchCount"></p><div id="searchResults" class="route-grid"></div>');
  const update=()=>draw($r('routeSearchInput').value,$r('routeBrand').value,$r('routePrice').value);
  $r('routeSearchInput').addEventListener('input',update);$r('routeBrand').addEventListener('change',update);$r('routePrice').addEventListener('change',update);update();
 }
