@@ -107,3 +107,6 @@ body{background:var(--iqa-ivory);color:var(--iqa-obsidian)}
  .route-specs th,.route-specs td{padding:10px 7px;font-size:12px}
 }
 @media(prefers-reduced-motion:reduce){.hero-visual img,.product-card,.route-card{animation:none!important;transition:none!important}}
+
+/* Compact mobile header actions: keep every core control reachable at 320px. */
+@media(max-width:760px){.nav-actions{gap:4px;flex-shrink:0}.nav-actions .icon-btn{min-width:32px;padding:7px 5px;font-size:10px}.nav-actions .nav-account{display:none}#voiceSearch{display:inline-flex;align-items:center;justify-content:center}}
