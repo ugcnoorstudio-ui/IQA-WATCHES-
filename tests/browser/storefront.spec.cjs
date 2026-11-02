@@ -637,3 +637,36 @@ test('mobile watch detail opens as a large image-first bottom panel', async ({ p
   await expect(page.locator('#modalContent h2')).not.toBeEmpty();
   await page.locator('#modalContent #modalClose').click();
 });
+
+
+test('homepage footer exposes clear Home, Shop, Brands and My Account destinations', async ({ page }) => {
+  await openStore(page);
+  const footer = page.locator('.footer');
+  const quickNav = footer.locator('.footer-bottom-nav');
+  await expect(quickNav).toBeVisible();
+  for (const [label, href] of [['Home', '#home'], ['Shop', '#shop'], ['Brands', '#brands'], ['My account', '#account']]) {
+    const link = quickNav.getByRole('link', { name: new RegExp(label, 'i') });
+    await expect(link).toHaveAttribute('href', href);
+  }
+  await quickNav.getByRole('link', { name: /Brands/i }).click();
+  await expect.poll(() => page.evaluate(() => location.hash)).toBe('#brands');
+  await expect(page.locator('#routeView')).toContainText(/Explore our brands/i);
+  await page.locator('.footer-bottom-nav a[href="#account"]').click();
+  await expect.poll(() => page.evaluate(() => location.hash)).toBe('#account');
+  await expect(page.locator('#routeView')).toContainText(/Sign in|Account unavailable/i);
+});
+
+test('customer account entry and footer navigation remain usable on mobile', async ({ page, isMobile }) => {
+  test.skip(!isMobile, 'mobile viewport only');
+  await openStore(page);
+  await page.locator('.footer-bottom-nav a[href="#account"]').click();
+  await expect(page.locator('#routeView')).toBeVisible();
+  await expect(page.locator('#routeView')).toContainText(/Sign in|Account unavailable/i);
+  const dimensions = await page.evaluate(() => ({
+    viewport: document.documentElement.clientWidth,
+    document: document.documentElement.scrollWidth,
+    footerNav: document.querySelector('.footer-bottom-nav').scrollWidth
+  }));
+  expect(dimensions.document).toBeLessThanOrEqual(dimensions.viewport + 1);
+  expect(dimensions.footerNav).toBeLessThanOrEqual(dimensions.viewport + 1);
+});
