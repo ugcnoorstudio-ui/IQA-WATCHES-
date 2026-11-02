@@ -518,6 +518,22 @@ body.menu-open::before{content:"";position:fixed;inset:0;background:rgba(13,13,1
  .buy-now-copy h2{font-size:32px}
 }
 </style>
+
+<style id="iqa-instant-interface-open">
+/* Keep page and panel changes immediate: no vertical reveal, slide-in or modal entrance. */
+html{scroll-behavior:auto!important}
+.route-view,.route-view .route-hero,.route-view .route-content,
+.route-view .route-product-media,.route-view .route-product-copy,
+.route-view .buy-now-panel,.route-view .buy-now-image img,.route-view .buy-now-copy>*{
+ animation:none!important;transform:none!important;opacity:1!important;
+}
+.route-view .route-card,.route-view .route-feature,.route-view .route-card img{
+ animation:none!important;transition:none!important;transform:none!important;opacity:1!important;
+}
+.drawer,.overlay,.modal-wrap,.modal-wrap .modal,.search-overlay,.search-panel,.mobile-menu{
+ animation:none!important;transition:none!important;
+}
+</style>
 </head>
 <body>
 
