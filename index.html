@@ -742,6 +742,51 @@ body.menu-open .site-header { z-index:1300 !important; }
 }
 </style>
 
+
+<style id="iqa-natural-navigation-and-product-motion">
+/*
+  Product and Buy Now views should feel like normal storefront navigation,
+  not cards rising into view. Keep small interaction feedback only.
+*/
+.route-product-media,
+.route-product-copy,
+.buy-now-panel,
+.buy-now-image img,
+.buy-now-copy>* {
+  animation:none !important;
+  transform:none !important;
+  opacity:1 !important;
+}
+.buy-now-panel {
+  box-shadow:0 8px 28px rgba(33,27,21,.07);
+}
+.route-purchase-actions .button,
+.buy-now-actions .button {
+  transition:background-color .18s ease,border-color .18s ease,color .18s ease,box-shadow .18s ease !important;
+}
+.route-purchase-actions .button:hover,
+.buy-now-actions .button:hover {
+  transform:none !important;
+  box-shadow:0 4px 12px rgba(33,27,21,.08);
+}
+.route-purchase-actions .button:active,
+.buy-now-actions .button:active {
+  transform:scale(.99) !important;
+}
+.route-purchase-actions .route-buy-button:before {
+  display:none !important;
+}
+.modal-wrap.open .modal,
+.modal-wrap.open .product-modal,
+.drawer.open {
+  animation:none !important;
+}
+@media(prefers-reduced-motion:reduce) {
+  .route-purchase-actions .button,
+  .buy-now-actions .button { transition:none !important; }
+}
+</style>
+
 </head>
 <body>
 
