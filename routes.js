@@ -198,7 +198,7 @@ function renderAuth(mode='login'){
   try{
    const client=customerAuthClient();
    if(!otpRequested){
-    if(!/^\\+[1-9]\\d{7,14}$/.test(phone))throw new Error('Enter your mobile number with country code, e.g. +919876543210.');
+    if(!/^\+[1-9]\d{7,14}$/.test(phone))throw new Error('Enter your mobile number with country code, e.g. +919876543210.');
     const {error}=await client.auth.signInWithOtp({phone,options:{shouldCreateUser:true}});
     if(error)throw error;
     requestedPhone=phone;otpRequested=true;
