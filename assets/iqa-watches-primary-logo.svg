@@ -14,5 +14,5 @@
 <path d="M450 456 C405 470 376 488 366 514 C435 483 515 531 593 540 C660 548 715 528 755 492" fill="none" stroke="#B99A5B" stroke-width="12" stroke-linecap="round"/>
 <text x="450" y="685" text-anchor="middle" fill="#11110F" font-family="Georgia, 'Times New Roman', serif" font-size="75" letter-spacing="15">IQA WATCHES</text>
 <path d="M250 735h145 M505 735h145" stroke="#B99A5B" stroke-width="3"/>
-<text x="450" y="778" text-anchor="middle" fill="#B99A5B" font-family="Georgia, 'Times New Roman', serif" font-size="23" letter-spacing="5">TIMELESS DESIGN. EVERYDAY PRECISION.</text>
+<text x="450" y="778" text-anchor="middle" fill="#211B15" font-family="Georgia, 'Times New Roman', serif" font-size="23" font-weight="700" letter-spacing="4">TIMELESS DESIGN. EVERYDAY PRECISION.</text>
 </svg>

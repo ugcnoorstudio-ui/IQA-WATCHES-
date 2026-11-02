@@ -38,13 +38,17 @@ test('order history and line items use customer RLS-scoped queries', () => {
   assert.match(routes, /from\('order_status_events'\)\.select\([\s\S]*?\.in\('order_id',ids\)/);
 });
 
-test('checkout remains disabled and no order creation call is introduced', () => {
-  const start = routes.indexOf('function renderCheckoutRoute()');
-  const end = routes.indexOf('\n}', start);
+test('COD checkout uses the authenticated server-side order endpoint', () => {
+  const start = routes.indexOf('async function renderCheckoutRoute()');
+  const end = routes.indexOf('\n}\n\nlet customerClient', start);
   const checkout = routes.slice(start, end);
   assert.ok(start >= 0 && end > start);
-  assert.match(checkout, /Checkout is not available yet/);
-  assert.doesNotMatch(checkout, /\.rpc\(/);
+  assert.match(checkout, /Cash on Delivery \(COD\)/);
+  assert.match(checkout, /Confirm COD Order/);
+  assert.match(checkout, /functions\/v1\/iqa-customer-checkout/);
+  assert.match(checkout, /'Authorization':'Bearer '\+session\.access_token/);
+  assert.match(checkout, /x-idempotency-key/);
+  assert.match(checkout, /result\.ok!==true/);
 });
 
 test('desktop and mobile account links always render the account route on repeated taps', () => {
