@@ -372,7 +372,7 @@ test('product detail tolerates null optional fields and ignores invalid gallery 
   await expect(page.locator('#routeMainImage')).toHaveAttribute('src', expectedImage);
   await expect(page.locator('#routeView [data-gallery-src]')).toHaveCount(0);
   await expect(page.locator('#routeView .route-specs')).toBeVisible();
-  await expect(page.locator('#routeView')).not.toContainText(/(?:^|\\s)(?:null|undefined)(?:\\s|$)/i);
+  await expect(page.locator('#routeView')).not.toContainText(/\b(?:null|undefined)\b/i);
   await expect(page.locator('#routeView')).toContainText(/IQA WATCHES/i);
 });
 
