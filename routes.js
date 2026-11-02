@@ -108,6 +108,7 @@ function customerAuthClient(){
  customerClient.auth.onAuthStateChange((event,session)=>{
   const accountLink=document.querySelector('a[href="#account"][aria-label="My account"]');
   if(accountLink)accountLink.textContent=session?.user?'My account':'Account';
+  if(event==='SIGNED_IN'){const next=sessionStorage.getItem('iqa-checkout-return');if(next){sessionStorage.removeItem('iqa-checkout-return');location.hash=next;}}
   if(event==='SIGNED_OUT'&&['account','profile','orders','tracking','addresses'].includes((location.hash||'#').slice(1).split('/')[0]))location.hash='login';
  });
  return customerClient;
