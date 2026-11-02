@@ -650,7 +650,7 @@ test('homepage footer exposes clear Home, Shop, Brands and My Account destinatio
   }
   await quickNav.getByRole('link', { name: /Brands/i }).click();
   await expect.poll(() => page.evaluate(() => location.hash)).toBe('#brands');
-  await expect(page.locator('#routeView')).toContainText(/Explore our brands/i);
+  await expect(page.locator('#routeView')).toContainText(/Explore the brands represented in the approved catalogue/i);
   await page.locator('.footer-bottom-nav a[href="#account"]').click();
   await expect.poll(() => page.evaluate(() => location.hash)).toBe('#account');
   await expect(page.locator('#routeView')).toContainText(/Sign in|Account unavailable/i);
