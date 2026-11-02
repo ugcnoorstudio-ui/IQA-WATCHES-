@@ -243,7 +243,7 @@ async function renderAccount(){
   if(location.hash!==requestedHash)return;
   const fullName=profile.full_name||meta.full_name||'';
   const phone=profile.phone||meta.phone||'';
-  const initials=(fullName||user.email||'IQA').trim().split(/\\s+/).slice(0,2).map(part=>part[0]||'').join('').toUpperCase();
+  const initials=(fullName||user.email||'IQA').trim().split(/\s+/).slice(0,2).map(part=>part[0]||'').join('').toUpperCase();
   infoRoute('IQA WATCHES · MY ACCOUNT','Welcome'+(fullName?', '+fullName.split(' ')[0]:' to IQA WATCHES'),'Your personal space for profile details, orders and saved pieces.',
    '<div class="account-dashboard">'+
     '<section class="account-welcome-card"><div class="account-avatar" aria-hidden="true">'+esc(initials)+'</div><div class="account-welcome-copy"><span class="eyebrow">YOUR IQA ACCOUNT</span><h2>'+(fullName?'Good to see you, '+esc(fullName.split(' ')[0]):'Welcome to your account')+'</h2><p>'+esc(user.email||'')+'</p></div><span class="account-member-mark">IQA MEMBER</span></section>'+
