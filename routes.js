@@ -10,7 +10,7 @@ function product(id){
  if(typeof catalogueState!=='undefined'&&catalogueState==='error'){
   root.innerHTML=hero('IQA WATCHES · PRODUCT','Product temporarily unavailable','The approved product catalogue could not be loaded.')+'<div class="route-content"><div class="route-disabled" role="alert">Please refresh the page or return to the collection. No purchase has been created.</div><a class="button light" href="#shop">Back to Shop</a></div>';return;
  }
- const p=products.find(x=>x.id===id);
+ const p=products.find(x=>String(x.id)===String(id));
  if(!p){root.innerHTML=hero('IQA WATCHES · PRODUCT','Product not found','This product is not currently in the approved catalogue.')+'<div class="route-content"><a class="button" href="#shop">Shop All</a></div>';return}
  const casio=p.sku==='CAS-AE1200WHL5AV-001'||p.sku==='CAS-AE1200WHL5AVDF-001'||p.sku==='AE-1200WHL-5AV'||p.sku==='AE-1200WHL-5AVDF';
  const galleryItems=(Array.isArray(p.gallery)?p.gallery:[]).map(item=>({src:safeImageUrl(item.src),alt:String(item.alt||p.name)})).filter(item=>item.src);
