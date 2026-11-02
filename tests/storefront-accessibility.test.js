@@ -33,7 +33,7 @@ test('product card controls have product-specific accessible names and wishlist 
 });
 
 test('shop, Watch Finder and route search share one price-range configuration',()=>{
- assert.match(html,/const PRICE_RANGES=Object\\.freeze\\(\\[/);
+ assert.match(html,/const PRICE_RANGES=Object\.freeze\(\[/);
  assert.ok(html.includes("priceOk=price==='all'||matchesPriceRange(p.price,price)"));
  assert.ok(html.includes("budget==='all'||matchesPriceRange(p.price,budget)"));
  assert.ok(html.includes("window.IQA_PRICE_RANGES=PRICE_RANGES"));
@@ -41,10 +41,10 @@ test('shop, Watch Finder and route search share one price-range configuration',(
 });
 test('shared price ranges cover boundaries exactly once',()=>{
  const start=html.indexOf('const PRICE_RANGES=Object.freeze([');
- const end=html.indexOf('\\nfunction priceRangeOptions',start);
+ const end=html.indexOf('\nfunction priceRangeOptions',start);
  assert.ok(start>=0&&end>start,'shared price configuration and matcher must exist');
  const sandbox={};
- vm.runInNewContext(html.slice(start,end)+'\\nthis.matchesPriceRange=matchesPriceRange;',sandbox);
+ vm.runInNewContext(html.slice(start,end)+'\nthis.matchesPriceRange=matchesPriceRange;',sandbox);
  const matches=sandbox.matchesPriceRange;
  assert.equal(matches(999.99,'under1000'),true);
  assert.equal(matches(1000,'under1000'),false);
