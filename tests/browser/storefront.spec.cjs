@@ -88,12 +88,12 @@ test('Customer Care hub links open the correct help pages', async ({ page }) => 
   await navigateToHash(page, 'care');
   await expect(page.locator('#routeView')).toContainText('We are here to help');
   const links = [
-    ['Frequently asked questions', 'faq', 'Frequently asked questions'],
-    ['Delivery information', 'delivery', 'Delivery information'],
-    ['Orders & tracking', 'orders', 'My orders'],
-    ['Returns & store policies', 'policies', 'Store policies'],
-    ['Contact IQA WATCHES', 'contact', 'Contact us'],
-    ['Explore the collection', 'shop', 'IQA WATCHES']
+    ['View FAQs', 'faq', 'Frequently asked questions'],
+    ['Delivery details', 'delivery', 'Delivery information'],
+    ['My orders', 'orders', 'My orders'],
+    ['Read policies', 'policies', 'Store policies'],
+    ['Contact us', 'contact', 'Contact us'],
+    ['Shop watches', 'shop', 'IQA WATCHES']
   ];
   for (const [label, hash, expected] of links) {
     await navigateToHash(page, 'care');
