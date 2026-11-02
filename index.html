@@ -789,34 +789,18 @@ body.menu-open .site-header { z-index:1300 !important; }
 
 
 <style id="iqa-instant-page-and-panel-transitions">
-/* Instant, stable storefront navigation: no rising/fading/slide-in page transitions. */
+/* Instant navigation: remove page-entry, panel-entry and scroll animations everywhere. */
 html,body { scroll-behavior:auto !important; }
-.section-head,.values,.trust-strip,.newsletter,.editorial-copy,
-.route-hero,.route-content,.policy-page,
-.route-product-media,.route-product-copy,.buy-now-panel,
-.buy-now-image img,.buy-now-copy>*,
-.modal-wrap.open .modal {
+*,*::before,*::after {
   animation:none !important;
+  transition:none !important;
+  scroll-behavior:auto !important;
+}
+.route-hero,.route-content,.policy-page,.route-product-media,.route-product-copy,
+.buy-now-panel,.buy-now-image img,.buy-now-copy>*,.modal-wrap.open .modal,
+.drawer,.overlay,.mobile-menu,.search-panel {
   opacity:1 !important;
   transform:none !important;
-}
-.route-hero,.route-content,.policy-page { transition:none !important; }
-.buy-now-panel,.buy-now-image img,.buy-now-copy>*,
-.route-product-media,.route-product-copy { animation:none !important; }
-.drawer,.overlay,.modal-wrap,.mobile-menu {
-  transition:none !important;
-}
-.mobile-menu.open { animation:none !important; }
-.modal-wrap.open .modal { animation:none !important; }
-@keyframes iqaWatchRise { from,to { opacity:1; transform:none; } }
-@keyframes iqaBuyPanelIn { from,to { opacity:1; transform:none; } }
-@keyframes iqaBuyImageIn { from,to { opacity:1; transform:none; } }
-@keyframes iqaBuyCopyIn { from,to { opacity:1; transform:none; } }
-@keyframes drawerReveal { from,to { opacity:1; transform:none; } }
-@keyframes nw-content-enter { from,to { opacity:1; transform:none; } }
-@keyframes nw-modal-enter { from,to { opacity:1; transform:none; } }
-@media(prefers-reduced-motion:reduce) {
-  *,*::before,*::after { animation:none !important; transition:none !important; scroll-behavior:auto !important; }
 }
 </style>
 
