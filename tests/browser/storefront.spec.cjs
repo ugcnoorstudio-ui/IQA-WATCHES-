@@ -371,7 +371,8 @@ test('product detail tolerates null optional fields and ignores invalid gallery 
   await expect(page.locator('#routeMainImage')).toBeVisible();
   await expect(page.locator('#routeMainImage')).toHaveAttribute('src', expectedImage);
   await expect(page.locator('#routeView [data-gallery-src]')).toHaveCount(0);
-  await expect(page.locator('#routeView')).toContainText(/Not specified/i);
+  await expect(page.locator('#routeView .route-specs')).toBeVisible();
+  await expect(page.locator('#routeView')).not.toContainText(/(?:^|\\s)(?:null|undefined)(?:\\s|$)/i);
   await expect(page.locator('#routeView')).toContainText(/IQA WATCHES/i);
 });
 
@@ -526,7 +527,9 @@ test('Buy Now adds the selected watch and opens the guarded checkout route', asy
   const modal = page.locator('#modalWrap');
   await expect(modal).toHaveClass(/open/);
   await modal.locator('[data-buy-now]').click();
-  await expect.poll(() => page.evaluate(() => location.hash)).toBe('#checkout');
+  const selectedId = await card.locator('.product-image-link').getAttribute('data-view');
+  await expect.poll(() => page.evaluate(() => location.hash)).toBe('#buy-now/' + encodeURIComponent(selectedId));
+  await expect(page.locator('#routeView')).toContainText(/A closer look before checkout/i);
   await expect(page.locator('#routeView')).toContainText(/Checkout is not available yet/i);
   await expect(page.locator('#routeView')).toContainText(/No order can be submitted/i);
   await expect(page.locator('#routeView [data-qty]')).toHaveCount(0);
