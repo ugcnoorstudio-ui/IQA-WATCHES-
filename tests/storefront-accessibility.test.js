@@ -55,3 +55,11 @@ test('shared price ranges cover boundaries exactly once',()=>{
  assert.equal(matches(-1,'under1000'),false);
  assert.equal(matches(1200,'unknown'),false);
 });
+
+test('official IQA WATCHES slogan is consistent across storefront branding',()=>{
+ assert.ok(html.includes('Timeless design, everyday precision.'));
+ assert.match(html,/<title>IQA WATCHES \\| Timeless design, everyday precision\\.<\\/title>/);
+ assert.match(html,/<h1>Timeless design,<br><em>everyday precision\\.<\\/em><\\/h1>/);
+ assert.ok(html.includes('drawer-tagline">Timeless design, everyday precision.'));
+ assert.ok(html.includes('brand-tag">Timeless design, everyday precision.'));
+});
