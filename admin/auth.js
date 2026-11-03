@@ -29,15 +29,27 @@ async function init(){
 $('loginForm').addEventListener('submit',async event=>{
  event.preventDefault();
  const email=$('authEmail').value.trim(),password=$('authPassword').value;
- const button=$('authSubmit');button.disabled=true;button.textContent='Verifying…';message('Checking your staff access…',false);
+ const button=$('authSubmit'),googleButton=$('googleAuth');button.disabled=true;googleButton.disabled=true;button.textContent='Verifying…';message('Checking your staff access…',false);
  try{
   const profile=await backend.signIn(email,password);
   if(!profile)throw new Error('This account could not be verified as active staff.');
   $('authPassword').value='';unlock(profile);
  }catch(error){message(error.message||'Sign-in failed. Check your credentials and try again.',true)}
- finally{button.disabled=false;button.textContent='Sign in securely'}
+ finally{button.disabled=false;googleButton.disabled=false;button.textContent='Sign in securely'}
 });
-$('signOut').addEventListener('click',async()=>{
+
+$('googleAuth').addEventListener('click',async()=>{
+ const button=$('googleAuth'),passwordButton=$('authSubmit');
+ button.disabled=true;passwordButton.disabled=true;
+ message('Redirecting to Google securely…',false);
+ try{
+  await backend.signInWithGoogle();
+ }catch(error){
+  message(error.message||'Google sign-in could not be started. Please try again.',true);
+  button.disabled=false;passwordButton.disabled=false;
+ }
+});
+\n$('signOut').addEventListener('click',async()=>{
  const button=$('signOut');button.disabled=true;
  try{await backend.signOut();lock('You have been signed out.')}
  catch(error){if(error.message)message(error.message,true)}
