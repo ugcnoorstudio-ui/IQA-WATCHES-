@@ -659,7 +659,7 @@ body{background:var(--paper)}
 
 <style id="desktop-drawer-navigation">
 /* Desktop uses the same left-sliding navigation drawer as mobile; closed by default. */
-@media(min-width:1024px){
+@media(min-width:681px){
  .nav-links{display:none!important}
  #menuToggle{display:inline-flex!important;position:fixed;left:16px;top:100px;z-index:30;width:46px;height:46px;min-width:46px;background:var(--paper);border:1px solid var(--line);box-shadow:0 3px 14px #00000012;font-size:25px}
  #mobileMenu.desktop-sidebar{display:flex!important;position:fixed!important;inset:0 auto 0 0!important;width:min(410px,88vw)!important;max-width:410px!important;height:100vh;height:100dvh!important;max-height:100vh;max-height:100dvh;overflow-y:auto!important;overscroll-behavior:contain;transform:translateX(-105%)!important;transition:transform .25s ease!important;z-index:1300!important;margin:0!important;padding:0 0 18px!important;background:var(--paper);border-right:1px solid #d8c7aa;box-shadow:18px 0 48px #0004;flex-direction:column!important;align-items:stretch!important;gap:0!important}
@@ -675,7 +675,7 @@ body{background:var(--paper)}
 }
 #menuBackdrop{display:none;position:fixed;inset:0;background:#0008;z-index:1290}
 body.menu-open #menuBackdrop{display:block}
-@media(min-width:681px) and (max-width:1023px){#mobileMenu.desktop-sidebar{display:none!important}}
+
 </style>
 </head>
 <body>
@@ -1019,7 +1019,7 @@ $('searchPanelForm').addEventListener('submit',e=>{e.preventDefault();const q=$(
 $('drawerClose').addEventListener('click',closePanel);$('overlay').addEventListener('click',closePanel);$('modalWrap').addEventListener('click',e=>{if(e.target===$('modalWrap'))closeModal()});document.body.appendChild($('mobileMenu'));
 const menuBackdrop=document.createElement('div');menuBackdrop.id='menuBackdrop';menuBackdrop.setAttribute('aria-hidden','true');document.body.appendChild(menuBackdrop);
 menuBackdrop.addEventListener('click',()=>setMobileMenu(false));
-const desktopSidebarQuery=window.matchMedia('(min-width:1024px)');
+const desktopSidebarQuery=window.matchMedia('(min-width:681px)');
 function syncDesktopSidebar(){
  const menu=$('mobileMenu');
  const desktop=desktopSidebarQuery.matches;
