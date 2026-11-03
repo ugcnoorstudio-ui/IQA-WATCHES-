@@ -1,8 +1,8 @@
 # Casio Five-Family Preview — Research Report
 
-**Project:** IQA WATCHES  
-**Status:** Informational storefront preview only  
-**Checked:** 4 November 2026  
+**Project:** IQA WATCHES
+**Status:** Informational storefront preview only
+**Checked:** 4 November 2026
 **Scope:** Five Casio watch families requested for a first public-facing preview.
 
 ## Publication boundary
