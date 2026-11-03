@@ -647,6 +647,14 @@ body{background:var(--paper)}
 }
 @media(min-width:681px){.drawer-logo{display:block}}
 </style>
+<style id="mobile-drawer-overlap-fix">
+/* Fix: keep the mobile drawer above the homepage/header layers, never underneath them. */
+@media(max-width:680px){
+ body.menu-open .site-header{z-index:1200}
+ .mobile-menu.open{position:fixed!important;top:0!important;left:0!important;right:auto!important;bottom:0!important;width:min(88vw,410px)!important;max-width:calc(100vw - 42px)!important;height:100vh;height:100dvh!important;max-height:100vh;max-height:100dvh;overflow-y:auto!important;overscroll-behavior:contain;z-index:1202!important;margin:0!important;border:0!important;border-right:1px solid #d8c7aa!important;box-shadow:18px 0 48px #0004!important;padding-top:env(safe-area-inset-top,0px)!important;padding-bottom:max(18px,env(safe-area-inset-bottom,0px))!important}
+ .mobile-menu.open .mobile-menu-head{position:sticky;top:0;z-index:4;flex-shrink:0}
+}
+</style>
 </head>
 <body>
 <div class="iqa-announcement" role="note">IQA WATCHES <span aria-hidden="true">·</span> TIMELESS STYLE, CONSIDERED DETAILS <span aria-hidden="true">·</span> PERSONAL ASSISTANCE ON WHATSAPP</div>
