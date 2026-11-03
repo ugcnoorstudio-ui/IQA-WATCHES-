@@ -115,3 +115,6 @@ body.nav-open{overflow:hidden}
   .empty-state p{font-size:13px;line-height:1.55}
 }
 @media(prefers-reduced-motion:reduce){.sidebar{transition:none!important}}
+
+/* Admin Google OAuth sign-in */
+.auth-divider{display:flex;align-items:center;gap:12px;margin:16px 0;color:#858174;font-size:10px;letter-spacing:.16em}.auth-divider:before,.auth-divider:after{content:'';height:1px;flex:1;background:#34342f}.auth-google{width:100%;min-height:46px;display:flex;align-items:center;justify-content:center;gap:11px;border:1px solid #5a574d;border-radius:5px;background:#f7f6f2;color:#20201d;font-weight:700;cursor:pointer}.auth-google:hover{background:#fff}.auth-google:disabled{opacity:.55;cursor:not-allowed}.google-g{font:700 18px Arial,sans-serif;color:#4285f4}.auth-submit:disabled{opacity:.55;cursor:wait}

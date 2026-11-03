@@ -21,6 +21,8 @@
       <label for="authPassword">Password</label>
       <input id="authPassword" name="password" type="password" autocomplete="current-password" required>
       <button id="authSubmit" class="auth-submit" type="submit">Sign in securely</button>
+      <div class="auth-divider" aria-hidden="true"><span>OR</span></div>
+      <button id="googleAuth" class="auth-google" type="button"><span class="google-g" aria-hidden="true">G</span><span>Continue with Google</span></button>
       <p id="authMessage" class="auth-message" role="status" aria-live="polite">Your access is verified against the staff directory.</p>
     </form>
     <div class="auth-foot"><span>Protected by Supabase Auth</span><a href="../">Return to storefront</a></div>
@@ -51,5 +53,5 @@
 <script src="./motion-studio.js"></script>
 <script src="./admin.js?v=20261103-scheduled-publish-v1"></script>
 <script src="./listing-assistant.js?v=2"></script>
-<script src="./auth.js?v=622dc3c3"></script>
+<script src="./auth.js?v=20261104-google-oauth"></script>
 </body></html>
