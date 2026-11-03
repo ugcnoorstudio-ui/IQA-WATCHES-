@@ -1,10 +1,10 @@
 # IQA WATCHES — 200-candidate research and validation report
 
-**Date:** 2026-11-04  
-**Branch:** `feature/purchase-dispatch-workspace`  
-**Source workbook:** `200_watches_men_women_india.xlsx`, sheet `All 200 Watches`  
-**Deep research run:** `01a1a33b-6827-7998-ae60-65b0eb854e25`  
-**Report URL:** https://agent.tinyfish.ai/research/01a1a33b-6827-7998-ae60-65b0eb854e25  
+**Date:** 2026-11-04
+**Branch:** `feature/purchase-dispatch-workspace`
+**Source workbook:** `200_watches_men_women_india.xlsx`, sheet `All 200 Watches`
+**Deep research run:** `01a1a33b-6827-7998-ae60-65b0eb854e25`
+**Report URL:** https://agent.tinyfish.ai/research/01a1a33b-6827-7998-ae60-65b0eb854e25
 **Status:** Research still running at latest poll (20 sources read; output_ready=false). This report does not claim the candidate-level research is complete.
 
 ## Input inventory and schema build
