@@ -80,3 +80,24 @@ Both contain all 200 candidate rows, 100 Men / 100 Women, with unverified model,
 - CSV regenerated from the JSON record schema: PASS.
 
 These are schema/integrity checks, not product-level verification. The TinyFish run remains RUNNING (20 sources read at latest poll; output_ready=false), so the research queue must not be represented as a completed catalogue.
+
+
+## Official-source research continuation — 2026-11-04 (TinyFish not used)
+
+Direct official-brand-page research was performed for the first five Casio family candidates. This is evidence enrichment, not a final SKU assignment: each source candidate names a series/family and several colour/band variants exist. Therefore candidate-level `exactModelSku`, `officialProductPage`, `specifications` and `indiaMrpINR` remain null. The candidate-specific variant examples and source URLs are recorded in `familyEvidence`.
+
+- Candidate 1 (MTP-V series): official examples MTP-VT06D-1B (international page) and MTP-V006D-7B2 (India page, MRP ₹2,795). Prior seed contains two models under this broad family; no single model selected.
+- Candidate 2 (MTP-VD01): official India examples include MTP-VD01D-1E2V (₹2,995), MTP-VD01D-1BV (₹2,995), and MTP-VD01B-1BV (₹4,195).
+- Candidate 3 (MTP-1302): official Europe examples MTP-1302PD-1A1V and MTP-1302PD-3AV. India MRP and India market availability remain unknown.
+- Candidate 4 (MTP-1374): official India examples MTP-1374HD-2A2V (₹5,995), MTP-1374HSG-1AV (₹6,595), and MTP-1374L-1AV (₹5,795).
+- Candidate 5 (MTP-1381): official India examples MTP-1381D-1AV (₹4,295) and MTP-1381HG-9AV (₹5,195).
+
+### Candidate-level evidence QA
+- Every family example has an official brand product URL.
+- Multiple variants are explicitly recorded instead of arbitrarily choosing one.
+- India MRP values appear only inside the specific sourced variant evidence; candidate-level MRP remains null because the intended variant is unresolved.
+- Non-India market evidence is labelled and does not imply India availability.
+- No image asset URL or image reuse permission is inferred from the product page.
+- No inventory or fulfilment claim is made.
+
+Candidates 6–200 remain pending official-source research. This pass did not use TinyFish. No merge or deployment was performed.
