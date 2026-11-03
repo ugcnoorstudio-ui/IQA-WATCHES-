@@ -1,0 +1,94 @@
+{
+  "schemaVersion": 1,
+  "description": "Initial exact-SKU research records from official Casio sources. Research seed only: not yet public listings. Images are not copied or hotlinked until direct asset URLs and reuse rights are confirmed.",
+  "records": [
+    {
+      "candidateNo": 1,
+      "audience": "Men",
+      "brand": "Casio",
+      "model": "MTP-VT06D-1B",
+      "title": "Casio MTP-VT06D-1B",
+      "officialProductPage": "https://www.casio.com/intl/watches/casio/product.MTP-VT06D-1B/",
+      "indiaCatalogue": "https://www.casio.com/in/watches/casio-collection/",
+      "officialImagePage": "https://www.casio.com/intl/watches/casio/product.MTP-VT06D-1B/",
+      "imageAssetUrl": null,
+      "imageRights": "Official product page contains model imagery; direct asset URL and reuse permission still require confirmation.",
+      "mrpINR": 4995,
+      "description": "A stainless-steel analogue watch with day, date and 24-hour sub-dials. Its compact 43 × 37 × 8 mm case, mineral glass and triple-fold clasp give it a practical everyday profile.",
+      "specifications": {
+        "display": "Analogue, 3 hands and 3 sub-dials (date, day, 24-hour)",
+        "caseSizeMM": "43 × 37 × 8",
+        "weightG": 78,
+        "band": "Stainless steel, triple-fold clasp",
+        "glass": "Mineral",
+        "waterResistance": "Water resistant (no numeric depth stated on source)",
+        "battery": "Approx. 2 years, SR621SW",
+        "accuracy": "±20 seconds/month"
+      },
+      "sources": [
+        "https://www.casio.com/intl/watches/casio/product.MTP-VT06D-1B/",
+        "https://www.casio.com/in/watches/casio-collection/"
+      ],
+      "verification": "official model and specs verified; image asset/reuse pending"
+    },
+    {
+      "candidateNo": 1,
+      "audience": "Men",
+      "brand": "Casio",
+      "model": "MTP-V006D-7B2",
+      "title": "Casio MTP-V006D-7B2",
+      "officialProductPage": "https://www.casio.com/in/watches/casio/product.MTP-V006D-7B2/",
+      "officialImagePage": "https://www.casio.com/in/watches/casio/product.MTP-V006D-7B2/",
+      "imageAssetUrl": null,
+      "imageRights": "Official product page contains model imagery; direct asset URL and reuse permission still require confirmation.",
+      "mrpINR": 2795,
+      "description": "A classic stainless-steel analogue watch with day-and-date display, mineral glass and a triple-fold clasp. The chrome-plated case measures 45.1 × 38 × 9.4 mm.",
+      "specifications": {
+        "display": "Analogue, 3 hands; day and date",
+        "caseSizeMM": "45.1 × 38 × 9.4",
+        "weightG": 93,
+        "caseMaterial": "Chrome plated",
+        "band": "Stainless steel, triple-fold clasp",
+        "glass": "Mineral",
+        "waterResistance": "Water resistant (no numeric depth stated on source)",
+        "battery": "Approx. 2 years, SR626SW",
+        "accuracy": "±20 seconds/month",
+        "indiaProductCode": "A2316"
+      },
+      "sources": [
+        "https://www.casio.com/in/watches/casio/product.MTP-V006D-7B2/"
+      ],
+      "verification": "official model and specs verified; image asset/reuse pending"
+    },
+    {
+      "candidateNo": 120,
+      "audience": "Women",
+      "brand": "Casio",
+      "model": "LTP-1234PGL-1A",
+      "title": "Casio LTP-1234PGL-1A",
+      "officialProductPage": "https://www.casio.com/in/watches/casio/product.LTP-1234PGL-1A/",
+      "officialImagePage": "https://www.casio.com/in/watches/casio/product.LTP-1234PGL-1A/",
+      "imageAssetUrl": null,
+      "imageRights": "Official product page contains model imagery; direct asset URL and reuse permission still require confirmation.",
+      "mrpINR": 4495,
+      "description": "A slim tonneau-shaped analogue watch with a gold-tone ion-plated case and black genuine-leather strap. The 32 × 21 × 7.4 mm profile keeps the design understated for everyday and dress wear.",
+      "specifications": {
+        "display": "Analogue, 3 hands",
+        "caseSizeMM": "32 × 21 × 7.4",
+        "weightG": 25,
+        "caseMaterial": "Gold tone, gold ion plated",
+        "band": "Genuine leather",
+        "glass": "Mineral",
+        "waterResistance": "Water resistant (no numeric depth stated on India page)",
+        "battery": "Approx. 3 years, SR626SW",
+        "accuracy": "±20 seconds/month",
+        "compatibleBandSizeMM": "130–180",
+        "indiaProductCode": "A2559"
+      },
+      "sources": [
+        "https://www.casio.com/in/watches/casio/product.LTP-1234PGL-1A/"
+      ],
+      "verification": "official model and specs verified; image asset/reuse pending"
+    }
+  ]
+}
