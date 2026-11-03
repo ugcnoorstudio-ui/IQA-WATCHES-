@@ -542,6 +542,75 @@ body.menu-open::before{content:"";position:fixed;inset:0;background:rgba(13,13,1
 
 <link rel="stylesheet" href="./assets/customer-premium.css?v=20261103">
 <style id="iqa-announcement-bar-style">.iqa-announcement{min-height:30px;display:flex;align-items:center;justify-content:center;gap:10px;padding:6px 14px;background:#171612;color:#f8f0e3;font-size:9px;letter-spacing:1.7px;text-align:center;text-transform:uppercase}.iqa-announcement span{color:#c7a66a}@media(max-width:520px){.iqa-announcement{font-size:8px;letter-spacing:1px;gap:6px;min-height:28px}}</style>
+<style id="reference-homepage-refresh">
+/* Reference-led homepage refresh: warm ivory, champagne gold and deep black. */
+:root{--paper:#f8f1e4;--white:#fffaf1;--gold:#a77c39;--gold-light:#d9bd83;--line:#e5d7c0}
+body{background:var(--paper)}
+.iqa-announcement{justify-content:space-between;padding:7px max(4%,calc((100vw - 1320px)/2));font-size:10px;letter-spacing:1px}
+.site-header{background:#fbf4e8f5}
+.nav{min-height:74px}
+.nav-links{gap:clamp(10px,1.7vw,24px);letter-spacing:.8px;font-weight:600}
+.hero{grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr);min-height:clamp(410px,38vw,540px);background:linear-gradient(110deg,#f9f0e1,#e8d5b6)}
+.hero-copy{padding-top:54px;padding-bottom:54px}
+.hero h1{font-size:clamp(52px,6vw,82px);letter-spacing:-2px}
+.hero-visual{min-height:410px;background:#2a2117}
+.hero-visual img{object-position:center 48%;filter:saturate(.95) contrast(1.08)}
+.trust-strip{grid-template-columns:repeat(3,minmax(0,1fr));background:#f2e5d0;border-color:#e3d1b4;padding:17px 5%}
+.trust-strip div{font-family:var(--serif);font-size:15px;color:#63491f;text-transform:none;letter-spacing:0}
+.trust-strip span{font-family:var(--sans);font-size:10px;color:#78684e}
+#shop.section{padding-top:58px}
+#shop>.section-head{justify-content:center;text-align:center;margin-bottom:25px}
+#shop>.section-head .section-sub{display:none}
+#shop>.section-head h2{font-size:clamp(32px,4vw,44px)}
+.homepage-collections{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;margin:22px 0 26px}
+.collection-tile{display:flex;flex-direction:column;min-width:0;overflow:hidden;border:1px solid #e4d4bb;border-radius:12px;background:#f0e2cc;transition:transform .25s ease,box-shadow .25s ease}
+.collection-tile:hover{transform:translateY(-3px);box-shadow:0 12px 28px #4a35151c}
+.collection-tile img{width:100%;aspect-ratio:1.25/1;object-fit:cover;display:block;background:#eadcc7}
+.collection-tile>span{display:flex;flex-direction:column;align-items:center;gap:1px;padding:9px 8px 11px;color:#201a12}
+.collection-tile strong{font-size:14px}.collection-tile small{font-size:11px}
+.homepage-feature-banners{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;margin:0 0 34px}
+.feature-banner{position:relative;isolation:isolate;min-height:150px;overflow:hidden;display:flex;flex-direction:column;justify-content:center;align-items:flex-start;gap:5px;padding:22px 26px;background:#17130e;color:#fff7e9;border-radius:10px}
+.feature-banner:before{content:"";position:absolute;inset:0;z-index:-1;opacity:.42;background-position:center;background-size:cover}
+.finder-banner:before{background-image:linear-gradient(90deg,#120f0b,transparent),url("https://images.unsplash.com/photo-1547996160-81dfa63595aa?auto=format&fit=crop&w=1000&q=80")}
+.compare-banner:before{background-image:linear-gradient(90deg,#120f0b,transparent),url("https://images.unsplash.com/photo-1523170335258-f5ed11844a49?auto=format&fit=crop&w=1000&q=80")}
+.feature-banner .eyebrow{font-size:9px;color:#e4c68c;letter-spacing:2px}
+.feature-banner strong{font:400 clamp(21px,2.4vw,29px)/1.15 var(--serif)}
+.feature-banner small{max-width:300px;font-size:11px;color:#f0e5d3}
+.feature-banner b{margin-top:7px;padding:8px 13px;border:1px solid #d5b579;color:#f6e5c5;font-size:10px;font-weight:500}
+.featured-products-heading{display:flex;flex-direction:column;align-items:center;text-align:center;margin:28px 0 18px}
+.featured-products-heading h2{font:400 clamp(31px,4vw,43px)/1.1 var(--serif);margin:5px 0}
+.featured-products-heading p{margin:3px 0 0;color:var(--muted);font-size:12px}
+#shop .category-row{justify-content:center}
+#shop .product-card{background:#f3e8d7;border-color:#e4d4bb;border-radius:10px;overflow:hidden}
+#shop .product-image{background:#eee0ca}
+#shop .product-info{padding:13px 13px 0}
+#shop .card-actions .add-cart{background:#21170d;border-color:#21170d;border-radius:30px}
+#smart-shopping{background:#f6eddf}
+#smart-shopping .tool-card{background:#f0e2cc;border-color:#e2cfad}
+#story{border-top:1px solid #ddc9a9}
+.newsletter{background:#21180e;color:#fff5e5}
+.newsletter p{color:#d6c6ac}
+.newsletter-form input{background:#fff9ef;border-color:#c8ad7d}
+.newsletter-form button{background:#c9a66b;border-color:#c9a66b;color:#1d160d}
+.footer{background:#100e0b}
+@media(max-width:760px){
+ .iqa-announcement{justify-content:center;white-space:nowrap;overflow:hidden;font-size:8px;padding:7px 8px}
+ .hero{grid-template-columns:1fr;min-height:0}
+ .hero-copy{padding:40px 7% 32px}
+ .hero-visual{min-height:0;height:clamp(270px,78vw,390px)}
+ .trust-strip{grid-template-columns:1fr 1fr;gap:14px;padding:15px 4%}
+ .trust-strip div{font-size:13px}
+ #shop.section{padding-top:42px}
+ .homepage-collections{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+ .collection-tile img{aspect-ratio:1.35/1}
+ .collection-tile strong{font-size:13px}
+ .homepage-feature-banners{grid-template-columns:1fr;gap:10px;margin-bottom:25px}
+ .feature-banner{min-height:135px;padding:20px}
+ .featured-products-heading{margin-top:20px}
+}
+@media(max-width:380px){.trust-strip{grid-template-columns:1fr}.homepage-collections{gap:8px}.collection-tile strong{font-size:12px}}
+@media(prefers-reduced-motion:reduce){.collection-tile{transition:none}}
+</style>
 </head>
 <body>
 <div class="iqa-announcement" role="note">IQA WATCHES <span aria-hidden="true">·</span> TIMELESS STYLE, CONSIDERED DETAILS <span aria-hidden="true">·</span> PERSONAL ASSISTANCE ON WHATSAPP</div>
@@ -571,9 +640,19 @@ body.menu-open::before{content:"";position:fixed;inset:0;background:rgba(13,13,1
 <div class="trust-strip"><div>Considered design<span>Versatile everyday styles</span></div><div>Clear product details<span>Know what you're choosing</span></div><div>Personal assistance<span>Speak with IQA WATCHES on WhatsApp</span></div></div>
 
 <section class="section" id="shop"><div class="section-head"><div><div class="eyebrow">The collection · IQA WATCHES</div><h2>Shop by Collection.</h2></div><p class="section-sub">Explore the IQA WATCHES collection. Discover considered everyday styles, browse verified catalogue details, and find a timepiece that feels like yours.</p></div>
+<div class="homepage-collections" aria-label="Shop watch collections">
+<a class="collection-tile" href="#men"><img src="https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&w=900&q=85" alt="Classic men's wristwatch" loading="lazy"><span><strong>Men's Watches</strong><small>Shop now →</small></span></a>
+<a class="collection-tile" href="#women"><img src="https://images.unsplash.com/photo-1547996160-81dfa63595aa?auto=format&fit=crop&w=900&q=85" alt="Elegant women's wristwatch" loading="lazy"><span><strong>Women's Watches</strong><small>Shop now →</small></span></a>
+<a class="collection-tile" href="#unisex"><img src="https://images.unsplash.com/photo-1523170335258-f5ed11844a49?auto=format&fit=crop&w=900&q=85" alt="Black unisex watch" loading="lazy"><span><strong>Unisex Watches</strong><small>Shop now →</small></span></a>
+<a class="collection-tile" href="#new-arrivals"><img src="https://images.unsplash.com/photo-1508685096489-7aacd43bd3b1?auto=format&fit=crop&w=900&q=85" alt="New arrival watch style" loading="lazy"><span><strong>New Arrivals</strong><small>Shop now →</small></span></a>
+</div>
+<div class="homepage-feature-banners" aria-label="Shopping tools">
+<a class="feature-banner finder-banner" href="#finderCard"><span class="eyebrow">DISCOVER YOUR STYLE</span><strong>Find Your Perfect Watch</strong><small>Use our Watch Finder to discover the ideal timepiece for your style.</small><b>Watch Finder →</b></a>
+<a class="feature-banner compare-banner" href="#compareCard"><span class="eyebrow">MAKE THE RIGHT CHOICE</span><strong>Compare Watches</strong><small>See the differences. Choose better.</small><b>Compare Now →</b></a>
+</div>
 <div class="category-row" id="categoryChips" aria-label="Filter by category"><button class="chip active" data-category="All" aria-pressed="true">All styles</button><button class="chip" data-category="Men" aria-pressed="false">Men</button><button class="chip" data-category="Women" aria-pressed="false">Women</button><button class="chip" data-category="Unisex" aria-pressed="false">Unisex</button><button class="chip" data-category="Analog" aria-pressed="false">Analog</button><button class="chip" data-category="Chronograph" aria-pressed="false">Chronograph</button><button class="chip" data-category="New Arrivals" aria-pressed="false">New arrivals</button><button class="chip" data-category="Bestsellers" aria-pressed="false">Bestsellers</button></div>
 <div class="toolbar"><div class="search-wrap"><input id="searchInput" type="search" placeholder="Search watches or styles…" aria-label="Search watches"></div><select id="brandFilter" aria-label="Filter by brand"><option value="All">All brands</option></select><select id="priceFilter" aria-label="Filter by price"><option value="all">Any price</option><option value="under1000">Under ₹1,000</option><option value="1000to2500">₹1,000–₹2,500</option><option value="over2500">Over ₹2,500</option></select><select id="sortFilter" aria-label="Sort products"><option value="featured">Featured</option><option value="low">Price: low to high</option><option value="high">Price: high to low</option><option value="name">Name: A to Z</option></select></div>
-<div class="results-count" id="resultsCount" aria-live="polite" aria-atomic="true">Loading watches…</div><div class="product-grid" id="productGrid"></div>
+<div class="featured-products-heading"><div class="eyebrow">THE IQA EDIT</div><h2>Featured Watches</h2><p>Explore Owner-approved styles from the live catalogue.</p></div><div class="results-count" id="resultsCount" aria-live="polite" aria-atomic="true">Loading watches…</div><div class="product-grid" id="productGrid"></div>
 <p class="disclaimer"><strong>Live approved catalogue. Product visibility requires Owner approval, verified product details, a primary image and available stock. Online ordering and payments are not enabled yet.</p>
 </section>
 
