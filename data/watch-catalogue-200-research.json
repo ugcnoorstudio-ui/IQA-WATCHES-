@@ -7,8 +7,9 @@
     "women": 100,
     "sourceWorkbook": "200_watches_men_women_india.xlsx",
     "researchRunId": "01a1a33b-6827-7998-ae60-65b0eb854e25",
-    "status": "research_pending",
-    "purpose": "internal research queue only; not public catalogue data"
+    "status": "partial_official_source_research",
+    "purpose": "internal research queue only; not public catalogue data",
+    "researchNote": "Official brand evidence added for candidates 1-5. These are family-level variant examples, not unique product resolutions. Remaining candidates still pending research. No TinyFish used for this stage."
   },
   "records": [
     {
@@ -30,17 +31,36 @@
       "specifications": null,
       "indiaMrpINR": null,
       "indiaMrpSource": null,
-      "sourceCheckedAt": null,
+      "sourceCheckedAt": "2026-11-04",
       "officialImageAssetUrl": null,
       "imageSourcePage": null,
       "imageRightsStatus": "not_assessed",
       "lifecycleStatus": "unconfirmed",
       "duplicateCheck": "not_run",
-      "decision": "pending_research",
-      "decisionReason": "Candidate-level deep research has not completed; no evidence-backed resolution recorded.",
+      "decision": "needs_variant_selection",
+      "decisionReason": "Official brand pages confirm multiple variants in this family. The source candidate does not identify one exact variant; keep exactModelSku, officialProductPage, specifications and India MRP null at candidate level until the intended variant is selected. Variant examples are recorded under familyEvidence.",
       "replacementRecommendation": null,
-      "sourceUrlsChecked": [],
-      "fulfilmentStatus": "not_stocked_do_not_publish_as_in_stock"
+      "sourceUrlsChecked": [
+        "https://www.casio.com/intl/watches/casio/product.MTP-VT06D-1B/",
+        "https://www.casio.com/in/watches/casio/product.MTP-V006D-7B2/"
+      ],
+      "fulfilmentStatus": "not_stocked_do_not_publish_as_in_stock",
+      "familyEvidence": [
+        {
+          "model": "MTP-VT06D-1B",
+          "market": "International official Casio product page; India collection MRP reference previously found ₹4,995",
+          "mrpINR": null,
+          "url": "https://www.casio.com/intl/watches/casio/product.MTP-VT06D-1B/",
+          "note": "India MRP needs current India SKU page confirmation; family candidate does not identify one variant."
+        },
+        {
+          "model": "MTP-V006D-7B2",
+          "market": "Casio India",
+          "mrpINR": 2795,
+          "url": "https://www.casio.com/in/watches/casio/product.MTP-V006D-7B2/",
+          "note": "One official India variant; not a unique resolution for the family."
+        }
+      ]
     },
     {
       "candidateNo": 2,
@@ -61,17 +81,41 @@
       "specifications": null,
       "indiaMrpINR": null,
       "indiaMrpSource": null,
-      "sourceCheckedAt": null,
+      "sourceCheckedAt": "2026-11-04",
       "officialImageAssetUrl": null,
       "imageSourcePage": null,
       "imageRightsStatus": "not_assessed",
       "lifecycleStatus": "unconfirmed",
       "duplicateCheck": "not_run",
-      "decision": "pending_research",
-      "decisionReason": "Candidate-level deep research has not completed; no evidence-backed resolution recorded.",
+      "decision": "needs_variant_selection",
+      "decisionReason": "Official brand pages confirm multiple variants in this family. The source candidate does not identify one exact variant; keep exactModelSku, officialProductPage, specifications and India MRP null at candidate level until the intended variant is selected. Variant examples are recorded under familyEvidence.",
       "replacementRecommendation": null,
-      "sourceUrlsChecked": [],
-      "fulfilmentStatus": "not_stocked_do_not_publish_as_in_stock"
+      "sourceUrlsChecked": [
+        "https://www.casio.com/in/watches/casio/product.MTP-VD01D-1E2V/",
+        "https://www.casio.com/in/watches/casio/product.MTP-VD01D-1BV/",
+        "https://www.casio.com/in/watches/casio/product.MTP-VD01B-1BV/"
+      ],
+      "fulfilmentStatus": "not_stocked_do_not_publish_as_in_stock",
+      "familyEvidence": [
+        {
+          "model": "MTP-VD01D-1E2V",
+          "mrpINR": 2995,
+          "url": "https://www.casio.com/in/watches/casio/product.MTP-VD01D-1E2V/",
+          "note": "Official India variant; series has multiple colour/band variants."
+        },
+        {
+          "model": "MTP-VD01D-1BV",
+          "mrpINR": 2995,
+          "url": "https://www.casio.com/in/watches/casio/product.MTP-VD01D-1BV/",
+          "note": "Official India variant; not unique resolution."
+        },
+        {
+          "model": "MTP-VD01B-1BV",
+          "mrpINR": 4195,
+          "url": "https://www.casio.com/in/watches/casio/product.MTP-VD01B-1BV/",
+          "note": "Official India variant; black ion-plated variant."
+        }
+      ]
     },
     {
       "candidateNo": 3,
@@ -92,17 +136,36 @@
       "specifications": null,
       "indiaMrpINR": null,
       "indiaMrpSource": null,
-      "sourceCheckedAt": null,
+      "sourceCheckedAt": "2026-11-04",
       "officialImageAssetUrl": null,
       "imageSourcePage": null,
       "imageRightsStatus": "not_assessed",
       "lifecycleStatus": "unconfirmed",
       "duplicateCheck": "not_run",
-      "decision": "pending_research",
-      "decisionReason": "Candidate-level deep research has not completed; no evidence-backed resolution recorded.",
+      "decision": "needs_variant_selection",
+      "decisionReason": "Official brand pages confirm multiple variants in this family. The source candidate does not identify one exact variant; keep exactModelSku, officialProductPage, specifications and India MRP null at candidate level until the intended variant is selected. Variant examples are recorded under familyEvidence.",
       "replacementRecommendation": null,
-      "sourceUrlsChecked": [],
-      "fulfilmentStatus": "not_stocked_do_not_publish_as_in_stock"
+      "sourceUrlsChecked": [
+        "https://www.casio.com/europe/watches/casio/product.MTP-1302PD-1A1V/",
+        "https://www.casio.com/europe/watches/casio/product.MTP-1302PD-3AV/"
+      ],
+      "fulfilmentStatus": "not_stocked_do_not_publish_as_in_stock",
+      "familyEvidence": [
+        {
+          "model": "MTP-1302PD-1A1V",
+          "market": "Casio Europe official page",
+          "mrpINR": null,
+          "url": "https://www.casio.com/europe/watches/casio/product.MTP-1302PD-1A1V/",
+          "note": "Official non-India source; specs include 44.2 × 38.5 × 9.2 mm, 105 g, 50m water resistance, stainless steel band, mineral glass. India availability/MRP not verified."
+        },
+        {
+          "model": "MTP-1302PD-3AV",
+          "market": "Casio Europe official page",
+          "mrpINR": null,
+          "url": "https://www.casio.com/europe/watches/casio/product.MTP-1302PD-3AV/",
+          "note": "Official non-India colour variant; does not resolve exact India variant."
+        }
+      ]
     },
     {
       "candidateNo": 4,
@@ -123,17 +186,41 @@
       "specifications": null,
       "indiaMrpINR": null,
       "indiaMrpSource": null,
-      "sourceCheckedAt": null,
+      "sourceCheckedAt": "2026-11-04",
       "officialImageAssetUrl": null,
       "imageSourcePage": null,
       "imageRightsStatus": "not_assessed",
       "lifecycleStatus": "unconfirmed",
       "duplicateCheck": "not_run",
-      "decision": "pending_research",
-      "decisionReason": "Candidate-level deep research has not completed; no evidence-backed resolution recorded.",
+      "decision": "needs_variant_selection",
+      "decisionReason": "Official brand pages confirm multiple variants in this family. The source candidate does not identify one exact variant; keep exactModelSku, officialProductPage, specifications and India MRP null at candidate level until the intended variant is selected. Variant examples are recorded under familyEvidence.",
       "replacementRecommendation": null,
-      "sourceUrlsChecked": [],
-      "fulfilmentStatus": "not_stocked_do_not_publish_as_in_stock"
+      "sourceUrlsChecked": [
+        "https://www.casio.com/in/watches/casio/product.MTP-1374HD-2A2V/",
+        "https://www.casio.com/in/watches/casio/product.MTP-1374HSG-1AV/",
+        "https://www.casio.com/in/watches/casio/product.MTP-1374L-1AV/"
+      ],
+      "fulfilmentStatus": "not_stocked_do_not_publish_as_in_stock",
+      "familyEvidence": [
+        {
+          "model": "MTP-1374HD-2A2V",
+          "mrpINR": 5995,
+          "url": "https://www.casio.com/in/watches/casio/product.MTP-1374HD-2A2V/",
+          "note": "Official India variant; 47 × 43.5 × 10.4 mm, 124 g, stainless steel band, 50m, 2-year warranty."
+        },
+        {
+          "model": "MTP-1374HSG-1AV",
+          "mrpINR": 6595,
+          "url": "https://www.casio.com/in/watches/casio/product.MTP-1374HSG-1AV/",
+          "note": "Official India gold ion-plated variant; 47 × 43.5 × 10.4 mm, 124 g, 50m, 2-year warranty."
+        },
+        {
+          "model": "MTP-1374L-1AV",
+          "mrpINR": 5795,
+          "url": "https://www.casio.com/in/watches/casio/product.MTP-1374L-1AV/",
+          "note": "Official India leather-band variant; 47 × 43.5 × 10.4 mm, 66 g, 50m, 2-year warranty."
+        }
+      ]
     },
     {
       "candidateNo": 5,
@@ -154,17 +241,34 @@
       "specifications": null,
       "indiaMrpINR": null,
       "indiaMrpSource": null,
-      "sourceCheckedAt": null,
+      "sourceCheckedAt": "2026-11-04",
       "officialImageAssetUrl": null,
       "imageSourcePage": null,
       "imageRightsStatus": "not_assessed",
       "lifecycleStatus": "unconfirmed",
       "duplicateCheck": "not_run",
-      "decision": "pending_research",
-      "decisionReason": "Candidate-level deep research has not completed; no evidence-backed resolution recorded.",
+      "decision": "needs_variant_selection",
+      "decisionReason": "Official brand pages confirm multiple variants in this family. The source candidate does not identify one exact variant; keep exactModelSku, officialProductPage, specifications and India MRP null at candidate level until the intended variant is selected. Variant examples are recorded under familyEvidence.",
       "replacementRecommendation": null,
-      "sourceUrlsChecked": [],
-      "fulfilmentStatus": "not_stocked_do_not_publish_as_in_stock"
+      "sourceUrlsChecked": [
+        "https://www.casio.com/in/watches/casio/product.MTP-1381D-1AV/",
+        "https://www.casio.com/in/watches/casio/product.MTP-1381HG-9AV/"
+      ],
+      "fulfilmentStatus": "not_stocked_do_not_publish_as_in_stock",
+      "familyEvidence": [
+        {
+          "model": "MTP-1381D-1AV",
+          "mrpINR": 4295,
+          "url": "https://www.casio.com/in/watches/casio/product.MTP-1381D-1AV/",
+          "note": "Official India variant; 46.6 × 39.9 × 8.9 mm, 104 g, stainless steel band, 50m, 2-year warranty."
+        },
+        {
+          "model": "MTP-1381HG-9AV",
+          "mrpINR": 5195,
+          "url": "https://www.casio.com/in/watches/casio/product.MTP-1381HG-9AV/",
+          "note": "Official India gold-tone variant; same series dimensions and 50m water resistance."
+        }
+      ]
     },
     {
       "candidateNo": 6,
