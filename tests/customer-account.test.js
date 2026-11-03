@@ -62,7 +62,7 @@ test('desktop and mobile account links always render the account route on repeat
 
 test('storefront menu destinations resolve to the matching page or shopping tool', () => {
   assert.match(routes, /if\(r==='smart-shopping'\|\|r==='finder'\)\{showHomeSection\('smart-shopping'\);return;\}/);
-  assert.match(routes, /if\(r==='comparison'\)\{showHomeSection\('compareCard'\);return;\}/);
+  assert.match(routes, /if\(r==='comparison'\|\|r==='compareCard'\)\{showHomeSection\('compareCard'\);return;\}/);
   assert.match(routes, /if\(r==='journal'\)\{/);
   assert.match(routes, /if\(r==='care'\)return renderPolicies\(\)/);
 });
