@@ -1,7 +1,7 @@
 # IQA WATCHES — 200-watch research and validation report
 
-**Date:** 2026-11-04  
-**Status:** Partial research; 200-row candidate queue prepared.  
+**Date:** 2026-11-04
+**Status:** Partial research; 200-row candidate queue prepared.
 **Scope:** Research-only package isolated from Purchase & Dispatch admin changes.
 
 ## Source workbook
