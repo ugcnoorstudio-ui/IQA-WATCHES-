@@ -1,10 +1,10 @@
 # IQA WATCHES — 200-candidate catalogue audit (research in progress)
 
-**Date:** 2026-11-04  
-**Branch:** `feature/purchase-dispatch-workspace`  
-**Source input:** `200_watches_men_women_india.xlsx` (All 200 Watches sheet)  
-**Research run:** `01a1a33b-6827-7998-ae60-65b0eb854e25`  
-**Report:** https://agent.tinyfish.ai/research/01a1a33b-6827-7998-ae60-65b0eb854e25  
+**Date:** 2026-11-04
+**Branch:** `feature/purchase-dispatch-workspace`
+**Source input:** `200_watches_men_women_india.xlsx` (All 200 Watches sheet)
+**Research run:** `01a1a33b-6827-7998-ae60-65b0eb854e25`
+**Report:** https://agent.tinyfish.ai/research/01a1a33b-6827-7998-ae60-65b0eb854e25
 **Status:** Deep research queued; do not treat the candidate list as verified catalogue data.
 
 ## Scope confirmed from source workbook
