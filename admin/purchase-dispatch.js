@@ -1,0 +1,25 @@
+(()=>{'use strict';
+const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const money=v=>new Intl.NumberFormat('en-IN',{style:'currency',currency:'INR',maximumFractionDigits:0}).format(Number(v||0));
+const stateLabel=s=>({pending:'Awaiting order review',processing:'Processing / supplier purchase',packed:'Received & quality checked',ready_for_pickup:'Ready for courier handover',shipped:'With delivery partner',delivered:'Delivered',cancelled:'Cancelled'}[s]||String(s||'Unknown').replaceAll('_',' '));
+function render(){
+return '<div class="page-intro"><div><p class="eyebrow gold">OWNER OPERATIONS</p><h2>Purchase & dispatch</h2><p>Self-fulfilled workflow: customer orders on IQA WATCHES → owner buys the exact model → parcel arrives with you → inspect it → hand it to your delivery partner.</p></div><div><span class="tag">Owner-only · workflow preview</span></div></div>'+
+'<div class="notice" role="status"><strong>Important:</strong> This page is a safe first-stage workspace. It reads existing orders only. Supplier purchase references, item-received checks, QC evidence, courier name, tracking number and dispatch costs are not yet stored in the database, so this page does not pretend to save them or change order status.</div>'+
+'<div class="grid metrics-grid">'+[['1','New order','Check customer address, item, amount and payment method.'],['2','Purchase item','Buy the exact model and colour; save supplier order reference and invoice.'],['3','Receive & inspect','Match model/SKU, check packaging, accessories, serial/warranty and condition.'],['4','Dispatch','Pack securely, book courier, save tracking and share it with customer.']].map(x=>'<div class="metric"><div class="value">'+x[0]+'</div><div class="label">'+x[1]+'</div><div class="sub">'+x[2]+'</div></div>').join('')+'</div>'+
+'<section class="panel"><div class="panel-head"><div><h3>Live customer orders</h3><p class="muted">Read from the existing protected orders table. No order or inventory data is modified here.</p></div><button class="btn secondary" type="button" data-pd-refresh>Refresh</button></div><div data-pd-orders><p class="muted">Loading owner-authorized orders…</p></div></section>'+
+'<section class="panel"><div class="panel-head"><h3>Before accepting live orders</h3></div><ul class="muted"><li>Confirm supplier permits resale and provides genuine products with valid invoices and warranty documentation.</li><li>Do not promise a delivery date until supplier availability and courier serviceability are confirmed.</li><li>Keep checkout disabled until payment/COD, shipping PIN-code rules, cancellation, returns and refund workflows are configured.</li><li>Do not mark an order as shipped until the parcel is actually handed to the courier and a tracking reference exists.</li></ul></section>'+
+'<section class="panel"><div class="panel-head"><h3>Next backend connection required</h3></div><p class="muted">A secure Owner-only database workflow is needed for supplier purchase records, purchase cost, received quantity, QC pass/fail, courier booking, tracking number, dispatch timestamp and audit history. It must be added through a reviewed Supabase migration and Edge Function before these controls become writable.</p></section>';
+}
+async function load(root){
+const host=root.querySelector('[data-pd-orders]');if(!host)return;
+try{
+const api=window.IQA_ADMIN_BACKEND;if(!api)throw new Error('Admin backend is not loaded.');
+api.requireRole(['owner']);
+const rows=await api.readTable('orders','id,order_number,state,payable_total,delivery_snapshot,created_at',{limit:100,orderBy:'created_at',ascending:false});
+if(!rows.length){host.innerHTML='<div class="empty-state"><h3>No customer orders yet</h3><p>When a verified customer order exists, it will appear here. Product listing and checkout should remain closed until sourcing and fulfilment are ready.</p></div>';return;}
+host.innerHTML='<div class="table-wrap" role="region" aria-label="Customer orders for purchase and dispatch" tabindex="0"><table><thead><tr><th>Order</th><th>Current stage</th><th>Payment</th><th>Order total</th><th>Received</th></tr></thead><tbody>'+rows.map(r=>'<tr><td><strong>'+esc(r.order_number||String(r.id).slice(0,8))+'</strong><div class="muted">'+esc(r.created_at?new Date(r.created_at).toLocaleString('en-IN'):'—')+'</div></td><td>'+esc(stateLabel(r.state))+'</td><td>'+esc(r.delivery_snapshot?.payment_method||'Not recorded')+'</td><td>'+money(r.payable_total)+'</td><td><span class="tag">'+(r.state==='delivered'?'Complete':r.state==='cancelled'?'Closed':'Needs fulfilment review')+'</span></td></tr>').join('')+'</tbody></table></div>';
+}catch(error){host.innerHTML='<div class="notice" role="alert">'+esc(error?.message||'Orders could not be loaded. No status was assumed.')+'</div>';}
+}
+function bind(root){load(root);root.addEventListener('click',e=>{if(e.target.closest('[data-pd-refresh]'))load(root)});}
+window.IQA_PURCHASE_DISPATCH=Object.freeze({render,bind});
+})();

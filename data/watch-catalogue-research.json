@@ -1,0 +1,1610 @@
+{
+  "note": "Internal product research queue; not public storefront data.",
+  "counts": {
+    "total": 200,
+    "men": 100,
+    "women": 100
+  },
+  "products": [
+    {
+      "no": 1,
+      "audience": "Men",
+      "brand": "Casio",
+      "candidate": "Casio Enticer MTP-V series watch",
+      "type": "Analog / digital / fashion",
+      "verification": "pending"
+    },
+    {
+      "no": 2,
+      "audience": "Men",
+      "brand": "Casio",
+      "candidate": "Casio MTP-VD01 series watch",
+      "type": "Analog / digital / fashion",
+      "verification": "pending"
+    },
+    {
+      "no": 3,
+      "audience": "Men",
+      "brand": "Casio",
+      "candidate": "Casio MTP-1302 series watch",
+      "type": "Analog / digital / fashion",
+      "verification": "pending"
+    },
+    {
+      "no": 4,
+      "audience": "Men",
+      "brand": "Casio",
+      "candidate": "Casio MTP-1374 series watch",
+      "type": "Analog / digital / fashion",
+      "verification": "pending"
+    },
+    {
+      "no": 5,
+      "audience": "Men",
+      "brand": "Casio",
+      "candidate": "Casio MTP-1381 series watch",
+      "type": "Analog / digital / fashion",
+      "verification": "pending"
+    },
+    {
+      "no": 6,
+      "audience": "Men",
+      "brand": "Casio",
+      "candidate": "Casio G-Shock GA-2100 series watch",
+      "type": "Analog / digital / fashion",
+      "verification": "pending"
+    },
+    {
+      "no": 7,
+      "audience": "Men",
+      "brand": "Casio",
+      "candidate": "Casio G-Shock DW-5600 series watch",
+      "type": "Analog / digital / fashion",
+      "verification": "pending"
+    },
+    {
+      "no": 8,
+      "audience": "Men",
+      "brand": "Casio",
+      "candidate": "Casio G-Shock GA-100 series watch",
+      "type": "Analog / digital / fashion",
+      "verification": "pending"
+    },
+    {
+      "no": 9,
+      "audience": "Men",
+      "brand": "Casio",
+      "candidate": "Casio Edifice EFV series watch",
+      "type": "Analog / digital / fashion",
+      "verification": "pending"
+    },
+    {
+      "no": 10,
+      "audience": "Men",
+      "brand": "Casio",
+      "candidate": "Casio Edifice EFR series watch",
+      "type": "Analog / digital / fashion",
+      "verification": "pending"
+    },
+    {
+      "no": 11,
+      "audience": "Men",
+      "brand": "Titan",
+      "candidate": "Titan Karishma Analog watch",
+      "type": "Analog / digital / fashion",
+      "verification": "pending"
+    },
+    {
+      "no": 12,
+      "audience": "Men",
+      "brand": "Titan",
+      "candidate": "Titan Neo Splash Multifunction watch",
+      "type": "Analog / digital / fashion",
+      "verification": "pending"
+    },
+    {
+      "no": 13,
+      "audience": "Men",
+      "brand": "Titan",
+      "candidate": "Titan Workwear Analog watch",
+      "type": "Analog / digital / fashion",
+      "verification": "pending"
+    },
+    {
+      "no": 14,
+      "audience": "Men",
+      "brand": "Titan",
+      "candidate": "Titan Minimals Quartz watch",
+      "type": "Analog / digital / fashion",
+      "verification": "pending"
+    },
+    {
+      "no": 15,
+      "audience": "Men",
+      "brand": "Titan",
+      "candidate": "Titan Urban Edge watch",
+      "type": "Analog / digital / fashion",
+      "verification": "pending"
+    },
+    {
+      "no": 16,
+      "audience": "Men",
+      "brand": "Titan",
+      "candidate": "Titan Maritime Pro watch",
+      "type": "Analog / digital / fashion",
+      "verification": "pending"
+    },
+    {
+      "no": 17,
+      "audience": "Men",
+      "brand": "Titan",
+      "candidate": "Titan Stellar Multifunction watch",
+      "type": "Analog / digital / fashion",
+      "verification": "pending"
+    },
+    {
+      "no": 18,
+      "audience": "Men",
+      "brand": "Titan",
+      "candidate": "Titan Classique Analog watch",
+      "type": "Analog / digital / fashion",
+      "verification": "pending"
+    },
+    {
+      "no": 19,
+      "audience": "Men",
+      "brand": "Titan",
+      "candidate": "Titan Octane Chronograph watch",
+      "type": "Analog / digital / fashion",
+      "verification": "pending"
+    },
+    {
+      "no": 20,
+      "audience": "Men",
+      "brand": "Titan",
+      "candidate": "Titan Edge Ceramic watch",
+      "type": "Analog / digital / fashion",
+      "verification": "pending"
+    },
+    {
+      "no": 21,
+      "audience": "Men",
+      "brand": "Fastrack",
+      "candidate": "Fastrack Stunners Analog watch",
+      "type": "Analog / digital / fashion",
+      "verification": "pending"
+    },
+    {
+      "no": 22,
+      "audience": "Men",
+      "brand": "Fastrack",
+      "candidate": "Fastrack Reflex Play watch",
+      "type": "Analog / digital / fashion",
+      "verification": "pending"
+    },
+    {
+      "no": 23,
+      "audience": "Men",
+      "brand": "Fastrack",
+      "candidate": "Fastrack Limitless FS1 watch",
+      "type": "Analog / digital / fashion",
+      "verification": "pending"
+    },
+    {
+      "no": 24,
+      "audience": "Men",
+      "brand": "Fastrack",
+      "candidate": "Fastrack Tees Analog watch",
+      "type": "Analog / digital / fashion",
+      "verification": "pending"
+    },
+    {
+      "no": 25,
+      "audience": "Men",
+      "brand": "Fastrack",
+      "candidate": "Fastrack Vyb Analog watch",
+      "type": "Analog / digital / fashion",
+      "verification": "pending"
+    },
+    {
+      "no": 26,
+      "audience": "Men",
+      "brand": "Fastrack",
+      "candidate": "Fastrack New Astor watch",
+      "type": "Analog / digital / fashion",
+      "verification": "pending"
+    },
+    {
+      "no": 27,
+      "audience": "Men",
+      "brand": "Fastrack",
+      "candidate": "Fastrack Bare Basic watch",
+      "type": "Analog / digital / fashion",
+      "verification": "pending"
+    },
+    {
+      "no": 28,
+      "audience": "Men",
+      "brand": "Fastrack",
+      "candidate": "Fastrack Townsman Analog watch",
+      "type": "Analog / digital / fashion",
+      "verification": "pending"
+    },
+    {
+      "no": 29,
+      "audience": "Men",
+      "brand": "Fastrack",
+      "candidate": "Fastrack Automatics watch",
+      "type": "Analog / digital / fashion",
+      "verification": "pending"
+    },
+    {
+      "no": 30,
+      "audience": "Men",
+      "brand": "Fastrack",
+      "candidate": "Fastrack Varsity watch",
+      "type": "Analog / digital / fashion",
+      "verification": "pending"
+    },
+    {
+      "no": 31,
+      "audience": "Men",
+      "brand": "Timex",
+      "candidate": "Timex Expedition Scout watch",
+      "type": "Analog / digital / fashion",
+      "verification": "pending"
+    },
+    {
+      "no": 32,
+      "audience": "Men",
+      "brand": "Timex",
+      "candidate": "Timex Weekender watch",
+      "type": "Analog / digital / fashion",
+      "verification": "pending"
+    },
+    {
+      "no": 33,
+      "audience": "Men",
+      "brand": "Timex",
+      "candidate": "Timex Waterbury Classic watch",
+      "type": "Analog / digital / fashion",
+      "verification": "pending"
+    },
+    {
+      "no": 34,
+      "audience": "Men",
+      "brand": "Timex",
+      "candidate": "Timex Q Timex watch",
+      "type": "Analog / digital / fashion",
+      "verification": "pending"
+    },
+    {
+      "no": 35,
+      "audience": "Men",
+      "brand": "Timex",
+      "candidate": "Timex Marlin Automatic watch",
+      "type": "Analog / digital / fashion",
+      "verification": "pending"
+    },
+    {
+      "no": 36,
+      "audience": "Men",
+      "brand": "Timex",
+      "candidate": "Timex E-Classics watch",
+      "type": "Analog / digital / fashion",
+      "verification": "pending"
+    },
+    {
+      "no": 37,
+      "audience": "Men",
+      "brand": "Timex",
+      "candidate": "Timex Chronograph watch",
+      "type": "Analog / digital / fashion",
+      "verification": "pending"
+    },
+    {
+      "no": 38,
+      "audience": "Men",
+      "brand": "Timex",
+      "candidate": "Timex Ironman Digital watch",
+      "type": "Analog / digital / fashion",
+      "verification": "pending"
+    },
+    {
+      "no": 39,
+      "audience": "Men",
+      "brand": "Timex",
+      "candidate": "Timex Command Urban watch",
+      "type": "Analog / digital / fashion",
+      "verification": "pending"
+    },
+    {
+      "no": 40,
+      "audience": "Men",
+      "brand": "Timex",
+      "candidate": "Timex TWEG series watch",
+      "type": "Analog / digital / fashion",
+      "verification": "pending"
+    },
+    {
+      "no": 41,
+      "audience": "Men",
+      "brand": "Fossil",
+      "candidate": "Fossil Machine Chronograph watch",
+      "type": "Analog / digital / fashion",
+      "verification": "pending"
+    },
+    {
+      "no": 42,
+      "audience": "Men",
+      "brand": "Fossil",
+      "candidate": "Fossil Grant Chronograph watch",
+      "type": "Analog / digital / fashion",
+      "verification": "pending"
+    },
+    {
+      "no": 43,
+      "audience": "Men",
+      "brand": "Fossil",
+      "candidate": "Fossil Neutra Chronograph watch",
+      "type": "Analog / digital / fashion",
+      "verification": "pending"
+    },
+    {
+      "no": 44,
+      "audience": "Men",
+      "brand": "Fossil",
+      "candidate": "Fossil Bronson watch",
+      "type": "Analog / digital / fashion",
+      "verification": "pending"
+    },
+    {
+      "no": 45,
+      "audience": "Men",
+      "brand": "Fossil",
+      "candidate": "Fossil Townsman Automatic watch",
+      "type": "Analog / digital / fashion",
+      "verification": "pending"
+    },
+    {
+      "no": 46,
+      "audience": "Men",
+      "brand": "Fossil",
+      "candidate": "Fossil Coachman watch",
+      "type": "Analog / digital / fashion",
+      "verification": "pending"
+    },
+    {
+      "no": 47,
+      "audience": "Men",
+      "brand": "Fossil",
+      "candidate": "Fossil Blue Dive watch",
+      "type": "Analog / digital / fashion",
+      "verification": "pending"
+    },
+    {
+      "no": 48,
+      "audience": "Men",
+      "brand": "Fossil",
+      "candidate": "Fossil Minimalist watch",
+      "type": "Analog / digital / fashion",
+      "verification": "pending"
+    },
+    {
+      "no": 49,
+      "audience": "Men",
+      "brand": "Fossil",
+      "candidate": "Fossil FB series watch",
+      "type": "Analog / digital / fashion",
+      "verification": "pending"
+    },
+    {
+      "no": 50,
+      "audience": "Men",
+      "brand": "Fossil",
+      "candidate": "Fossil Everett watch",
+      "type": "Analog / digital / fashion",
+      "verification": "pending"
+    },
+    {
+      "no": 51,
+      "audience": "Men",
+      "brand": "Sonata",
+      "candidate": "Sonata Poze Analog watch",
+      "type": "Analog / digital / fashion",
+      "verification": "pending"
+    },
+    {
+      "no": 52,
+      "audience": "Men",
+      "brand": "Sonata",
+      "candidate": "Sonata Super Fibre watch",
+      "type": "Analog / digital / fashion",
+      "verification": "pending"
+    },
+    {
+      "no": 53,
+      "audience": "Men",
+      "brand": "Sonata",
+      "candidate": "Sonata SF Essentials watch",
+      "type": "Analog / digital / fashion",
+      "verification": "pending"
+    },
+    {
+      "no": 54,
+      "audience": "Men",
+      "brand": "Sonata",
+      "candidate": "Sonata Ocean Series watch",
+      "type": "Analog / digital / fashion",
+      "verification": "pending"
+    },
+    {
+      "no": 55,
+      "audience": "Men",
+      "brand": "Sonata",
+      "candidate": "Sonata Workwear Analog watch",
+      "type": "Analog / digital / fashion",
+      "verification": "pending"
+    },
+    {
+      "no": 56,
+      "audience": "Men",
+      "brand": "Sonata",
+      "candidate": "Sonata Digital Sports watch",
+      "type": "Analog / digital / fashion",
+      "verification": "pending"
+    },
+    {
+      "no": 57,
+      "audience": "Men",
+      "brand": "Sonata",
+      "candidate": "Sonata NR770 series watch",
+      "type": "Analog / digital / fashion",
+      "verification": "pending"
+    },
+    {
+      "no": 58,
+      "audience": "Men",
+      "brand": "Sonata",
+      "candidate": "Sonata 77085 series watch",
+      "type": "Analog / digital / fashion",
+      "verification": "pending"
+    },
+    {
+      "no": 59,
+      "audience": "Men",
+      "brand": "boAt",
+      "candidate": "boAt Wave Call watch",
+      "type": "Smartwatch / wearable",
+      "verification": "pending"
+    },
+    {
+      "no": 60,
+      "audience": "Men",
+      "brand": "boAt",
+      "candidate": "boAt Storm Call watch",
+      "type": "Smartwatch / wearable",
+      "verification": "pending"
+    },
+    {
+      "no": 61,
+      "audience": "Men",
+      "brand": "Noise",
+      "candidate": "Noise ColorFit Icon 2 watch",
+      "type": "Smartwatch / wearable",
+      "verification": "pending"
+    },
+    {
+      "no": 62,
+      "audience": "Men",
+      "brand": "Noise",
+      "candidate": "Noise ColorFit Pulse 4 watch",
+      "type": "Smartwatch / wearable",
+      "verification": "pending"
+    },
+    {
+      "no": 63,
+      "audience": "Men",
+      "brand": "Noise",
+      "candidate": "Noise NoiseFit Halo watch",
+      "type": "Smartwatch / wearable",
+      "verification": "pending"
+    },
+    {
+      "no": 64,
+      "audience": "Men",
+      "brand": "Fire-Boltt",
+      "candidate": "Fire-Boltt Ninja Call Pro watch",
+      "type": "Smartwatch / wearable",
+      "verification": "pending"
+    },
+    {
+      "no": 65,
+      "audience": "Men",
+      "brand": "Fire-Boltt",
+      "candidate": "Fire-Boltt Phoenix Ultra watch",
+      "type": "Smartwatch / wearable",
+      "verification": "pending"
+    },
+    {
+      "no": 66,
+      "audience": "Men",
+      "brand": "Fire-Boltt",
+      "candidate": "Fire-Boltt Legacy watch",
+      "type": "Smartwatch / wearable",
+      "verification": "pending"
+    },
+    {
+      "no": 67,
+      "audience": "Men",
+      "brand": "Amazfit",
+      "candidate": "Amazfit Bip 5 watch",
+      "type": "Smartwatch / wearable",
+      "verification": "pending"
+    },
+    {
+      "no": 68,
+      "audience": "Men",
+      "brand": "Amazfit",
+      "candidate": "Amazfit GTR Mini watch",
+      "type": "Smartwatch / wearable",
+      "verification": "pending"
+    },
+    {
+      "no": 69,
+      "audience": "Men",
+      "brand": "Amazfit",
+      "candidate": "Amazfit Active watch",
+      "type": "Smartwatch / wearable",
+      "verification": "pending"
+    },
+    {
+      "no": 70,
+      "audience": "Men",
+      "brand": "Samsung",
+      "candidate": "Samsung Galaxy Watch FE watch",
+      "type": "Smartwatch / wearable",
+      "verification": "pending"
+    },
+    {
+      "no": 71,
+      "audience": "Men",
+      "brand": "Samsung",
+      "candidate": "Samsung Galaxy Watch7 watch",
+      "type": "Smartwatch / wearable",
+      "verification": "pending"
+    },
+    {
+      "no": 72,
+      "audience": "Men",
+      "brand": "OnePlus",
+      "candidate": "OnePlus Watch 2R watch",
+      "type": "Smartwatch / wearable",
+      "verification": "pending"
+    },
+    {
+      "no": 73,
+      "audience": "Men",
+      "brand": "OnePlus",
+      "candidate": "OnePlus Nord Watch 2 watch",
+      "type": "Smartwatch / wearable",
+      "verification": "pending"
+    },
+    {
+      "no": 74,
+      "audience": "Men",
+      "brand": "Redmi",
+      "candidate": "Redmi Watch 5 Active watch",
+      "type": "Smartwatch / wearable",
+      "verification": "pending"
+    },
+    {
+      "no": 75,
+      "audience": "Men",
+      "brand": "Seiko",
+      "candidate": "Seiko 5 Sports SRPD series watch",
+      "type": "Analog / digital / fashion",
+      "verification": "pending"
+    },
+    {
+      "no": 76,
+      "audience": "Men",
+      "brand": "Seiko",
+      "candidate": "Seiko Dress Quartz SSB series watch",
+      "type": "Analog / digital / fashion",
+      "verification": "pending"
+    },
+    {
+      "no": 77,
+      "audience": "Men",
+      "brand": "Citizen",
+      "candidate": "Citizen Eco-Drive BM series watch",
+      "type": "Analog / digital / fashion",
+      "verification": "pending"
+    },
+    {
+      "no": 78,
+      "audience": "Men",
+      "brand": "Citizen",
+      "candidate": "Citizen Quartz BI series watch",
+      "type": "Analog / digital / fashion",
+      "verification": "pending"
+    },
+    {
+      "no": 79,
+      "audience": "Men",
+      "brand": "Orient",
+      "candidate": "Orient Bambino watch",
+      "type": "Analog / digital / fashion",
+      "verification": "pending"
+    },
+    {
+      "no": 80,
+      "audience": "Men",
+      "brand": "Invicta",
+      "candidate": "Invicta Pro Diver watch",
+      "type": "Analog / digital / fashion",
+      "verification": "pending"
+    },
+    {
+      "no": 81,
+      "audience": "Men",
+      "brand": "Daniel Klein",
+      "candidate": "Daniel Klein DK series analog watch",
+      "type": "Analog / digital / fashion",
+      "verification": "pending"
+    },
+    {
+      "no": 82,
+      "audience": "Men",
+      "brand": "Police",
+      "candidate": "Police Men's analog chronograph watch",
+      "type": "Analog / digital / fashion",
+      "verification": "pending"
+    },
+    {
+      "no": 83,
+      "audience": "Men",
+      "brand": "Tommy Hilfiger",
+      "candidate": "Tommy Hilfiger Men's Decker watch",
+      "type": "Analog / digital / fashion",
+      "verification": "pending"
+    },
+    {
+      "no": 84,
+      "audience": "Men",
+      "brand": "Diesel",
+      "candidate": "Diesel Mega Chief watch",
+      "type": "Analog / digital / fashion",
+      "verification": "pending"
+    },
+    {
+      "no": 85,
+      "audience": "Men",
+      "brand": "Armani Exchange",
+      "candidate": "Armani Exchange AX chronograph watch",
+      "type": "Analog / digital / fashion",
+      "verification": "pending"
+    },
+    {
+      "no": 86,
+      "audience": "Men",
+      "brand": "Guess",
+      "candidate": "Guess Men's analog steel watch",
+      "type": "Analog / digital / fashion",
+      "verification": "pending"
+    },
+    {
+      "no": 87,
+      "audience": "Men",
+      "brand": "Kenneth Cole",
+      "candidate": "Kenneth Cole Automatic skeleton watch",
+      "type": "Analog / digital / fashion",
+      "verification": "pending"
+    },
+    {
+      "no": 88,
+      "audience": "Men",
+      "brand": "Timberland",
+      "candidate": "Timberland Men's field watch watch",
+      "type": "Analog / digital / fashion",
+      "verification": "pending"
+    },
+    {
+      "no": 89,
+      "audience": "Men",
+      "brand": "Swiss Military",
+      "candidate": "Swiss Military Hanowa quartz watch",
+      "type": "Analog / digital / fashion",
+      "verification": "pending"
+    },
+    {
+      "no": 90,
+      "audience": "Men",
+      "brand": "Lacoste",
+      "candidate": "Lacoste Boston watch",
+      "type": "Analog / digital / fashion",
+      "verification": "pending"
+    },
+    {
+      "no": 91,
+      "audience": "Men",
+      "brand": "Skagen",
+      "candidate": "Skagen Aaren watch",
+      "type": "Analog / digital / fashion",
+      "verification": "pending"
+    },
+    {
+      "no": 92,
+      "audience": "Men",
+      "brand": "Michael Kors",
+      "candidate": "Michael Kors Men's Lexington watch",
+      "type": "Analog / digital / fashion",
+      "verification": "pending"
+    },
+    {
+      "no": 93,
+      "audience": "Men",
+      "brand": "Hugo Boss",
+      "candidate": "Hugo Boss Grand Prix watch",
+      "type": "Analog / digital / fashion",
+      "verification": "pending"
+    },
+    {
+      "no": 94,
+      "audience": "Men",
+      "brand": "Tommy Hilfiger",
+      "candidate": "Tommy Hilfiger Bank watch",
+      "type": "Analog / digital / fashion",
+      "verification": "pending"
+    },
+    {
+      "no": 95,
+      "audience": "Men",
+      "brand": "Casio",
+      "candidate": "Casio Standard MWD series watch",
+      "type": "Analog / digital / fashion",
+      "verification": "pending"
+    },
+    {
+      "no": 96,
+      "audience": "Men",
+      "brand": "Casio",
+      "candidate": "Casio Youth digital AE series watch",
+      "type": "Analog / digital / fashion",
+      "verification": "pending"
+    },
+    {
+      "no": 97,
+      "audience": "Men",
+      "brand": "Titan",
+      "candidate": "Titan Regalia collection watch",
+      "type": "Analog / digital / fashion",
+      "verification": "pending"
+    },
+    {
+      "no": 98,
+      "audience": "Men",
+      "brand": "Titan",
+      "candidate": "Titan Nebula collection watch",
+      "type": "Analog / digital / fashion",
+      "verification": "pending"
+    },
+    {
+      "no": 99,
+      "audience": "Men",
+      "brand": "Timex",
+      "candidate": "Timex  Expedition North watch",
+      "type": "Analog / digital / fashion",
+      "verification": "pending"
+    },
+    {
+      "no": 100,
+      "audience": "Men",
+      "brand": "Timex",
+      "candidate": "Timex Multifunction steel watch",
+      "type": "Analog / digital / fashion",
+      "verification": "pending"
+    },
+    {
+      "no": 101,
+      "audience": "Women",
+      "brand": "Titan",
+      "candidate": "Titan Raga Delight watch",
+      "type": "Analog / digital / fashion",
+      "verification": "pending"
+    },
+    {
+      "no": 102,
+      "audience": "Women",
+      "brand": "Titan",
+      "candidate": "Titan Raga Showstopper watch",
+      "type": "Analog / digital / fashion",
+      "verification": "pending"
+    },
+    {
+      "no": 103,
+      "audience": "Women",
+      "brand": "Titan",
+      "candidate": "Titan Raga Charm watch",
+      "type": "Analog / digital / fashion",
+      "verification": "pending"
+    },
+    {
+      "no": 104,
+      "audience": "Women",
+      "brand": "Titan",
+      "candidate": "Titan Lagan Chic watch",
+      "type": "Analog / digital / fashion",
+      "verification": "pending"
+    },
+    {
+      "no": 105,
+      "audience": "Women",
+      "brand": "Titan",
+      "candidate": "Titan Lagan watch",
+      "type": "Analog / digital / fashion",
+      "verification": "pending"
+    },
+    {
+      "no": 106,
+      "audience": "Women",
+      "brand": "Titan",
+      "candidate": "Titan Karishma watch",
+      "type": "Analog / digital / fashion",
+      "verification": "pending"
+    },
+    {
+      "no": 107,
+      "audience": "Women",
+      "brand": "Titan",
+      "candidate": "Titan Purple Stackables watch",
+      "type": "Analog / digital / fashion",
+      "verification": "pending"
+    },
+    {
+      "no": 108,
+      "audience": "Women",
+      "brand": "Titan",
+      "candidate": "Titan Workwear Analog watch",
+      "type": "Analog / digital / fashion",
+      "verification": "pending"
+    },
+    {
+      "no": 109,
+      "audience": "Women",
+      "brand": "Titan",
+      "candidate": "Titan Classique Analog watch",
+      "type": "Analog / digital / fashion",
+      "verification": "pending"
+    },
+    {
+      "no": 110,
+      "audience": "Women",
+      "brand": "Titan",
+      "candidate": "Titan Stellar Analog watch",
+      "type": "Analog / digital / fashion",
+      "verification": "pending"
+    },
+    {
+      "no": 111,
+      "audience": "Women",
+      "brand": "Fastrack",
+      "candidate": "Fastrack Vyb 6.0 Charmer watch",
+      "type": "Analog / digital / fashion",
+      "verification": "pending"
+    },
+    {
+      "no": 112,
+      "audience": "Women",
+      "brand": "Fastrack",
+      "candidate": "Fastrack Stunners Analog watch",
+      "type": "Analog / digital / fashion",
+      "verification": "pending"
+    },
+    {
+      "no": 113,
+      "audience": "Women",
+      "brand": "Fastrack",
+      "candidate": "Fastrack Bare Basic watch",
+      "type": "Analog / digital / fashion",
+      "verification": "pending"
+    },
+    {
+      "no": 114,
+      "audience": "Women",
+      "brand": "Fastrack",
+      "candidate": "Fastrack Tees Analog watch",
+      "type": "Analog / digital / fashion",
+      "verification": "pending"
+    },
+    {
+      "no": 115,
+      "audience": "Women",
+      "brand": "Fastrack",
+      "candidate": "Fastrack Ruffles watch",
+      "type": "Analog / digital / fashion",
+      "verification": "pending"
+    },
+    {
+      "no": 116,
+      "audience": "Women",
+      "brand": "Fastrack",
+      "candidate": "Fastrack New Limitless watch",
+      "type": "Analog / digital / fashion",
+      "verification": "pending"
+    },
+    {
+      "no": 117,
+      "audience": "Women",
+      "brand": "Fastrack",
+      "candidate": "Fastrack All Nighters watch",
+      "type": "Analog / digital / fashion",
+      "verification": "pending"
+    },
+    {
+      "no": 118,
+      "audience": "Women",
+      "brand": "Fastrack",
+      "candidate": "Fastrack Ceramic collection watch",
+      "type": "Analog / digital / fashion",
+      "verification": "pending"
+    },
+    {
+      "no": 119,
+      "audience": "Women",
+      "brand": "Casio",
+      "candidate": "Casio LTP-V007 series watch",
+      "type": "Analog / digital / fashion",
+      "verification": "pending"
+    },
+    {
+      "no": 120,
+      "audience": "Women",
+      "brand": "Casio",
+      "candidate": "Casio LTP-1302 series watch",
+      "type": "Analog / digital / fashion",
+      "verification": "pending"
+    },
+    {
+      "no": 121,
+      "audience": "Women",
+      "brand": "Casio",
+      "candidate": "Casio LTP-1234 series watch",
+      "type": "Analog / digital / fashion",
+      "verification": "pending"
+    },
+    {
+      "no": 122,
+      "audience": "Women",
+      "brand": "Casio",
+      "candidate": "Casio LTP-1183 series watch",
+      "type": "Analog / digital / fashion",
+      "verification": "pending"
+    },
+    {
+      "no": 123,
+      "audience": "Women",
+      "brand": "Casio",
+      "candidate": "Casio Vintage LA670 watch",
+      "type": "Analog / digital / fashion",
+      "verification": "pending"
+    },
+    {
+      "no": 124,
+      "audience": "Women",
+      "brand": "Casio",
+      "candidate": "Casio Baby-G BGD-565 watch",
+      "type": "Analog / digital / fashion",
+      "verification": "pending"
+    },
+    {
+      "no": 125,
+      "audience": "Women",
+      "brand": "Casio",
+      "candidate": "Casio Sheen SHE series watch",
+      "type": "Analog / digital / fashion",
+      "verification": "pending"
+    },
+    {
+      "no": 126,
+      "audience": "Women",
+      "brand": "Casio",
+      "candidate": "Casio LTP-E series watch",
+      "type": "Analog / digital / fashion",
+      "verification": "pending"
+    },
+    {
+      "no": 127,
+      "audience": "Women",
+      "brand": "Timex",
+      "candidate": "Timex Q Timex Mini watch",
+      "type": "Analog / digital / fashion",
+      "verification": "pending"
+    },
+    {
+      "no": 128,
+      "audience": "Women",
+      "brand": "Timex",
+      "candidate": "Timex Classic Analog watch",
+      "type": "Analog / digital / fashion",
+      "verification": "pending"
+    },
+    {
+      "no": 129,
+      "audience": "Women",
+      "brand": "Timex",
+      "candidate": "Timex Easy Reader watch",
+      "type": "Analog / digital / fashion",
+      "verification": "pending"
+    },
+    {
+      "no": 130,
+      "audience": "Women",
+      "brand": "Timex",
+      "candidate": "Timex Transcend watch",
+      "type": "Analog / digital / fashion",
+      "verification": "pending"
+    },
+    {
+      "no": 131,
+      "audience": "Women",
+      "brand": "Timex",
+      "candidate": "Timex Legacy watch",
+      "type": "Analog / digital / fashion",
+      "verification": "pending"
+    },
+    {
+      "no": 132,
+      "audience": "Women",
+      "brand": "Timex",
+      "candidate": "Timex Marlin watch",
+      "type": "Analog / digital / fashion",
+      "verification": "pending"
+    },
+    {
+      "no": 133,
+      "audience": "Women",
+      "brand": "Timex",
+      "candidate": "Timex Fashion mini watch",
+      "type": "Analog / digital / fashion",
+      "verification": "pending"
+    },
+    {
+      "no": 134,
+      "audience": "Women",
+      "brand": "Timex",
+      "candidate": "Timex TWEL series watch",
+      "type": "Analog / digital / fashion",
+      "verification": "pending"
+    },
+    {
+      "no": 135,
+      "audience": "Women",
+      "brand": "Fossil",
+      "candidate": "Fossil Jacqueline watch",
+      "type": "Analog / digital / fashion",
+      "verification": "pending"
+    },
+    {
+      "no": 136,
+      "audience": "Women",
+      "brand": "Fossil",
+      "candidate": "Fossil Carlie Mini watch",
+      "type": "Analog / digital / fashion",
+      "verification": "pending"
+    },
+    {
+      "no": 137,
+      "audience": "Women",
+      "brand": "Fossil",
+      "candidate": "Fossil Riley watch",
+      "type": "Analog / digital / fashion",
+      "verification": "pending"
+    },
+    {
+      "no": 138,
+      "audience": "Women",
+      "brand": "Fossil",
+      "candidate": "Fossil Scarlette watch",
+      "type": "Analog / digital / fashion",
+      "verification": "pending"
+    },
+    {
+      "no": 139,
+      "audience": "Women",
+      "brand": "Fossil",
+      "candidate": "Fossil Raquel watch",
+      "type": "Analog / digital / fashion",
+      "verification": "pending"
+    },
+    {
+      "no": 140,
+      "audience": "Women",
+      "brand": "Fossil",
+      "candidate": "Fossil Virginia watch",
+      "type": "Analog / digital / fashion",
+      "verification": "pending"
+    },
+    {
+      "no": 141,
+      "audience": "Women",
+      "brand": "Fossil",
+      "candidate": "Fossil Tailor watch",
+      "type": "Analog / digital / fashion",
+      "verification": "pending"
+    },
+    {
+      "no": 142,
+      "audience": "Women",
+      "brand": "Fossil",
+      "candidate": "Fossil FB series watch",
+      "type": "Analog / digital / fashion",
+      "verification": "pending"
+    },
+    {
+      "no": 143,
+      "audience": "Women",
+      "brand": "Sonata",
+      "candidate": "Sonata Poze Analog watch",
+      "type": "Analog / digital / fashion",
+      "verification": "pending"
+    },
+    {
+      "no": 144,
+      "audience": "Women",
+      "brand": "Sonata",
+      "candidate": "Sonata Blush collection watch",
+      "type": "Analog / digital / fashion",
+      "verification": "pending"
+    },
+    {
+      "no": 145,
+      "audience": "Women",
+      "brand": "Sonata",
+      "candidate": "Sonata Super Fibre watch",
+      "type": "Analog / digital / fashion",
+      "verification": "pending"
+    },
+    {
+      "no": 146,
+      "audience": "Women",
+      "brand": "Sonata",
+      "candidate": "Sonata Essentials Analog watch",
+      "type": "Analog / digital / fashion",
+      "verification": "pending"
+    },
+    {
+      "no": 147,
+      "audience": "Women",
+      "brand": "Sonata",
+      "candidate": "Sonata Digital watch",
+      "type": "Analog / digital / fashion",
+      "verification": "pending"
+    },
+    {
+      "no": 148,
+      "audience": "Women",
+      "brand": "Raga",
+      "candidate": "Raga Ivory collection watch",
+      "type": "Analog / digital / fashion",
+      "verification": "pending"
+    },
+    {
+      "no": 149,
+      "audience": "Women",
+      "brand": "Raga",
+      "candidate": "Raga Showstopper watch",
+      "type": "Analog / digital / fashion",
+      "verification": "pending"
+    },
+    {
+      "no": 150,
+      "audience": "Women",
+      "brand": "Raga",
+      "candidate": "Raga Cocktail watch",
+      "type": "Analog / digital / fashion",
+      "verification": "pending"
+    },
+    {
+      "no": 151,
+      "audience": "Women",
+      "brand": "Raga",
+      "candidate": "Raga Blush watch",
+      "type": "Analog / digital / fashion",
+      "verification": "pending"
+    },
+    {
+      "no": 152,
+      "audience": "Women",
+      "brand": "Raga",
+      "candidate": "Raga Moments watch",
+      "type": "Analog / digital / fashion",
+      "verification": "pending"
+    },
+    {
+      "no": 153,
+      "audience": "Women",
+      "brand": "Michael Kors",
+      "candidate": "Michael Kors Mini Darci watch",
+      "type": "Analog / digital / fashion",
+      "verification": "pending"
+    },
+    {
+      "no": 154,
+      "audience": "Women",
+      "brand": "Michael Kors",
+      "candidate": "Michael Kors Parker watch",
+      "type": "Analog / digital / fashion",
+      "verification": "pending"
+    },
+    {
+      "no": 155,
+      "audience": "Women",
+      "brand": "Michael Kors",
+      "candidate": "Michael Kors Pyper watch",
+      "type": "Analog / digital / fashion",
+      "verification": "pending"
+    },
+    {
+      "no": 156,
+      "audience": "Women",
+      "brand": "Michael Kors",
+      "candidate": "Michael Kors Runway watch",
+      "type": "Analog / digital / fashion",
+      "verification": "pending"
+    },
+    {
+      "no": 157,
+      "audience": "Women",
+      "brand": "Michael Kors",
+      "candidate": "Michael Kors Lexington Mini watch",
+      "type": "Analog / digital / fashion",
+      "verification": "pending"
+    },
+    {
+      "no": 158,
+      "audience": "Women",
+      "brand": "Guess",
+      "candidate": "Guess Ladies Rose Gold Analog watch",
+      "type": "Analog / digital / fashion",
+      "verification": "pending"
+    },
+    {
+      "no": 159,
+      "audience": "Women",
+      "brand": "Guess",
+      "candidate": "Guess G Twist watch",
+      "type": "Analog / digital / fashion",
+      "verification": "pending"
+    },
+    {
+      "no": 160,
+      "audience": "Women",
+      "brand": "Guess",
+      "candidate": "Guess Mini Luna watch",
+      "type": "Analog / digital / fashion",
+      "verification": "pending"
+    },
+    {
+      "no": 161,
+      "audience": "Women",
+      "brand": "Guess",
+      "candidate": "Guess Ladies Crystal Bezel watch",
+      "type": "Analog / digital / fashion",
+      "verification": "pending"
+    },
+    {
+      "no": 162,
+      "audience": "Women",
+      "brand": "Anne Klein",
+      "candidate": "Anne Klein AK quartz bracelet watch",
+      "type": "Analog / digital / fashion",
+      "verification": "pending"
+    },
+    {
+      "no": 163,
+      "audience": "Women",
+      "brand": "Anne Klein",
+      "candidate": "Anne Klein Ceramic bracelet watch",
+      "type": "Analog / digital / fashion",
+      "verification": "pending"
+    },
+    {
+      "no": 164,
+      "audience": "Women",
+      "brand": "Skagen",
+      "candidate": "Skagen Anita watch",
+      "type": "Analog / digital / fashion",
+      "verification": "pending"
+    },
+    {
+      "no": 165,
+      "audience": "Women",
+      "brand": "Skagen",
+      "candidate": "Skagen Freja watch",
+      "type": "Analog / digital / fashion",
+      "verification": "pending"
+    },
+    {
+      "no": 166,
+      "audience": "Women",
+      "brand": "Daniel Wellington",
+      "candidate": "Daniel Wellington Petite watch",
+      "type": "Analog / digital / fashion",
+      "verification": "pending"
+    },
+    {
+      "no": 167,
+      "audience": "Women",
+      "brand": "Daniel Wellington",
+      "candidate": "Daniel Wellington Quadro watch",
+      "type": "Analog / digital / fashion",
+      "verification": "pending"
+    },
+    {
+      "no": 168,
+      "audience": "Women",
+      "brand": "Olivia Burton",
+      "candidate": "Olivia Burton Classic watch",
+      "type": "Analog / digital / fashion",
+      "verification": "pending"
+    },
+    {
+      "no": 169,
+      "audience": "Women",
+      "brand": "Emporio Armani",
+      "candidate": "Emporio Armani Gianni T-Bar watch",
+      "type": "Analog / digital / fashion",
+      "verification": "pending"
+    },
+    {
+      "no": 170,
+      "audience": "Women",
+      "brand": "Armani Exchange",
+      "candidate": "Armani Exchange Ladies Lola watch",
+      "type": "Analog / digital / fashion",
+      "verification": "pending"
+    },
+    {
+      "no": 171,
+      "audience": "Women",
+      "brand": "Diesel",
+      "candidate": "Diesel Little Daddy mini watch",
+      "type": "Analog / digital / fashion",
+      "verification": "pending"
+    },
+    {
+      "no": 172,
+      "audience": "Women",
+      "brand": "Tommy Hilfiger",
+      "candidate": "Tommy Hilfiger Lori watch",
+      "type": "Analog / digital / fashion",
+      "verification": "pending"
+    },
+    {
+      "no": 173,
+      "audience": "Women",
+      "brand": "Tommy Hilfiger",
+      "candidate": "Tommy Hilfiger Mia watch",
+      "type": "Analog / digital / fashion",
+      "verification": "pending"
+    },
+    {
+      "no": 174,
+      "audience": "Women",
+      "brand": "Coach",
+      "candidate": "Coach Ladies Perry watch",
+      "type": "Analog / digital / fashion",
+      "verification": "pending"
+    },
+    {
+      "no": 175,
+      "audience": "Women",
+      "brand": "Lacoste",
+      "candidate": "Lacoste Ladies Cannes watch",
+      "type": "Analog / digital / fashion",
+      "verification": "pending"
+    },
+    {
+      "no": 176,
+      "audience": "Women",
+      "brand": "Citizen",
+      "candidate": "Citizen Eco-Drive Silhouette watch",
+      "type": "Analog / digital / fashion",
+      "verification": "pending"
+    },
+    {
+      "no": 177,
+      "audience": "Women",
+      "brand": "Seiko",
+      "candidate": "Seiko Ladies Essentials watch",
+      "type": "Analog / digital / fashion",
+      "verification": "pending"
+    },
+    {
+      "no": 178,
+      "audience": "Women",
+      "brand": "Swatch",
+      "candidate": "Swatch Skin Classic watch",
+      "type": "Analog / digital / fashion",
+      "verification": "pending"
+    },
+    {
+      "no": 179,
+      "audience": "Women",
+      "brand": "Noise",
+      "candidate": "Noise ColorFit Icon 2 women watch",
+      "type": "Smartwatch / wearable",
+      "verification": "pending"
+    },
+    {
+      "no": 180,
+      "audience": "Women",
+      "brand": "Noise",
+      "candidate": "Noise ColorFit Pulse 4 women watch",
+      "type": "Smartwatch / wearable",
+      "verification": "pending"
+    },
+    {
+      "no": 181,
+      "audience": "Women",
+      "brand": "boAt",
+      "candidate": "boAt Wave Call women watch",
+      "type": "Smartwatch / wearable",
+      "verification": "pending"
+    },
+    {
+      "no": 182,
+      "audience": "Women",
+      "brand": "Fire-Boltt",
+      "candidate": "Fire-Boltt Ninja Call Pro women watch",
+      "type": "Smartwatch / wearable",
+      "verification": "pending"
+    },
+    {
+      "no": 183,
+      "audience": "Women",
+      "brand": "Fastrack",
+      "candidate": "Fastrack Reflex Vox watch",
+      "type": "Analog / digital / fashion",
+      "verification": "pending"
+    },
+    {
+      "no": 184,
+      "audience": "Women",
+      "brand": "Amazfit",
+      "candidate": "Amazfit GTS 4 Mini watch",
+      "type": "Smartwatch / wearable",
+      "verification": "pending"
+    },
+    {
+      "no": 185,
+      "audience": "Women",
+      "brand": "Amazfit",
+      "candidate": "Amazfit Active watch",
+      "type": "Smartwatch / wearable",
+      "verification": "pending"
+    },
+    {
+      "no": 186,
+      "audience": "Women",
+      "brand": "Samsung",
+      "candidate": "Samsung Galaxy Watch FE 40mm watch",
+      "type": "Smartwatch / wearable",
+      "verification": "pending"
+    },
+    {
+      "no": 187,
+      "audience": "Women",
+      "brand": "Samsung",
+      "candidate": "Samsung Galaxy Watch7 40mm watch",
+      "type": "Smartwatch / wearable",
+      "verification": "pending"
+    },
+    {
+      "no": 188,
+      "audience": "Women",
+      "brand": "Apple",
+      "candidate": "Apple Watch SE 2nd Gen 40mm watch",
+      "type": "Smartwatch / wearable",
+      "verification": "pending"
+    },
+    {
+      "no": 189,
+      "audience": "Women",
+      "brand": "Apple",
+      "candidate": "Apple Watch Series 10 42mm watch",
+      "type": "Smartwatch / wearable",
+      "verification": "pending"
+    },
+    {
+      "no": 190,
+      "audience": "Women",
+      "brand": "Pebble",
+      "candidate": "Pebble Cosmos Vogue watch",
+      "type": "Smartwatch / wearable",
+      "verification": "pending"
+    },
+    {
+      "no": 191,
+      "audience": "Women",
+      "brand": "CrossBeats",
+      "candidate": "CrossBeats Orbit Infinity watch",
+      "type": "Smartwatch / wearable",
+      "verification": "pending"
+    },
+    {
+      "no": 192,
+      "audience": "Women",
+      "brand": "Van Heusen",
+      "candidate": "Van Heusen Women's analog collection watch",
+      "type": "Analog / digital / fashion",
+      "verification": "pending"
+    },
+    {
+      "no": 193,
+      "audience": "Women",
+      "brand": "French Connection",
+      "candidate": "French Connection Women's analog collection watch",
+      "type": "Analog / digital / fashion",
+      "verification": "pending"
+    },
+    {
+      "no": 194,
+      "audience": "Women",
+      "brand": "Dressberry",
+      "candidate": "Dressberry Crystal studded analog watch",
+      "type": "Analog / digital / fashion",
+      "verification": "pending"
+    },
+    {
+      "no": 195,
+      "audience": "Women",
+      "brand": "London Fog",
+      "candidate": "London Fog Crescent collection watch",
+      "type": "Analog / digital / fashion",
+      "verification": "pending"
+    },
+    {
+      "no": 196,
+      "audience": "Women",
+      "brand": "Daniel Hechter",
+      "candidate": "Daniel Hechter Women's analog collection watch",
+      "type": "Analog / digital / fashion",
+      "verification": "pending"
+    },
+    {
+      "no": 197,
+      "audience": "Women",
+      "brand": "Sylvi",
+      "candidate": "Sylvi Classic designer analog watch",
+      "type": "Analog / digital / fashion",
+      "verification": "pending"
+    },
+    {
+      "no": 198,
+      "audience": "Women",
+      "brand": "Titan",
+      "candidate": "Titan Raga Viva watch",
+      "type": "Analog / digital / fashion",
+      "verification": "pending"
+    },
+    {
+      "no": 199,
+      "audience": "Women",
+      "brand": "Titan",
+      "candidate": "Titan Raga Viva 2.0 watch",
+      "type": "Analog / digital / fashion",
+      "verification": "pending"
+    },
+    {
+      "no": 200,
+      "audience": "Women",
+      "brand": "Titan",
+      "candidate": "Titan Edge Ceramic watch",
+      "type": "Analog / digital / fashion",
+      "verification": "pending"
+    }
+  ]
+}
