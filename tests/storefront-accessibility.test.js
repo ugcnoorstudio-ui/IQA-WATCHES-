@@ -30,3 +30,11 @@ test('product card controls have product-specific accessible names and wishlist 
  assert.ok(html.includes("aria-label=\"View details for '+escapeHtml(p.name)+'\""));
  assert.ok(html.includes("aria-label=\"Add '+escapeHtml(p.name)+' to bag\""));
 });
+
+
+test('drawer sign-in and register actions navigate to the working customer auth routes',()=>{
+ assert.match(html,/<a class="drawer-signin" href="#login">Sign in/);
+ assert.match(html,/<a class="drawer-register" href="#signup">Register/);
+ assert.match(html,/<div class="drawer-account-actions">/);
+ assert.match(html,/\.drawer-account-actions\{[^}]*display:flex/);
+});
