@@ -1,7 +1,7 @@
 # IQA WATCHES — 200-watch research queue audit
 
-**Date:** 2026-11-04  
-**Branch:** `feature/watch-catalogue-200-research-only`  
+**Date:** 2026-11-04
+**Branch:** `feature/watch-catalogue-200-research-only`
 **Purpose:** Isolated research-only data package; not a public product catalogue.
 
 ## Input coverage
