@@ -657,31 +657,25 @@ body{background:var(--paper)}
 }
 </style>
 
-<style id="desktop-persistent-sidebar">
-/* Reuse the mobile navigation as a permanent left rail on wide desktop screens. */
+<style id="desktop-drawer-navigation">
+/* Desktop uses the same left-sliding navigation drawer as mobile; closed by default. */
 @media(min-width:1024px){
- body.has-desktop-sidebar{padding-left:292px}
- #mobileMenu.desktop-sidebar{
-  display:flex!important;position:fixed!important;inset:0 auto 0 0!important;
-  width:292px!important;max-width:292px!important;height:100vh;height:100dvh!important;
-  overflow-y:auto!important;overscroll-behavior:contain;transform:none!important;
-  z-index:100!important;background:var(--paper);border-right:1px solid #d8c7aa;
-  box-shadow:8px 0 28px #17161212;padding:0 0 18px!important;
-  flex-direction:column!important;align-items:stretch!important;gap:0!important;
- }
+ .nav-links{display:none!important}
+ #menuToggle{display:inline-flex!important;position:fixed;left:16px;top:100px;z-index:30;width:46px;height:46px;min-width:46px;background:var(--paper);border:1px solid var(--line);box-shadow:0 3px 14px #00000012;font-size:25px}
+ #mobileMenu.desktop-sidebar{display:flex!important;position:fixed!important;inset:0 auto 0 0!important;width:min(410px,88vw)!important;max-width:410px!important;height:100vh;height:100dvh!important;max-height:100vh;max-height:100dvh;overflow-y:auto!important;overscroll-behavior:contain;transform:translateX(-105%)!important;transition:transform .25s ease!important;z-index:1300!important;margin:0!important;padding:0 0 18px!important;background:var(--paper);border-right:1px solid #d8c7aa;box-shadow:18px 0 48px #0004;flex-direction:column!important;align-items:stretch!important;gap:0!important}
+ #mobileMenu.desktop-sidebar.open{transform:translateX(0)!important}
  #mobileMenu.desktop-sidebar .mobile-menu-head{position:sticky;top:0;z-index:5;background:var(--paper);padding:22px 20px 14px}
- #mobileMenu.desktop-sidebar .mobile-menu-close{display:none!important}
+ #mobileMenu.desktop-sidebar .mobile-menu-close{display:block!important}
  #mobileMenu.desktop-sidebar .drawer-intro{padding:12px 22px 16px}
  #mobileMenu.desktop-sidebar .drawer-account-card{margin:0 16px 12px}
  #mobileMenu.desktop-sidebar .mobile-menu-nav>a{min-height:46px;padding:10px 20px}
  #mobileMenu.desktop-sidebar .drawer-group-label{padding:14px 20px 6px}
  #mobileMenu.desktop-sidebar .drawer-promo{margin:14px 16px}
  #mobileMenu.desktop-sidebar .drawer-social,#mobileMenu.desktop-sidebar .drawer-footer{padding-left:20px;padding-right:20px}
- #menuToggle{display:none!important}
 }
-@media(min-width:681px) and (max-width:1023px){
- #mobileMenu.desktop-sidebar{display:none!important}
-}
+#menuBackdrop{display:none;position:fixed;inset:0;background:#0008;z-index:1290}
+body.menu-open #menuBackdrop{display:block}
+@media(min-width:681px) and (max-width:1023px){#mobileMenu.desktop-sidebar{display:none!important}}
 </style>
 </head>
 <body>
@@ -1023,17 +1017,18 @@ $('searchImageFile').addEventListener('change',()=>{const file=$('searchImageFil
 $('voiceSearchButton').addEventListener('click',()=>{const Speech=window.SpeechRecognition||window.webkitSpeechRecognition;if(!Speech){$('searchToolStatus').textContent='This browser does not support voice recognition. Type your search instead.';return;}try{const recognition=new Speech();recognition.lang='en-IN';recognition.interimResults=false;recognition.maxAlternatives=1;$('searchToolStatus').textContent='Listening… Please speak now.';recognition.onresult=event=>{$('searchPanelInput').value=event.results?.[0]?.[0]?.transcript||'';$('searchToolStatus').textContent=$('searchPanelInput').value?'Voice captured. Tap Search watches.':'No speech was recognised. Please try again.'};recognition.onerror=event=>{$('searchToolStatus').textContent=event.error==='not-allowed'?'Microphone permission denied. Type your search instead.':'Voice search could not start. Type your search instead.'};recognition.start()}catch(error){$('searchToolStatus').textContent='Voice search could not start. Type your search instead.'}});
 $('searchPanelForm').addEventListener('submit',e=>{e.preventDefault();const q=$('searchPanelInput').value.trim();location.hash='search';setTimeout(()=>{const input=document.getElementById('routeSearchInput');if(input){input.value=q;input.dispatchEvent(new Event('input',{bubbles:true}));input.focus()}},80);closeSearchPanel();});
 $('drawerClose').addEventListener('click',closePanel);$('overlay').addEventListener('click',closePanel);$('modalWrap').addEventListener('click',e=>{if(e.target===$('modalWrap'))closeModal()});document.body.appendChild($('mobileMenu'));
+const menuBackdrop=document.createElement('div');menuBackdrop.id='menuBackdrop';menuBackdrop.setAttribute('aria-hidden','true');document.body.appendChild(menuBackdrop);
+menuBackdrop.addEventListener('click',()=>setMobileMenu(false));
 const desktopSidebarQuery=window.matchMedia('(min-width:1024px)');
 function syncDesktopSidebar(){
  const menu=$('mobileMenu');
  const desktop=desktopSidebarQuery.matches;
  menu.classList.toggle('desktop-sidebar',desktop);
- document.body.classList.toggle('has-desktop-sidebar',desktop);
- menu.setAttribute('aria-hidden',desktop?'false':'true');
+ menu.setAttribute('aria-hidden',menu.classList.contains('open')?'false':'true');
  menu.setAttribute('aria-modal',desktop?'false':'true');
 }
 syncDesktopSidebar();
-desktopSidebarQuery.addEventListener?.('change',syncDesktopSidebar);
+desktopSidebarQuery.addEventListener?.('change',()=>{setMobileMenu(false);syncDesktopSidebar();});
 
 let mobileMenuReturnFocus=null;
 let mobileMenuInertSiblings=[];
@@ -1044,7 +1039,7 @@ function setMobileMenu(open){
   if(menu.classList.contains('open'))return;
   mobileMenuReturnFocus=document.activeElement;
   mobileMenuInertSiblings=Array.from(document.body.children)
-   .filter(element=>element!==menu&&element.tagName!=='SCRIPT')
+   .filter(element=>element!==menu&&element.id!=='menuBackdrop'&&element.tagName!=='SCRIPT')
    .map(element=>({element,inert:element.inert}));
   mobileMenuInertSiblings.forEach(item=>{item.element.inert=true;});
   menu.classList.add('open');
