@@ -152,7 +152,7 @@ test('premium mobile drawer shows grouped navigation, editorial header and foote
   await expect(menu.locator('a[href="#shop"]')).toBeVisible();
   await expect(menu.locator('a[href="#smart-shopping"]')).toBeVisible();
   await expect(menu.locator('a[href="#story"]')).toBeVisible();
-  await expect(menu.locator('a')).toHaveCount(12);
+  await expect(menu.locator('a')).toHaveCount(14);
   await expect(page.locator('.storefront-shortcuts')).toHaveCount(0);
   await expect(page.locator('.hero')).toBeVisible();
   await page.keyboard.press('Escape');
@@ -176,7 +176,7 @@ test('every mobile menu link opens its real destination and closes the menu', as
     ['account', /Sign in|Account unavailable/i],
     ['wishlist', /wishlist/i],
     ['bag', /shopping bag/i]
-  ];  const menuLinks = await page.locator('#mobileMenu a').evaluateAll(links =>
+  ];  const menuLinks = await page.locator('#mobileMenu nav[aria-label="Mobile navigation links"] a').evaluateAll(links =>
     links.map(link => link.getAttribute('href').replace(/^#/, ''))
   );
   expect(menuLinks).toEqual(destinations.map(([route]) => route));
@@ -588,7 +588,7 @@ test('mobile drawer exposes modal navigation semantics, traps focus and restores
   await expect(page.locator('#mobileMenuClose')).toBeFocused();
 
   const links = menu.locator('a');
-  await expect(links).toHaveCount(12);
+  await expect(links).toHaveCount(14);
   await page.keyboard.press('Shift+Tab');
   await expect(links.last()).toBeFocused();
   await page.keyboard.press('Tab');
