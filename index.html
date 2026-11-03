@@ -617,7 +617,7 @@ body{background:var(--paper)}
 @media(max-width:680px){
  .mobile-menu.open{width:min(88vw,410px);max-width:calc(100vw - 42px);padding:0 0 18px;background:#f8f1e5;color:#17140f;box-shadow:18px 0 48px #0004}
  .mobile-menu-head{min-height:92px;padding:18px 20px;background:#fbf5ea;border-bottom:1px solid #e4d5bd}
- .drawer-logo-link{display:block;max-width:235px;min-width:0;position:relative}.drawer-wordmark{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}.drawer-intro{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0)}
+ .drawer-logo-link{display:block;max-width:235px;min-width:0;position:relative}.drawer-wordmark{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
  .drawer-logo{display:block;width:100%;height:auto;max-height:56px;object-fit:contain;object-position:left center}
  .mobile-menu-close{flex:0 0 42px;width:42px;height:42px;min-width:42px;min-height:42px;border:0;border-radius:50%;background:transparent;font-size:32px;color:#17140f}
  .drawer-account-card{display:grid;grid-template-columns:48px minmax(0,1fr);gap:10px 12px;align-items:center;margin:14px 16px 12px;padding:15px;background:linear-gradient(125deg,#f1e5d2,#eadbc4);border:1px solid #e5d4b8;border-radius:12px}
@@ -658,10 +658,10 @@ body{background:var(--paper)}
 <div class="nav-actions"><button class="icon-btn" id="headerSearch" type="button" aria-label="Open search">⌕</button><a class="icon-btn nav-account" href="#account" aria-label="My account">Account</a><button class="icon-btn" id="wishlistOpen" aria-label="Open wishlist">♡ <span class="count" id="wishCount" aria-live="polite" aria-atomic="true">0</span></button><button class="icon-btn" id="cartOpen" aria-label="Open shopping bag">Bag <span class="count" id="cartCount" aria-live="polite" aria-atomic="true">0</span></button></div>
 <div class="mobile-menu" id="mobileMenu" role="dialog" aria-modal="true" aria-labelledby="mobileMenuTitle" aria-describedby="mobileMenuDescription" aria-hidden="true" tabindex="-1">
 <div class="mobile-menu-head">
-<a class="drawer-logo-link" href="#home" aria-label="IQA WATCHES home"><img src="./assets/iqa-watches-header-logo.svg" alt="IQA WATCHES — Timeless design. Everyday precision." class="drawer-logo"><span class="drawer-wordmark">IQA WATCHES</span></a>
+<div class="drawer-logo-link"><img src="./assets/iqa-watches-header-logo.svg" alt="IQA WATCHES — Timeless design. Everyday precision." class="drawer-logo"><span class="drawer-wordmark" id="mobileMenuTitle">IQA WATCHES</span></div>
 <button type="button" class="mobile-menu-close" id="mobileMenuClose" aria-label="Close navigation">×</button>
 </div>
-<div class="drawer-intro" aria-hidden="true"><span>DISCOVER IQA</span><p>Find the details that make every moment yours.</p></div>
+<div class="drawer-intro" id="mobileMenuDescription"><span>DISCOVER IQA</span><p>Find the details that make every moment yours.</p></div>
 <section class="drawer-account-card" aria-label="Your account">
 <span class="drawer-avatar" aria-hidden="true">♙</span>
 <div class="drawer-account-copy"><strong>Welcome to IQA WATCHES</strong><small>Sign in to enjoy a more personal experience</small></div>
@@ -687,6 +687,7 @@ body{background:var(--paper)}
 </nav>
 <div class="drawer-promo"><span class="drawer-promo-copy"><strong>Luxury on Your Wrist</strong><small>Timeless. Elegant. Yours.</small><b>Explore Collection <span aria-hidden="true">→</span></b></span></div>
 <div class="drawer-social" aria-label="Follow IQA WATCHES"><span>Follow IQA WATCHES</span><div><span aria-label="Instagram">◎</span><span aria-label="YouTube">▶</span><span aria-label="Pinterest">P</span></div></div>
+<div class="drawer-footer"><span>MADE FOR EVERY MOMENT</span><span>TIMELESS · CONSIDERED · PERSONAL</span></div>
 </div>
 </nav></header>
 
