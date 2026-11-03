@@ -97,8 +97,7 @@ async function renderCheckoutRoute(){
    checkoutProgress+'<div class="checkout-layout"><div class="checkout-main"><section class="checkout-section"><div class="checkout-section-head"><span>03</span><div><h2>Payment method</h2><p>Online payments will be activated after gateway setup.</p></div></div><div class="checkout-payments"><label class="checkout-payment-option"><input type="radio" name="payment_method" value="cash_on_delivery" checked><span><strong>Cash on Delivery (COD)</strong><small>Pay when your order is delivered.</small></span><b>COD</b></label><label class="checkout-payment-option is-unavailable"><input type="radio" disabled><span><strong>UPI · Google Pay · PhonePe · Paytm</strong><small>Coming Soon</small></span><b>UPI</b></label><label class="checkout-payment-option is-unavailable"><input type="radio" disabled><span><strong>Credit / Debit Cards</strong><small>Coming Soon</small></span><b>CARDS</b></label><label class="checkout-payment-option is-unavailable"><input type="radio" disabled><span><strong>Net Banking</strong><small>Coming Soon</small></span><b>BANK</b></label><label class="checkout-payment-option is-unavailable"><input type="radio" disabled><span><strong>Wallets</strong><small>Coming Soon</small></span><b>WALLET</b></label></div><p class="route-note checkout-setup-note">COD is available. Your order will be created securely and payment will be collected only at delivery.</p><p id="codOrderMessage" role="status" aria-live="polite"></p><button class="button checkout-submit" type="button" id="confirmCodOrder">Confirm COD Order</button><a class="button light" href="#checkout-review">Back to order review</a></section></div>'+summary+'</div>');
   $r('confirmCodOrder')?.addEventListener('click',async()=>{
    const button=$r('confirmCodOrder'),message=$r('codOrderMessage');if(!button||button.disabled)return;
-   button.disabled=true;button.textContent='Placing your order…';message.textContent='Please wait while we securely verify your watch, stock and delivery address.';
-   try{
+   button.disabled=true;button.textContent='Placing your order…';message.textContent='Please wait while we securely verify your watch, stock and delivery address.';   try{
     const cfg=window.IQA_SUPABASE_CONFIG,session=(await client.auth.getSession()).data.session;
     if(!cfg?.url||!cfg?.publishableKey||!session?.access_token)throw new Error('Your secure session expired. Please sign in again.');
     const requestKey=crypto.randomUUID(),orderItems=entries.map(x=>({product_id:String(x.p.id||''),variant_id:String(x.p.variantId||''),quantity:Number(x.qty)}));
@@ -197,8 +196,7 @@ function renderAuth(mode='login'){
   finally{button.disabled=false;}
  });
  $r('customerGoogleSignIn').addEventListener('click',async e=>{
-  const button=e.currentTarget;button.disabled=true;
-  try{
+  const button=e.currentTarget;button.disabled=true;  try{
    const client=customerAuthClient();
    const {error}=await client.auth.signInWithOAuth({provider:'google',options:{redirectTo:'https://ugcnoorstudio-ui.github.io/IQA-WATCHES-/'}});
    if(error)throw error;
@@ -297,8 +295,7 @@ async function renderCustomerDataPage(route){
    if(error)throw error;
    if(!orders?.length){host.innerHTML='<h2>'+titles[route]+'</h2><p>No orders are linked to this account yet.</p><a class="button light" href="#shop">Explore watches</a>';return;}
    const ids=orders.map(o=>o.id);
-   const [{data:items,error:itemError},{data:events,error:eventError}]=await Promise.all([client.from('order_items').select('order_id,sku_snapshot,product_snapshot,quantity,unit_price,line_total').in('order_id',ids),client.from('order_status_events').select('order_id,previous_state,new_state,reason,created_at').in('order_id',ids).order('created_at',{ascending:false})]);
-   if(itemError)throw itemError;if(eventError)throw eventError;
+   const [{data:items,error:itemError},{data:events,error:eventError}]=await Promise.all([client.from('order_items').select('order_id,sku_snapshot,product_snapshot,quantity,unit_price,line_total').in('order_id',ids),client.from('order_status_events').select('order_id,previous_state,new_state,reason,created_at').in('order_id',ids).order('created_at',{ascending:false})]);   if(itemError)throw itemError;if(eventError)throw eventError;
    host.innerHTML='<h2>'+titles[route]+'</h2>'+orders.map(o=>{
     const oi=(items||[]).filter(i=>i.order_id===o.id),ev=(events||[]).filter(x=>x.order_id===o.id);
     const canCancel=route==='orders'&&o.state==='confirmed'&&o.payment_state==='pending'&&o.delivery_snapshot?.payment_method==='cash_on_delivery';
@@ -397,7 +394,6 @@ function renderDelivery(){
  infoRoute('IQA WATCHES · DELIVERY','Delivery information','Delivery coverage and estimates will be displayed only after verified shipping configuration is connected.',
  '<div class="route-feature"><h2>Delivery setup is not active</h2><p>PIN-code serviceability, courier partners, shipping charges, handling times and delivery estimates are not currently connected to this storefront.</p><p>No delivery date, fee or serviceability promise can be made from this page. Checkout remains disabled.</p><a class="button light" href="#faq">Read FAQs</a> <a class="button light" href="#policies">Store policies</a></div>');
 }
-
 function render(){
  try{
  const raw=(location.hash||'#home').slice(1),parts=raw.split('/'),r=parts[0]||'home';
@@ -431,7 +427,7 @@ function render(){
  if(r==='recently-viewed'){infoRoute('IQA WATCHES · SAVED','Recently viewed','Your recently viewed watches will appear here soon.','<div class="route-feature"><p class="route-disabled">Coming soon — a private list of the watches you have recently explored is being prepared.</p><a class="button" href="#shop">Explore watches</a></div>');return;}
  if(r==='journal'){infoRoute('IQA WATCHES · JOURNAL','The Watch Journal is coming soon','Guides, watch-care notes and product education are being prepared.','<div class="route-feature"><p>We will publish model-specific guides only when product details and manufacturer information have been verified.</p><a class="button" href="#shop">Explore watches</a></div>');return;}
  if(r==='smart-shopping'||r==='finder'){showHomeSection('smart-shopping');return;}
- if(r==='comparison'){showHomeSection('compareCard');return;}
+ if(r==='comparison'||r==='compareCard'){showHomeSection('compareCard');return;}
  if(['shop','men','women','unisex','new-arrivals','bestsellers'].includes(r)){
   const collection=collectionForRoute(r),matching=products.filter(collection.matches);
   root.innerHTML=hero('IQA WATCHES · COLLECTION',collection.title,collection.description)+'<div class="route-content"><div id="routeCatalogue" class="route-grid" style="margin-top:22px"></div></div>';
