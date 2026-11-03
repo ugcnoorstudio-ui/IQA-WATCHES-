@@ -62,3 +62,21 @@ For each candidate, the final research record must include exact SKU, official p
 ## Next action
 
 Continue polling the existing TinyFish run ID above; do not start another run. When it completes, retrieve the full report, map its evidence to all 200 candidate numbers, retain nulls for unsupported facts, and regenerate the JSON/CSV with per-row citations and decisions. Then run duplicate, SKU, price, image-rights and schema validation. Merge/deploy only after all release gates are separately satisfied.
+
+
+## Repository deliverables update — 2026-11-04
+
+The structured research queue is now committed on `feature/purchase-dispatch-workspace`:
+- `data/watch-catalogue-200-research.json`
+- `data/watch-catalogue-200-research.csv`
+
+Both contain all 200 candidate rows, 100 Men / 100 Women, with unverified model, variant, product page, description, specifications, India MRP, image asset URL and related evidence fields kept null. Each candidate remains `pending_research`; image rights are `not_assessed`; fulfilment status explicitly prevents an in-stock claim. Candidate 83 retains the original raw brand string with its leading space in `inputBrandOriginal`, while `inputBrand` is normalized to `Tommy Hilfiger` for matching.
+
+### Latest validation (repository schema)
+- 200 records and 200 unique candidate numbers: PASS.
+- 100 Men and 100 Women: PASS.
+- All exact SKU, MRP and official image asset URL fields remain null pending evidence: PASS.
+- All candidate decisions remain pending; no row is falsely marked verified: PASS.
+- CSV regenerated from the JSON record schema: PASS.
+
+These are schema/integrity checks, not product-level verification. The TinyFish run remains RUNNING (20 sources read at latest poll; output_ready=false), so the research queue must not be represented as a completed catalogue.
