@@ -105,7 +105,7 @@ test('mobile header keeps its logo and action icons in one row without overflow'
     await expect(nav).toBeVisible();
     await expect(page.locator('#menuToggle')).toBeVisible();
     await expect(page.locator('.brand-logo')).toBeVisible();
-    for (const id of ['#headerSearch', '#voiceSearch', '#wishlistOpen', '#cartOpen']) {
+    for (const id of ['#headerSearch', '#wishlistOpen', '#cartOpen']) {
       await expect(page.locator(id)).toBeVisible();
     }
     const layout = await page.evaluate(() => {
@@ -146,12 +146,13 @@ test('premium mobile drawer shows grouped navigation, editorial header and foote
   await expect(menu.locator('.drawer-wordmark')).toHaveText('IQA WATCHES');
   await expect(menu.locator('.drawer-intro')).toContainText('Find the details');
   await expect(menu.locator('.drawer-group-label')).toHaveText([
-    'THE COLLECTION', 'TOOLS & SAVED', 'THE IQA EXPERIENCE'
+    'SHOP THE COLLECTION', 'DISCOVER', 'YOUR ACCOUNT'
   ]);
   await expect(menu.locator('.drawer-footer')).toContainText('MADE FOR EVERY MOMENT');
   await expect(menu.locator('a[href="#shop"]')).toBeVisible();
-  await expect(menu.locator('a[href="#policies"]')).toBeVisible();
-  await expect(menu.locator('a')).toHaveCount(21);
+  await expect(menu.locator('a[href="#smart-shopping"]')).toBeVisible();
+  await expect(menu.locator('a[href="#story"]')).toBeVisible();
+  await expect(menu.locator('a')).toHaveCount(12);
   await expect(page.locator('.storefront-shortcuts')).toHaveCount(0);
   await expect(page.locator('.hero')).toBeVisible();
   await page.keyboard.press('Escape');
@@ -166,26 +167,16 @@ test('every mobile menu link opens its real destination and closes the menu', as
     ['shop', '#routeCatalogue'],
     ['men', '#routeCatalogue'],
     ['women', '#routeCatalogue'],
-    ['unisex', '#routeCatalogue'],
-    ['search', /Search the collection/i],
-    ['finder', '#finderCard'],
-    ['comparison', '#compareCard'],
-    ['compare', /Compare watches/i],
-    ['recently-viewed', /Recently viewed/i],
-    ['wishlist', /wishlist/i],
-    ['bag', /shopping bag/i],
-    ['journal', /Watch Journal is coming soon/i],
+    ['new-arrivals', '#routeCatalogue'],
+    ['bestsellers', '#routeCatalogue'],
+    ['smart-shopping', '#finderCard'],
+    ['compareCard', '#compareCard'],
     ['story', /Our point of view/i],
-    ['care', /Store policies/i],
-    ['delivery', /Delivery availability/i],
-    ['offers', /Offers & rewards|Sign in/i],
-    ['contact', /Contact us/i],
-    ['account', /Sign in|Account unavailable/i],
-    ['orders', /Sign in/i],
     ['faq', /Frequently asked questions/i],
-    ['policies', /Store policies/i]
-  ];
-  const menuLinks = await page.locator('#mobileMenu a').evaluateAll(links =>
+    ['account', /Sign in|Account unavailable/i],
+    ['wishlist', /wishlist/i],
+    ['bag', /shopping bag/i]
+  ];  const menuLinks = await page.locator('#mobileMenu a').evaluateAll(links =>
     links.map(link => link.getAttribute('href').replace(/^#/, ''))
   );
   expect(menuLinks).toEqual(destinations.map(([route]) => route));
@@ -597,7 +588,7 @@ test('mobile drawer exposes modal navigation semantics, traps focus and restores
   await expect(page.locator('#mobileMenuClose')).toBeFocused();
 
   const links = menu.locator('a');
-  await expect(links).toHaveCount(21);
+  await expect(links).toHaveCount(12);
   await page.keyboard.press('Shift+Tab');
   await expect(links.last()).toBeFocused();
   await page.keyboard.press('Tab');
