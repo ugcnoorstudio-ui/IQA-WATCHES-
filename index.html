@@ -843,7 +843,7 @@ document.addEventListener('click',event=>{
 $('cartOpen').addEventListener('click',()=>{if(location.hash!=='#bag')location.hash='bag';else if(typeof window.renderRouteFromHash==='function')window.renderRouteFromHash();});$('wishlistOpen').addEventListener('click',()=>{if(location.hash!=='#wishlist')location.hash='wishlist';else if(typeof window.renderRouteFromHash==='function')window.renderRouteFromHash();});
 function openSearchPanel(){if(location.hash!=='#search')location.hash='search';else if(typeof window.renderRouteFromHash==='function')window.renderRouteFromHash();setTimeout(()=>document.getElementById('routeSearchInput')?.focus({preventScroll:true}),80)}
 function closeSearchPanel(){const panel=$('searchOverlay');panel.classList.remove('open');panel.setAttribute('aria-hidden','true');document.body.classList.toggle('locked',$('drawer').classList.contains('open')||$('modalWrap').classList.contains('open')||$('mobileMenu').classList.contains('open'));$('headerSearch').focus({preventScroll:true})}
-$('headerSearch').addEventListener('click',openSearchPanel);$('voiceSearch').addEventListener('click',()=>{openSearchPanel();setTimeout(()=>$('voiceSearchButton')?.click(),100)});
+$('headerSearch').addEventListener('click',openSearchPanel);
 $('searchClose').addEventListener('click',closeSearchPanel);
 $('searchOverlay').addEventListener('click',e=>{if(e.target===$('searchOverlay'))closeSearchPanel()});
 $('imageSearchButton').addEventListener('click',()=>$('searchImageFile').click());
