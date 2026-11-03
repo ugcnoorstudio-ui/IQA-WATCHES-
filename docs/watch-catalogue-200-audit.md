@@ -64,3 +64,7 @@ Do not merge catalogue data into the public storefront until:
 - all existing storefront safety filters and tests remain intact.
 
 The current research run is asynchronous. This document is an audit/progress artifact, not the final 200-row report.
+
+## Progress update — 2026-11-04
+
+The full 200-row candidate list from the repository research queue was passed explicitly to the deep-research run `01a1a33b-6827-7998-ae60-65b0eb854e25`. At the latest check the run is still active and has read 20 sources; no final candidate-level conclusions are available yet. The earlier run `01a1a334-398c-7907-a2db-e6dce863b828` is obsolete for this purpose: it incorrectly concluded that the candidate list was absent and must not be used as the 200-row result.
