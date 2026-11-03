@@ -30,6 +30,7 @@
         auth: {
           persistSession: true,
           autoRefreshToken: true,
+          storageKey: 'iqa-watches-admin-auth-v1',
           detectSessionInUrl: true,
           flowType: "pkce"
         },
@@ -85,6 +86,17 @@
       await supabaseClient.auth.signOut();
       throw error;
     }
+  }
+
+
+  async function signInWithGoogle() {
+    const supabaseClient = getClient();
+    const redirectTo = new URL("./", global.location.href).toString();
+    const { error } = await supabaseClient.auth.signInWithOAuth({
+      provider: "google",
+      options: { redirectTo }
+    });
+    if (error) throw error;
   }
 
   async function signOut() {
@@ -185,7 +197,7 @@
   }
 
   global.IQA_ADMIN_BACKEND = Object.freeze({
-    configured, getClient, signIn, signOut, getActiveProfile,
+    configured, getClient, signIn, signInWithGoogle, signOut, getActiveProfile,
     currentProfile, requireRole, readTable, countTable, mutate, uploadProductImage, onAuthStateChange
   });
 })(window);
