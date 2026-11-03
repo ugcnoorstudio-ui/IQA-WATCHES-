@@ -49,7 +49,7 @@ $('googleAuth').addEventListener('click',async()=>{
   button.disabled=false;passwordButton.disabled=false;
  }
 });
-\n$('signOut').addEventListener('click',async()=>{
+$('signOut').addEventListener('click',async()=>{
  const button=$('signOut');button.disabled=true;
  try{await backend.signOut();lock('You have been signed out.')}
  catch(error){if(error.message)message(error.message,true)}
