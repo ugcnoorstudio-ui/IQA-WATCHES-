@@ -625,7 +625,7 @@ body{background:var(--paper)}
  .drawer-account-copy{display:flex;flex-direction:column;gap:3px;min-width:0}
  .drawer-account-copy strong{font:600 15px/1.25 var(--serif);color:#211b13}
  .drawer-account-copy small{font:11px/1.4 var(--sans);color:#71634e}
- .drawer-signin{grid-column:1/-1;justify-self:start;display:inline-flex;align-items:center;gap:12px;padding:9px 16px;border-radius:24px;background:#17140f;color:#fff8ec;font-size:11px;font-weight:700;letter-spacing:.3px}
+ .drawer-account-actions{grid-column:1/-1;display:flex;align-items:center;gap:9px;flex-wrap:wrap}.drawer-signin,.drawer-register{display:inline-flex;align-items:center;justify-content:center;gap:10px;min-height:38px;padding:9px 16px;border:1px solid #17140f;border-radius:24px;font-size:11px;font-weight:700;letter-spacing:.3px;text-decoration:none;transition:background .18s,color .18s,border-color .18s}.drawer-signin{background:#17140f;color:#fff8ec}.drawer-signin:hover,.drawer-signin:focus-visible{background:#3a2d1d;color:#fff8ec}.drawer-register{background:transparent;color:#211b13}.drawer-register:hover,.drawer-register:focus-visible{background:#eadbc4;color:#211b13}
  .mobile-menu-nav{padding:0 16px}
  .mobile-menu-nav .drawer-group-label{padding:16px 6px 7px;border-top:1px solid #e0d2bc;font:700 9px/1.4 var(--sans);letter-spacing:2.1px;color:#a77c39}
  .mobile-menu-nav>a{display:grid;grid-template-columns:34px minmax(0,1fr) 18px;align-items:center;gap:8px;min-height:48px;padding:8px 8px;border:0;border-radius:8px;background:transparent;font:400 15px/1.2 var(--serif);color:#211b13}
@@ -718,7 +718,7 @@ body.menu-open #menuBackdrop{display:block}
 <section class="drawer-account-card" aria-label="Your account">
 <span class="drawer-avatar" aria-hidden="true">♙</span>
 <div class="drawer-account-copy"><strong>Welcome to IQA WATCHES</strong><small>Sign in to enjoy a more personal experience</small></div>
-<span class="drawer-signin">Sign in / Register <span aria-hidden="true">→</span></span>
+<div class="drawer-account-actions"><a class="drawer-signin" href="#login">Sign in <span aria-hidden="true">→</span></a><a class="drawer-register" href="#signup">Register <span aria-hidden="true">→</span></a></div>
 </section>
 <nav class="mobile-menu-nav" aria-label="Mobile navigation links">
 <div class="drawer-group-label">SHOP THE COLLECTION</div>
