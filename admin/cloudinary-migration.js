@@ -83,6 +83,47 @@ function mount(){
   staticBox.append(staticTitle,staticCopy,staticButton,staticStatus,staticOutput);
   host.prepend(staticBox);
  }
+
+ if(!host.querySelector('[data-cloudinary-unlinked-review]')){
+  const reviewBox=document.createElement('section');
+  reviewBox.className='panel';
+  reviewBox.setAttribute('data-cloudinary-unlinked-review','');
+  reviewBox.style.marginBottom='18px';
+  const reviewTitle=document.createElement('h3');
+  reviewTitle.textContent='Unlinked legacy image — safe review copy';
+  const reviewCopy=document.createElement('p');
+  reviewCopy.className='muted';
+  reviewCopy.textContent='Copy the one identified unlinked legacy image into iqa-watches/unassigned-review. It will not be attached to a product and the original Supabase file will remain untouched.';
+  const reviewButton=document.createElement('button');
+  reviewButton.type='button';reviewButton.className='btn primary';
+  reviewButton.textContent='Copy unlinked image to Cloudinary review folder';
+  const reviewStatus=document.createElement('p');
+  reviewStatus.className='muted';reviewStatus.setAttribute('role','status');reviewStatus.setAttribute('aria-live','polite');
+  const reviewOutput=document.createElement('pre');
+  reviewOutput.style.cssText='white-space:pre-wrap;overflow-wrap:anywhere;font-size:12px;max-height:240px;overflow:auto';
+  reviewButton.addEventListener('click',async()=>{
+   if(busy)return;
+   if(!window.confirm('Copy the single unlinked legacy image to Cloudinary review folder? No product will be changed and no Supabase file will be deleted.'))return;
+   busy=true;reviewButton.disabled=true;reviewButton.textContent='Copying image…';
+   reviewStatus.textContent='Verifying owner session and copying the source image…';reviewOutput.textContent='';
+   try{
+    api.requireRole(['owner']);
+    const {data,error}=await api.getClient().functions.invoke('iqa-migrate-unlinked-review',{body:{}});
+    if(error)throw error;
+    if(!data||data.ok!==true||data.status!=='copied_for_review')throw new Error(data?.error||'Copy could not be verified.');
+    reviewStatus.textContent='Image copied to Cloudinary review folder. Original Supabase file is untouched; no product record changed.';
+    reviewStatus.style.color='#385947';
+    reviewOutput.textContent=JSON.stringify(data,null,2);
+    reviewButton.textContent='Review copy completed';
+   }catch(error){
+    reviewStatus.textContent='Copy failed: '+(error?.message||String(error));
+    reviewStatus.style.color='#9b3b2f';reviewButton.textContent='Retry image copy';
+   }finally{busy=false;reviewButton.disabled=false;}
+  });
+  reviewBox.append(reviewTitle,reviewCopy,reviewButton,reviewStatus,reviewOutput);
+  host.prepend(reviewBox);
+ }
+
 }
 const observer=new MutationObserver(scheduleMount);
 function start(){
