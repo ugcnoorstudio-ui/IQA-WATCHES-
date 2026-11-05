@@ -145,6 +145,7 @@ test('Cloudinary media library endpoint is owner-gated, read-only, and restricte
   const manager = read('admin/media-manager.js');
   assert.match(fn, /profiles\[0\]\.role !== "owner"/);
   assert.match(fn, /profiles\[0\]\.active !== true/);
+  assert.ok(fn.includes('.match(/^Bearer\\s+(.+)$/i)'));
   assert.match(fn, /resources\/image\/upload/);
   assert.match(fn, /prefix", "iqa-watches\//);
   assert.match(fn, /max_results", "500"/);
