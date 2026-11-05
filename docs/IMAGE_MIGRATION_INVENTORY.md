@@ -90,6 +90,23 @@ Verification boundary: repository references are confirmed. The web inspection s
 
 No duplicate copies were created, no image records were changed, and no Supabase originals were deleted.
 
+
+## Step 4 — unlinked legacy image review
+
+The planned Step 4 source object was already copied safely to Cloudinary during the Step 2 reconciliation, so it will **not** be uploaded a second time.
+
+- Supabase source object: `product-images/7fea8610-9261-4bbe-b80a-5ba1e2745510/MP000000025248756_437Wx649H_202502030016151.jpeg`
+- Current live Storage check: object still exists, size 30,161 bytes, and has no matching `product_media.storage_path` row.
+- Cloudinary review copy: `iqa-watches/unassigned-review/legacy-MP000000025248756-437Wx649H-202502030016151`
+- Cloudinary URL: `https://res.cloudinary.com/rrmdzam7/image/upload/v1793907482/iqa-watches/unassigned-review/legacy-MP000000025248756-437Wx649H-202502030016151.jpg`
+- Prior Admin Panel result: `ok=true`, `status=copied_for_review`; original Supabase object untouched and no product record changed.
+
+### Step 4 review status
+
+The copy and source-preservation checks are confirmed. The image itself could not be fetched by the available inspection session for visual identification. Therefore its product identity remains **unconfirmed**; do not attach it to Fastrack Thor or any other product until it has been visually inspected in the owner-only Cloudinary Media Manager. Keep both the Cloudinary review copy and Supabase original; do not delete either.
+
+No duplicate upload, product association update, or deletion was performed.
+
 ## Remaining verification before any cleanup
 
 1. Refresh the owner-only Cloudinary Media Manager and confirm the complete library contains the expected six static IDs, three brand IDs, product images, and the new unassigned review-copy. The connected repository/database tools do not expose a Cloudinary account-wide inventory.
