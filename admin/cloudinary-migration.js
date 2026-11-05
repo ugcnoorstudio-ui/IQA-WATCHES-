@@ -31,9 +31,10 @@ function mount(){
    if(!data||data.ok!==true)throw new Error(data?.error||'Migration was not confirmed.');
    const rows=Array.isArray(data.results)?data.results:[];
    const migrated=rows.filter(x=>x.status==='migrated').length;
+   const already=rows.filter(x=>x.status==='already_migrated').length;
    const unlinked=rows.filter(x=>x.status==='uploaded_unlinked_asset').length;
-   const failed=rows.filter(x=>!['migrated','uploaded_unlinked_asset'].includes(x.status));
-   status.textContent='Migration response: '+migrated+' linked images migrated; '+unlinked+' unlinked files copied; '+failed.length+' errors. '+(failed.length?failed.map(x=>x.path+': '+x.status).join(' | '):'Original Supabase files remain intact.');
+   const failed=rows.filter(x=>!['migrated','already_migrated','uploaded_unlinked_asset'].includes(x.status));
+   status.textContent='Migration response: '+migrated+' linked images newly migrated; '+already+' already on Cloudinary; '+unlinked+' unlinked files copied; '+failed.length+' errors. '+(failed.length?failed.map(x=>x.path+': '+x.status).join(' | '):'All linked images are accounted for. Original Supabase files remain intact.');
    status.style.color=failed.length?'#9b3b2f':'#385947';
    button.textContent=failed.length?'Migration needs review':'Migration completed';
   }catch(e){let detail=e?.message||String(e);try{const response=e?.context;if(response&&typeof response.clone==='function'){const payload=await response.clone().json();if(payload?.missing?.length)detail+=' — Missing secrets: '+payload.missing.join(', ');else if(payload?.error)detail+=' — '+payload.error;}}catch(_){}status.textContent='Migration failed: '+detail;status.style.color='#9b3b2f';button.textContent='Retry migration';}
