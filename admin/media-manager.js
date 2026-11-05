@@ -29,8 +29,8 @@ const CLOUD='https://res.cloudinary.com/rrmdzam7/image/upload/';
 let active='Product', busy=false, productRows=[], productNames=new Map(), unlinkedResult=null;
 const tabs=['Product','Homepage','Category','Editorial','Unassigned','Failed Uploads'];
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-function cloudUrl(id,ext='jpg',width=900){return CLOUD+(ext==='svg'?'':('f_auto,q_auto,w_'+width+',c_limit/'))+id+'.'+ext}
-function optimized(url,width=900){if(typeof url!=='string'||!url.startsWith('https://res.cloudinary.com/'))return '';return url.replace('/image/upload/','/image/upload/f_auto,q_auto,w_'+width+',c_limit/')}
+function cloudUrl(id,ext='jpg',width=900){return CLOUD+(ext==='svg'?'':('c_limit,w_'+width+'/f_auto/q_auto/'))+id+'.'+ext}
+function optimized(url,width=900){if(typeof url!=='string'||!url.startsWith('https://res.cloudinary.com/'))return '';return url.replace('/image/upload/','/image/upload/c_limit,w_'+width+'/f_auto/q_auto/')}
 function card(label,alt,url,meta,actions=''){const preview=url?'<img src="'+esc(url)+'" alt="'+esc(alt)+'" loading="lazy" style="max-width:100%;max-height:150px;object-fit:contain">':'<span class="muted" style="font-size:11px">Preview pending / unavailable</span>';return '<article class="panel" style="padding:12px;min-width:0"><div style="height:150px;display:grid;place-items:center;background:#111210;border:1px solid var(--line);border-radius:4px;overflow:hidden">'+preview+'</div><h3 style="margin:10px 0 4px">'+esc(label)+'</h3><p class="muted" style="font-size:11px;overflow-wrap:anywhere;margin:0 0 8px">'+esc(meta)+'</p>'+actions+'</article>'}
 function grid(items){return '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px">'+items.join('')+'</div>'}
 function failedRows(){try{return window.IQA_ADMIN_BACKEND?.listFailedImageUploads?.()||[]}catch(_){return []}}
