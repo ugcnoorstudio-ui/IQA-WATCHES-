@@ -117,3 +117,42 @@ No duplicate upload, product association update, or deletion was performed.
 ## Safety
 
 No Supabase Storage objects, database rows, or repository source assets were deleted or changed during these audits. The unlinked JPEG was copied to Cloudinary for review only; its Supabase original remains intact. No image URL switch or product association change was performed in Step 2.
+
+
+## Step 5 — complete Supabase Storage object audit (read-only)
+
+Live read-only SQL inventory was run against **all** rows in `storage.objects`, grouped by bucket, and reconciled against `public.product_media`.
+
+### Bucket totals
+
+| Bucket | Objects | Total bytes |
+|---|---:|---:|
+| `product-images` | 6 | 3,713,565 bytes (~3.54 MiB / 3.71 MB) |
+
+No other Storage buckets contained objects at the time of this audit.
+
+### Object-by-object classification
+
+| Storage object | Size | Product media link | Classification / action |
+|---|---:|---|---|
+| `0a8836eb-b7ad-41b6-874f-3737e8e94482/72380da5-682f-4b86-a551-03d6cf283b8a.jpg` | 30,161 B | Yes — Casio AE-1200WHL-5AV | Legacy source still exists; matching media row already has Cloudinary URL/public ID. Retain pending end-to-end live gallery verification. |
+| `7fea8610-9261-4bbe-b80a-5ba1e2745510/d1875a84-aedb-4311-a6a3-02dcd0c8a745.png` | 1,528,824 B | Yes — Fastrack Thor | Legacy source still exists; matching media row already has Cloudinary URL/public ID. Retain pending end-to-end live gallery verification. |
+| `7fea8610-9261-4bbe-b80a-5ba1e2745510/MP000000025248756_437Wx649H_202502030016151.jpeg` | 30,161 B | No — 0 matches | Unlinked legacy JPEG; Step 4 Cloudinary review copy exists. Identity remains visually unconfirmed. Retain original and review copy. |
+| `b440d67b-7bd7-49bd-bdb3-817dc16b7ea7/ee339630-71a4-430d-bccf-fb89244de399.png` | 2,124,419 B | Yes — Casio AE-1200WHD-1AV | Legacy source still exists; matching media row already has Cloudinary URL/public ID. Retain pending end-to-end live gallery verification. |
+| `Product image/.emptyFolderPlaceholder` | 0 B | No | Empty folder placeholder; no image bytes and no product_media link. Do not delete as part of this audit. |
+| `Untitled folder/Untitled folder/.emptyFolderPlaceholder` | 0 B | No | Empty folder placeholder; no image bytes and no product_media link. Do not delete as part of this audit. |
+
+### Reconciliation checks
+
+- Exactly 6 Storage objects were returned across all buckets.
+- Exactly 3 non-empty objects are linked to product_media rows by `bucket_id + storage_path`.
+- Exactly 1 non-empty JPEG is unlinked and matches the Step 4 review-copy source.
+- Exactly 2 zero-byte placeholder objects exist.
+- The four current `product_media` rows all have Cloudinary `image_url` and `cloudinary_public_id`; three still retain a legacy `storage_path`, and one row has `storage_path = null`.
+- A separate anti-join check confirmed all three non-null legacy `product_media.storage_path` values still resolve to existing Storage objects. The fourth media row has no legacy Storage path and already points to Cloudinary.
+
+### Step 5 result and safety boundary
+
+The audit and reconciliation are complete. **No Storage object, database row, bucket setting, or policy was modified. Nothing was deleted.** The three linked legacy files are retained until the live product galleries and admin upload/gallery paths are verified against Cloudinary. The unlinked JPEG remains under review until visual identification. The two empty placeholders are recorded as zero-byte folder artifacts, not treated as image files.
+
+Any cleanup must be a separate, explicitly approved operation after the relevant live checks; this audit itself authorizes no deletion.
