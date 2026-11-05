@@ -1,0 +1,64 @@
+const test = require('node:test');
+const assert = require('node:assert/strict');
+const fs = require('node:fs');
+const path = require('node:path');
+
+const read = file => fs.readFileSync(path.join(__dirname, '..', file), 'utf8');
+
+test('static Cloudinary migration is owner-gated and limited to six approved homepage image sources', () => {
+  const fn = read('supabase/functions/iqa-migrate-static-cloudinary/index.ts');
+  assert.match(fn, /const ORIGIN = "https:\/\/ugcnoorstudio-ui\.github\.io"/);
+  assert.match(fn, /staff_profiles/);
+  assert.match(fn, /profiles\[0\]\.role !== "owner"/);
+  assert.match(fn, /profiles\[0\]\.active !== true/);
+  assert.match(fn, /https:\/\/api\.cloudinary\.com/);
+  assert.match(fn, /CLOUDINARY_API_SECRET/);
+  assert.doesNotMatch(fn, /storage\/v1\/object|storage\.from|deleteObject|image\/destroy/);
+  const keys = [...fn.matchAll(/key: "([a-z-]+)", url:/g)].map(match => match[1]);
+  assert.deepEqual(keys, [
+    'home-hero',
+    'collection-classic',
+    'collection-sport',
+    'collection-editorial',
+    'collection-modern',
+    'editorial-detail'
+  ]);
+});
+
+test('admin exposes a confirmed owner-only static image migration without changing storefront URLs prematurely', () => {
+  const ui = read('admin/cloudinary-migration.js');
+  assert.match(ui, /data-cloudinary-static-migration/);
+  assert.match(ui, /Migrate 6 static images to Cloudinary/);
+  assert.match(ui, /api\.requireRole\(\['owner'\]\)/);
+  assert.match(ui, /functions\.invoke\('iqa-migrate-static-cloudinary'/);
+  assert.match(ui, /window\.confirm\(/);
+  assert.match(ui, /Live homepage has not been changed yet/);
+});
+
+test('admin product gallery uploader validates and sends up to eight images through the signed Cloudinary function', () => {
+  const admin = read('admin/admin.js');
+  const backend = read('admin/backend.js');
+  assert.match(admin, /Upload \/ replace product image/);
+  assert.match(admin, /if\(files\.length>8\)/);
+  assert.match(admin, /await api\.uploadProductImage\(values\.product_id,files\[index\]/);
+  assert.match(backend, /file\.size > 5 \* 1024 \* 1024/);
+  assert.match(backend, /functions\.invoke\("iqa-product-image-upload"/);
+  assert.doesNotMatch(backend, /storage\.from\(["']product-images/);
+});
+
+test('static homepage images are explicitly inventoried for the Cloudinary cutover', () => {
+  const html = read('index.html');
+  const fn = read('supabase/functions/iqa-migrate-static-cloudinary/index.ts');
+  for (const id of [
+    'photo-1524592094714-0f0654e20314',
+    'photo-1523275335684-37898b6baf30',
+    'photo-1547996160-81dfa63595aa',
+    'photo-1523170335258-f5ed11844a49',
+    'photo-1508685096489-7aacd43bd3b1',
+    'photo-1434056886845-dac89ffe9b56'
+  ]) {
+    assert.ok(html.includes(id), 'homepage should still reference the inventoried source image ' + id);
+    assert.ok(fn.includes(id), 'migration function should include the same source image ' + id);
+  }
+  assert.match(html, /\.\/assets\/iqa-watches-header-logo\.svg/);
+});
