@@ -114,3 +114,24 @@ test('Cloudinary media manager exposes all six media groups and safe owner-only 
   assert.match(backend, /clearFailedImageUpload/);
   assert.match(html, /media-manager\.js\?v=20261106-media-manager-v1/);
 });
+
+test('Cloudinary delivery uses bounded responsive widths and separate automatic format and quality components', () => {
+  const html = read('index.html');
+  const admin = read('admin/admin.js');
+  const manager = read('admin/media-manager.js');
+  assert.match(html, /c_limit,w_480\/f_auto\/q_auto/);
+  assert.match(html, /srcset=/);
+  assert.match(html, /sizes="\(max-width: 760px\) 100vw/);
+  assert.match(html, /parts\.splice\(uploadIndex\+1,0,'c_limit,w_1200','f_auto','q_auto'\)/);
+  assert.match(admin, /c_limit,w_320\/f_auto\/q_auto/);
+  assert.match(manager, /c_limit,w_\x27\+width\+\x27\/f_auto\/q_auto/);
+  assert.doesNotMatch(html + admin + manager, /f_auto,q_auto/);
+});
+
+test('unreferenced local Casio JPG is not served by storefront or Admin in place of verified Cloudinary product media', () => {
+  const html = read('index.html');
+  const admin = read('admin/admin.js');
+  assert.doesNotMatch(html, /casio-ae-1200whl-5av\.jpg/);
+  assert.doesNotMatch(admin, /casio-ae-1200whl-5av\.jpg/);
+  assert.match(admin, /res\.cloudinary\.com/);
+});
