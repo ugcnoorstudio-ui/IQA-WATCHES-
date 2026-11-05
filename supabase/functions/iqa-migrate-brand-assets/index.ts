@@ -38,7 +38,7 @@ Deno.serve(async (req: Request) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: CORS });
   if (req.method !== "POST") return out({ error: "POST required" }, 405);
   if (req.headers.get("origin") !== ORIGIN) return out({ error: "Origin not allowed" }, 403);
-  const bearer = (req.headers.get("authorization") || "").match(/^Bearer\\s+(.+)$/i);
+  const bearer = (req.headers.get("authorization") || "").match(/^Bearer\s+(.+)$/i);
   if (!bearer) return out({ error: "Sign in required" }, 401);
 
   const url = env("SUPABASE_URL");
@@ -82,8 +82,8 @@ Deno.serve(async (req: Request) => {
         continue;
       }
       const svg = new TextDecoder().decode(bytes);
-      if (!/^\\s*(?:<\\?xml[^>]*>\\s*)?<svg[\\s>]/i.test(svg) ||
-          /<script\\b|\\bon[a-z]+\\s*=|<foreignObject\\b|(?:href|xlink:href)\\s*=\\s*["']https?:/i.test(svg)) {
+      if (!/^\s*(?:<\?xml[^>]*>\s*)?<svg[\s>]/i.test(svg) ||
+          /<script\b|\bon[a-z]+\s*=|<foreignObject\b|(?:href|xlink:href)\s*=\s*["']https?:/i.test(svg)) {
         results.push({ key: source.key, status: "unsafe_or_invalid_svg" });
         continue;
       }
