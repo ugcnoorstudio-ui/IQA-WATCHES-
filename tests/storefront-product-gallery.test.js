@@ -12,11 +12,12 @@ test('storefront inline application script remains syntactically valid', () => {
   new vm.Script(match[1], { filename: 'index.html:inline-storefront' });
 });
 
-test('Supabase product_media rows are mapped into safe public gallery image URLs', () => {
-  assert.match(html, /from\('product_media'\)\.select\('id,product_id,storage_path,alt_text,sort_order,is_primary'\)/);
-  assert.match(html, /storage\.from\('product-images'\)\.getPublicUrl\(item\.storage_path\)/);
+test('Supabase product_media metadata is mapped only to Cloudinary public gallery image URLs', () => {
+  assert.match(html, /from\('product_media'\)\.select\('id,product_id,storage_path,image_url,cloudinary_public_id,alt_text,sort_order,is_primary'\)/);
+  assert.match(html, /filter\(item=>typeof item\.image_url==='string'&&item\.image_url\.includes\('res\.cloudinary\.com'\)\)/);
   assert.match(html, /gallery:galleryImages/);
   assert.match(html, /const gallery=\(mediaByProduct\.get\(row\.id\)\|\|\[\]\)/);
+  assert.doesNotMatch(html, /storage\.from\('product-images'\)\.getPublicUrl/);
 });
 
 test('product detail modal renders available photos with keyboard-operable thumbnail controls', () => {
