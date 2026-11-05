@@ -61,7 +61,7 @@ function tabBody(){
 }
 async function loadProducts(){
  const api=window.IQA_ADMIN_BACKEND;
- if(!api||!api.currentProfile())return;
+ if(!api||!api.currentProfile())throw new Error('Owner session is not ready. Sign in again, then refresh the library.');
  api.requireRole(['owner']);
  const [media,products,library]=await Promise.all([
   api.readTable('product_media','id,product_id,image_url,cloudinary_public_id,alt_text,sort_order,is_primary',{limit:100,orderBy:'sort_order'}),
@@ -92,7 +92,23 @@ function mount(){
   tabbar.innerHTML=tabs.map(t=>'<button type="button" class="btn '+(active===t?'primary':'secondary')+'" data-media-tab="'+esc(t)+'">'+esc(t)+'</button>').join('');
   body.innerHTML=tabBody();
  }
- async function refreshData(){try{await loadProducts();render();setStatus(box,'Library refreshed. '+cloudResources.length+' Cloudinary assets and '+productRows.length+' product media records loaded.')}catch(e){setStatus(box,'Could not load media records: '+(e?.message||String(e)),true)}}
+ async function refreshData(){
+  if(refresh.disabled)return;
+  refresh.disabled=true;
+  const originalLabel='Refresh library';
+  refresh.textContent='Refreshing…';
+  setStatus(box,'Refreshing Cloudinary assets and product media records…');
+  try{
+   await loadProducts();
+   render();
+   setStatus(box,'Library refreshed. '+cloudResources.length+' Cloudinary assets and '+productRows.length+' product media records loaded.');
+  }catch(e){
+   setStatus(box,'Could not refresh library: '+(e?.message||String(e)),true);
+  }finally{
+   refresh.disabled=false;
+   refresh.textContent=originalLabel;
+  }
+ }
  tabbar.addEventListener('click',e=>{const b=e.target.closest('[data-media-tab]');if(!b)return;active=b.getAttribute('data-media-tab');render()});
  body.addEventListener('click',async e=>{
   const migrate=e.target.closest('[data-migrate-brand]');
@@ -118,7 +134,7 @@ function mount(){
    picker.click();
   }
  });
- refresh.addEventListener('click',refreshData);
+ refresh.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();void refreshData();});
  box.append(head,description,tabbar,body,status);host.prepend(box);
  refreshData();
 }
