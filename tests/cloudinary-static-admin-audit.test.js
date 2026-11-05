@@ -65,5 +65,5 @@ test('static homepage images are explicitly inventoried for the Cloudinary cutov
 
 test('admin shell cache-busts the new static migration controls', () => {
   const html = read('admin/index.html');
-  assert.match(html, /cloudinary-migration\\.js\\?v=20261106-static-migration/);
+  assert.match(html, /cloudinary-migration\.js\?v=20261106-static-migration/);
 });
