@@ -156,3 +156,27 @@ No other Storage buckets contained objects at the time of this audit.
 The audit and reconciliation are complete. **No Storage object, database row, bucket setting, or policy was modified. Nothing was deleted.** The three linked legacy files are retained until the live product galleries and admin upload/gallery paths are verified against Cloudinary. The unlinked JPEG remains under review until visual identification. The two empty placeholders are recorded as zero-byte folder artifacts, not treated as image files.
 
 Any cleanup must be a separate, explicitly approved operation after the relevant live checks; this audit itself authorizes no deletion.
+
+
+## Step 6 — image optimization and delivery caching
+
+### Responsive delivery changes
+
+- The six homepage/static image assets already use Cloudinary `f_auto` and `q_auto` transformations and responsive `srcset` widths.
+- Dynamic product images previously received a single 1,200 px Cloudinary transformation. The storefront now builds 320, 480, 800 and 1,200 px variants for Cloudinary raster images and adds `srcset` plus a responsive `sizes` hint.
+- A lightweight `MutationObserver` applies the same responsive attributes to product cards, galleries, drawers and route content created after the initial page render.
+- Existing explicit `srcset` attributes are preserved. Non-Cloudinary URLs and SVG brand assets are excluded. Original Cloudinary public IDs and source assets are not changed.
+- Every generated raster variant uses `c_limit`, `f_auto` and `q_auto`; the browser selects the appropriate candidate from the available widths.
+
+### Cache behavior and limits
+
+- Cloudinary standard uploaded-asset delivery is CDN-cached (documented default: up to 30 days). Versioned delivery URLs are retained where present so changed uploads can use a new version URL instead of relying on stale cached bytes.
+- GitHub Pages does not provide configurable per-file `Cache-Control` response headers for this static deployment. Image caching therefore remains controlled by Cloudinary's delivery response/CDN, not by a custom Pages header.
+- Cloudinary's `fl_immutable_cache` is not added: Cloudinary documents it as currently supported only by Firefox, so it would not provide a reliable cross-browser cache policy.
+- Live response-header inspection from this execution environment was not available; CDN cache policy is documented from Cloudinary's current delivery guidance, not represented as a measured browser-cache header test.
+
+### Step 6 verification
+
+- Added automated tests for 4 responsive widths, preservation of Cloudinary version segments, replacement (not duplication) of existing transforms, SVG/non-Cloudinary exclusion, and dynamic DOM enhancement.
+- Run JavaScript syntax, all Node regression tests, desktop/mobile Playwright checks and deployment before marking Step 6 complete.
+- No Supabase Storage objects, product media rows, or Cloudinary originals are deleted or rewritten by this optimization step.
