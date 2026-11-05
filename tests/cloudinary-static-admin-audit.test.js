@@ -71,3 +71,18 @@ test('admin shell cache-busts the new static migration controls', () => {
   const html = read('admin/index.html');
   assert.match(html, /cloudinary-migration\.js\?v=20261106-static-migration/);
 });
+
+test('unlinked legacy image review copy is owner-gated, fixed-source, and never deletes or links the original', () => {
+  const fn = read('supabase/functions/iqa-migrate-unlinked-review/index.ts');
+  const ui = read('admin/cloudinary-migration.js');
+  assert.match(fn, /profiles\[0\]\.role !== "owner"/);
+  assert.match(fn, /profiles\[0\]\.active !== true/);
+  assert.match(fn, /MP000000025248756_437Wx649H_202502030016151\.jpeg/);
+  assert.match(fn, /iqa-watches\/unassigned-review/);
+  assert.match(fn, /uploaded\.public_id !== FOLDER \+ "\/" \+ PUBLIC_ID/);
+  assert.match(fn, /Original Supabase object remains untouched/);
+  assert.doesNotMatch(fn, /storage\/v1\/object\/sign|\/storage\/v1\/object\/[^"]+\/[^"]+\/delete|deleteObject|image\/destroy/);
+  assert.match(ui, /data-cloudinary-unlinked-review/);
+  assert.match(ui, /functions\.invoke\('iqa-migrate-unlinked-review'/);
+  assert.match(ui, /No product will be changed and no Supabase file will be deleted/);
+});
