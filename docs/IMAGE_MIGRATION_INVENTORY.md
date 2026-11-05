@@ -180,3 +180,38 @@ Any cleanup must be a separate, explicitly approved operation after the relevant
 - Added automated tests for 4 responsive widths, preservation of Cloudinary version segments, replacement (not duplication) of existing transforms, SVG/non-Cloudinary exclusion, and dynamic DOM enhancement.
 - Run JavaScript syntax, all Node regression tests, desktop/mobile Playwright checks and deployment before marking Step 6 complete.
 - No Supabase Storage objects, product media rows, or Cloudinary originals are deleted or rewritten by this optimization step.
+
+## Step 7A — upload-path prevention and fresh Storage baseline (read-only)
+
+Audit date: 2026-11-06
+
+### Admin upload path
+
+- The owner-only Admin Panel image upload calls the `iqa-product-image-upload` Edge Function.
+- The Edge Function validates the signed-in staff user and active owner role, validates image MIME type and file magic bytes, checks the target product, then uploads image bytes to Cloudinary under `iqa-watches/products`.
+- After Cloudinary confirms the asset, the function registers only the Cloudinary URL and public ID in `product_media` through `iqa_register_cloudinary_product_image`.
+- The reviewed Edge Function contains no Supabase Storage object upload call. A failed metadata registration triggers a best-effort Cloudinary asset cleanup.
+- The browser Admin backend sends the image as multipart form data to this Edge Function; it does not directly upload image bytes to `storage.from(...)`.
+- The local asset-intake helper is explicitly local-preview/validation only and does not upload files.
+
+### Fresh live Storage baseline
+
+A fresh read-only query against `storage.objects` returned:
+
+| Bucket | Objects | Total bytes | Zero-byte objects |
+|---|---:|---:|---:|
+| `product-images` | 6 | 3,713,565 (~3.71 MB) | 2 |
+
+This matches the Step 5 baseline. No object, database row, bucket setting, or policy was modified.
+
+### Step 7A result
+
+The reviewed Admin product-image upload path is Cloudinary-first and does not write product image bytes to Supabase Storage. Supabase continues to hold product records and Cloudinary media metadata. The current six legacy Storage objects remain unchanged.
+
+### Remaining before any Storage cleanup
+
+- Complete a repository-wide scan of all upload entry points and server functions, including non-image files, before declaring every Storage write path eliminated.
+- Visually inspect the unassigned legacy JPEG in the owner-only Cloudinary Media Manager; do not attach it automatically.
+- Verify all live product galleries and the Admin upload/gallery workflow.
+- Only then prepare a proposed deletion list. No Storage deletion is authorized by this audit.
+
