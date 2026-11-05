@@ -152,3 +152,12 @@ test('Cloudinary media library endpoint is owner-gated, read-only, and restricte
   assert.match(manager, /cloudResources\.filter/);
   assert.match(manager, /assetUrl\('iqa-watches\/static\//);
 });
+
+test('deployed product upload source is Cloudinary-only and stores metadata through the restricted Cloudinary RPC', () => {
+  const fn = read('supabase/functions/iqa-product-image-upload/index.ts');
+  assert.match(fn, /api\.cloudinary\.com/);
+  assert.match(fn, /iqa_register_cloudinary_product_image/);
+  assert.match(fn, /iqa-watches\/products/);
+  assert.match(fn, /CLOUDINARY_API_SECRET|apiSecret/);
+  assert.doesNotMatch(fn, /storage\/v1\/object\/product-images|iqa_register_product_image/);
+});
