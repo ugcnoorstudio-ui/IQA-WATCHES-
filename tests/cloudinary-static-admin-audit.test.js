@@ -46,21 +46,25 @@ test('admin product gallery uploader validates and sends up to eight images thro
   assert.doesNotMatch(backend, /storage\.from\(["']product-images/);
 });
 
-test('static homepage images are explicitly inventoried for the Cloudinary cutover', () => {
+test('homepage static imagery is served from the six migrated Cloudinary assets', () => {
   const html = read('index.html');
   const fn = read('supabase/functions/iqa-migrate-static-cloudinary/index.ts');
-  for (const id of [
-    'photo-1524592094714-0f0654e20314',
-    'photo-1523275335684-37898b6baf30',
-    'photo-1547996160-81dfa63595aa',
-    'photo-1523170335258-f5ed11844a49',
-    'photo-1508685096489-7aacd43bd3b1',
-    'photo-1434056886845-dac89ffe9b56'
-  ]) {
-    assert.ok(html.includes(id), 'homepage should still reference the inventoried source image ' + id);
-    assert.ok(fn.includes(id), 'migration function should include the same source image ' + id);
+  const assets = [
+    ['photo-1524592094714-0f0654e20314', 'home-hero'],
+    ['photo-1523275335684-37898b6baf30', 'collection-classic'],
+    ['photo-1547996160-81dfa63595aa', 'collection-sport'],
+    ['photo-1523170335258-f5ed11844a49', 'collection-editorial'],
+    ['photo-1508685096489-7aacd43bd3b1', 'collection-modern'],
+    ['photo-1434056886845-dac89ffe9b56', 'editorial-detail']
+  ];
+  for (const [sourceId, publicId] of assets) {
+    assert.ok(!html.includes(sourceId), 'homepage must no longer request legacy Unsplash image ' + sourceId);
+    assert.ok(html.includes('https://res.cloudinary.com/rrmdzam7/image/upload/f_auto,q_auto/iqa-watches/static/' + publicId + '.jpg'),
+      'homepage should use migrated Cloudinary asset ' + publicId);
+    assert.ok(fn.includes(publicId), 'migration function should provision the same Cloudinary asset ' + publicId);
   }
   assert.match(html, /\.\/assets\/iqa-watches-header-logo\.svg/);
+  assert.doesNotMatch(html, /https:\/\/images\.unsplash\.com\/photo-/);
 });
 
 test('admin shell cache-busts the new static migration controls', () => {
