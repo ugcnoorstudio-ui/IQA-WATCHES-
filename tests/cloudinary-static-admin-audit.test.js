@@ -63,7 +63,8 @@ test('homepage static imagery is served from the six migrated Cloudinary assets'
       'homepage should use migrated Cloudinary asset ' + publicId);
     assert.ok(fn.includes(publicId), 'migration function should provision the same Cloudinary asset ' + publicId);
   }
-  assert.match(html, /\.\/assets\/iqa-watches-header-logo\.svg/);
+  assert.match(html, /https:\/\/res\.cloudinary\.com\/rrmdzam7\/image\/upload\/iqa-watches\/brand\/iqa-watches-header-logo\.svg/);
+  assert.doesNotMatch(html, /\.\/assets\/iqa-watches-header-logo\.svg/);
   assert.doesNotMatch(html, /https:\/\/images\.unsplash\.com\/photo-/);
 });
 
