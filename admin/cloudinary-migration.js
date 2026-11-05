@@ -1,11 +1,13 @@
 (()=>{'use strict';
-const PROJECT='https://nyhyfdququxnorqlnnqq.supabase.co';
 let busy=false;
+let scheduled=false;
+function scheduleMount(){if(scheduled)return;scheduled=true;queueMicrotask(()=>{scheduled=false;mount()})}
 function mount(){
  const host=document.getElementById('content');
  const api=window.IQA_ADMIN_BACKEND;
  if(!host||!api||!api.currentProfile()||host.querySelector('[data-cloudinary-migration]'))return;
- if(!location.hash.includes('health')&&!location.hash.includes('overview'))return;
+ const route=(location.hash.replace(/^#/,'')||'overview');
+ if(route!=='health'&&route!=='overview')return;
  const box=document.createElement('section');
  box.className='panel';
  box.setAttribute('data-cloudinary-migration','');
@@ -40,7 +42,16 @@ function mount(){
  box.append(title,copy,button,status);
  host.prepend(box);
 }
-const observer=new MutationObserver(mount);
-function start(){mount();const root=document.getElementById('content');if(root)observer.observe(root,{childList:true,subtree:true});window.addEventListener('hashchange',mount)}
+const observer=new MutationObserver(scheduleMount);
+function start(){
+ const root=document.getElementById('content');
+ if(root)observer.observe(root,{childList:true,subtree:true});
+ window.addEventListener('hashchange',scheduleMount);
+ const originalRefresh=window.IQA_ADMIN_REFRESH;
+ if(typeof originalRefresh==='function')window.IQA_ADMIN_REFRESH=function(){originalRefresh();scheduleMount()};
+ const api=window.IQA_ADMIN_BACKEND;
+ if(api&&typeof api.onAuthStateChange==='function')try{api.onAuthStateChange(()=>scheduleMount())}catch(_){}
+ scheduleMount();
+}
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',start);else start();
 })();
