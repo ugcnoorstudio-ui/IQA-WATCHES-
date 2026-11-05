@@ -69,7 +69,7 @@ test('homepage static imagery is served from the six migrated Cloudinary assets'
 
 test('admin shell cache-busts the new static migration controls', () => {
   const html = read('admin/index.html');
-  assert.match(html, /cloudinary-migration\.js\?v=20261106-static-migration/);
+  assert.match(html, /cloudinary-migration\.js\?v=20261106-unlinked-review/);
 });
 
 test('unlinked legacy image review copy is owner-gated, fixed-source, and never deletes or links the original', () => {
