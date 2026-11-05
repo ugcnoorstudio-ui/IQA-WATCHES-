@@ -112,7 +112,7 @@ test('Cloudinary media manager exposes all six media groups and safe owner-only 
   assert.match(backend, /recordFailedImageUpload/);
   assert.match(backend, /listFailedImageUploads/);
   assert.match(backend, /clearFailedImageUpload/);
-  assert.match(html, /media-manager\.js\?v=20261106-media-manager-v1/);
+  assert.match(html, /media-manager\.js\?v=20261106-cloudinary-live-library-v2/);
 });
 
 test('Cloudinary delivery uses bounded responsive widths and separate automatic format and quality components', () => {
