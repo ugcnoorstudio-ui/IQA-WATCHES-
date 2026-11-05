@@ -62,3 +62,8 @@ test('static homepage images are explicitly inventoried for the Cloudinary cutov
   }
   assert.match(html, /\.\/assets\/iqa-watches-header-logo\.svg/);
 });
+
+test('admin shell cache-busts the new static migration controls', () => {
+  const html = read('admin/index.html');
+  assert.match(html, /cloudinary-migration\\.js\\?v=20261106-static-migration/);
+});
