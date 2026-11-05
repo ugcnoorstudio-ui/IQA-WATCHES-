@@ -166,6 +166,37 @@
     return data;
   }
 
+  function listFailedImageUploads() {
+    try {
+      const rows = JSON.parse(global.localStorage?.getItem("iqaFailedImageUploads") || "[]");
+      return Array.isArray(rows) ? rows.filter(x => x && typeof x.id === "string") : [];
+    } catch (_) { return []; }
+  }
+
+  function clearFailedImageUpload(id) {
+    try {
+      const rows = listFailedImageUploads().filter(x => x.id !== id);
+      global.localStorage?.setItem("iqaFailedImageUploads", JSON.stringify(rows));
+    } catch (_) {}
+  }
+
+  function recordFailedImageUpload(productId, file, altText, error) {
+    try {
+      const rows = listFailedImageUploads();
+      rows.unshift({
+        id: global.crypto?.randomUUID?.() || String(Date.now()) + "-" + Math.random().toString(16).slice(2),
+        productId: String(productId),
+        fileName: String(file?.name || "product-image"),
+        mimeType: String(file?.type || ""),
+        size: Number(file?.size || 0),
+        altText: String(altText || ""),
+        error: String(error?.message || error || "Upload failed").slice(0, 500),
+        createdAt: new Date().toISOString()
+      });
+      global.localStorage?.setItem("iqaFailedImageUploads", JSON.stringify(rows.slice(0, 50)));
+    } catch (_) {}
+  }
+
   async function uploadProductImage(productId, file, altText, isPrimary) {
     requireRole(["owner"]);
     if (!/^[0-9a-f-]{36}$/i.test(String(productId || ""))) throw new Error("Choose a valid product.");
@@ -178,14 +209,19 @@
     form.append("image", file, file.name || "product-image");
     form.append("alt_text", String(altText || "").trim());
     form.append("is_primary", isPrimary === true ? "true" : "false");
-    const { data, error } = await getClient().functions.invoke("iqa-product-image-upload", { body: form });
-    if (error) throw error;
-    if (!data || data.ok !== true) throw new Error(data?.error || "The image upload was not confirmed.");
-    return data;
+    try {
+      const { data, error } = await getClient().functions.invoke("iqa-product-image-upload", { body: form });
+      if (error) throw error;
+      if (!data || data.ok !== true) throw new Error(data?.error || "The image upload was not confirmed.");
+      return data;
+    } catch (error) {
+      recordFailedImageUpload(productId, file, altText, error);
+      throw error;
+    }
   }
 
   global.IQA_ADMIN_BACKEND = Object.freeze({
     configured, getClient, signIn, signOut, getActiveProfile,
-    currentProfile, requireRole, readTable, countTable, mutate, uploadProductImage, onAuthStateChange
+    currentProfile, requireRole, readTable, countTable, mutate, uploadProductImage, listFailedImageUploads, clearFailedImageUpload, onAuthStateChange
   });
 })(window);
