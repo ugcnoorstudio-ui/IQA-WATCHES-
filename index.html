@@ -999,7 +999,7 @@ function responsiveCloudinarySrcset(value,widths=[320,480,800,1200]){
  if(typeof value!=='string'||!value.trim())return '';
  try{
   const source=new URL(value.trim(),location.href);
-  if(source.protocol!=='https:'||source.hostname!=='res.cloudinary.com'||/\\.svg(?:$|\\?)/i.test(source.pathname))return '';
+  if(source.protocol!=='https:'||source.hostname!=='res.cloudinary.com'||/\.svg(?:$|\?)/i.test(source.pathname))return '';
   const parts=source.pathname.split('/'),uploadIndex=parts.indexOf('upload');
   if(uploadIndex<0)return '';
   const tail=parts.slice(uploadIndex+1),transform=/^(?:c_|w_|h_|f_|q_|g_|dpr_|fl_|ar_|e_|o_|r_|b_|t_|l_|u_|so_|eo_|du_|fps_|ac_|vc_|af_|cs_|d_|ki_|pg_|sp_|vs_)/;
