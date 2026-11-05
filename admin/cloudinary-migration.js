@@ -41,6 +41,48 @@ function mount(){
  });
  box.append(title,copy,button,status);
  host.prepend(box);
+
+ if(!host.querySelector('[data-cloudinary-static-migration]')){
+  const staticBox=document.createElement('section');
+  staticBox.className='panel';
+  staticBox.setAttribute('data-cloudinary-static-migration','');
+  staticBox.style.marginBottom='18px';
+  const staticTitle=document.createElement('h3');
+  staticTitle.textContent='Homepage & static image migration';
+  const staticCopy=document.createElement('p');
+  staticCopy.className='muted';
+  staticCopy.textContent='Copy the six approved Unsplash watch/editorial images used by the homepage into the IQA WATCHES Cloudinary account. This does not change the live homepage yet; the returned URLs are reviewed before publishing the storefront update.';
+  const staticButton=document.createElement('button');
+  staticButton.type='button';staticButton.className='btn primary';
+  staticButton.textContent='Migrate 6 static images to Cloudinary';
+  const staticStatus=document.createElement('p');
+  staticStatus.className='muted';staticStatus.setAttribute('role','status');staticStatus.setAttribute('aria-live','polite');
+  const staticOutput=document.createElement('pre');
+  staticOutput.style.cssText='white-space:pre-wrap;overflow-wrap:anywhere;font-size:12px;max-height:320px;overflow:auto';
+  staticButton.addEventListener('click',async()=>{
+   if(busy)return;
+   if(!window.confirm('Copy the six homepage/static images from Unsplash into Cloudinary? The live website will not be changed by this step.'))return;
+   busy=true;staticButton.disabled=true;staticButton.textContent='Copying static images…';
+   staticStatus.textContent='Verifying owner session and copying images securely…';staticOutput.textContent='';
+   try{
+    api.requireRole(['owner']);
+    const {data,error}=await api.getClient().functions.invoke('iqa-migrate-static-cloudinary',{body:{}});
+    if(error)throw error;
+    if(!data||!Array.isArray(data.results))throw new Error(data?.error||'Migration response was not confirmed.');
+    const passed=data.results.filter(x=>x.status==='migrated');
+    const failed=data.results.filter(x=>x.status!=='migrated');
+    staticStatus.textContent=passed.length+' of '+data.total+' static images copied to Cloudinary; '+failed.length+' need review. Live homepage has not been changed yet.';
+    staticStatus.style.color=failed.length?'#9b3b2f':'#385947';
+    staticOutput.textContent=JSON.stringify(data.results,null,2);
+    staticButton.textContent=failed.length?'Review static image migration':'Static images copied — ready for URL verification';
+   }catch(error){
+    staticStatus.textContent='Static image migration failed: '+(error?.message||String(error));
+    staticStatus.style.color='#9b3b2f';staticButton.textContent='Retry static image migration';
+   }finally{busy=false;staticButton.disabled=false;}
+  });
+  staticBox.append(staticTitle,staticCopy,staticButton,staticStatus,staticOutput);
+  host.prepend(staticBox);
+ }
 }
 const observer=new MutationObserver(scheduleMount);
 function start(){
