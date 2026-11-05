@@ -70,6 +70,26 @@ This copy is an isolated review asset; it is not attached to a product and is no
 - Direct Supabase Storage URL construction or `storage.from(...).getPublicUrl(...)` was not found in the audited storefront files (`index.html`, `routes.js`, `customer-storefront.js`) or reviewed admin files (`admin/admin.js`, `admin/backend.js`, `admin/asset-intake.js`, `admin/media-manager.js`, `admin/model-viewer.js`). This is a targeted file audit, not a claim that every file in the repository has been exhaustively scanned.
 - Supabase remains required for products, variants, customers, orders, authentication, admin authorization, and image metadata. Only image file storage/delivery is being moved to Cloudinary.
 
+
+## Step 3 — homepage static images
+
+The six planned homepage/static assets were already present in the Cloudinary `iqa-watches/static` folder and referenced from the live storefront entry page. They were **not uploaded again**, avoiding duplicate Cloudinary assets.
+
+| Asset | Active Cloudinary public ID |
+|---|---|
+| Homepage hero | `iqa-watches/static/home-hero` |
+| Classic collection tile | `iqa-watches/static/collection-classic` |
+| Sport collection tile | `iqa-watches/static/collection-sport` |
+| Editorial collection tile | `iqa-watches/static/collection-editorial` |
+| Modern collection tile | `iqa-watches/static/collection-modern` |
+| Editorial detail scene | `iqa-watches/static/editorial-detail` |
+
+Source-reference check: `index.html` points these assets to Cloudinary and uses responsive width variants with automatic format and quality transformations. No Supabase Storage URL is used for these six homepage/static assets in the inspected entry page.
+
+Verification boundary: repository references are confirmed. The web inspection service could not directly open Cloudinary image transformation URLs, so this audit does not claim a separate visual pixel-by-pixel confirmation of all six images in the Cloudinary Media Manager. The Step 2 desktop/mobile browser regression suite passed, and the current deployed site references these Cloudinary URLs. The owner-only Media Manager visual confirmation remains a separate check.
+
+No duplicate copies were created, no image records were changed, and no Supabase originals were deleted.
+
 ## Remaining verification before any cleanup
 
 1. Refresh the owner-only Cloudinary Media Manager and confirm the complete library contains the expected six static IDs, three brand IDs, product images, and the new unassigned review-copy. The connected repository/database tools do not expose a Cloudinary account-wide inventory.
