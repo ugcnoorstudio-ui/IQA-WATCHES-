@@ -16,7 +16,7 @@ test('dynamic Cloudinary images receive responsive srcset variants', () => {
   const result = context.buildSrcset('https://res.cloudinary.com/rrmdzam7/image/upload/v1234567890/iqa-watches/products/watch.jpg');
   const entries = result.split(', ');
   assert.equal(entries.length, 4);
-  assert.deepEqual(entries.map(entry => entry.match(/ (\\d+)w$/)?.[1]), ['320', '480', '800', '1200']);
+  assert.deepEqual(entries.map(entry => entry.match(/ (\d+)w$/)?.[1]), ['320', '480', '800', '1200']);
   assert.ok(entries.every(entry => entry.includes('/c_limit,w_') && entry.includes('/f_auto/q_auto/v1234567890/')));
 });
 
