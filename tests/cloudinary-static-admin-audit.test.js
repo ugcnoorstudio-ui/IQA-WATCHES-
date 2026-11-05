@@ -86,3 +86,31 @@ test('unlinked legacy image review copy is owner-gated, fixed-source, and never 
   assert.match(ui, /functions\.invoke\('iqa-migrate-unlinked-review'/);
   assert.match(ui, /No product will be changed and no Supabase file will be deleted/);
 });
+
+test('brand SVG migration is owner-gated, fixed-source, and verifies all three Cloudinary assets', () => {
+  const fn = read('supabase/functions/iqa-migrate-brand-assets/index.ts');
+  assert.match(fn, /profiles\[0\]\.role !== "owner"/);
+  assert.match(fn, /profiles\[0\]\.active !== true/);
+  assert.match(fn, /raw\.githubusercontent\.com\/ugcnoorstudio-ui\/IQA-WATCHES-/);
+  assert.match(fn, /CLOUDINARY_API_SECRET/);
+  assert.match(fn, /image\/svg\+xml/);
+  assert.match(fn, /unsafe_or_invalid_svg/);
+  assert.match(fn, /uploaded\.public_id !== FOLDER \+ "\/" \+ source\.publicId/);
+  assert.doesNotMatch(fn, /storage\/v1\/object|deleteObject|image\/destroy/);
+  for (const asset of ['iqa-watches-favicon','iqa-watches-header-logo','iqa-watches-primary-logo']) assert.ok(fn.includes(asset));
+});
+
+test('Cloudinary media manager exposes all six media groups and safe owner-only retry actions', () => {
+  const manager = read('admin/media-manager.js');
+  const backend = read('admin/backend.js');
+  const html = read('admin/index.html');
+  for (const group of ['Product','Homepage','Category','Editorial','Unassigned','Failed Uploads']) assert.ok(manager.includes(group));
+  assert.match(manager, /functions\.invoke\('iqa-migrate-brand-assets'/);
+  assert.match(manager, /functions\.invoke\('iqa-migrate-unlinked-review'/);
+  assert.match(manager, /data-retry-upload/);
+  assert.match(manager, /api\.requireRole\(\['owner'\]\)/);
+  assert.match(backend, /recordFailedImageUpload/);
+  assert.match(backend, /listFailedImageUploads/);
+  assert.match(backend, /clearFailedImageUpload/);
+  assert.match(html, /media-manager\.js\?v=20261106-media-manager-v1/);
+});
