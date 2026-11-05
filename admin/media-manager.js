@@ -40,7 +40,11 @@ function tabBody(){
   if(!productRows.length)return '<div class="panel"><p class="muted">No Cloudinary product images found yet. Uploads added through Product Management will appear here.</p></div>';
   return grid(productRows.map(row=>{const url=optimized(row.image_url);const name=productNames.get(row.product_id)||row.product_id;return card(name,row.alt_text||name,url,'Product ID '+row.product_id+' · '+(row.cloudinary_public_id||'Cloudinary ID missing')+(row.is_primary?' · Primary':''));}));
  }
- if(active==='Homepage')return grid([...STATIC.map(x=>card(x.label,x.alt,cloudUrl('iqa-watches/static/'+x.id),'Homepage static asset · Cloudinary')), ...BRAND.map(x=>card(x.label,x.label,cloudUrl('iqa-watches/brand/'+x.id,x.ext),'Brand SVG · Cloudinary migration pending until owner confirms upload'))]);
+ if(active==='Homepage'){
+  let saved={};try{saved=JSON.parse(localStorage.getItem('iqaCloudinaryBrandAssets')||'{}')}catch(_){}
+  const brandCards=BRAND.map(x=>{const result=(saved.results||[]).find(r=>r.key===x.id.replace('iqa-watches-','')&&r.status==='migrated');const url=result?.secure_url||'';return url?card(x.label,x.label,url,'Brand SVG · verified Cloudinary upload'):card(x.label,x.label,'','SVG source ready · migration not yet verified')});
+  return '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px"><button class="btn primary" data-migrate-brand>Migrate 3 brand SVGs to Cloudinary</button></div>'+grid([...STATIC.map(x=>card(x.label,x.alt,cloudUrl('iqa-watches/static/'+x.id),'Homepage static asset · Cloudinary')), ...brandCards]);
+ }
  if(active==='Category')return grid(CATEGORIES.map(x=>card(x.label,x.alt,cloudUrl('iqa-watches/static/'+x.id),'Category image · shared static asset')));
  if(active==='Editorial')return grid(EDITORIAL.map(x=>card(x.label,x.alt,cloudUrl('iqa-watches/static/'+x.id),'Editorial story image · shared static asset')));
  if(active==='Unassigned'){
@@ -87,6 +91,14 @@ function mount(){
  async function refreshData(){try{await loadProducts();render();setStatus(box,'Library refreshed. '+productRows.length+' Cloudinary product image records loaded.')}catch(e){setStatus(box,'Could not load media records: '+(e?.message||String(e)),true)}}
  tabbar.addEventListener('click',e=>{const b=e.target.closest('[data-media-tab]');if(!b)return;active=b.getAttribute('data-media-tab');render()});
  body.addEventListener('click',async e=>{
+  const migrate=e.target.closest('[data-migrate-brand]');
+  if(migrate){
+   if(busy)return;
+   if(!window.confirm('Copy the three reviewed IQA brand SVGs into Cloudinary? Existing website logo/favicon references will not change until the upload is verified.'))return;
+   busy=true;migrate.disabled=true;migrate.textContent='Migrating SVGs…';setStatus(box,'Checking owner session and copying three SVG assets…');
+   try{api.requireRole(['owner']);const {data,error}=await api.getClient().functions.invoke('iqa-migrate-brand-assets',{body:{}});if(error)throw error;if(!data||!Array.isArray(data.results))throw new Error(data?.error||'Migration response was not confirmed.');try{localStorage.setItem('iqaCloudinaryBrandAssets',JSON.stringify(data))}catch(_){}const ok=data.results.filter(x=>x.status==='migrated').length;active='Homepage';render();setStatus(box,ok+' of 3 brand SVGs copied and verified. '+(ok===3?'Ready to switch website references.':'Review failed assets before switching website references.'),ok!==3)}catch(err){setStatus(box,'Brand SVG migration failed: '+(err?.message||String(err)),true);migrate.disabled=false;migrate.textContent='Retry brand SVG migration'}finally{busy=false}
+   return;
+  }
   const copy=e.target.closest('[data-copy-unlinked]');
   if(copy){
    if(busy)return;
