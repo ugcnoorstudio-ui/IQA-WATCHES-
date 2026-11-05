@@ -59,7 +59,7 @@ test('homepage static imagery is served from the six migrated Cloudinary assets'
   ];
   for (const [sourceId, publicId] of assets) {
     assert.ok(!html.includes(sourceId), 'homepage must no longer request legacy Unsplash image ' + sourceId);
-    assert.ok(html.includes('https://res.cloudinary.com/rrmdzam7/image/upload/f_auto,q_auto/iqa-watches/static/' + publicId + '.jpg'),
+    assert.ok(html.includes('https://res.cloudinary.com/rrmdzam7/image/upload/c_limit,w_1200/f_auto/q_auto/iqa-watches/static/' + publicId + '.jpg'),
       'homepage should use migrated Cloudinary asset ' + publicId);
     assert.ok(fn.includes(publicId), 'migration function should provision the same Cloudinary asset ' + publicId);
   }
