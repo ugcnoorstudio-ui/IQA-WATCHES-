@@ -135,3 +135,18 @@ test('unreferenced local Casio JPG is not served by storefront or Admin in place
   assert.doesNotMatch(admin, /casio-ae-1200whl-5av\.jpg/);
   assert.match(admin, /res\.cloudinary\.com/);
 });
+
+test('Cloudinary media library endpoint is owner-gated, read-only, and restricted to the IQA asset prefix', () => {
+  const fn = read('supabase/functions/iqa-cloudinary-media-library/index.ts');
+  const manager = read('admin/media-manager.js');
+  assert.match(fn, /profiles\[0\]\.role !== "owner"/);
+  assert.match(fn, /profiles\[0\]\.active !== true/);
+  assert.match(fn, /resources\/image\/upload/);
+  assert.match(fn, /prefix", "iqa-watches\//);
+  assert.match(fn, /max_results", "500"/);
+  assert.match(fn, /Basic /);
+  assert.doesNotMatch(fn, /\/destroy|\/delete|delete_resources|image\/destroy/);
+  assert.match(manager, /functions\.invoke\('iqa-cloudinary-media-library'/);
+  assert.match(manager, /cloudResources\.filter/);
+  assert.match(manager, /assetUrl\('iqa-watches\/static\//);
+});
