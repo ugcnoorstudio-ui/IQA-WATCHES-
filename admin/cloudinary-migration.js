@@ -36,7 +36,7 @@ function mount(){
    status.textContent='Migration response: '+migrated+' linked images migrated; '+unlinked+' unlinked files copied; '+failed.length+' errors. '+(failed.length?failed.map(x=>x.path+': '+x.status).join(' | '):'Original Supabase files remain intact.');
    status.style.color=failed.length?'#9b3b2f':'#385947';
    button.textContent=failed.length?'Migration needs review':'Migration completed';
-  }catch(e){status.textContent='Migration failed: '+(e?.message||String(e));status.style.color='#9b3b2f';button.textContent='Retry migration';}
+  }catch(e){let detail=e?.message||String(e);try{const response=e?.context;if(response&&typeof response.clone==='function'){const payload=await response.clone().json();if(payload?.missing?.length)detail+=' — Missing secrets: '+payload.missing.join(', ');else if(payload?.error)detail+=' — '+payload.error;}}catch(_){}status.textContent='Migration failed: '+detail;status.style.color='#9b3b2f';button.textContent='Retry migration';}
   finally{busy=false;button.disabled=false;}
  });
  box.append(title,copy,button,status);
