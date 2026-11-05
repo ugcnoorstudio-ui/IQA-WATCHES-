@@ -929,7 +929,7 @@ async function loadStorefrontCatalogue(){
   if(ids.length){
    const [{data:variantRows,error:variantsError},{data:mediaRows,error:mediaError}]=await Promise.all([
     storefrontClient.from('product_variants').select('id,product_id,options,selling_price,stock_on_hand,stock_reserved,active').in('product_id',ids).abortSignal(controller.signal),
-    storefrontClient.from('product_media').select('id,product_id,storage_path,alt_text,sort_order,is_primary').in('product_id',ids).order('sort_order',{ascending:true}).abortSignal(controller.signal)
+    storefrontClient.from('product_media').select('id,product_id,storage_path,image_url,cloudinary_public_id,alt_text,sort_order,is_primary').in('product_id',ids).order('sort_order',{ascending:true}).abortSignal(controller.signal)
    ]);
    if(variantsError)throw variantsError;
    if(mediaError)throw mediaError;
@@ -946,10 +946,10 @@ async function loadStorefrontCatalogue(){
    const specs=row.specs&&typeof row.specs==='object'?row.specs:{};
    const gallery=(mediaByProduct.get(row.id)||[]).filter(item=>typeof item.storage_path==='string'&&item.storage_path.trim());
    const primaryImage=gallery.find(item=>item.is_primary)||gallery[0];
-   const storedImage=primaryImage?safeImageUrl(storefrontClient.storage.from('product-images').getPublicUrl(primaryImage.storage_path).data?.publicUrl):'';
+   const storedImage=primaryImage?(safeImageUrl(primaryImage.image_url)||safeImageUrl(storefrontClient.storage.from('product-images').getPublicUrl(primaryImage.storage_path).data?.publicUrl)):'';
    const image=storedImage||safeImageUrl(typeof specs.image_url==='string'?specs.image_url:'');
    const imageAlt=primaryImage?.alt_text||row.name;
-   const galleryImages=gallery.map(item=>({src:safeImageUrl(storefrontClient.storage.from('product-images').getPublicUrl(item.storage_path).data?.publicUrl),alt:item.alt_text||row.name,isPrimary:Boolean(item.is_primary),sortOrder:Number(item.sort_order)||0})).filter(item=>item.src).sort((a,b)=>Number(b.isPrimary)-Number(a.isPrimary)||a.sortOrder-b.sortOrder);
+   const galleryImages=gallery.map(item=>({src:safeImageUrl(item.image_url)||safeImageUrl(storefrontClient.storage.from('product-images').getPublicUrl(item.storage_path).data?.publicUrl),alt:item.alt_text||row.name,isPrimary:Boolean(item.is_primary),sortOrder:Number(item.sort_order)||0})).filter(item=>item.src).sort((a,b)=>Number(b.isPrimary)-Number(a.isPrimary)||a.sortOrder-b.sortOrder);
    return {id:row.id,variantId:chosen?.id||null,name:row.name,brand:row.brand||'IQA WATCHES',category:row.category||row.audience||'Watches',audience:row.audience||'',style:specs.style||specs.watch_type||specs.type||'Analog',tags:Array.isArray(specs.tags)?specs.tags:[],price:Number(chosen?.selling_price??row.selling_price??0),compareAt:Number(row.mrp||0),stock:availableStock,colour:specs.colour||specs.color||specs.case_colour||'',dial:specs.dial_colour||specs.dial||'',strap:specs.strap_material||specs.strap||'',sku:specs.model_code||'Not listed',label:availableStock===1?'Only 1 left':availableStock+' in stock',desc:row.description||'',image,imageAlt,gallery:galleryImages,caseDiameter:specs.case_diameter_mm||specs.case_diameter||specs.case_size_mm||'',caseThickness:specs.case_thickness_mm||specs.case_thickness||'',lugToLug:specs.lug_to_lug_mm||specs.lug_to_lug||'',caseMaterial:specs.case_material||'',strapWidth:specs.strap_width_mm||specs.strap_width||'',movement:specs.movement||'',waterResistance:specs.water_resistance||'',warranty:specs.warranty||''};
   }).filter(p=>p.price>0&&p.image&&p.stock>0);
   knownProductIds=new Set(products.map(p=>p.id));
