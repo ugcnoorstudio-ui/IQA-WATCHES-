@@ -86,3 +86,17 @@ test('mobile watch details use a large scrollable image-first panel', async ({ p
   expect(layout.height).toBeCloseTo(layout.viewportHeight, 0);
   await expect(page.locator('#modalContent .product-modal-image img')).toBeVisible();
 });
+
+
+test('mobile homepage hero is compact and the brand tagline is clearly visible', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto('/');
+  const tagline = page.locator('.site-header .brand-tagline');
+  await expect(tagline).toHaveText('Timeless design, everyday precision');
+  await expect(tagline).toBeVisible();
+  const taglineStyle = await tagline.evaluate(el => ({ weight: getComputedStyle(el).fontWeight, color: getComputedStyle(el).color }));
+  expect(Number(taglineStyle.weight)).toBeGreaterThanOrEqual(700);
+  const hero = await page.locator('.hero').evaluate(el => ({ height: el.getBoundingClientRect().height, imageHeight: el.querySelector('.hero-visual').getBoundingClientRect().height }));
+  expect(hero.imageHeight).toBeLessThanOrEqual(220);
+  expect(hero.height).toBeLessThan(500);
+});

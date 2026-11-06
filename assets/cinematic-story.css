@@ -45,3 +45,19 @@
  .homepage-ad-slide,.homepage-ad-media img,.homepage-ad-dot{transition:none!important}
  .homepage-ad-slide.is-active .homepage-ad-media img{transform:none}
 }
+
+
+/* Mobile homepage hero sizing and visible brand promise */
+.brand{display:flex;flex-direction:column;align-items:flex-start;justify-content:center;gap:2px}
+.brand-tagline{display:block;margin:2px 0 0;color:#59451f;font-size:9px;font-weight:700;line-height:1.25;letter-spacing:.105em;text-transform:uppercase;white-space:nowrap}
+@media(max-width:680px){
+ .brand-logo{width:190px;max-height:42px}
+ .brand-tagline{font-size:8px;letter-spacing:.09em}
+ .hero{min-height:0}
+ .hero-copy{padding:27px 7% 21px}
+ .hero h1{font-size:clamp(38px,10vw,44px);margin:11px 0 8px;line-height:1.02}
+ .hero-copy p{font-size:12px;line-height:1.65;margin:0}
+ .hero .button{margin-top:12px;padding:11px 17px}
+ .hero-secondary-link{margin-top:9px}
+ .hero-visual{min-height:190px;max-height:220px}
+}
