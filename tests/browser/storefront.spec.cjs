@@ -692,10 +692,25 @@ test('multi-image watch detail supports touch swipe and synchronized gallery con
   await expect(count).toHaveText('1 / 3');
 
   await image.dispatchEvent('pointerdown', { pointerId: 11, pointerType: 'touch', button: 0, isPrimary: true, clientX: 260, clientY: 210 });
-  await image.dispatchEvent('pointerup', { pointerId: 11, pointerType: 'touch', button: 0, isPrimary: true, clientX: 100, clientY: 214 });
+  // A real finger can finish outside the image; pointerup must still reach the gallery handler.
+  await page.locator('#modalContent .product-modal-copy').dispatchEvent('pointerup', { pointerId: 11, pointerType: 'touch', button: 0, isPrimary: true, clientX: 100, clientY: 214 });
   await expect(count).toHaveText('2 / 3');
   await expect(image).toHaveAttribute('alt', 'Swipe secondary watch image');
   await expect(page.locator('[data-gallery-index="1"]')).toHaveAttribute('aria-pressed', 'true');
+
+  const recommendationFlow = await modal.evaluate(el => {
+    const product = el.querySelector('.product-modal');
+    const related = el.querySelector('.related-products');
+    return {
+      exists: Boolean(related),
+      followsProduct: Boolean(related && product && related.parentElement === product.parentElement && related.previousElementSibling === product),
+      relatedTop: related?.getBoundingClientRect().top ?? -1,
+      productBottom: product?.getBoundingClientRect().bottom ?? -1
+    };
+  });
+  expect(recommendationFlow.exists).toBe(true);
+  expect(recommendationFlow.followsProduct).toBe(true);
+  expect(recommendationFlow.relatedTop).toBeGreaterThanOrEqual(recommendationFlow.productBottom - 1);
 
   await page.locator('[data-gallery-step="1"]').click();
   await expect(count).toHaveText('3 / 3');
