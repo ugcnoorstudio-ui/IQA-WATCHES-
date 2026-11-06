@@ -41,6 +41,6 @@ test('checkout remains authenticated and idempotent with COD only; no online gat
   assert.match(checkout, /x-idempotency-key/);
   assert.match(checkout, /payment_method: "cash_on_delivery"/);
   assert.match(checkout, /payments\.cod_enabled !== true/);
-  assert.match(storefront, /UPI · Google Pay · PhonePe · Paytm/);
-  assert.match(storefront, /Coming Soon/);
+  assert.match(routes, /UPI · Google Pay · PhonePe · Paytm/);
+  assert.match(routes, /Coming Soon/);
 });
