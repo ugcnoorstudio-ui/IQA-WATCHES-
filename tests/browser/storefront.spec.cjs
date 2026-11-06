@@ -774,3 +774,46 @@ test('homepage editorial banners are consolidated into an autoplay carousel with
   await expect(carousel.locator('[data-ad-pause]')).toHaveAttribute('aria-pressed', 'true');
   await expect(carousel.locator('[data-ad-pause]')).toHaveAttribute('aria-label', 'Play automatic stories');
 });
+
+test('premium customer login exposes Google, email and OTP sections with responsive desktop and mobile layout', async ({ page, isMobile }) => {
+  await page.goto('/');
+  await navigateToHash(page, 'login');
+
+  const layout = page.locator('.route-auth-layout.auth-experience');
+  const main = page.locator('.auth-panel-main');
+  const brand = page.locator('.auth-brand-panel');
+  await expect(layout).toBeVisible();
+  await expect(main).toBeVisible();
+  await expect(brand).toBeVisible();
+  await expect(main.locator('#authWelcomeTitle')).toHaveText('Welcome back');
+  await expect(main.locator('#customerGoogleSignIn')).toContainText('Continue with Google');
+
+  const emailForm = page.locator('#customerAuthForm');
+  await expect(emailForm.locator('input[name="email"][type="email"]')).toBeVisible();
+  await expect(emailForm.locator('input[name="password"][type="password"]')).toBeVisible();
+  await expect(emailForm.locator('button[type="submit"]')).toContainText('Sign in with email');
+
+  const phoneForm = page.locator('#customerPhoneForm');
+  await expect(phoneForm.locator('input[name="phone"][type="tel"]')).toBeVisible();
+  await expect(phoneForm.locator('#customerPhoneSubmit')).toContainText('Send OTP');
+  await expect(page.locator('#phoneOtpLabel')).toBeHidden();
+  await expect(brand).toContainText('TIME, WITH INTENTION');
+  await expect(brand).toContainText('Your signature.');
+
+  const columns = await layout.evaluate(el => getComputedStyle(el).gridTemplateColumns.trim().split(/\s+/).length);
+  if (isMobile) {
+    expect(columns).toBe(1);
+    const overflow = await page.evaluate(() => document.documentElement.scrollWidth > document.documentElement.clientWidth);
+    expect(overflow, 'premium login should not overflow on mobile').toBe(false);
+  } else {
+    expect(columns).toBe(2);
+    const boxes = await Promise.all([main, brand].map(locator => locator.boundingBox()));
+    expect(boxes[0].x).toBeLessThan(boxes[1].x);
+    expect(boxes[1].x).toBeGreaterThanOrEqual(boxes[0].x + boxes[0].width - 1);
+  }
+
+  await page.locator('.auth-tabs a[href="#signup"]').click();
+  await expect.poll(() => page.evaluate(() => location.hash)).toBe('#signup');
+  await expect(page.locator('#authWelcomeTitle')).toHaveText('Create your account');
+  await expect(page.locator('#customerAuthForm input[name="full_name"]')).toBeVisible();
+});
