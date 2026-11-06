@@ -720,6 +720,142 @@ body.menu-open #menuBackdrop{display:block}
 @media(max-width:680px){#iqa-image-lightbox{padding:8px}#iqa-image-lightbox .iqa-lightbox-toolbar{min-height:48px}#iqa-image-lightbox button{min-width:44px;min-height:44px}#iqa-image-lightbox img.is-zoomed{max-width:calc(100% - 96px);max-height:78vh}}
 @media(prefers-reduced-motion:reduce){#iqa-image-lightbox img{transition:none}}
 </style>
+<style id="watches-panel-gallery-swipe">
+.product-modal-image{position:relative;touch-action:pan-y}
+.product-gallery-nav{position:absolute;z-index:3;top:50%;transform:translateY(-50%);width:44px;height:44px;border:1px solid #cfc6b6;border-radius:50%;background:#fffdf2ed;color:#24221e;font-size:30px;line-height:1;display:grid;place-items:center;box-shadow:0 2px 12px #0002}
+.product-gallery-prev{left:12px}.product-gallery-next{right:12px}
+.product-gallery-count{position:absolute;right:14px;bottom:calc(78px + env(safe-area-inset-bottom));z-index:2;padding:4px 9px;border-radius:20px;background:#24221ecc;color:#fff;font-size:11px;font-variant-numeric:tabular-nums}
+@media(max-width:680px){.product-gallery-nav{width:38px;height:38px;font-size:26px}.product-gallery-prev{left:8px}.product-gallery-next{right:8px}.product-gallery-count{bottom:calc(72px + env(safe-area-inset-bottom));right:10px}}
+</style>
+<style id="watches-panel-fullscreen-layout">
+/* Product detail / Watches panel: use the complete visible viewport on every device. */
+.modal-wrap{
+  position:fixed;
+  inset:0;
+  width:100%;
+  height:100vh;
+  height:100dvh;
+  min-height:0;
+  padding:0;
+  display:none;
+  place-items:stretch;
+  overflow:hidden;
+  overscroll-behavior:contain;
+}
+.modal-wrap.open{display:grid}
+.modal-wrap .modal{
+  width:100%;
+  max-width:none;
+  height:100vh;
+  height:100dvh;
+  max-height:none;
+  min-height:0;
+  margin:0;
+  border:0;
+  border-radius:0;
+  overflow:hidden;
+  overscroll-behavior:contain;
+  display:flex;
+  flex-direction:column;
+}
+.modal-wrap .product-modal{
+  width:100%;
+  height:100%;
+  min-height:0;
+  flex:1 1 auto;
+  grid-template-columns:minmax(0,1fr) minmax(0,1fr);
+  overflow:hidden;
+}
+.modal-wrap .product-modal-image{
+  min-width:0;
+  min-height:0;
+  height:100%;
+  max-height:none;
+  display:grid;
+  place-items:center;
+  overflow:hidden;
+  background:#e7e1d6;
+}
+.modal-wrap .product-modal-image img{
+  display:block;
+  width:100%;
+  height:100%;
+  min-height:0;
+  max-height:100%;
+  object-fit:contain;
+  padding:clamp(12px,3vw,40px);
+}
+.modal-wrap .product-modal-copy{
+  min-width:0;
+  min-height:0;
+  height:100%;
+  max-height:100%;
+  overflow-y:auto;
+  overscroll-behavior:contain;
+  -webkit-overflow-scrolling:touch;
+  padding:clamp(24px,4vw,56px);
+  padding-bottom:max(clamp(24px,4vw,56px),env(safe-area-inset-bottom));
+}
+.modal-wrap .modal-close{
+  position:fixed;
+  top:max(12px,env(safe-area-inset-top));
+  right:max(12px,env(safe-area-inset-right));
+  z-index:8;
+  width:44px;
+  height:44px;
+  background:#fffdf8ed;
+  box-shadow:0 2px 14px #0002;
+}
+.modal-wrap .policy-page{
+  width:100%;
+  max-width:900px;
+  max-height:100%;
+  overflow-y:auto;
+  overscroll-behavior:contain;
+  margin:0 auto;
+  padding:clamp(28px,5vw,64px);
+}
+@media(max-width:680px){
+  .modal-wrap .product-modal{
+    grid-template-columns:minmax(0,1fr);
+    grid-template-rows:minmax(210px,38dvh) minmax(0,1fr);
+    overflow:hidden;
+  }
+  .modal-wrap .product-modal-image{
+    width:100%;
+    height:100%;
+    min-height:0;
+    max-height:none;
+  }
+  .modal-wrap .product-modal-image img{
+    width:100%;
+    height:100%;
+    max-height:100%;
+    object-fit:contain;
+    padding:10px 42px;
+  }
+  .modal-wrap .product-modal-copy{
+    width:100%;
+    height:100%;
+    max-height:100%;
+    overflow-y:auto;
+    padding:22px 18px max(24px,env(safe-area-inset-bottom));
+  }
+  .modal-wrap .product-modal-copy h2{font-size:clamp(27px,7vw,36px)}
+  .modal-wrap .product-gallery-thumbs{max-width:100%;overflow-x:auto}
+  .modal-wrap .policy-page{
+    max-width:none;
+    padding:calc(62px + env(safe-area-inset-top)) 20px max(24px,env(safe-area-inset-bottom));
+  }
+}
+@media(max-width:380px){
+  .modal-wrap .product-modal{grid-template-rows:minmax(185px,32dvh) minmax(0,1fr)}
+  .modal-wrap .product-modal-copy{padding-left:15px;padding-right:15px}
+}
+@media(prefers-reduced-motion:reduce){
+  .modal-wrap,.modal-wrap .modal{transition:none!important;animation:none!important}
+}
+</style>
 </head>
 <body>
 <div class="iqa-announcement" role="note">IQA WATCHES <span aria-hidden="true">·</span> TIMELESS STYLE, CONSIDERED DETAILS <span aria-hidden="true">·</span> PERSONAL ASSISTANCE ON WHATSAPP</div>
@@ -1055,7 +1191,7 @@ function renderPanel(mode='cart'){const isWish=mode==='wishlist';const items=isW
 function addCart(id){const p=products.find(x=>x.id===id);if(!p)return false;const currentQty=Number(cart[id]||0);if(currentQty>=p.stock){toast('Only '+p.stock+' unit(s) currently available.');return false}cart[id]=currentQty+1;updateCounts();toast(p.name+' added to your bag. Checkout is not enabled yet.');return true}
 function toggleWish(id){wishlist=wishlist.includes(id)?wishlist.filter(x=>x!==id):[...wishlist,id];updateCounts();renderProducts();if($('drawer').classList.contains('open')&&$('drawerTitle').textContent==='Your wishlist')renderPanel('wishlist');toast(wishlist.includes(id)?'Saved to your local preview wishlist.':'Removed from wishlist.')}
 let productModalReturnFocus=null;
-function openProduct(id){const p=products.find(x=>x.id===id);if(!p)return;const gallery=(Array.isArray(p.gallery)?p.gallery:[]).map(item=>({src:safeImageUrl(item.src||item.image_url),alt:item.alt||item.alt_text||p.imageAlt||p.name})).filter(item=>item.src);const primaryImage=safeImageUrl(p.image);if(primaryImage&&!gallery.some(item=>item.src===primaryImage))gallery.unshift({src:primaryImage,alt:p.imageAlt||p.name});window.iqaCurrentModalGallery=gallery;window.iqaCurrentModalGalleryIndex=0;const galleryMarkup=gallery.length>1?'<div class="product-gallery-thumbs" role="group" aria-label="Product image gallery">'+gallery.map((item,index)=>'<button type="button" class="product-gallery-thumb" data-gallery-index="'+index+'" data-gallery-src="'+escapeHtml(item.src)+'" data-gallery-alt="'+escapeHtml(item.alt)+'" aria-label="Show product image '+(index+1)+' of '+gallery.length+'" aria-pressed="'+(index===0?'true':'false')+'"><img loading="lazy" decoding="async" src="'+escapeHtml(item.src)+'" alt="" aria-hidden="true"></button>').join('')+'</div>':'';const dimensionRows=[['Case diameter',p.caseDiameter],['Case thickness',p.caseThickness],['Lug-to-lug',p.lugToLug],['Strap width',p.strapWidth]].filter(([,value])=>value!==null&&value!==undefined&&String(value).trim()!=='');const dimensionMarkup=dimensionRows.map(([label,value])=>'<div><span>'+label+'</span><span>'+escapeHtml(String(value).toLowerCase().includes('mm')?String(value):String(value)+' mm')+'</span></div>').join('');window.dispatchEvent(new CustomEvent('iqa:product-viewed',{detail:{productId:p.id}}));if(!$('modalWrap').classList.contains('open'))productModalReturnFocus=document.activeElement;const spec=(key,fallback='Not specified')=>p[key]||fallback;const related=products.filter(x=>x.id!==p.id&&Number(x.stock)>0&&(x.category===p.category||x.style===p.style)).slice(0,4);$('modalContent').innerHTML='<button class="close-btn modal-close" id="modalClose" aria-label="Close product details">×</button><div class="product-modal"><div class="product-modal-image"><img id="productModalMainImage" role="button" tabindex="0" aria-label="Open full-screen product image" loading="eager" src="'+escapeHtml(gallery[0]?.src||primaryImage)+'" alt="'+escapeHtml(gallery[0]?.alt||p.imageAlt||p.name)+'" data-modal-image>'+galleryMarkup+'</div><div class="product-modal-copy"><div class="eyebrow">'+escapeHtml(p.brand)+' · IQA WATCHES</div><h2 id="modalTitle">'+escapeHtml(p.name)+'</h2><div class="price-line"><span class="price">'+money(p.price)+'</span>'+(p.compareAt>p.price?'<span class="old-price">'+money(p.compareAt)+'</span>':'')+'</div><span class="sample-label">VERIFIED CATALOGUE · CURRENTLY AVAILABLE</span><p>'+escapeHtml(p.desc)+'</p><div class="spec-list"><div><span>Category</span><span>'+escapeHtml(spec('category'))+'</span></div><div><span>Watch type</span><span>'+escapeHtml(spec('style'))+'</span></div><div><span>Dial / colour</span><span>'+escapeHtml((p.dial||'Not specified')+' / '+(p.colour||'Not specified'))+'</span></div><div><span>Case material</span><span>'+escapeHtml(spec('caseMaterial'))+'</span></div><div><span>Strap material</span><span>'+escapeHtml(spec('strap'))+'</span></div>'+dimensionMarkup+'<div><span>Movement</span><span>'+escapeHtml(spec('movement'))+'</span></div><div><span>Water resistance</span><span>'+escapeHtml(spec('waterResistance'))+'</span></div><div><span>Warranty</span><span>'+escapeHtml(spec('warranty','Confirm with seller'))+'</span></div><div><span>Availability</span><span>Available at last catalogue check</span></div></div><div class="product-purchase-actions"><button class="button" type="button" data-add="'+escapeHtml(p.id)+'">Add to Bag</button><button class="button light" type="button" data-buy-now="'+escapeHtml(p.id)+'">Buy Now</button></div><p>Buy Now takes you to checkout. Orders and payments remain disabled until secure backend, stock reservation and payment verification are complete.</p></div>'+(related.length?'<section class="related-products"><h3>More styles to explore</h3><div class="related-grid">'+related.map(x=>'<button type="button" class="related-product" data-view="'+escapeHtml(x.id)+'"><img loading="lazy" decoding="async" src="'+escapeHtml(safeImageUrl(x.image))+'" alt="'+escapeHtml(x.imageAlt||x.name)+'"><span>'+escapeHtml(x.name)+'</span><small>'+money(x.price)+'</small></button>').join('')+'</div></section>':'')+'</div>';$('modalContent').querySelector('[data-modal-image]')?.addEventListener('error',function(){this.hidden=true;this.parentElement.setAttribute('data-image-error','true');this.parentElement.setAttribute('role','img');this.parentElement.setAttribute('aria-label','Product image unavailable')},{once:true});$('modalContent').querySelectorAll('[data-gallery-index]').forEach(button=>button.addEventListener('click',function(){const image=$('modalContent').querySelector('[data-modal-image]');if(!image)return;image.src=this.dataset.gallerySrc;image.alt=this.dataset.galleryAlt||p.name;window.iqaCurrentModalGalleryIndex=Number(this.dataset.galleryIndex)||0;image.hidden=false;image.parentElement.removeAttribute('data-image-error');$('modalContent').querySelectorAll('[data-gallery-index]').forEach(other=>other.setAttribute('aria-pressed',String(other===this)));}));$('modalWrap').classList.add('open');document.body.classList.add('locked');$('modalClose')?.focus();}
+function openProduct(id){const p=products.find(x=>x.id===id);if(!p)return;const gallery=(Array.isArray(p.gallery)?p.gallery:[]).map(item=>({src:safeImageUrl(item.src||item.image_url),alt:item.alt||item.alt_text||p.imageAlt||p.name})).filter(item=>item.src);const primaryImage=safeImageUrl(p.image);if(primaryImage&&!gallery.some(item=>item.src===primaryImage))gallery.unshift({src:primaryImage,alt:p.imageAlt||p.name});window.iqaCurrentModalGallery=gallery;window.iqaCurrentModalGalleryIndex=0;const galleryMarkup=gallery.length>1?'<div class="product-gallery-thumbs" role="group" aria-label="Product image gallery">'+gallery.map((item,index)=>'<button type="button" class="product-gallery-thumb" data-gallery-index="'+index+'" data-gallery-src="'+escapeHtml(item.src)+'" data-gallery-alt="'+escapeHtml(item.alt)+'" aria-label="Show product image '+(index+1)+' of '+gallery.length+'" aria-pressed="'+(index===0?'true':'false')+'"><img loading="lazy" decoding="async" src="'+escapeHtml(item.src)+'" alt="" aria-hidden="true"></button>').join('')+'</div>':'';const dimensionRows=[['Case diameter',p.caseDiameter],['Case thickness',p.caseThickness],['Lug-to-lug',p.lugToLug],['Strap width',p.strapWidth]].filter(([,value])=>value!==null&&value!==undefined&&String(value).trim()!=='');const dimensionMarkup=dimensionRows.map(([label,value])=>'<div><span>'+label+'</span><span>'+escapeHtml(String(value).toLowerCase().includes('mm')?String(value):String(value)+' mm')+'</span></div>').join('');window.dispatchEvent(new CustomEvent('iqa:product-viewed',{detail:{productId:p.id}}));if(!$('modalWrap').classList.contains('open'))productModalReturnFocus=document.activeElement;const spec=(key,fallback='Not specified')=>p[key]||fallback;const related=products.filter(x=>x.id!==p.id&&Number(x.stock)>0&&(x.category===p.category||x.style===p.style)).slice(0,4);$('modalContent').innerHTML='<button class="close-btn modal-close" id="modalClose" aria-label="Close product details">×</button><div class="product-modal"><div class="product-modal-image"><img id="productModalMainImage" role="button" tabindex="0" aria-label="Open full-screen product image" loading="eager" src="'+escapeHtml(gallery[0]?.src||primaryImage)+'" alt="'+escapeHtml(gallery[0]?.alt||p.imageAlt||p.name)+'" data-modal-image>'+(gallery.length>1?'<button type="button" class="product-gallery-nav product-gallery-prev" data-gallery-step="-1" aria-label="Previous watch image">‹</button><button type="button" class="product-gallery-nav product-gallery-next" data-gallery-step="1" aria-label="Next watch image">›</button><span class="product-gallery-count" aria-live="polite">1 / '+gallery.length+'</span>':'')+galleryMarkup+'</div><div class="product-modal-copy"><div class="eyebrow">'+escapeHtml(p.brand)+' · IQA WATCHES</div><h2 id="modalTitle">'+escapeHtml(p.name)+'</h2><div class="price-line"><span class="price">'+money(p.price)+'</span>'+(p.compareAt>p.price?'<span class="old-price">'+money(p.compareAt)+'</span>':'')+'</div><span class="sample-label">VERIFIED CATALOGUE · CURRENTLY AVAILABLE</span><p>'+escapeHtml(p.desc)+'</p><div class="spec-list"><div><span>Category</span><span>'+escapeHtml(spec('category'))+'</span></div><div><span>Watch type</span><span>'+escapeHtml(spec('style'))+'</span></div><div><span>Dial / colour</span><span>'+escapeHtml((p.dial||'Not specified')+' / '+(p.colour||'Not specified'))+'</span></div><div><span>Case material</span><span>'+escapeHtml(spec('caseMaterial'))+'</span></div><div><span>Strap material</span><span>'+escapeHtml(spec('strap'))+'</span></div>'+dimensionMarkup+'<div><span>Movement</span><span>'+escapeHtml(spec('movement'))+'</span></div><div><span>Water resistance</span><span>'+escapeHtml(spec('waterResistance'))+'</span></div><div><span>Warranty</span><span>'+escapeHtml(spec('warranty','Confirm with seller'))+'</span></div><div><span>Availability</span><span>Available at last catalogue check</span></div></div><div class="product-purchase-actions"><button class="button" type="button" data-add="'+escapeHtml(p.id)+'">Add to Bag</button><button class="button light" type="button" data-buy-now="'+escapeHtml(p.id)+'">Buy Now</button></div><p>Buy Now takes you to checkout. Orders and payments remain disabled until secure backend, stock reservation and payment verification are complete.</p></div>'+(related.length?'<section class="related-products"><h3>More styles to explore</h3><div class="related-grid">'+related.map(x=>'<button type="button" class="related-product" data-view="'+escapeHtml(x.id)+'"><img loading="lazy" decoding="async" src="'+escapeHtml(safeImageUrl(x.image))+'" alt="'+escapeHtml(x.imageAlt||x.name)+'"><span>'+escapeHtml(x.name)+'</span><small>'+money(x.price)+'</small></button>').join('')+'</div></section>':'')+'</div>';$('modalContent').querySelector('[data-modal-image]')?.addEventListener('error',function(){this.hidden=true;this.parentElement.setAttribute('data-image-error','true');this.parentElement.setAttribute('role','img');this.parentElement.setAttribute('aria-label','Product image unavailable')},{once:true});const setGalleryIndex=index=>{if(!gallery.length)return;const nextIndex=(index+gallery.length)%gallery.length,item=gallery[nextIndex],image=$('modalContent').querySelector('[data-modal-image]');if(!image)return;image.src=item.src;image.alt=item.alt||p.name;image.hidden=false;image.parentElement.removeAttribute('data-image-error');window.iqaCurrentModalGalleryIndex=nextIndex;$('modalContent').querySelectorAll('[data-gallery-index]').forEach((other,i)=>other.setAttribute('aria-pressed',String(i===nextIndex)));const count=$('modalContent').querySelector('.product-gallery-count');if(count)count.textContent=(nextIndex+1)+' / '+gallery.length;};$('modalContent').querySelectorAll('[data-gallery-index]').forEach(button=>button.addEventListener('click',()=>setGalleryIndex(Number(button.dataset.galleryIndex)||0)));$('modalContent').querySelectorAll('[data-gallery-step]').forEach(button=>button.addEventListener('click',()=>setGalleryIndex(window.iqaCurrentModalGalleryIndex+Number(button.dataset.galleryStep||0))));const gallerySurface=$('modalContent').querySelector('.product-modal-image');if(gallerySurface&&gallery.length>1){let pointerStart=null;const galleryImage=typeof gallerySurface.querySelector==='function'?gallerySurface.querySelector('[data-modal-image]'):null;if(galleryImage){galleryImage.style.touchAction='pan-y';galleryImage.style.userSelect='none';galleryImage.style.webkitUserSelect='none';galleryImage.addEventListener('pointerdown',event=>{if(event.pointerType==='mouse'||event.button!==0)return;pointerStart={id:event.pointerId,x:event.clientX,y:event.clientY};});galleryImage.addEventListener('pointerup',event=>{if(!pointerStart||event.pointerId!==pointerStart.id)return;const dx=event.clientX-pointerStart.x,dy=event.clientY-pointerStart.y;pointerStart=null;if(Math.abs(dx)>35&&Math.abs(dx)>Math.abs(dy)*1.15){event.preventDefault();setGalleryIndex(window.iqaCurrentModalGalleryIndex+(dx<0?1:-1));}});galleryImage.addEventListener('pointercancel',()=>{pointerStart=null;});}gallerySurface.addEventListener('keydown',event=>{if(event.target.matches('[data-modal-image]')&&(event.key==='ArrowRight'||event.key==='ArrowLeft')){event.preventDefault();setGalleryIndex(window.iqaCurrentModalGalleryIndex+(event.key==='ArrowRight'?1:-1));}});}$('modalWrap').classList.add('open');document.body.classList.add('locked');$('modalClose')?.focus();}
 function closeModal(){$('modalWrap').classList.remove('open');document.body.classList.toggle('locked',$('drawer').classList.contains('open')||$('mobileMenu').classList.contains('open')||document.getElementById('iqa-image-lightbox')?.classList.contains('open'));if(productModalReturnFocus?.isConnected)productModalReturnFocus.focus();productModalReturnFocus=null}
 
 // Smart shopping additions: recommendations are based only on available catalogue attributes.
