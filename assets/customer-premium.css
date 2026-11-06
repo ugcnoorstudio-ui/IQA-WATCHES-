@@ -245,3 +245,62 @@ body{background:var(--iqa-cream);color:var(--iqa-ink)}
  .hero-secondary-link{margin-top:8px}
  .hero-visual{min-height:0!important;height:clamp(165px,45vw,195px)!important}
 }
+
+
+/* Premium customer authentication: clear hierarchy, confident actions, responsive layout. */
+.route-auth-layout.auth-experience{display:grid;grid-template-columns:minmax(0,1.08fr) minmax(280px,.92fr);gap:0;max-width:1040px;margin:0 auto 56px;background:#fffdf8;border:1px solid #ded5c5;box-shadow:0 22px 65px rgba(30,25,16,.09);overflow:hidden}
+.auth-experience .auth-panel-main{padding:clamp(26px,4.4vw,54px);background:#fffdf8;border:0;min-width:0}
+.auth-panel-kicker{display:block;color:#92713d;font-size:9px;font-weight:700;letter-spacing:2.2px;text-transform:uppercase}
+.auth-experience .auth-tabs{display:flex;gap:8px;margin:22px 0 28px;padding:5px;background:#f2eee5;border:1px solid #e7dfd1;width:max-content;max-width:100%}
+.auth-experience .auth-tabs .chip{margin:0;border:1px solid transparent;background:transparent;padding:10px 17px;color:#625c50;font-size:10px}
+.auth-experience .auth-tabs .chip.active{background:#191916;color:#fffaf0;border-color:#191916;box-shadow:0 3px 9px #17161220}
+.auth-experience .auth-panel-main>h2{font:400 clamp(30px,3.5vw,42px)/1.12 Georgia,serif;letter-spacing:-.6px;margin:0 0 8px;color:#191916}
+.auth-intro{font-size:12px;line-height:1.8;color:#777064;margin:0 0 24px;max-width:440px}
+.auth-experience .auth-methods{display:block;margin:0}
+.auth-google-button{width:100%;min-height:54px;display:flex;align-items:center;justify-content:flex-start;gap:13px;padding:0 17px;background:#191916;border:1px solid #191916;color:#fffaf0;font-size:11px;font-weight:700;letter-spacing:.7px;text-transform:none;box-shadow:0 7px 18px rgba(20,18,13,.13)}
+.auth-google-button:hover{background:#302c23;border-color:#302c23;color:#fffaf0;transform:translateY(-1px)}
+.auth-google-mark{display:grid;place-items:center;width:27px;height:27px;border-radius:50%;background:#fff;color:#4285f4;font:700 17px Arial,sans-serif}
+.auth-button-arrow{margin-left:auto;color:#d9bd83;font-size:19px}
+.auth-experience .auth-divider{display:flex;align-items:center;gap:12px;margin:23px 0;color:#91897b;font-size:8px;letter-spacing:1.6px;text-align:center}
+.auth-experience .auth-divider:before,.auth-experience .auth-divider:after{content:"";height:1px;background:#e7e0d5;flex:1}
+.auth-experience .route-form{display:grid;gap:13px;margin:0}
+.auth-experience .route-form label{display:grid;gap:6px;color:#4e493f;font-size:10px;font-weight:700;letter-spacing:.35px}
+.auth-experience .route-form input{width:100%;min-height:48px;padding:12px 14px;border:1px solid #dcd3c4;background:#fcfaf5;color:#211f1a;font-size:12px;outline:none;transition:border-color .18s,box-shadow .18s}
+.auth-experience .route-form input::placeholder{color:#aaa294}
+.auth-experience .route-form input:focus{border-color:#ad8c53;box-shadow:0 0 0 3px rgba(173,140,83,.13)}
+.auth-email-button,.auth-phone-button{width:100%;min-height:49px;justify-content:space-between;padding:0 17px;background:#c4a36a;border:1px solid #c4a36a;color:#191713;font-size:10px;font-weight:700;letter-spacing:1.1px}
+.auth-email-button:hover,.auth-phone-button:hover{background:#b18e53;border-color:#b18e53;color:#171510}
+.auth-email-button span,.auth-phone-button span{font-size:18px}
+.auth-experience .auth-mobile-divider{margin:24px 0 18px}
+.auth-phone-form{grid-template-columns:minmax(0,1fr) auto!important;align-items:end;gap:10px!important}
+.auth-phone-form label{min-width:0}
+.auth-phone-button{width:auto;min-width:112px;min-height:48px;gap:8px;white-space:nowrap}
+.auth-status{grid-column:1/-1;margin:0;min-height:0;color:#8a6935;font-size:11px}
+.auth-security-note{display:flex;gap:8px;align-items:flex-start;margin:20px 0 0;padding-top:15px;border-top:1px solid #eee8dd;color:#81796c;font-size:9px;line-height:1.7}
+.auth-security-note span{color:#a8864e;font-size:16px;line-height:1}
+.auth-brand-panel{position:relative;display:flex;flex-direction:column;justify-content:space-between;min-height:100%;padding:clamp(28px,4vw,48px);overflow:hidden;border:0;background:radial-gradient(circle at 75% 20%,#4a4030 0,#28251e 35%,#171714 75%);color:#f7f0e4}
+.auth-brand-panel:before{content:"";position:absolute;width:360px;height:360px;border:1px solid rgba(220,193,139,.14);border-radius:50%;right:-170px;top:-125px;box-shadow:0 0 0 35px rgba(220,193,139,.035),0 0 0 75px rgba(220,193,139,.025)}
+.auth-brand-orbit{position:relative;display:grid;place-items:center;width:160px;height:160px;margin:10px auto 32px;border:1px solid rgba(218,190,135,.55);border-radius:50%;box-shadow:0 0 0 12px rgba(218,190,135,.06),inset 0 0 35px rgba(218,190,135,.08)}
+.auth-orbit-ring{position:absolute;inset:14px;border:1px dashed rgba(218,190,135,.45);border-radius:50%}
+.auth-watch-symbol{font:400 38px Georgia,serif;letter-spacing:5px;color:#e4cc9b;text-shadow:0 4px 24px #d8b97935}
+.auth-brand-copy{position:relative;z-index:1;margin:auto 0}
+.auth-brand-copy .auth-panel-kicker{color:#d7bd8d}
+.auth-brand-copy h2{font:400 clamp(32px,3.6vw,44px)/1.12 Georgia,serif;letter-spacing:-.6px;color:#fff8eb;margin:14px 0}
+.auth-brand-copy h2 em{font-weight:400;color:#d9bd83}
+.auth-brand-copy p{max-width:330px;color:#c8c0b2;font-size:11px;line-height:1.9}
+.auth-brand-foot{position:relative;z-index:1;display:flex;justify-content:space-between;gap:10px;margin-top:35px;padding-top:16px;border-top:1px solid rgba(222,199,157,.22);color:#b7a98e;font-size:8px;letter-spacing:1.2px}
+@media(max-width:760px){
+ .route-auth-layout.auth-experience{grid-template-columns:1fr;margin-bottom:38px}
+ .auth-experience .auth-panel-main{padding:26px 20px}
+ .auth-experience .auth-tabs{margin:18px 0 23px}
+ .auth-brand-panel{min-height:290px;padding:25px 22px}
+ .auth-brand-orbit{width:112px;height:112px;margin:0 auto 20px}
+ .auth-brand-copy h2{font-size:31px;margin:9px 0}
+ .auth-brand-copy p{max-width:100%;margin:8px 0}
+ .auth-brand-foot{margin-top:20px}
+}
+@media(max-width:380px){
+ .auth-phone-form{grid-template-columns:1fr!important}
+ .auth-phone-button{width:100%}
+ .auth-experience .auth-tabs .chip{padding:9px 12px}
+}
