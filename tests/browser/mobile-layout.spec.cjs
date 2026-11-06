@@ -60,9 +60,12 @@ test('clicking a watch image, title or Details opens its product detail panel', 
 });
 
 
-test('homepage keeps the cinematic slider without the duplicate customer shortcut row', async ({ page }) => {
+test('homepage keeps the autoplay editorial carousel without the duplicate customer shortcut row', async ({ page }) => {
   await page.goto('/');
-  await expect(page.locator('[data-cinematic-story]')).toBeVisible();
+  const carousel = page.locator('[data-ad-carousel]');
+  await expect(carousel).toBeVisible();
+  await expect(carousel.locator('[data-ad-slide]')).toHaveCount(7);
+  await expect(carousel.locator('[data-ad-count]')).toHaveText('01 / 07');
   await expect(page.locator('#customerQuickNav')).toHaveCount(0);
 });
 
