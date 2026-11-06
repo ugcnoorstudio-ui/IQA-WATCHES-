@@ -823,3 +823,44 @@ test('premium customer login exposes Google, email and OTP sections with respons
   await expect(page.locator('#authWelcomeTitle')).toHaveText('Create your account');
   await expect(page.locator('#customerAuthForm input[name="full_name"]')).toBeVisible();
 });
+
+
+test('Featured Watches includes crawlable static fallback cards and hides them after live catalogue loads', async ({ page }) => {
+  await page.goto('/');
+  const fallback = page.locator('#productStaticFallback');
+  await expect(fallback).toBeAttached();
+  await expect(fallback.locator('.product-card')).toHaveCount(3);
+  await expect(fallback).toContainText('AE-1200WHD-1AV');
+  await expect(fallback).toContainText('AE-1200WHL-5AV');
+  await expect(fallback).toContainText('Thor Multifunctional Analogue Watch');
+  await expect.poll(
+    () => page.evaluate(() => typeof catalogueState === 'undefined' ? 'missing' : catalogueState),
+    { timeout: 20000 }
+  ).toBe('ready');
+  await expect(fallback).toBeHidden();
+});
+
+test('catalogue loading failure shows retry action and retains static fallback', async ({ page }) => {
+  let failProducts = true;
+  await page.route('**/rest/v1/products**', async route => {
+    if (failProducts) {
+      await route.abort('failed');
+      return;
+    }
+    await route.continue();
+  });
+  await page.goto('/');
+  await expect.poll(
+    () => page.evaluate(() => typeof catalogueState === 'undefined' ? 'missing' : catalogueState),
+    { timeout: 20000 }
+  ).toBe('error');
+  await expect(page.locator('#productGrid [data-catalogue-retry]')).toBeVisible();
+  await expect(page.locator('#productStaticFallback')).toBeVisible();
+  failProducts = false;
+  await page.locator('#productGrid [data-catalogue-retry]').click();
+  await expect.poll(
+    () => page.evaluate(() => typeof catalogueState === 'undefined' ? 'missing' : catalogueState),
+    { timeout: 20000 }
+  ).toBe('ready');
+  await expect(page.locator('#productStaticFallback')).toBeHidden();
+});
