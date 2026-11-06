@@ -712,8 +712,8 @@ body.menu-open #menuBackdrop{display:block}
 #iqa-image-lightbox .iqa-lightbox-controls{display:flex;gap:8px;align-items:center}
 #iqa-image-lightbox button{min-width:42px;min-height:42px;border:1px solid #ffffff55;background:#ffffff12;color:#fff;border-radius:2px;font-size:20px}
 #iqa-image-lightbox button:disabled{opacity:.35;cursor:not-allowed}
-#iqa-image-lightbox .iqa-lightbox-stage{min-height:0;display:grid;place-items:center;overflow:hidden;touch-action:pan-y}
-#iqa-image-lightbox img{display:block;max-width:100%;max-height:100%;width:auto;height:auto;object-fit:contain;transform:scale(1);transition:transform .2s ease;cursor:zoom-in}
+#iqa-image-lightbox .iqa-lightbox-stage{min-height:0;display:flex;align-items:center;justify-content:space-between;gap:clamp(8px,2vw,20px);overflow:hidden;touch-action:pan-y}
+#iqa-image-lightbox img{display:block;flex:1 1 auto;min-width:0;max-width:calc(100% - 116px);max-height:100%;width:auto;height:auto;object-fit:contain;transform:scale(1);transition:transform .2s ease;cursor:zoom-in}
 #iqa-image-lightbox img.is-zoomed{transform:scale(1.8);cursor:zoom-out;max-width:80vw;max-height:80vh}
 #iqa-image-lightbox .iqa-lightbox-caption{min-height:30px;text-align:center;color:#e9e3d7;font-size:12px;padding-top:8px}
 .route-gallery-main img,#productModalMainImage{cursor:zoom-in}
