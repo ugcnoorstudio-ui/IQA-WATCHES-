@@ -89,3 +89,18 @@ test('mobile product detail modal stacks gallery and product information', () =>
   assert.ok(html.includes('@media(max-width:680px){.modal-wrap'));
   assert.ok(html.includes('.product-modal{grid-template-columns:1fr}'));
 });
+
+
+test('full-screen product image viewer is present and supports keyboard-accessible entry points', () => {
+  assert.match(html, /id="phase-three-image-lightbox"/);
+  assert.match(html, /#iqa-image-lightbox\.open/);
+  assert.match(html, /data-lightbox-zoom/);
+  assert.match(html, /data-lightbox-prev/);
+  assert.match(html, /data-lightbox-next/);
+  assert.match(html, /aria-label="Open full-screen product image"/);
+});
+
+test('Buy Now uses an isolated quantity selection instead of mutating the cart', () => {
+  assert.match(html, /window\.iqaBuyNowSelection=\{productId:id,quantity:1\}/);
+  assert.doesNotMatch(html, /const buyNow=e\.target\.closest\('\[data-buy-now\]'\);if\(buyNow\)\{const id=buyNow\.dataset\.buyNow;if\(!addCart\(id\)\)/);
+});
