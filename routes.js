@@ -597,3 +597,22 @@ render();
  if(root&&'MutationObserver' in window)new MutationObserver(installControls).observe(root,{childList:true,subtree:true});
  document.addEventListener('DOMContentLoaded',installControls);window.addEventListener('load',installControls);window.addEventListener('hashchange',installControls);
 })();
+
+/* The full-screen image viewer must also respond to horizontal swipes. */
+(function(){
+ function attach(){
+  const stage=document.querySelector('#iqa-image-lightbox .iqa-lightbox-stage');
+  if(!stage||stage.dataset.swipeReady==='true')return;
+  stage.dataset.swipeReady='true';
+  let start=null;
+  stage.addEventListener('pointerdown',event=>{start={x:event.clientX,y:event.clientY,id:event.pointerId}},{passive:true});
+  stage.addEventListener('pointerup',event=>{
+   if(!start||start.id!==event.pointerId)return;
+   const dx=event.clientX-start.x,dy=event.clientY-start.y;start=null;
+   if(Math.abs(dx)>48&&Math.abs(dx)>Math.abs(dy)*1.2&&typeof window.iqaStepImageLightbox==='function')window.iqaStepImageLightbox(dx<0?1:-1);
+  },{passive:true});
+  stage.addEventListener('pointercancel',()=>{start=null},{passive:true});
+ }
+ if('MutationObserver' in window)new MutationObserver(attach).observe(document.body,{childList:true,subtree:true});
+ attach();
+})();
