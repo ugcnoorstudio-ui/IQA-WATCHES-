@@ -29,15 +29,23 @@ test('Motion Studio styles preserve hidden states and narrow layouts', () => {
   assert.match(css, /@media\(max-width:420px\)/);
 });
 
-test('cinematic story remains progressive and reduced-motion aware', () => {
+test('homepage editorial stories run as an accessible autoplay carousel with reduced-motion support', () => {
   const js = read('assets/cinematic-story.js');
   const css = read('assets/cinematic-story.css');
   const html = read('index.html');
-  assert.match(js, /IntersectionObserver/);
-  assert.match(js, /if\(!\('IntersectionObserver' in window\)\)/);
+  assert.match(js, /setInterval/);
+  assert.match(js, /prefers-reduced-motion: reduce/);
+  assert.match(js, /touchstart/);
+  assert.match(js, /touchend/);
+  assert.match(js, /data-ad-next/);
+  assert.match(js, /data-ad-pause/);
   assert.match(css, /prefers-reduced-motion:reduce/);
-  assert.match(html, /data-cinematic-story/);
-  assert.match(html, /cinematic-story-skip/);
+  assert.match(html, /data-ad-carousel/);
+  assert.match(html, /Good design belongs in every day\./);
+  assert.match(html, /Time is an art\./);
+  assert.match(html, /Presence, before precision\./);
+  assert.match(html, /Every second, considered\./);
+  assert.doesNotMatch(html, /data-cinematic-story|cinematic-story-skip/);
 });
 
 test('admin route remains attached to the existing authenticated shell', () => {
