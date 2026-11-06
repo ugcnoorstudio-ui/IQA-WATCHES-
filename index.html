@@ -720,6 +720,135 @@ body.menu-open #menuBackdrop{display:block}
 @media(max-width:680px){#iqa-image-lightbox{padding:8px}#iqa-image-lightbox .iqa-lightbox-toolbar{min-height:48px}#iqa-image-lightbox button{min-width:44px;min-height:44px}#iqa-image-lightbox img.is-zoomed{max-width:calc(100% - 96px);max-height:78vh}}
 @media(prefers-reduced-motion:reduce){#iqa-image-lightbox img{transition:none}}
 </style>
+<style id="watches-panel-fullscreen-layout">
+/* Product detail / Watches panel: use the complete visible viewport on every device. */
+.modal-wrap{
+  position:fixed;
+  inset:0;
+  width:100%;
+  height:100vh;
+  height:100dvh;
+  min-height:0;
+  padding:0;
+  display:none;
+  place-items:stretch;
+  overflow:hidden;
+  overscroll-behavior:contain;
+}
+.modal-wrap.open{display:grid}
+.modal-wrap .modal{
+  width:100%;
+  max-width:none;
+  height:100vh;
+  height:100dvh;
+  max-height:none;
+  min-height:0;
+  margin:0;
+  border:0;
+  border-radius:0;
+  overflow:hidden;
+  overscroll-behavior:contain;
+  display:flex;
+  flex-direction:column;
+}
+.modal-wrap .product-modal{
+  width:100%;
+  height:100%;
+  min-height:0;
+  flex:1 1 auto;
+  grid-template-columns:minmax(0,1fr) minmax(0,1fr);
+  overflow:hidden;
+}
+.modal-wrap .product-modal-image{
+  min-width:0;
+  min-height:0;
+  height:100%;
+  max-height:none;
+  display:grid;
+  place-items:center;
+  overflow:hidden;
+  background:#e7e1d6;
+}
+.modal-wrap .product-modal-image img{
+  display:block;
+  width:100%;
+  height:100%;
+  min-height:0;
+  max-height:100%;
+  object-fit:contain;
+  padding:clamp(12px,3vw,40px);
+}
+.modal-wrap .product-modal-copy{
+  min-width:0;
+  min-height:0;
+  height:100%;
+  max-height:100%;
+  overflow-y:auto;
+  overscroll-behavior:contain;
+  -webkit-overflow-scrolling:touch;
+  padding:clamp(24px,4vw,56px);
+  padding-bottom:max(clamp(24px,4vw,56px),env(safe-area-inset-bottom));
+}
+.modal-wrap .modal-close{
+  position:fixed;
+  top:max(12px,env(safe-area-inset-top));
+  right:max(12px,env(safe-area-inset-right));
+  z-index:8;
+  width:44px;
+  height:44px;
+  background:#fffdf8ed;
+  box-shadow:0 2px 14px #0002;
+}
+.modal-wrap .policy-page{
+  width:100%;
+  max-width:900px;
+  max-height:100%;
+  overflow-y:auto;
+  overscroll-behavior:contain;
+  margin:0 auto;
+  padding:clamp(28px,5vw,64px);
+}
+@media(max-width:680px){
+  .modal-wrap .product-modal{
+    grid-template-columns:minmax(0,1fr);
+    grid-template-rows:minmax(210px,38dvh) minmax(0,1fr);
+    overflow:hidden;
+  }
+  .modal-wrap .product-modal-image{
+    width:100%;
+    height:100%;
+    min-height:0;
+    max-height:none;
+  }
+  .modal-wrap .product-modal-image img{
+    width:100%;
+    height:100%;
+    max-height:100%;
+    object-fit:contain;
+    padding:10px 42px;
+  }
+  .modal-wrap .product-modal-copy{
+    width:100%;
+    height:100%;
+    max-height:100%;
+    overflow-y:auto;
+    padding:22px 18px max(24px,env(safe-area-inset-bottom));
+  }
+  .modal-wrap .product-modal-copy h2{font-size:clamp(27px,7vw,36px)}
+  .modal-wrap .product-gallery-thumbs{max-width:100%;overflow-x:auto}
+  .modal-wrap .policy-page{
+    max-width:none;
+    padding:calc(62px + env(safe-area-inset-top)) 20px max(24px,env(safe-area-inset-bottom));
+  }
+}
+@media(max-width:380px){
+  .modal-wrap .product-modal{grid-template-rows:minmax(185px,32dvh) minmax(0,1fr)}
+  .modal-wrap .product-modal-copy{padding-left:15px;padding-right:15px}
+}
+@media(prefers-reduced-motion:reduce){
+  .modal-wrap,.modal-wrap .modal{transition:none!important;animation:none!important}
+}
+</style>
 </head>
 <body>
 <div class="iqa-announcement" role="note">IQA WATCHES <span aria-hidden="true">·</span> TIMELESS STYLE, CONSIDERED DETAILS <span aria-hidden="true">·</span> PERSONAL ASSISTANCE ON WHATSAPP</div>
