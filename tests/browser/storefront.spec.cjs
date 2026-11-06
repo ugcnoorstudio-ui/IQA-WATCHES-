@@ -800,7 +800,7 @@ test('premium customer login exposes Google, email and OTP sections with respons
   await expect(brand).toContainText('TIME, WITH INTENTION');
   await expect(brand).toContainText('Your signature.');
 
-  const columns = await layout.evaluate(el => getComputedStyle(el).gridTemplateColumns.trim().split(/\\s+/).length);
+  const columns = await layout.evaluate(el => getComputedStyle(el).gridTemplateColumns.trim().split(/\s+/).length);
   if (isMobile) {
     expect(columns).toBe(1);
     const overflow = await page.evaluate(() => document.documentElement.scrollWidth > document.documentElement.clientWidth);
