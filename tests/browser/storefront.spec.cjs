@@ -669,3 +669,38 @@ test('mobile watch detail opens as a large image-first bottom panel', async ({ p
   await expect(page.locator('#modalContent h2')).not.toBeEmpty();
   await page.locator('#modalContent #modalClose').click();
 });
+
+test('multi-image watch detail supports touch swipe and synchronized gallery controls', async ({ page }) => {
+  await openStore(page);
+  const card = page.locator('#productGrid .product-card').first();
+  const selectedId = await card.locator('.product-image-link').getAttribute('data-view');
+  const primary = await card.locator('.product-image img').getAttribute('src');
+  await page.evaluate(({ id, src }) => {
+    const product = products.find(item => item.id === id);
+    product.gallery = [
+      { src, alt: 'Swipe primary watch image' },
+      { src: src + '?swipe-test=secondary', alt: 'Swipe secondary watch image' },
+      { src: src + '?swipe-test=tertiary', alt: 'Swipe tertiary watch image' }
+    ];
+    location.hash = '#product/' + encodeURIComponent(id);
+  }, { id: selectedId, src: primary });
+  const modal = page.locator('#modalWrap');
+  await expect(modal).toHaveClass(/open/);
+  const image = page.locator('#modalContent [data-modal-image]');
+  const count = page.locator('#modalContent .product-gallery-count');
+  await expect(count).toHaveText('1 / 3');
+
+  await image.dispatchEvent('pointerdown', { pointerId: 11, pointerType: 'touch', button: 0, isPrimary: true, clientX: 260, clientY: 210 });
+  await image.dispatchEvent('pointerup', { pointerId: 11, pointerType: 'touch', button: 0, isPrimary: true, clientX: 100, clientY: 214 });
+  await expect(count).toHaveText('2 / 3');
+  await expect(image).toHaveAttribute('alt', 'Swipe secondary watch image');
+  await expect(page.locator('[data-gallery-index="1"]')).toHaveAttribute('aria-pressed', 'true');
+
+  await page.locator('[data-gallery-step="1"]').click();
+  await expect(count).toHaveText('3 / 3');
+  await page.locator('[data-gallery-step="1"]').click();
+  await expect(count).toHaveText('1 / 3');
+  await page.locator('[data-gallery-step="-1"]').click();
+  await expect(count).toHaveText('3 / 3');
+  await page.locator('#modalContent #modalClose').click();
+});
