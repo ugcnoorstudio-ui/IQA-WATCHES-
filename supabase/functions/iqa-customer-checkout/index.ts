@@ -86,12 +86,41 @@ Deno.serve(async (req: Request) => {
       .eq("customer_id", customer.id)
       .maybeSingle();
     if (addressError || !address) return reply(400, { ok: false, error: "The selected delivery address could not be verified for your account." });
-    if (!shipping.serviceable_pincodes.map(String).includes(String(address.postal_code))) {
+    const configuredPins = shipping.serviceable_pincodes.map((pin: unknown) => String(pin).trim());
+    const requestedPin = String(address.postal_code || "").trim();
+    if (!/^\d{6}$/.test(requestedPin) || (!configuredPins.includes("*") && !configuredPins.includes(requestedPin))) {
       return reply(409, { ok: false, error: "Delivery is not available for the selected PIN code." });
     }
 
-    const fee = Number(shipping.flat_shipping_fee);
-    if (!Number.isFinite(fee) || fee < 0 || fee > 100000) return reply(409, { ok: false, error: "Shipping configuration needs review." });
+    // Recalculate the basket from trusted catalogue rows; never trust browser prices.
+    const variantIds = items.map((item: any) => item.variant_id);
+    if (new Set(variantIds).size !== variantIds.length) return reply(400, { ok: false, error: "Remove duplicate watch lines and try again." });
+    const { data: variants, error: variantsError } = await admin.from("product_variants")
+      .select("id,product_id,selling_price,active")
+      .in("id", variantIds);
+    if (variantsError) throw new Error("Catalogue prices could not be verified.");
+    const productIds = (variants || []).map((variant: any) => variant.product_id);
+    const { data: products, error: productsError } = await admin.from("products")
+      .select("id,selling_price,state,is_sample,verified_sellable")
+      .in("id", productIds);
+    if (productsError) throw new Error("Catalogue products could not be verified.");
+    let itemSubtotal = 0;
+    for (const item of items) {
+      const variant = (variants || []).find((row: any) => row.id === item.variant_id && row.active === true);
+      const product = (products || []).find((row: any) => row.id === variant?.product_id);
+      if (!variant || !product || product.state !== "published" || product.is_sample !== false || product.verified_sellable !== true) {
+        return reply(409, { ok: false, error: "A selected watch is not approved for sale." });
+      }
+      const price = Number(variant.selling_price ?? product.selling_price);
+      if (!Number.isFinite(price) || price <= 0) return reply(409, { ok: false, error: "A selected watch has no valid selling price." });
+      itemSubtotal += price * item.quantity;
+    }
+    const flatFee = Number(shipping.flat_shipping_fee);
+    const threshold = Number(shipping.free_shipping_threshold);
+    if (!Number.isFinite(flatFee) || flatFee < 0 || flatFee > 100000) return reply(409, { ok: false, error: "Shipping configuration needs review." });
+    const freeShipping = Number.isFinite(threshold) && threshold > 0 &&
+      (shipping.free_shipping_operator === "greater_than" ? itemSubtotal > threshold : itemSubtotal >= threshold);
+    const fee = freeShipping ? 0 : flatFee;
     const deliverySnapshot = {
       recipient_name: address.recipient_name,
       phone: address.phone,
