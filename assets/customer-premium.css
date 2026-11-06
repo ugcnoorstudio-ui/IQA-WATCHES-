@@ -219,3 +219,18 @@ body{background:var(--iqa-cream);color:var(--iqa-ink)}
 #iqa-image-lightbox .iqa-lightbox-stage{touch-action:pan-y}
 @media(max-width:760px){.route-gallery-controls{left:9px;right:9px;bottom:9px}.route-gallery-controls button{width:36px;height:36px}.route-recommendations{margin-top:52px}}
 
+
+/* Keep the product details and recommendations in separate, non-overlapping flow rows. */
+.route-product-page{display:flow-root;overflow:visible}
+.route-product-layout{position:relative;display:grid;align-items:start;isolation:isolate}
+.route-product-media{align-self:start;min-width:0}
+.route-product-copy{align-self:start;min-width:0}
+.route-recommendations{position:relative;clear:both;display:flow-root;width:100%;margin:clamp(52px,6vw,78px) 0 0;padding:34px 0 0;border-top:1px solid #ddd4c5;z-index:0}
+.route-gallery-main{touch-action:pan-y;overscroll-behavior-x:contain;user-select:none}
+.route-gallery-main img{user-select:none;-webkit-user-drag:none}
+.route-gallery-count{display:block;padding:8px 14px;text-align:center;color:#716b60;background:#fffdf9;font-size:11px;letter-spacing:1px}
+.iqa-lightbox-stage{touch-action:pan-y;overscroll-behavior-x:contain}
+@media(max-width:760px){
+ .route-product-media{position:relative;top:auto}
+ .route-recommendations{margin-top:42px;padding-top:28px}
+}
