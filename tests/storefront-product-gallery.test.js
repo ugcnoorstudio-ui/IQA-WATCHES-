@@ -107,9 +107,11 @@ test('Buy Now uses an isolated quantity selection instead of mutating the cart',
 });
 
 
-test('quick-view gallery handles pointer release outside the image and recommendations flow after details', () => {
-  assert.match(html, /document\.addEventListener\('pointerup',onPointerUp/);
-  assert.match(html, /gallerySurface\.setPointerCapture\(event\.pointerId\)/);
+test('quick-view gallery handles native touch release outside the image and recommendations flow after details', () => {
+  assert.match(html, /gallerySurface\.addEventListener\('touchstart',onTouchStart/);
+  assert.match(html, /document\.addEventListener\('touchend',onTouchEnd/);
+  assert.match(html, /document\.addEventListener\('touchcancel',onTouchCancel/);
+  assert.match(html, /const applySwipe=\(dx,dy\)=>/);
   assert.match(html, /<style id="quick-view-gallery-and-recommendations-fix">/);
   assert.match(html, /<\/div><\/div>'\+\(related\.length\?'<section class="related-products">/);
 });

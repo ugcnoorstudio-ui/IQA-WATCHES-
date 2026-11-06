@@ -699,9 +699,17 @@ test('multi-image watch detail supports touch swipe and synchronized gallery con
   const count = page.locator('#modalContent .product-gallery-count');
   await expect(count).toHaveText('1 / 3');
 
-  await image.dispatchEvent('pointerdown', { pointerId: 11, pointerType: 'touch', button: 0, isPrimary: true, clientX: 260, clientY: 210 });
-  // A real finger can finish outside the image; pointerup must still reach the gallery handler.
-  await page.locator('#modalContent .product-modal-copy').dispatchEvent('pointerup', { pointerId: 11, pointerType: 'touch', button: 0, isPrimary: true, clientX: 100, clientY: 214 });
+  await page.evaluate(() => {
+    const image = document.querySelector('#modalContent [data-modal-image]');
+    const copy = document.querySelector('#modalContent .product-modal-copy');
+    const start = new Event('touchstart', { bubbles: true, cancelable: true });
+    Object.defineProperty(start, 'touches', { value: [{ identifier: 17, clientX: 260, clientY: 210 }] });
+    image.dispatchEvent(start);
+    // A finger may finish outside the image; native touchend is listened for at document level.
+    const end = new Event('touchend', { bubbles: true, cancelable: true });
+    Object.defineProperty(end, 'changedTouches', { value: [{ identifier: 17, clientX: 100, clientY: 214 }] });
+    copy.dispatchEvent(end);
+  });
   await expect(count).toHaveText('2 / 3');
   await expect(image).toHaveAttribute('alt', 'Swipe secondary watch image');
   await expect(page.locator('[data-gallery-index="1"]')).toHaveAttribute('aria-pressed', 'true');
