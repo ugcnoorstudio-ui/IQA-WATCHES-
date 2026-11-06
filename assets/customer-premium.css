@@ -218,3 +218,13 @@ body{background:var(--iqa-cream);color:var(--iqa-ink)}
 .route-recommendations{position:relative;display:block;clear:both;float:none;width:100%;margin:clamp(56px,7vw,88px) 0 0;padding:clamp(28px,4vw,42px) 0 0;border-top:1px solid #ddd4c5;isolation:isolate}
 #iqa-image-lightbox .iqa-lightbox-stage{touch-action:pan-y}
 @media(max-width:760px){.route-gallery-controls{left:9px;right:9px;bottom:9px}.route-gallery-controls button{width:36px;height:36px}.route-recommendations{margin-top:52px}}
+
+/* Gallery gesture and product-detail spacing fixes */
+.route-gallery-main{position:relative;touch-action:pan-y;overscroll-behavior-x:contain}
+.route-gallery-main img{display:block;user-select:none;-webkit-user-drag:none}
+.route-gallery-count{display:block;padding:8px 14px;text-align:center;color:#716b60;font-size:11px;letter-spacing:1px;background:#fffdf9}
+.route-recommendations{position:relative;clear:both;display:block;width:100%;margin:clamp(48px,6vw,76px) auto 0;padding:38px 0 0;z-index:0}
+.route-product-layout{position:relative;align-items:start}
+.route-product-copy{min-width:0;position:relative;z-index:1}
+.iqa-lightbox-stage{touch-action:pan-y;overscroll-behavior-x:contain}
+@media(max-width:760px){.route-recommendations{margin-top:44px;padding-top:30px}}
