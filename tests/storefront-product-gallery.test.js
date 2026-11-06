@@ -105,3 +105,11 @@ test('Buy Now uses an isolated quantity selection instead of mutating the cart',
   assert.match(html, /window\.iqaBuyNowSelection=\{productId:id,quantity:1\}/);
   assert.doesNotMatch(html, /const buyNow=e\.target\.closest\('\[data-buy-now\]'\);if\(buyNow\)\{const id=buyNow\.dataset\.buyNow;if\(!addCart\(id\)\)/);
 });
+
+
+test('quick-view gallery handles pointer release outside the image and recommendations flow after details', () => {
+  assert.match(html, /document\.addEventListener\('pointerup',onPointerUp/);
+  assert.match(html, /gallerySurface\.setPointerCapture\(event\.pointerId\)/);
+  assert.match(html, /<style id="quick-view-gallery-and-recommendations-fix">/);
+  assert.match(html, /<\/div><\/div>'\+\(related\.length\?'<section class="related-products">/);
+});
