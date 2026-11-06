@@ -455,31 +455,6 @@ window.addEventListener('catalogue:error',render);
 function setRouteGalleryIndex(index){const main=document.getElementById('routeMainImage');if(!main)return;const thumbs=Array.from(document.querySelectorAll('[data-gallery-src]'));if(!thumbs.length)return;const next=(index+thumbs.length)%thumbs.length;const thumb=thumbs[next];main.src=thumb.dataset.gallerySrc;main.alt=thumb.dataset.galleryAlt||main.alt;main.dataset.galleryIndex=String(next);thumbs.forEach((button,i)=>button.setAttribute('aria-pressed',String(i===next)));const count=document.querySelector('.route-gallery-count');if(count)count.textContent=(next+1)+' / '+thumbs.length;}
 document.addEventListener('click',e=>{const thumb=e.target.closest('[data-gallery-src]');if(thumb){const thumbs=Array.from(document.querySelectorAll('[data-gallery-src]'));setRouteGalleryIndex(thumbs.indexOf(thumb));}const add=e.target.closest('[data-add-compare]');if(add)location.hash='comparison'});
 
-// Mobile gallery gestures: horizontal swipes change the active thumbnail and full-screen image.
-(function(){
- let startX=0,startY=0,gestureTarget=null;
- document.addEventListener('touchstart',event=>{
-  if(event.touches.length!==1)return;
-  const target=event.target.closest('.route-gallery-main,.iqa-lightbox-stage');
-  if(!target)return;
-  gestureTarget=target;startX=event.touches[0].clientX;startY=event.touches[0].clientY;
- },{passive:true});
- document.addEventListener('touchend',event=>{
-  if(!gestureTarget||!event.changedTouches.length){gestureTarget=null;return;}
-  const dx=event.changedTouches[0].clientX-startX,dy=event.changedTouches[0].clientY-startY,target=gestureTarget;
-  gestureTarget=null;
-  if(Math.abs(dx)<42||Math.abs(dx)<Math.abs(dy)*1.2)return;
-  if(target.classList.contains('route-gallery-main')){
-   const main=document.getElementById('routeMainImage'),thumbs=Array.from(document.querySelectorAll('[data-gallery-src]'));
-   if(!main||thumbs.length<2)return;
-   const current=Math.max(0,Number(main.dataset.galleryIndex)||0);
-   setRouteGalleryIndex(current+(dx<0?1:-1));
-  }else if(document.getElementById('iqa-image-lightbox')?.classList.contains('open')){
-   window.iqaStepImageLightbox(dx<0?1:-1);
-  }
-  event.preventDefault();
- },{passive:false});
-})();
 function ensureIqaImageLightbox(){
  let layer=document.getElementById('iqa-image-lightbox');
  if(layer)return layer;
