@@ -736,3 +736,40 @@ test('multi-image watch detail supports touch swipe and synchronized gallery con
   await expect(count).toHaveText('3 / 3');
   await page.locator('#modalContent #modalClose').click();
 });
+
+test('homepage editorial banners are consolidated into an autoplay carousel with manual and touch navigation', async ({ page }) => {
+  await openStore(page);
+  const carousel = page.locator('[data-ad-carousel]');
+  const slides = carousel.locator('[data-ad-slide]');
+  await expect(carousel).toBeVisible();
+  await expect(slides).toHaveCount(7);
+  await expect(slides.nth(0).locator('h2')).toHaveText('Good design belongs in every day.');
+  await expect(slides.nth(1).locator('h2')).toHaveText('Time is an art.');
+  await expect(slides.nth(2).locator('h2')).toHaveText('Presence, before precision.');
+  await expect(slides.nth(3).locator('h2')).toHaveText('Every second, considered.');
+  await expect(slides.filter({ visible: true })).toHaveCount(1);
+  await expect(carousel.locator('[data-ad-count]')).toHaveText('01 / 07');
+
+  // The first banner advances automatically when the carousel is not hovered or focused.
+  await page.mouse.move(0, 0);
+  await expect(carousel.locator('[data-ad-count]')).toHaveText('02 / 07', { timeout: 8000 });
+  await carousel.locator('[data-ad-next]').click();
+  await expect(carousel.locator('[data-ad-count]')).toHaveText('03 / 07');
+  await carousel.locator('[data-ad-prev]').click();
+  await expect(carousel.locator('[data-ad-count]')).toHaveText('02 / 07');
+
+  // A horizontal touch gesture advances the banner; vertical gestures remain page scrolling.
+  await page.evaluate(() => {
+    const track = document.querySelector('[data-ad-track]');
+    const start = new Event('touchstart', { bubbles: true, cancelable: true });
+    Object.defineProperty(start, 'touches', { value: [{ identifier: 71, clientX: 280, clientY: 180 }] });
+    track.dispatchEvent(start);
+    const end = new Event('touchend', { bubbles: true, cancelable: true });
+    Object.defineProperty(end, 'changedTouches', { value: [{ identifier: 71, clientX: 90, clientY: 184 }] });
+    document.dispatchEvent(end);
+  });
+  await expect(carousel.locator('[data-ad-count]')).toHaveText('03 / 07');
+  await carousel.locator('[data-ad-pause]').click();
+  await expect(carousel.locator('[data-ad-pause]')).toHaveAttribute('aria-pressed', 'true');
+  await expect(carousel.locator('[data-ad-pause]')).toHaveAttribute('aria-label', 'Play automatic stories');
+});
