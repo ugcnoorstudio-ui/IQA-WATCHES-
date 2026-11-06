@@ -5,6 +5,7 @@ const path = require('node:path');
 const vm = require('node:vm');
 
 const html = fs.readFileSync(path.join(__dirname, '..', 'index.html'), 'utf8');
+const routes = fs.readFileSync(path.join(__dirname, '..', 'routes.js'), 'utf8');
 
 test('storefront inline application script remains syntactically valid', () => {
   const match = html.match(/<script>\s*([\s\S]*?)<\/script>/i);
@@ -94,9 +95,9 @@ test('mobile product detail modal stacks gallery and product information', () =>
 test('full-screen product image viewer is present and supports keyboard-accessible entry points', () => {
   assert.match(html, /id="phase-three-image-lightbox"/);
   assert.match(html, /#iqa-image-lightbox\.open/);
-  assert.match(html, /data-lightbox-zoom/);
-  assert.match(html, /data-lightbox-prev/);
-  assert.match(html, /data-lightbox-next/);
+  assert.match(routes, /data-lightbox-zoom/);
+  assert.match(routes, /data-lightbox-prev/);
+  assert.match(routes, /data-lightbox-next/);
   assert.match(html, /aria-label="Open full-screen product image"/);
 });
 
