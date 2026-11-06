@@ -528,7 +528,7 @@ render();
 /* Reliable touch/pointer swipe for the product-detail gallery. */
 (function(){
  let active=null;
- function currentGallery(){return document.querySelector('.route-gallery-main');}
+ function currentGallery(){return typeof document.querySelector==='function'?document.querySelector('.route-gallery-main'):null;}
  function select(delta){
   const gallery=currentGallery();if(!gallery)return;
   const image=gallery.querySelector('#routeMainImage');
@@ -575,6 +575,7 @@ render();
 
 (function(){
  function installControls(){
+  if(typeof document.querySelector!=='function'||typeof document.querySelectorAll!=='function')return;
   const gallery=document.querySelector('.route-gallery-main');
   const image=gallery&&gallery.querySelector('#routeMainImage');
   const thumbs=Array.from(document.querySelectorAll('[data-gallery-src]'));
@@ -601,6 +602,7 @@ render();
 /* The full-screen image viewer must also respond to horizontal swipes. */
 (function(){
  function attach(){
+  if(typeof document.querySelector!=='function')return;
   const stage=document.querySelector('#iqa-image-lightbox .iqa-lightbox-stage');
   if(!stage||stage.dataset.swipeReady==='true')return;
   stage.dataset.swipeReady='true';
