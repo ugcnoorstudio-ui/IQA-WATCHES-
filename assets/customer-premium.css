@@ -327,3 +327,16 @@ body{background:var(--iqa-cream);color:var(--iqa-ink)}
  .auth-brand-panel{min-height:270px}
  .auth-stepper{margin-bottom:22px}
 }
+
+
+/* Google identity mark and one consistent login composition on every viewport. */
+.auth-google-mark{display:grid;place-items:center;flex:0 0 27px;width:27px;height:27px;border-radius:50%;background:#fff}
+.auth-google-mark svg{display:block;width:22px;height:22px}
+.route-auth-layout.auth-experience{grid-template-columns:minmax(0,1fr);grid-template-areas:"brand" "main";max-width:760px}
+.auth-experience .auth-brand-panel{grid-area:brand;min-height:245px;padding:clamp(24px,4vw,38px)}
+.auth-experience .auth-panel-main{grid-area:main}
+@media(max-width:760px){
+ .route-auth-layout.auth-experience{grid-template-columns:minmax(0,1fr);grid-template-areas:"brand" "main";max-width:760px}
+ .auth-experience .auth-brand-panel{min-height:245px;padding:24px 22px}
+ .auth-experience .auth-panel-main{padding:26px 20px}
+}
