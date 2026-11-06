@@ -572,3 +572,28 @@ render();
  if(root&&'MutationObserver' in window)new MutationObserver(install).observe(root,{childList:true,subtree:true});
  document.addEventListener('DOMContentLoaded',install);window.addEventListener('load',install);window.addEventListener('hashchange',install);
 })();
+
+(function(){
+ function installControls(){
+  const gallery=document.querySelector('.route-gallery-main');
+  const image=gallery&&gallery.querySelector('#routeMainImage');
+  const thumbs=Array.from(document.querySelectorAll('[data-gallery-src]'));
+  if(!gallery||!image||thumbs.length<2||gallery.querySelector('.route-gallery-controls'))return;
+  const controls=document.createElement('div');controls.className='route-gallery-controls';
+  const prev=document.createElement('button');prev.type='button';prev.textContent='‹';prev.setAttribute('aria-label','Previous product image');
+  const next=document.createElement('button');next.type='button';next.textContent='›';next.setAttribute('aria-label','Next product image');
+  const count=document.createElement('span');count.className='route-gallery-count';count.setAttribute('aria-live','polite');
+  function move(delta){
+   const current=thumbs.findIndex(button=>button.dataset.gallerySrc===image.getAttribute('src')||button.dataset.gallerySrc===image.src);
+   const index=(Math.max(0,current)+delta+thumbs.length)%thumbs.length;
+   thumbs[index].click();count.textContent=(index+1)+' / '+thumbs.length;
+  }
+  prev.addEventListener('click',()=>move(-1));next.addEventListener('click',()=>move(1));
+  controls.append(prev,count,next);gallery.appendChild(controls);
+  const current=thumbs.findIndex(button=>button.dataset.gallerySrc===image.getAttribute('src')||button.dataset.gallerySrc===image.src);
+  count.textContent=(Math.max(0,current)+1)+' / '+thumbs.length;
+ }
+ const root=document.getElementById('routeView');
+ if(root&&'MutationObserver' in window)new MutationObserver(installControls).observe(root,{childList:true,subtree:true});
+ document.addEventListener('DOMContentLoaded',installControls);window.addEventListener('load',installControls);window.addEventListener('hashchange',installControls);
+})();
