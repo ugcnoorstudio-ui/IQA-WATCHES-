@@ -233,3 +233,15 @@ body{background:var(--iqa-cream);color:var(--iqa-ink)}
  .route-product-media{position:relative!important;top:auto!important}
  .route-recommendations{margin-top:42px;padding-top:28px}
 }
+
+
+/* Final mobile hero sizing: override the premium theme's larger hero minimums. */
+@media(max-width:680px){
+ .hero{min-height:0!important;grid-template-columns:1fr}
+ .hero-copy{padding:24px 7% 18px!important}
+ .hero h1{font-size:clamp(38px,9.5vw,44px)!important;line-height:1.02;margin:9px 0!important}
+ .hero-copy p{font-size:12px;line-height:1.6;margin:0}
+ .hero .button{min-height:42px;padding:11px 17px;margin-top:12px}
+ .hero-secondary-link{margin-top:8px}
+ .hero-visual{min-height:0!important;height:clamp(165px,45vw,195px)!important}
+}
