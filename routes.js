@@ -505,7 +505,7 @@ document.addEventListener('click',event=>{
  const id=decodeURIComponent((location.hash.split('/')[1]||''));
  const productItem=products.find(item=>item.id===id);
  const gallery=(Array.isArray(productItem?.gallery)?productItem.gallery:[]).map(item=>({src:item.src||item.image_url,alt:item.alt||item.alt_text||productItem.name}));
- if(productItem?.image)gallery.unshift({src:productItem.image,alt:productItem.imageAlt||productItem.name});
+ if(productItem?.image&&!gallery.some(item=>safeImageUrl(item.src)===safeImageUrl(productItem.image)))gallery.unshift({src:productItem.image,alt:productItem.imageAlt||productItem.name});
  const current=gallery.findIndex(item=>safeImageUrl(item.src)===safeImageUrl(image.src));
  window.iqaOpenImageLightbox(gallery,current<0?0:current);
 });
