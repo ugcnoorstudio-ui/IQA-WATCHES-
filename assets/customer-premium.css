@@ -234,3 +234,18 @@ body{background:var(--iqa-cream);color:var(--iqa-ink)}
  .route-product-media{position:relative;top:auto}
  .route-recommendations{margin-top:42px;padding-top:28px}
 }
+
+/* Final layout guard: related watches must follow the full details block, never overlap it. */
+.route-product-page{display:block;position:relative;isolation:isolate;overflow:visible}
+.route-product-layout{display:grid;position:relative;align-items:start;clear:both}
+.route-product-media{position:relative!important;top:auto!important;align-self:start;min-width:0}
+.route-product-copy{position:relative;align-self:start;min-width:0}
+.route-recommendations{position:relative;display:block;float:none;clear:both;width:100%;margin:58px 0 0;padding:34px 0 0;border-top:1px solid #ddd4c5;isolation:isolate;z-index:auto}
+.route-gallery-main{position:relative;touch-action:pan-y;overscroll-behavior-x:contain}
+.route-gallery-count{position:absolute;left:50%;bottom:14px;transform:translateX(-50%);display:block;padding:5px 10px;background:rgba(23,22,18,.85);color:#fff;font-size:11px;letter-spacing:.8px;white-space:nowrap;pointer-events:none}
+.iqa-lightbox-stage{touch-action:pan-y;overscroll-behavior-x:contain}
+@media(max-width:760px){
+ .route-product-layout{grid-template-columns:minmax(0,1fr)}
+ .route-product-media{position:relative!important;top:auto!important}
+ .route-recommendations{margin-top:42px;padding-top:28px}
+}
