@@ -521,19 +521,56 @@ test('homepage Explore shortcuts remain removed while the hero and catalogue con
   await expect(page.locator('#sortFilter')).toBeVisible();
 });
 
-test('Buy Now adds the selected watch and opens the guarded checkout route', async ({ page }) => {
+test('Buy Now keeps its own quantity and does not mutate the shopping bag', async ({ page, isMobile }) => {
   await openStore(page);
   const card = page.locator('#productGrid .product-card').first();
+  const selectedId = await card.locator('.product-image-link').getAttribute('data-view');
+  const cartBefore = await page.evaluate(id => Number(cart[id] || 0), selectedId);
   await card.locator('.product-image-link').click();
   const modal = page.locator('#modalWrap');
   await expect(modal).toHaveClass(/open/);
   await modal.locator('[data-buy-now]').click();
-  const selectedId = await card.locator('.product-image-link').getAttribute('data-view');
   await expect.poll(() => page.evaluate(() => location.hash)).toBe('#buy-now/' + encodeURIComponent(selectedId));
-  await expect(page.locator('#routeView')).toContainText(/A closer look before checkout/i);
-  await expect(page.locator('#routeView')).toContainText(/Checkout is not available yet/i);
-  await expect(page.locator('#routeView')).toContainText(/No order can be submitted/i);
-  await expect(page.locator('#routeView [data-qty]')).toHaveCount(0);
+  const buyNow = page.locator('#routeView');
+  await expect(buyNow).toContainText(/Review your selected timepiece/i);
+  await expect(buyNow).toContainText(/Secure checkout is not enabled yet/i);
+  await expect(buyNow).toContainText(/No order or payment can be submitted/i);
+  await expect(buyNow.locator('.buy-now-quantity strong')).toHaveText('1');
+  await expect(buyNow.locator('[data-qty]')).toHaveCount(0);
+  const cartAfter = await page.evaluate(id => Number(cart[id] || 0), selectedId);
+  expect(cartAfter).toBe(cartBefore);
+  if (isMobile) {
+    const overflow = await page.evaluate(() => document.documentElement.scrollWidth > document.documentElement.clientWidth);
+    expect(overflow, 'Buy Now panel should not overflow on mobile').toBe(false);
+  }
+});
+
+test('full-screen product image viewer supports navigation, zoom and keyboard close', async ({ page }) => {
+  await openStore(page);
+  const card = page.locator('#productGrid .product-card').first();
+  const selectedId = await card.locator('.product-image-link').getAttribute('data-view');
+  const primary = await card.locator('.product-image img').getAttribute('src');
+  await page.evaluate(({ id, src }) => {
+    const product = products.find(item => item.id === id);
+    product.gallery = [
+      { src, alt: 'Primary full-screen image' },
+      { src: src + '?phase3=secondary', alt: 'Secondary full-screen image' }
+    ];
+    location.hash = '#product/' + encodeURIComponent(id);
+  }, { id: selectedId, src: primary });
+  const mainImage = page.locator('#routeMainImage');
+  await expect(mainImage).toBeVisible();
+  await mainImage.click();
+  const viewer = page.locator('#iqa-image-lightbox');
+  await expect(viewer).toHaveClass(/open/);
+  await expect(viewer).toContainText('1 / 2');
+  await viewer.locator('[data-lightbox-next]').click();
+  await expect(viewer).toContainText('2 / 2');
+  await expect(viewer.locator('.iqa-lightbox-caption')).toHaveText('Secondary full-screen image');
+  await viewer.locator('[data-lightbox-zoom]').click();
+  await expect(viewer.locator('img')).toHaveClass(/is-zoomed/);
+  await page.keyboard.press('Escape');
+  await expect(viewer).not.toHaveClass(/open/);
 });
 
 test('collection, search and wishlist product cards open the same quick-view modal', async ({ page }) => {
