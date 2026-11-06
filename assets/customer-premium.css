@@ -306,3 +306,24 @@ body{background:var(--iqa-cream);color:var(--iqa-ink)}
 }
 /* Preserve native hidden-state behavior for the OTP field until an SMS code is requested. */
 .auth-experience .route-form label[hidden]{display:none}
+
+
+/* Reference-led login composition: watch brand on the left, secure access on the right. */
+.route-auth-layout.auth-experience{
+ grid-template-columns:minmax(260px,.82fr) minmax(0,1.18fr);
+ grid-template-areas:"brand main";
+}
+.auth-experience .auth-panel-main{grid-area:main}
+.auth-experience .auth-brand-panel{grid-area:brand}
+.auth-stepper{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:0 0 27px;padding:0 0 17px;border-bottom:1px solid #e9e1d5}
+.auth-step{display:flex;align-items:center;gap:8px;color:#9a9387;font:600 9px/1.2 Arial,sans-serif;letter-spacing:1px;text-transform:uppercase;white-space:nowrap}
+.auth-step i{display:grid;place-items:center;width:27px;height:27px;border:1px solid #d9d0c1;border-radius:50%;font-style:normal;font-size:9px}
+.auth-step.is-active{color:#8d6932}
+.auth-step.is-active i{background:#191916;border-color:#191916;color:#f8f0e3}
+.auth-step.is-complete{color:#6f7b63}
+.auth-step.is-complete i{background:#6f7b63;border-color:#6f7b63;color:#fff}
+@media(max-width:760px){
+ .route-auth-layout.auth-experience{grid-template-columns:minmax(0,1fr);grid-template-areas:"brand" "main"}
+ .auth-brand-panel{min-height:270px}
+ .auth-stepper{margin-bottom:22px}
+}
