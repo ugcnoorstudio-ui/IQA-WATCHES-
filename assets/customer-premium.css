@@ -206,3 +206,30 @@ body{background:var(--iqa-cream);color:var(--iqa-ink)}
  #shop .toolbar{gap:8px}
  #shop .toolbar select{flex:1}
 }
+
+/* Product gallery controls and non-overlapping product recommendations. */
+.route-product-page{position:relative;display:flow-root;isolation:isolate}
+.route-product-layout{position:relative;display:grid;clear:both;align-items:start}
+.route-gallery-main{position:relative;overflow:hidden;touch-action:pan-y;user-select:none;-webkit-user-select:none}
+.route-gallery-main>img{display:block;width:100%;height:100%;object-fit:contain;cursor:zoom-in;-webkit-user-drag:none}
+.route-gallery-controls{position:absolute;left:12px;right:12px;bottom:12px;display:flex;align-items:center;justify-content:space-between;gap:10px;pointer-events:none}
+.route-gallery-controls button{pointer-events:auto;width:38px;height:38px;border:1px solid #b8a98e;background:#fffdf0;color:#171612;font-size:24px;line-height:1}
+.route-gallery-count{position:absolute;left:50%;bottom:14px;transform:translateX(-50%);padding:5px 10px;background:#171612d9;color:#fff;font-size:11px;letter-spacing:.8px;pointer-events:none}
+.route-recommendations{position:relative;display:block;clear:both;float:none;width:100%;margin:clamp(56px,7vw,88px) 0 0;padding:clamp(28px,4vw,42px) 0 0;border-top:1px solid #ddd4c5;isolation:isolate}
+#iqa-image-lightbox .iqa-lightbox-stage{touch-action:pan-y}
+@media(max-width:760px){.route-gallery-controls{left:9px;right:9px;bottom:9px}.route-gallery-controls button{width:36px;height:36px}.route-recommendations{margin-top:52px}}
+
+/* Product detail layout: related watches follow specifications without overlap. */
+.route-product-page{position:relative;display:block;overflow:visible;isolation:isolate}
+.route-product-layout{display:grid;position:relative;align-items:start;clear:both}
+.route-product-media{position:relative!important;top:auto!important;align-self:start;min-width:0}
+.route-product-copy{position:relative;align-self:start;min-width:0}
+.route-recommendations{position:relative;display:block;float:none;clear:both;width:100%;margin:58px 0 0;padding:34px 0 0;border-top:1px solid #ddd4c5;isolation:isolate;z-index:auto}
+.route-gallery-main{position:relative;touch-action:pan-y;overscroll-behavior-x:contain}
+.route-gallery-count{position:absolute;left:50%;bottom:14px;transform:translateX(-50%);display:block;padding:5px 10px;background:rgba(23,22,18,.85);color:#fff;font-size:11px;letter-spacing:.8px;white-space:nowrap;pointer-events:none}
+.iqa-lightbox-stage{touch-action:pan-y;overscroll-behavior-x:contain}
+@media(max-width:760px){
+ .route-product-layout{grid-template-columns:minmax(0,1fr)}
+ .route-product-media{position:relative!important;top:auto!important}
+ .route-recommendations{margin-top:42px;padding-top:28px}
+}

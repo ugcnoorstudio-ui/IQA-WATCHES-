@@ -29,7 +29,7 @@ function product(id){
  const assurance='<div class="route-product-assurance"><article><strong>Catalogue checked</strong><span>Product details are sourced from the approved store catalogue.</span></article><article><strong>Availability</strong><span>'+Number(p.stock)+' unit'+(Number(p.stock)===1?'':'s')+' shown in the latest catalogue update.</span></article><article><strong>Delivery information</strong><span>Delivery fee and ETA are not yet configured for checkout.</span></article><article><strong>Warranty</strong><span>'+esc(p.warranty||'Not verified in the catalogue.')+'</span></article></div>';
  const reviewSummary='<section class="route-review-summary"><h3>Customer reviews</h3><p>No published customer reviews are available for this watch yet. We will show a star rating only after genuine customer reviews have been approved.</p></section>';
  const discountMarkup=discount?'<span class="sample-label">'+discount+'% below listed MRP</span>':'<span class="sample-label">APPROVED CATALOGUE · '+Number(p.stock)+' AVAILABLE</span>';
- root.innerHTML=hero('THE IQA COLLECTION',p.name,'Explore the gallery, current catalogue price and verified product specifications.')+'<div class="route-content route-product-page"><nav class="route-product-breadcrumb" aria-label="Breadcrumb"><a href="#home">Home</a><span aria-hidden="true">/</span><a href="#shop">Shop all</a><span aria-hidden="true">/</span><span aria-current="page">'+esc(p.name)+'</span></nav><div class="route-product-layout"><div class="route-product-media"><div class="route-gallery"><div class="route-gallery-main"><img id="routeMainImage" role="button" tabindex="0" aria-label="Open full-screen product image" src="'+esc(mainImage.src)+'" alt="'+esc(mainImage.alt)+'" loading="eager" onerror="this.alt=&#39;Product image unavailable&#39;;this.style.opacity=&#39;.25&#39;"></div>'+thumbnails+'</div></div><div class="route-product-copy"><div class="eyebrow">'+esc(p.brand)+' · IQA WATCHES</div><h2>'+esc(p.name)+'</h2><p class="route-product-price">'+money(p.price)+' '+(p.compareAt>p.price?'<del>'+money(p.compareAt)+'</del>':'')+'</p>'+discountMarkup+ratingNote+description+'<div class="route-purchase-actions"><button class="button route-add-button" type="button" data-add="'+esc(p.id)+'">Add to Cart</button><button class="button route-buy-button" type="button" data-buy-now="'+esc(p.id)+'">Buy Now</button><button class="button light route-wish-button" type="button" data-wish="'+esc(p.id)+'">♡ Wishlist</button></div>'+specs+assurance+reviewSummary+'</div></div></div>'+recommendations;
+ root.innerHTML=hero('THE IQA COLLECTION',p.name,'Explore the gallery, current catalogue price and verified product specifications.')+'<div class="route-content route-product-page"><nav class="route-product-breadcrumb" aria-label="Breadcrumb"><a href="#home">Home</a><span aria-hidden="true">/</span><a href="#shop">Shop all</a><span aria-hidden="true">/</span><span aria-current="page">'+esc(p.name)+'</span></nav><div class="route-product-layout"><div class="route-product-media"><div class="route-gallery"><div class="route-gallery-main"><img id="routeMainImage" role="button" tabindex="0" aria-label="Open full-screen product image" src="'+esc(mainImage.src)+'" alt="'+esc(mainImage.alt)+'" loading="eager" onerror="this.alt=&#39;Product image unavailable&#39;;this.style.opacity=&#39;.25&#39;"></div>'+thumbnails+'</div></div><div class="route-product-copy"><div class="eyebrow">'+esc(p.brand)+' · IQA WATCHES</div><h2>'+esc(p.name)+'</h2><p class="route-product-price">'+money(p.price)+' '+(p.compareAt>p.price?'<del>'+money(p.compareAt)+'</del>':'')+'</p>'+discountMarkup+ratingNote+description+'<div class="route-purchase-actions"><button class="button route-add-button" type="button" data-add="'+esc(p.id)+'">Add to Cart</button><button class="button route-buy-button" type="button" data-buy-now="'+esc(p.id)+'">Buy Now</button><button class="button light route-wish-button" type="button" data-wish="'+esc(p.id)+'">♡ Wishlist</button></div>'+specs+assurance+reviewSummary+'</div></div>'+recommendations+'</div>';
 }
 
 function renderBuyNow(id){
@@ -452,7 +452,8 @@ window.addEventListener('load',render);
 window.addEventListener('pageshow',render);
 window.addEventListener('catalogue:ready',render);
 window.addEventListener('catalogue:error',render);
-document.addEventListener('click',e=>{const thumb=e.target.closest('[data-gallery-src]');if(thumb){const main=document.getElementById('routeMainImage');if(main){main.src=thumb.dataset.gallerySrc;main.alt=thumb.dataset.galleryAlt||main.alt;}document.querySelectorAll('[data-gallery-src]').forEach(button=>button.setAttribute('aria-pressed',String(button===thumb)));}const add=e.target.closest('[data-add-compare]');if(add)location.hash='comparison'});
+function setRouteGalleryIndex(index){const main=document.getElementById('routeMainImage');if(!main)return;const thumbs=Array.from(document.querySelectorAll('[data-gallery-src]'));const total=Math.max(1,thumbs.length);const next=(index+total)%total;if(thumbs.length){const thumb=thumbs[next];main.src=thumb.dataset.gallerySrc;main.alt=thumb.dataset.galleryAlt||main.alt;thumbs.forEach((button,i)=>button.setAttribute('aria-pressed',String(i===next)));}main.dataset.galleryIndex=String(next);const count=document.querySelector('.route-gallery-count');if(count)count.textContent=(next+1)+' / '+total;}
+document.addEventListener('click',e=>{const thumb=e.target.closest('[data-gallery-src]');if(thumb){const thumbs=Array.from(document.querySelectorAll('[data-gallery-src]'));setRouteGalleryIndex(thumbs.indexOf(thumb));}const add=e.target.closest('[data-add-compare]');if(add)location.hash='comparison'});
 
 function ensureIqaImageLightbox(){
  let layer=document.getElementById('iqa-image-lightbox');
@@ -524,4 +525,97 @@ document.addEventListener('click',event=>{
 
 window.renderRouteFromHash=render;
 render();
+})();
+/* Reliable touch/pointer swipe for the product-detail gallery. */
+(function(){
+ let active=null;
+ function currentGallery(){return typeof document.querySelector==='function'?document.querySelector('.route-gallery-main'):null;}
+ function select(delta){
+  const gallery=currentGallery();if(!gallery)return;
+  const image=gallery.querySelector('#routeMainImage');
+  const thumbs=Array.from(document.querySelectorAll('[data-gallery-src]'));
+  if(!image||thumbs.length<2)return;
+  let index=thumbs.findIndex(button=>button.dataset.gallerySrc===image.getAttribute('src')||button.dataset.gallerySrc===image.src);
+  if(index<0)index=0;
+  thumbs[(index+delta+thumbs.length)%thumbs.length].click();
+  gallery.dataset.swipeMoved='true';
+  let counter=gallery.querySelector('.route-gallery-count');
+  if(!counter){counter=document.createElement('span');counter.className='route-gallery-count';gallery.appendChild(counter);}
+  const nextCount=((index+delta+thumbs.length)%thumbs.length+1)+' / '+thumbs.length;if(counter.textContent!==nextCount)counter.textContent=nextCount;
+ }
+ document.addEventListener('pointerdown',event=>{
+  const gallery=event.target.closest('.route-gallery-main');if(!gallery)return;
+  active={gallery,x:event.clientX,y:event.clientY,id:event.pointerId};
+ },{passive:true});
+ document.addEventListener('pointerup',event=>{
+  if(!active||active.id!==event.pointerId)return;
+  const dx=event.clientX-active.x,dy=event.clientY-active.y,gallery=active.gallery;active=null;
+  if(Math.abs(dx)>48&&Math.abs(dx)>Math.abs(dy)*1.2){select(dx<0?1:-1);}
+ },{passive:true});
+ document.addEventListener('pointercancel',()=>{active=null},{passive:true});
+ document.addEventListener('click',event=>{
+  const image=event.target.closest('#routeMainImage');
+  if(!image)return;
+  const gallery=image.closest('.route-gallery-main');
+  if(gallery&&gallery.dataset.swipeMoved==='true'){delete gallery.dataset.swipeMoved;event.preventDefault();event.stopImmediatePropagation();}
+ },true);
+ function install(){
+  const gallery=currentGallery();if(!gallery)return;
+  const thumbs=Array.from(document.querySelectorAll('[data-gallery-src]'));
+  if(thumbs.length<2)return;
+  let counter=gallery.querySelector('.route-gallery-count');
+  if(!counter){counter=document.createElement('span');counter.className='route-gallery-count';gallery.appendChild(counter);}
+  const image=gallery.querySelector('#routeMainImage');
+  const index=thumbs.findIndex(button=>button.dataset.gallerySrc===image?.getAttribute('src')||button.dataset.gallerySrc===image?.src);
+  const nextCount=(Math.max(0,index)+1)+' / '+thumbs.length;if(counter.textContent!==nextCount)counter.textContent=nextCount;
+ }
+ const root=document.getElementById('routeView');
+ if(root&&'MutationObserver' in window)new MutationObserver(install).observe(root,{childList:true,subtree:true});
+ document.addEventListener('DOMContentLoaded',install);window.addEventListener('load',install);window.addEventListener('hashchange',install);
+})();
+
+(function(){
+ function installControls(){
+  if(typeof document.querySelector!=='function'||typeof document.querySelectorAll!=='function')return;
+  const gallery=document.querySelector('.route-gallery-main');
+  const image=gallery&&gallery.querySelector('#routeMainImage');
+  const thumbs=Array.from(document.querySelectorAll('[data-gallery-src]'));
+  if(!gallery||!image||thumbs.length<2||gallery.querySelector('.route-gallery-controls'))return;
+  const controls=document.createElement('div');controls.className='route-gallery-controls';
+  const prev=document.createElement('button');prev.type='button';prev.textContent='‹';prev.setAttribute('aria-label','Previous product image');
+  const next=document.createElement('button');next.type='button';next.textContent='›';next.setAttribute('aria-label','Next product image');
+  const count=document.createElement('span');count.className='route-gallery-count';count.setAttribute('aria-live','polite');
+  function move(delta){
+   const current=thumbs.findIndex(button=>button.dataset.gallerySrc===image.getAttribute('src')||button.dataset.gallerySrc===image.src);
+   const index=(Math.max(0,current)+delta+thumbs.length)%thumbs.length;
+   thumbs[index].click();count.textContent=(index+1)+' / '+thumbs.length;
+  }
+  prev.addEventListener('click',()=>move(-1));next.addEventListener('click',()=>move(1));
+  controls.append(prev,count,next);gallery.appendChild(controls);
+  const current=thumbs.findIndex(button=>button.dataset.gallerySrc===image.getAttribute('src')||button.dataset.gallerySrc===image.src);
+  count.textContent=(Math.max(0,current)+1)+' / '+thumbs.length;
+ }
+ const root=document.getElementById('routeView');
+ if(root&&'MutationObserver' in window)new MutationObserver(installControls).observe(root,{childList:true,subtree:true});
+ document.addEventListener('DOMContentLoaded',installControls);window.addEventListener('load',installControls);window.addEventListener('hashchange',installControls);
+})();
+
+/* The full-screen image viewer must also respond to horizontal swipes. */
+(function(){
+ function attach(){
+  if(typeof document.querySelector!=='function')return;
+  const stage=document.querySelector('#iqa-image-lightbox .iqa-lightbox-stage');
+  if(!stage||stage.dataset.swipeReady==='true')return;
+  stage.dataset.swipeReady='true';
+  let start=null;
+  stage.addEventListener('pointerdown',event=>{start={x:event.clientX,y:event.clientY,id:event.pointerId}},{passive:true});
+  stage.addEventListener('pointerup',event=>{
+   if(!start||start.id!==event.pointerId)return;
+   const dx=event.clientX-start.x,dy=event.clientY-start.y;start=null;
+   if(Math.abs(dx)>48&&Math.abs(dx)>Math.abs(dy)*1.2&&typeof window.iqaStepImageLightbox==='function')window.iqaStepImageLightbox(dx<0?1:-1);
+  },{passive:true});
+  stage.addEventListener('pointercancel',()=>{start=null},{passive:true});
+ }
+ if('MutationObserver' in window)new MutationObserver(attach).observe(document.body,{childList:true,subtree:true});
+ attach();
 })();
