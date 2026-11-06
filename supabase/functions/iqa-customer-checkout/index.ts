@@ -88,13 +88,7 @@ Deno.serve(async (req: Request) => {
     if (addressError || !address) return reply(400, { ok: false, error: "The selected delivery address could not be verified for your account." });
     const configuredPins = shipping.serviceable_pincodes.map((pin: unknown) => String(pin).trim());
     const requestedPin = String(address.postal_code || "").trim();
-    if (!/^\\d{6}$/.test(requestedPin) || (!configuredPins.includes("*") && !configuredPins.includes(requestedPin))) {
-      return reply(409, { ok: false, error: "Delivery is not available for the selected PIN code." });
-    }
-
-    const requestedPins = shipping.serviceable_pincodes.map((pin: unknown) => String(pin).trim());
-    const addressPin = String(address.postal_code || "").trim();
-    if (!/^\\d{6}$/.test(addressPin) || (!requestedPins.includes("*") && !requestedPins.includes(addressPin))) {
+    if (!/^\d{6}$/.test(requestedPin) || (!configuredPins.includes("*") && !configuredPins.includes(requestedPin))) {
       return reply(409, { ok: false, error: "Delivery is not available for the selected PIN code." });
     }
 
