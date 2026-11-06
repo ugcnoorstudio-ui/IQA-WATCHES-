@@ -215,3 +215,23 @@ The reviewed Admin product-image upload path is Cloudinary-first and does not wr
 - Verify all live product galleries and the Admin upload/gallery workflow.
 - Only then prepare a proposed deletion list. No Storage deletion is authorized by this audit.
 
+## Step 7B — repository upload-write guard
+
+Audit date: 2026-11-06
+
+### Scope reviewed
+
+Reviewed the storefront and Admin upload entry points plus the Supabase Edge Functions used for product uploads, admin mutations, media-library reads, content delivery, and the one-time migration tools.
+
+- The user-facing Admin product-image upload sends multipart bytes to `iqa-product-image-upload`, which writes to Cloudinary.
+- The migration functions that access legacy `/storage/v1/object/` URLs use them as source downloads before sending the bytes to Cloudinary; these are migration reads, not new Supabase Storage uploads.
+- The media-library and unlinked-review tools are owner-only migration/review workflows; they do not attach the unlinked review copy to a product automatically.
+- Storefront cart/account persistence uses browser storage for small client state and does not upload image files to Supabase Storage.
+
+### Regression protection
+
+Added a repository source-scan test over the runtime upload surfaces and Supabase Edge Functions. It fails if a direct Supabase Storage SDK upload API (`upload`, `uploadToSignedUrl`, or `createSignedUploadUrl`) is introduced in those paths. The existing Cloudinary-specific upload test remains in place.
+
+### Step 7B boundary
+
+This is an upload-path guard, not a claim that all possible file storage use cases across future code are impossible. Any future feature that intentionally stores non-image documents in Supabase must be reviewed separately and explicitly documented. No Storage object, product row, bucket, or policy was modified.
