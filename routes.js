@@ -29,14 +29,17 @@ function product(id){
  const assurance='<div class="route-product-assurance"><article><strong>Catalogue checked</strong><span>Product details are sourced from the approved store catalogue.</span></article><article><strong>Availability</strong><span>'+Number(p.stock)+' unit'+(Number(p.stock)===1?'':'s')+' shown in the latest catalogue update.</span></article><article><strong>Delivery information</strong><span>Delivery fee and ETA are not yet configured for checkout.</span></article><article><strong>Warranty</strong><span>'+esc(p.warranty||'Not verified in the catalogue.')+'</span></article></div>';
  const reviewSummary='<section class="route-review-summary"><h3>Customer reviews</h3><p>No published customer reviews are available for this watch yet. We will show a star rating only after genuine customer reviews have been approved.</p></section>';
  const discountMarkup=discount?'<span class="sample-label">'+discount+'% below listed MRP</span>':'<span class="sample-label">APPROVED CATALOGUE · '+Number(p.stock)+' AVAILABLE</span>';
- root.innerHTML=hero('THE IQA COLLECTION',p.name,'Explore the gallery, current catalogue price and verified product specifications.')+'<div class="route-content route-product-page"><nav class="route-product-breadcrumb" aria-label="Breadcrumb"><a href="#home">Home</a><span aria-hidden="true">/</span><a href="#shop">Shop all</a><span aria-hidden="true">/</span><span aria-current="page">'+esc(p.name)+'</span></nav><div class="route-product-layout"><div class="route-product-media"><div class="route-gallery"><div class="route-gallery-main"><img id="routeMainImage" src="'+esc(mainImage.src)+'" alt="'+esc(mainImage.alt)+'" loading="eager" onerror="this.alt=&#39;Product image unavailable&#39;;this.style.opacity=&#39;.25&#39;"></div>'+thumbnails+'</div></div><div class="route-product-copy"><div class="eyebrow">'+esc(p.brand)+' · IQA WATCHES</div><h2>'+esc(p.name)+'</h2><p class="route-product-price">'+money(p.price)+' '+(p.compareAt>p.price?'<del>'+money(p.compareAt)+'</del>':'')+'</p>'+discountMarkup+ratingNote+description+'<div class="route-purchase-actions"><button class="button route-add-button" type="button" data-add="'+esc(p.id)+'">Add to Cart</button><button class="button route-buy-button" type="button" data-buy-now="'+esc(p.id)+'">Buy Now</button><button class="button light route-wish-button" type="button" data-wish="'+esc(p.id)+'">♡ Wishlist</button></div>'+specs+assurance+reviewSummary+'</div></div></div>'+recommendations;
+ root.innerHTML=hero('THE IQA COLLECTION',p.name,'Explore the gallery, current catalogue price and verified product specifications.')+'<div class="route-content route-product-page"><nav class="route-product-breadcrumb" aria-label="Breadcrumb"><a href="#home">Home</a><span aria-hidden="true">/</span><a href="#shop">Shop all</a><span aria-hidden="true">/</span><span aria-current="page">'+esc(p.name)+'</span></nav><div class="route-product-layout"><div class="route-product-media"><div class="route-gallery"><div class="route-gallery-main"><img id="routeMainImage" role="button" tabindex="0" aria-label="Open full-screen product image" src="'+esc(mainImage.src)+'" alt="'+esc(mainImage.alt)+'" loading="eager" onerror="this.alt=&#39;Product image unavailable&#39;;this.style.opacity=&#39;.25&#39;"></div>'+thumbnails+'</div></div><div class="route-product-copy"><div class="eyebrow">'+esc(p.brand)+' · IQA WATCHES</div><h2>'+esc(p.name)+'</h2><p class="route-product-price">'+money(p.price)+' '+(p.compareAt>p.price?'<del>'+money(p.compareAt)+'</del>':'')+'</p>'+discountMarkup+ratingNote+description+'<div class="route-purchase-actions"><button class="button route-add-button" type="button" data-add="'+esc(p.id)+'">Add to Cart</button><button class="button route-buy-button" type="button" data-buy-now="'+esc(p.id)+'">Buy Now</button><button class="button light route-wish-button" type="button" data-wish="'+esc(p.id)+'">♡ Wishlist</button></div>'+specs+assurance+reviewSummary+'</div></div></div>'+recommendations;
 }
 
 function renderBuyNow(id){
  const p=products.find(item=>item.id===id);
- if(!p){root.innerHTML=hero('IQA WATCHES · BUY NOW','Watch unavailable','This product is no longer available in the approved catalogue.')+'<div class="route-content"><a class="button" href="#shop">Back to Shop</a></div>';return;}
- const quantity=Number(cart[p.id]||1),subtotal=Number(p.price)*quantity;
- root.innerHTML=hero('IQA WATCHES · BUY NOW','A closer look before checkout','Review your selected timepiece and shopping summary.')+'<div class="route-content"><a class="route-back-link" href="#product/'+encodeURIComponent(p.id)+'">← Back to watch details</a><section class="buy-now-panel"><div class="buy-now-image"><img src="'+esc(safeImageUrl(p.image))+'" alt="'+esc(p.imageAlt||p.name)+'"></div><div class="buy-now-copy"><span class="buy-now-kicker">Your selection · IQA WATCHES</span><h2>'+esc(p.name)+'</h2><p class="buy-now-price">'+money(p.price)+'</p><p class="buy-now-description">'+esc(String(p.desc||'').slice(0,180))+(String(p.desc||'').length>180?'…':'')+'</p><div class="buy-now-summary"><div class="total-row"><span>Quantity</span><strong>'+quantity+'</strong></div><div class="total-row"><span>Item subtotal</span><strong>'+money(subtotal)+'</strong></div><div class="total-row"><span>Delivery</span><span>Confirmed at checkout</span></div></div><div class="buy-now-status"><strong>Checkout is not available yet.</strong> Your watch is ready for review, but no order can be submitted. Online payment and order placement will become available only after secure checkout setup is completed.</div><div class="buy-now-actions"><a class="button route-buy-button" href="#bag">Continue to Shopping Bag</a><a class="button light" href="#shop">Continue exploring</a></div></div></section></div>';
+ if(!p||Number(p.stock)<1){root.innerHTML=hero('IQA WATCHES · BUY NOW','Watch unavailable','This product is not currently available in the approved catalogue.')+'<div class="route-content"><a class="button" href="#shop">Back to Shop</a></div>';return;}
+ if(!window.iqaBuyNowSelection||window.iqaBuyNowSelection.productId!==p.id)window.iqaBuyNowSelection={productId:p.id,quantity:1};
+ const quantity=Math.max(1,Math.min(Number(p.stock)||1,Number(window.iqaBuyNowSelection.quantity)||1));
+ window.iqaBuyNowSelection.quantity=quantity;
+ const subtotal=Number(p.price)*quantity;
+ root.innerHTML=hero('IQA WATCHES · BUY NOW','Review your selected timepiece','This selection is separate from your shopping bag. Final order totals are confirmed only by secure checkout.')+'<div class="route-content"><a class="route-back-link" href="#product/'+encodeURIComponent(p.id)+'">← Back to watch details</a><section class="buy-now-panel"><div class="buy-now-image"><img src="'+esc(safeImageUrl(p.image))+'" alt="'+esc(p.imageAlt||p.name)+'"></div><div class="buy-now-copy"><span class="buy-now-kicker">Your selection · IQA WATCHES</span><h2>'+esc(p.name)+'</h2><p class="buy-now-price">'+money(p.price)+'</p><p class="buy-now-description">'+esc(String(p.desc||'').slice(0,180))+(String(p.desc||'').length>180?'…':'')+'</p><div class="buy-now-summary"><div class="total-row"><span>Quantity</span><div class="qty buy-now-quantity" aria-label="Buy Now quantity"><button type="button" data-buy-qty="-1" aria-label="Decrease Buy Now quantity" '+(quantity<=1?'disabled':'')+'>−</button><strong aria-live="polite">'+quantity+'</strong><button type="button" data-buy-qty="1" aria-label="Increase Buy Now quantity" '+(quantity>=Number(p.stock)?'disabled':'')+'>+</button></div></div><div class="total-row"><span>Item subtotal</span><strong>'+money(subtotal)+'</strong></div><div class="total-row"><span>Delivery</span><span>Calculated after address and store settings are verified</span></div></div><div class="buy-now-status"><strong>Secure checkout is not enabled yet.</strong> No order or payment can be submitted until the owner configures verified delivery and payment settings. Your shopping bag is unchanged.</div><div class="buy-now-actions"><a class="button light" href="#bag">View Shopping Bag</a><a class="button" href="#shop">Continue exploring</a></div></div></section></div>';
 }
 function renderBagRoute(){
  const entries=Object.entries(cart||{}).map(([id,qty])=>({p:products.find(x=>x.id===id),qty:Number(qty)})).filter(x=>x.p&&x.qty>0);
@@ -450,6 +453,75 @@ window.addEventListener('pageshow',render);
 window.addEventListener('catalogue:ready',render);
 window.addEventListener('catalogue:error',render);
 document.addEventListener('click',e=>{const thumb=e.target.closest('[data-gallery-src]');if(thumb){const main=document.getElementById('routeMainImage');if(main){main.src=thumb.dataset.gallerySrc;main.alt=thumb.dataset.galleryAlt||main.alt;}document.querySelectorAll('[data-gallery-src]').forEach(button=>button.setAttribute('aria-pressed',String(button===thumb)));}const add=e.target.closest('[data-add-compare]');if(add)location.hash='comparison'});
+
+function ensureIqaImageLightbox(){
+ let layer=document.getElementById('iqa-image-lightbox');
+ if(layer)return layer;
+ layer=document.createElement('section');
+ layer.id='iqa-image-lightbox';
+ layer.setAttribute('role','dialog');
+ layer.setAttribute('aria-modal','true');
+ layer.setAttribute('aria-label','Full-screen product image');
+ layer.innerHTML='<div class="iqa-lightbox-toolbar"><span class="iqa-lightbox-count" aria-live="polite"></span><div class="iqa-lightbox-controls"><button type="button" data-lightbox-zoom aria-label="Zoom image" title="Zoom">⌕</button><button type="button" data-lightbox-close aria-label="Close full-screen image" title="Close">×</button></div></div><div class="iqa-lightbox-stage"><button type="button" data-lightbox-prev aria-label="Previous image">‹</button><img alt="" draggable="false"><button type="button" data-lightbox-next aria-label="Next image">›</button></div><div class="iqa-lightbox-caption"></div>';
+ document.body.appendChild(layer);
+ const close=()=>{layer.classList.remove('open');document.body.classList.toggle('locked',!!(document.getElementById('drawer')?.classList.contains('open')||document.getElementById('modalWrap')?.classList.contains('open')||document.getElementById('mobileMenu')?.classList.contains('open')));if(layer.returnFocus?.isConnected)layer.returnFocus.focus();};
+ layer.querySelector('[data-lightbox-close]').addEventListener('click',close);
+ layer.addEventListener('click',event=>{if(event.target===layer)close()});
+ layer.querySelector('[data-lightbox-prev]').addEventListener('click',()=>window.iqaStepImageLightbox(-1));
+ layer.querySelector('[data-lightbox-next]').addEventListener('click',()=>window.iqaStepImageLightbox(1));
+ layer.querySelector('[data-lightbox-zoom]').addEventListener('click',()=>{const image=layer.querySelector('img');image.classList.toggle('is-zoomed');layer.querySelector('[data-lightbox-zoom]').setAttribute('aria-label',image.classList.contains('is-zoomed')?'Reset image zoom':'Zoom image')});
+ document.addEventListener('keydown',event=>{if(!layer.classList.contains('open'))return;if(event.key==='Escape'){event.preventDefault();close()}else if(event.key==='ArrowRight')window.iqaStepImageLightbox(1);else if(event.key==='ArrowLeft')window.iqaStepImageLightbox(-1)});
+ return layer;
+}
+window.iqaImageLightboxState={items:[],index:0};
+window.iqaStepImageLightbox=function(delta){
+ const state=window.iqaImageLightboxState,layer=document.getElementById('iqa-image-lightbox');
+ if(!layer||!state.items.length)return;
+ state.index=(state.index+delta+state.items.length)%state.items.length;
+ const item=state.items[state.index],image=layer.querySelector('img');
+ image.src=item.src;image.alt=item.alt;image.classList.remove('is-zoomed');
+ layer.querySelector('.iqa-lightbox-count').textContent=(state.index+1)+' / '+state.items.length;
+ layer.querySelector('.iqa-lightbox-caption').textContent=item.alt;
+ layer.querySelector('[data-lightbox-prev]').disabled=state.items.length<2;
+ layer.querySelector('[data-lightbox-next]').disabled=state.items.length<2;
+};
+window.iqaOpenImageLightbox=function(items,index){
+ const safe=(Array.isArray(items)?items:[]).map(item=>({src:safeImageUrl(item.src||item.image||item.image_url),alt:String(item.alt||item.alt_text||'IQA WATCHES product image')})).filter(item=>item.src);
+ if(!safe.length)return;
+ const layer=ensureIqaImageLightbox();
+ layer.returnFocus=document.activeElement;
+ window.iqaImageLightboxState={items:safe,index:Math.max(0,Math.min(Number(index)||0,safe.length-1))};
+ layer.classList.add('open');document.body.classList.add('locked');
+ window.iqaStepImageLightbox(0);
+ layer.querySelector('[data-lightbox-close]').focus();
+};
+document.addEventListener('click',event=>{
+ const image=event.target.closest('#routeMainImage,#productModalMainImage');
+ if(!image)return;
+ if(image.id==='productModalMainImage'){
+  window.iqaOpenImageLightbox(window.iqaCurrentModalGallery||[{src:image.src,alt:image.alt}],window.iqaCurrentModalGalleryIndex||0);
+  return;
+ }
+ const id=decodeURIComponent((location.hash.split('/')[1]||''));
+ const productItem=products.find(item=>item.id===id);
+ const gallery=(Array.isArray(productItem?.gallery)?productItem.gallery:[]).map(item=>({src:item.src||item.image_url,alt:item.alt||item.alt_text||productItem.name}));
+ if(productItem?.image)gallery.unshift({src:productItem.image,alt:productItem.imageAlt||productItem.name});
+ const current=gallery.findIndex(item=>safeImageUrl(item.src)===safeImageUrl(image.src));
+ window.iqaOpenImageLightbox(gallery,current<0?0:current);
+});
+document.addEventListener('keydown',event=>{
+ if((event.key==='Enter'||event.key===' ')&&event.target.matches('#routeMainImage,#productModalMainImage')){event.preventDefault();event.target.click()}
+});
+document.addEventListener('click',event=>{
+ const control=event.target.closest('[data-buy-qty]');
+ if(!control)return;
+ const state=window.iqaBuyNowSelection,productItem=products.find(item=>item.id===state?.productId);
+ if(!productItem)return;
+ const next=Math.max(1,Math.min(Number(productItem.stock)||1,Number(state.quantity||1)+Number(control.dataset.buyQty)));
+ window.iqaBuyNowSelection={productId:productItem.id,quantity:next};
+ render();
+});
+
 window.renderRouteFromHash=render;
 render();
 })();
