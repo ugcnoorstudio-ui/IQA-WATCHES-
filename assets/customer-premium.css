@@ -366,3 +366,22 @@ body{background:var(--iqa-cream);color:var(--iqa-ink)}
 body:has(.route-sticky-buybar){padding-bottom:88px}
 @media(max-width:760px){.route-product-layout{grid-template-columns:minmax(0,1fr);gap:22px}.route-product-copy h2{font-size:30px}.route-product-media .route-gallery-main{min-height:280px}.route-sticky-buybar{padding:10px 12px calc(10px + env(safe-area-inset-bottom));gap:10px}.route-sticky-price strong{font-size:17px}.route-sticky-actions{flex:1}.route-sticky-actions .button{flex:1;min-width:0;min-height:48px;padding:10px 8px;font-size:9px;letter-spacing:.7px}body:has(.route-sticky-buybar){padding-bottom:100px}}
 @media(max-width:360px){.route-sticky-price span{display:none}.route-sticky-actions{gap:6px}.route-sticky-actions .button{font-size:8px}}
+
+
+/* Product image viewer: left-aligned back navigation, no dismiss cross. */
+#iqa-image-lightbox [data-lightbox-back]{display:inline-flex;align-items:center;justify-content:center;gap:9px;min-width:92px;padding:0 12px;border:1px solid #ffffff55;background:#ffffff12;color:#fff;font-size:14px;letter-spacing:.02em}
+#iqa-image-lightbox [data-lightbox-back] span{font-size:12px}
+#iqa-image-lightbox .iqa-lightbox-count{flex:1;text-align:center;font-variant-numeric:tabular-nums}
+#iqa-image-lightbox .iqa-lightbox-controls{min-width:92px;justify-content:flex-end}
+
+/* Keep the first product view concise; full specifications and long copy open on demand. */
+.route-product-details{margin:18px 0 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line);background:rgba(255,253,248,.42)}
+.route-product-details>summary{display:flex;align-items:center;justify-content:space-between;gap:14px;min-height:54px;padding:14px 2px;cursor:pointer;list-style:none;font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase}
+.route-product-details>summary::-webkit-details-marker{display:none}
+.route-product-details>summary span:last-child{color:var(--gold);font-size:20px;line-height:1}
+.route-product-details[open]>summary span:last-child{transform:rotate(45deg)}
+.route-product-details-body{padding:0 2px 16px}
+.route-product-details-body .route-specs{margin:0}
+.route-product-details-body p{margin:0;color:var(--muted);font-size:13px;line-height:1.85}
+.route-product-about{margin-top:0;border-top:0}
+@media(max-width:680px){#iqa-image-lightbox [data-lightbox-back]{min-height:44px;min-width:88px}.route-product-details>summary{min-height:52px}}

@@ -372,6 +372,10 @@ test('product detail tolerates null optional fields and ignores invalid gallery 
   await expect(page.locator('#routeMainImage')).toBeVisible();
   await expect(page.locator('#routeMainImage')).toHaveAttribute('src', expectedImage);
   await expect(page.locator('#routeView [data-gallery-src]')).toHaveCount(0);
+  const specsDisclosure = page.locator('#routeView .route-product-details').first();
+  await expect(specsDisclosure.locator('summary')).toContainText('View product specifications');
+  await expect(specsDisclosure).not.toHaveAttribute('open', '');
+  await specsDisclosure.locator('summary').click();
   await expect(page.locator('#routeView .route-specs')).toBeVisible();
   await expect(page.locator('#routeView')).not.toContainText(/\b(?:null|undefined)\b/i);
   await expect(page.locator('#routeView')).toContainText(/IQA WATCHES/i);
@@ -565,14 +569,18 @@ test('full-screen product image viewer supports navigation, zoom and keyboard cl
   await mainImage.click();
   const viewer = page.locator('#iqa-image-lightbox');
   await expect(viewer).toHaveClass(/open/);
+  await expect(viewer.locator('[data-lightbox-back]')).toBeVisible();
+  await expect(viewer.locator('[data-lightbox-back]')).toContainText('Back');
+  await expect(viewer.locator('[data-lightbox-close]')).toHaveCount(0);
   await expect(viewer).toContainText('1 / 2');
   await viewer.locator('[data-lightbox-next]').click();
   await expect(viewer).toContainText('2 / 2');
   await expect(viewer.locator('.iqa-lightbox-caption')).toHaveText('Secondary full-screen image');
   await viewer.locator('[data-lightbox-zoom]').click();
   await expect(viewer.locator('img')).toHaveClass(/is-zoomed/);
-  await page.keyboard.press('Escape');
+  await viewer.locator('[data-lightbox-back]').click();
   await expect(viewer).not.toHaveClass(/open/);
+  await expect(page.locator('#routeMainImage')).toBeVisible();
 });
 
 test('collection, search and wishlist product cards open the same quick-view modal', async ({ page }) => {
