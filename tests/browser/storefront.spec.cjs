@@ -799,17 +799,21 @@ test('premium customer login exposes Google, email and OTP sections with respons
   await expect(page.locator('#phoneOtpLabel')).toBeHidden();
   await expect(brand).toContainText('TIME, WITH INTENTION');
   await expect(brand).toContainText('Your signature.');
+  await expect(page.locator('.auth-stepper [data-auth-step="login"]')).toHaveClass(/is-active/);
 
   const columns = await layout.evaluate(el => getComputedStyle(el).gridTemplateColumns.trim().split(/\s+/).length);
   if (isMobile) {
     expect(columns).toBe(1);
+    const brandBox = await brand.boundingBox();
+    const mainBox = await main.boundingBox();
+    expect(brandBox.y).toBeLessThan(mainBox.y);
     const overflow = await page.evaluate(() => document.documentElement.scrollWidth > document.documentElement.clientWidth);
     expect(overflow, 'premium login should not overflow on mobile').toBe(false);
   } else {
     expect(columns).toBe(2);
     const boxes = await Promise.all([main, brand].map(locator => locator.boundingBox()));
-    expect(boxes[0].x).toBeLessThan(boxes[1].x);
-    expect(boxes[1].x).toBeGreaterThanOrEqual(boxes[0].x + boxes[0].width - 1);
+    expect(boxes[1].x).toBeLessThan(boxes[0].x);
+    expect(boxes[0].x).toBeGreaterThanOrEqual(boxes[1].x + boxes[1].width - 1);
   }
 
   await page.locator('.auth-tabs a[href="#signup"]').click();
