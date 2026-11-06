@@ -540,7 +540,7 @@ render();
   gallery.dataset.swipeMoved='true';
   let counter=gallery.querySelector('.route-gallery-count');
   if(!counter){counter=document.createElement('span');counter.className='route-gallery-count';gallery.appendChild(counter);}
-  counter.textContent=((index+delta+thumbs.length)%thumbs.length+1)+' / '+thumbs.length;
+  const nextCount=((index+delta+thumbs.length)%thumbs.length+1)+' / '+thumbs.length;if(counter.textContent!==nextCount)counter.textContent=nextCount;
  }
  document.addEventListener('pointerdown',event=>{
   const gallery=event.target.closest('.route-gallery-main');if(!gallery)return;
@@ -566,7 +566,7 @@ render();
   if(!counter){counter=document.createElement('span');counter.className='route-gallery-count';gallery.appendChild(counter);}
   const image=gallery.querySelector('#routeMainImage');
   const index=thumbs.findIndex(button=>button.dataset.gallerySrc===image?.getAttribute('src')||button.dataset.gallerySrc===image?.src);
-  counter.textContent=(Math.max(0,index)+1)+' / '+thumbs.length;
+  const nextCount=(Math.max(0,index)+1)+' / '+thumbs.length;if(counter.textContent!==nextCount)counter.textContent=nextCount;
  }
  const root=document.getElementById('routeView');
  if(root&&'MutationObserver' in window)new MutationObserver(install).observe(root,{childList:true,subtree:true});
