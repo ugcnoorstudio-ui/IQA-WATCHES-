@@ -56,3 +56,11 @@ The checkout endpoint is deliberately fail-closed: the `store_settings` table cu
 - Test that customer A cannot read customer B's profile, addresses, cart or orders.
 - Test that unauthenticated users cannot reach admin functions or owner-only settings.
 - Test that admin catalogue edits appear in the storefront without exposing staff-only data.
+
+## Phase 3 — shopping interface release
+
+- The shopping bag remains a browser-local preview until the authenticated server checkout succeeds. Add/remove, quantity changes, stock caps, line totals and bag totals must remain synchronized without creating an order.
+- Buy Now is an independent single-product selection. It must not add to, increment, or otherwise mutate the shopping bag. Its quantity is bounded by the latest approved catalogue stock; the displayed subtotal is informational until the server calculates the final order.
+- The product gallery supports a full-screen image viewer with close, zoom and previous/next controls, keyboard operation and mobile viewport sizing. The viewer accepts only approved Cloudinary image URLs.
+- Product detail pages retain approved catalogue data, responsive layout, gallery thumbnails, specifications and clear loading/unavailable states.
+- Secure checkout remains fail-closed. Do not enable order submission or payment until the owner has configured verified shipping and COD settings, and the customer checkout Edge Function has been validated end-to-end. No UI change may bypass the server-side price, stock, address, identity or idempotency checks.
