@@ -304,3 +304,5 @@ body{background:var(--iqa-cream);color:var(--iqa-ink)}
  .auth-phone-button{width:100%}
  .auth-experience .auth-tabs .chip{padding:9px 12px}
 }
+/* Preserve native hidden-state behavior for the OTP field until an SMS code is requested. */
+.auth-experience .route-form label[hidden]{display:none}
