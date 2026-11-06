@@ -224,7 +224,7 @@ const fillTaxonomySelects=()=>{const kind=target.querySelector('[data-taxonomy-u
 fillTaxonomySelects();
 target.querySelectorAll('[data-taxonomy-update] [name="kind"],[data-taxonomy-archive] [name="kind"]').forEach(x=>x.addEventListener('change',fillTaxonomySelects));
 }else if(route==='products'){
-const results=await Promise.allSettled([api.readTable('products','id,name,sku,brand,category,category_id,brand_id,state,is_sample,verified_sellable,selling_price,mrp',{limit:100}),api.readTable('categories','id,name,slug,state',{limit:100}),api.readTable('brands','id,name,slug,state',{limit:100}),api.readTable('product_media','id,product_id,storage_path,image_url,cloudinary_public_id,alt_text,sort_order,is_primary',{limit:300}),api.readTable('product_variants','id,product_id,sku,options,selling_price,low_stock_threshold,active',{limit:200})]);
+const results=await Promise.allSettled([api.readTable('products','id,name,sku,brand,category,category_id,brand_id,state,is_sample,verified_sellable,selling_price,mrp,description,audience',{limit:100}),api.readTable('categories','id,name,slug,state',{limit:100}),api.readTable('brands','id,name,slug,state',{limit:100}),api.readTable('product_media','id,product_id,storage_path,image_url,cloudinary_public_id,alt_text,sort_order,is_primary',{limit:300}),api.readTable('product_variants','id,product_id,sku,options,selling_price,low_stock_threshold,active',{limit:200})]);
 if(current!==route)return;
 const labels=['products','categories','brands','product images','product variants'];
 const failures=results.map((r,i)=>r.status==='rejected'?labels[i]+': '+(r.reason?.message||'request failed'):null).filter(Boolean);
