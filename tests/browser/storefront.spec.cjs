@@ -530,6 +530,7 @@ test('Buy Now keeps its own quantity and does not mutate the shopping bag', asyn
   const modal = page.locator('#modalWrap');
   await expect(modal).toHaveClass(/open/);
   await modal.locator('[data-buy-now]').click();
+  await expect(modal).not.toHaveClass(/open/);
   await expect.poll(() => page.evaluate(() => location.hash)).toBe('#buy-now/' + encodeURIComponent(selectedId));
   const buyNow = page.locator('#routeView');
   await expect(buyNow).toContainText(/Review your selected timepiece/i);
