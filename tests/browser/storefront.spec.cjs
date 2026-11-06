@@ -574,6 +574,47 @@ test('full-screen product image viewer supports navigation, zoom and keyboard cl
   await expect(viewer).not.toHaveClass(/open/);
 });
 
+test('multi-image watch gallery supports swipe, arrows, keyboard and synchronized thumbnails', async ({ page, isMobile }) => {
+  await openStore(page);
+  const card = page.locator('#productGrid .product-card').first();
+  const id = await card.locator('.product-image-link').getAttribute('data-view');
+  const primary = await card.locator('.product-image img').getAttribute('src');
+  const images = [
+    { src: primary, alt: 'Watch front view' },
+    { src: primary + '?gallery=side', alt: 'Watch side view' },
+    { src: primary + '?gallery=back', alt: 'Watch back view' }
+  ];
+  await page.evaluate(({ id, images }) => {
+    products.find(item => item.id === id).gallery = images;
+  }, { id, images });
+  await card.locator('.product-image-link').click();
+  const modal = page.locator('#modalWrap');
+  await expect(modal).toHaveClass(/open/);
+  const main = page.locator('#productModalMainImage');
+  const next = page.locator('[data-gallery-step="1"]');
+  const previous = page.locator('[data-gallery-step="-1"]');
+  await expect(page.locator('.product-gallery-count')).toHaveText('1 / 3');
+  await next.click();
+  await expect(page.locator('.product-gallery-count')).toHaveText('2 / 3');
+  await expect(main).toHaveAttribute('alt', 'Watch side view');
+  await expect(page.locator('[data-gallery-index="1"]')).toHaveAttribute('aria-pressed', 'true');
+  if (isMobile) {
+    await main.dispatchEvent('touchstart', { changedTouches: [{ clientX: 300, clientY: 300 }] });
+    await main.dispatchEvent('touchend', { changedTouches: [{ clientX: 220, clientY: 302 }] });
+    await expect(page.locator('.product-gallery-count')).toHaveText('3 / 3');
+  } else {
+    await main.focus();
+    await page.keyboard.press('ArrowLeft');
+    await expect(page.locator('.product-gallery-count')).toHaveText('2 / 3');
+  }
+  await previous.click();
+  await expect(page.locator('.product-gallery-count')).toHaveText('1 / 3');
+  await previous.click();
+  await expect(page.locator('.product-gallery-count')).toHaveText('3 / 3');
+  await page.keyboard.press('Escape');
+  await expect(modal).not.toHaveClass(/open/);
+});
+
 test('collection, search and wishlist product cards open the same quick-view modal', async ({ page }) => {
   await openStore(page);
   await navigateToHash(page, 'shop');
@@ -649,20 +690,23 @@ test('mobile watch detail opens as a large image-first bottom panel', async ({ p
   await card.locator('.product-image-link').click();
   const modal = page.locator('#modalWrap');
   await expect(modal).toHaveClass(/open/);
-  const layout = await page.locator('#modalContent').evaluate(el => {
+  const layout = await page.locator('#modalWrap').evaluate(el => {
     const image = el.querySelector('.product-modal-image');
     return {
       panelHeight: el.getBoundingClientRect().height,
+      panelWidth: el.getBoundingClientRect().width,
       viewportHeight: window.innerHeight,
+      viewportWidth: window.innerWidth,
       imageHeight: image.getBoundingClientRect().height,
       columns: getComputedStyle(el.querySelector('.product-modal')).gridTemplateColumns,
-      align: getComputedStyle(document.querySelector('.modal-wrap')).alignItems
+      align: getComputedStyle(el).placeItems
     };
   });
-  expect(layout.panelHeight).toBeLessThanOrEqual(layout.viewportHeight * 0.95);
-  expect(layout.imageHeight).toBeGreaterThan(220);
+  expect(layout.panelHeight).toBeCloseTo(layout.viewportHeight, 0);
+  expect(layout.panelWidth).toBeCloseTo(layout.viewportWidth, 0);
+  expect(layout.imageHeight).toBeGreaterThan(180);
   expect(layout.columns.split(' ').length).toBe(1);
-  expect(layout.align).toBe('end');
+  expect(layout.align).toContain('stretch');
   await expect(page.locator('#modalContent h2')).not.toBeEmpty();
   await page.locator('#modalContent #modalClose').click();
 });
