@@ -98,5 +98,5 @@ test('mobile homepage hero is compact and the brand tagline is clearly visible',
   expect(Number(taglineStyle.weight)).toBeGreaterThanOrEqual(700);
   const hero = await page.locator('.hero').evaluate(el => ({ height: el.getBoundingClientRect().height, imageHeight: el.querySelector('.hero-visual').getBoundingClientRect().height }));
   expect(hero.imageHeight).toBeLessThanOrEqual(220);
-  expect(hero.height).toBeLessThan(520);
+  expect(hero.height).toBeLessThan(500);
 });
