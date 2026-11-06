@@ -682,6 +682,14 @@ test('multi-image watch detail supports touch swipe and synchronized gallery con
       { src: src + '?swipe-test=secondary', alt: 'Swipe secondary watch image' },
       { src: src + '?swipe-test=tertiary', alt: 'Swipe tertiary watch image' }
     ];
+    products.push({
+      ...product,
+      id: product.id + '-related-layout-fixture',
+      name: product.name + ' Related Layout Fixture',
+      gallery: [],
+      image: src,
+      stock: 1
+    });
   }, { id: selectedId, src: primary });
   // Open the quick-view through the same user interaction used by shoppers.
   await card.locator('.product-image-link').click();
