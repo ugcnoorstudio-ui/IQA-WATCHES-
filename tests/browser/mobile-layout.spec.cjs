@@ -72,14 +72,14 @@ test('mobile watch details use a large scrollable image-first panel', async ({ p
   await expect.poll(() => page.locator('#productGrid .product-card').count(), { timeout: 20000 }).toBeGreaterThan(0);
   await page.locator('#productGrid .product-card').first().locator('.product-image-link').click();
   await expect(page.locator('#modalWrap')).toHaveClass(/open/);
-  const layout = await page.locator('#modalContent').evaluate(el => ({
+  const layout = await page.locator('#modalWrap').evaluate(el => ({
     width: el.getBoundingClientRect().width,
-    maxHeight: parseFloat(getComputedStyle(el).maxHeight),
+    height: el.getBoundingClientRect().height,
+    viewportWidth: window.innerWidth,
     viewportHeight: window.innerHeight,
     imageFirst: getComputedStyle(el.querySelector('.product-modal')).gridTemplateColumns
   }));
-  expect(layout.width).toBeGreaterThan(350);
-  expect(layout.maxHeight).toBeGreaterThan(layout.viewportHeight * 0.9);
-  expect(layout.maxHeight).toBeLessThanOrEqual(layout.viewportHeight * 0.95);
+  expect(layout.width).toBeCloseTo(layout.viewportWidth, 0);
+  expect(layout.height).toBeCloseTo(layout.viewportHeight, 0);
   await expect(page.locator('#modalContent .product-modal-image img')).toBeVisible();
 });
