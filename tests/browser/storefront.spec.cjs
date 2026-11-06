@@ -682,8 +682,9 @@ test('multi-image watch detail supports touch swipe and synchronized gallery con
       { src: src + '?swipe-test=secondary', alt: 'Swipe secondary watch image' },
       { src: src + '?swipe-test=tertiary', alt: 'Swipe tertiary watch image' }
     ];
-    location.hash = '#product/' + encodeURIComponent(id);
   }, { id: selectedId, src: primary });
+  // Open the quick-view through the same user interaction used by shoppers.
+  await card.locator('.product-image-link').click();
   const modal = page.locator('#modalWrap');
   await expect(modal).toHaveClass(/open/);
   const image = page.locator('#modalContent [data-modal-image]');
