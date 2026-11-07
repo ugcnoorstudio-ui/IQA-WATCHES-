@@ -26,6 +26,9 @@ test('recurring monitor workflow runs on a 30-minute schedule and manual dispatc
   assert.match(workflow, /schedule:/);
   assert.match(workflow, /cron: '\*\/30 \* \* \* \*'/);
   assert.match(workflow, /workflow_dispatch:/);
+  assert.match(workflow, /workflow_run:/);
+  assert.match(workflow, /pages build and deployment/);
+  assert.match(workflow, /workflow\.run\.conclusion == 'success'/);
   assert.match(workflow, /node scripts\/monitor-public-health\.js/);
 });
 
