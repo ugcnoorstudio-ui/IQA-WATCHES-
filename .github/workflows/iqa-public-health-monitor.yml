@@ -7,6 +7,7 @@ on:
   workflow_run:
     workflows:
       - pages build and deployment
+      - Cinematic motion quality checks
     types:
       - completed
     branches:
