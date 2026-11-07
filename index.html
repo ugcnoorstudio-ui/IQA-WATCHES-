@@ -1089,11 +1089,10 @@ body.menu-open #menuBackdrop{display:block}
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="./admin/backend-config.js?v=20261030"></script>
 <script>
-const DEMO_MODE=false; // Public catalogue is loaded only from approved, in-stock Supabase records.
+const DEMO_MODE=false; // Public catalogue uses the approved static snapshot; Supabase remains for admin/auth.
 let products=[];
 let catalogueState='loading';
 let catalogueError='';
-let storefrontClient=null;
 const money=n=>new Intl.NumberFormat('en-IN',{style:'currency',currency:'INR',maximumFractionDigits:0}).format(n);
 const safeLoad=(key,fallback)=>{try{return JSON.parse(localStorage.getItem(key))??fallback}catch{return fallback}};
 let knownProductIds=new Set();
@@ -1123,59 +1122,36 @@ async function loadStorefrontCatalogue(){
   controller.abort();renderProducts();
  },10000);
  try{
-  const config=window.IQA_SUPABASE_CONFIG;
-  if(!window.supabase||!config?.url||!config?.publishableKey)throw new Error('Storefront catalogue configuration is missing.');
-  storefrontClient=window.supabase.createClient(config.url,config.publishableKey,{auth:{persistSession:false,autoRefreshToken:false,detectSessionInUrl:false}});
-  // Keep the public catalogue query deliberately simple: separate table reads avoid
-  // nested PostgREST relationship/RLS joins hiding an otherwise approved product.
-  const {data:rows,error:productsError}=await storefrontClient.from('products')
-   .select('id,name,brand,category,audience,description,selling_price,mrp,specs,state,is_sample,verified_sellable')
-   .eq('state','published').eq('is_sample',false).eq('verified_sellable',true)
-   .order('name',{ascending:true}).limit(100).abortSignal(controller.signal);
-  if(productsError)throw productsError;
-  const ids=(rows||[]).map(row=>row.id);
-  let variants=[],media=[];
-  if(ids.length){
-   const [{data:variantRows,error:variantsError},{data:mediaRows,error:mediaError}]=await Promise.all([
-    storefrontClient.from('product_variants').select('id,product_id,options,selling_price,stock_on_hand,stock_reserved,active').in('product_id',ids).abortSignal(controller.signal),
-    storefrontClient.from('product_media').select('id,product_id,storage_path,image_url,cloudinary_public_id,alt_text,sort_order,is_primary').in('product_id',ids).order('sort_order',{ascending:true}).abortSignal(controller.signal)
-   ]);
-   if(variantsError)throw variantsError;
-   if(mediaError)throw mediaError;
-   variants=variantRows||[];media=mediaRows||[];
-  }
+  // Public storefront reads a small, same-origin static snapshot. Product photos
+  // are delivered by Cloudinary; no public Supabase Data API calls are needed.
+  const catalogueUrl=new URL('data/catalogue.json',document.baseURI);
+  const response=await fetch(catalogueUrl,{signal:controller.signal,headers:{Accept:'application/json'}});
+  if(!response.ok)throw new Error('Static catalogue request failed: '+response.status);
+  const payload=await response.json();
+  if(!payload||!Array.isArray(payload.products))throw new Error('Static catalogue format is invalid.');
   if(requestId!==catalogueRequestId||timedOut)return;
-  const mediaByProduct=new Map();
-  media.forEach(item=>{if(!mediaByProduct.has(item.product_id))mediaByProduct.set(item.product_id,[]);mediaByProduct.get(item.product_id).push(item)});
-  products=(rows||[]).map(row=>{
-   const productVariants=variants.filter(v=>v.product_id===row.id&&v.active!==false);
-   const stocked=productVariants.map(v=>({...v,availableQty:Math.max(0,Number(v.stock_on_hand||0)-Number(v.stock_reserved||0))})).filter(v=>v.availableQty>0&&Number(v.selling_price??row.selling_price)>0);
-   const chosen=[...stocked].sort((a,b)=>Number(a.selling_price??row.selling_price)-Number(b.selling_price??row.selling_price))[0];
-   const availableStock=stocked.reduce((sum,v)=>sum+v.availableQty,0);
-   const specs=row.specs&&typeof row.specs==='object'?row.specs:{};
-   const gallery=(mediaByProduct.get(row.id)||[]).filter(item=>typeof item.image_url==='string'&&item.image_url.includes('res.cloudinary.com'));
-   const primaryImage=gallery.find(item=>item.is_primary)||gallery[0];
-   const storedImage=primaryImage?safeImageUrl(primaryImage.image_url):'';
-   const image=storedImage;
-   const imageAlt=primaryImage?.alt_text||row.name;
-   const galleryImages=gallery.map(item=>({src:safeImageUrl(item.image_url),alt:item.alt_text||row.name,isPrimary:Boolean(item.is_primary),sortOrder:Number(item.sort_order)||0})).filter(item=>item.src).sort((a,b)=>Number(b.isPrimary)-Number(a.isPrimary)||a.sortOrder-b.sortOrder);
-   return {id:row.id,variantId:chosen?.id||null,name:row.name,brand:row.brand||'IQA WATCHES',category:row.category||row.audience||'Watches',audience:row.audience||'',style:specs.style||specs.watch_type||specs.type||'Analog',tags:Array.isArray(specs.tags)?specs.tags:[],price:Number(chosen?.selling_price??row.selling_price??0),compareAt:Number(row.mrp||0),stock:availableStock,colour:specs.colour||specs.color||specs.case_colour||'',dial:specs.dial_colour||specs.dial||'',strap:specs.strap_material||specs.strap||'',sku:specs.model_code||'Not listed',label:availableStock===1?'Only 1 left':availableStock+' in stock',desc:row.description||'',image,imageAlt,gallery:galleryImages,caseDiameter:specs.case_diameter_mm||specs.case_diameter||specs.case_size_mm||'',caseThickness:specs.case_thickness_mm||specs.case_thickness||'',lugToLug:specs.lug_to_lug_mm||specs.lug_to_lug||'',caseMaterial:specs.case_material||'',strapWidth:specs.strap_width_mm||specs.strap_width||'',movement:specs.movement||'',waterResistance:specs.water_resistance||'',warranty:specs.warranty||''};
-  }).filter(p=>p.price>0&&p.image&&p.stock>0);
-  knownProductIds=new Set(products.map(p=>p.id));
-  cart=Object.fromEntries(Object.entries(storedCart&&typeof storedCart==='object'&&!Array.isArray(storedCart)?storedCart:{}).filter(([id,qty])=>knownProductIds.has(id)&&Number.isInteger(qty)&&qty>0).map(([id,qty])=>[id,Math.min(qty,10,products.find(p=>p.id===id)?.stock||0)]).filter(([,qty])=>qty>0));
+  products=payload.products.map(item=>{
+   const gallery=(Array.isArray(item.gallery)?item.gallery:[]).map(image=>({
+    src:safeImageUrl(image.src),alt:String(image.alt||item.name),isPrimary:Boolean(image.isPrimary),sortOrder:Number(image.sortOrder)||0
+   })).filter(image=>image.src);
+   const image=safeImageUrl(item.image);
+   return {...item,image,gallery};
+  }).filter(item=>item.id&&item.name&&item.price>0&&item.stock>0&&item.image&&item.image.startsWith('https://res.cloudinary.com/'));
+  if(!products.length)throw new Error('No approved in-stock products are available in the static catalogue.');
+  knownProductIds=new Set(products.map(item=>item.id));
+  cart=Object.fromEntries(Object.entries(storedCart&&typeof storedCart==='object'&&!Array.isArray(storedCart)?storedCart:{}).filter(([id,qty])=>knownProductIds.has(id)&&Number.isInteger(qty)&&qty>0).map(([id,qty])=>[id,Math.min(qty,10,products.find(item=>item.id===id)?.stock||0)]).filter(([,qty])=>qty>0));
   wishlist=Array.isArray(storedWishlist)?[...new Set(storedWishlist.filter(id=>knownProductIds.has(id)))]:[];
   catalogueState='ready';catalogueError='';updateCatalogueFilters();renderProducts();updateCounts();initSmartShopping();window.dispatchEvent(new Event('catalogue:ready'));
   if(location.hash.startsWith('#product/'))window.dispatchEvent(new Event('hashchange'));
  }catch(error){
   if(requestId!==catalogueRequestId||timedOut)return;
   catalogueState='error';catalogueError="Couldn't load watches. Please try again.";
-  console.error('IQA WATCHES catalogue load failed:',error);window.dispatchEvent(new Event('catalogue:error'));
+  console.error('IQA WATCHES static catalogue load failed:',error);window.dispatchEvent(new Event('catalogue:error'));
   try{renderProducts();initSmartShopping()}catch(renderError){console.error('IQA WATCHES catalogue fallback render failed:',renderError)}
  }finally{
   if(requestId===catalogueRequestId&&catalogueTimeoutId){clearTimeout(catalogueTimeoutId);catalogueTimeoutId=null}
  }
 }
-function filteredProducts(){let list=products.filter(p=>{const q=$('searchInput').value.trim().toLowerCase();const tags=Array.isArray(p.tags)?p.tags:[];const searchOk=!q||[p.name,p.brand,p.category,p.audience,p.style,p.colour,p.dial,p.strap,p.sku,p.desc,...tags].filter(Boolean).join(' ').toLowerCase().includes(q);const categoryOk=activeCategory==='All'||p.category===activeCategory||p.audience===activeCategory||p.style===activeCategory||tags.includes(activeCategory);const brandOk=$('brandFilter').value==='All'||p.brand===$('brandFilter').value;const price=$('priceFilter').value;const priceOk=price==='all'||(price==='under1000'&&p.price<1000)||(price==='1000to2500'&&p.price>=1000&&p.price<=2500)||(price==='over2500'&&p.price>2500);return searchOk&&categoryOk&&brandOk&&priceOk});const sort=$('sortFilter').value;if(sort==='low')list.sort((a,b)=>a.price-b.price);if(sort==='high')list.sort((a,b)=>b.price-a.price);if(sort==='name')list.sort((a,b)=>a.name.localeCompare(b.name));return list}
 function renderProducts(){
  const grid=$('productGrid'),count=$('resultsCount'),fallback=$('productStaticFallback');
  if(catalogueState==='loading'){
