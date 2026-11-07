@@ -30,8 +30,9 @@ Never paste API tokens into chat, source files, commit messages, or workflow YAM
 2. Connect the GitHub account and select `ugcnoorstudio-ui/IQA-WATCHES-`.
 3. Use `main` as the production branch, root directory `/`, build command `exit 0`, and output directory `.`.
 4. Complete the initial setup. The Pages project will receive a `*.pages.dev` hostname.
-5. Add the GitHub Actions secrets and variable listed above.
-6. Review the `deploy-cloudflare-pages.yml` workflow and manually run it from `main`. It performs a full test gate before deploying and checks the live Pages hostname afterwards.
+5. In **Settings → Builds → Branch control**, disable automatic **production branch** deployments so a merge cannot bypass the repository's test gate. Keep preview branch deployments enabled for pull-request previews.
+6. Add the GitHub Actions secrets and variable listed above.
+7. Review the `deploy-cloudflare-pages.yml` workflow and manually run it from `main`. It performs a full test gate before deploying and checks the live Pages hostname afterwards.
 
 Cloudflare's Git integration and Wrangler Direct Upload cannot be switched between later for an existing project. This repository uses a Git-connected Pages project for previews and Wrangler for an explicit, test-gated production deployment; do not create a Direct Upload project instead.
 
