@@ -23,8 +23,8 @@ async function init(){
  if(!backend||!backend.configured()){lock('Admin backend configuration is missing.');return}
  try{
   const profile=await backend.getActiveProfile();
-  if(profile)unlock(profile);else lock('Sign in with an authorized IQA WATCHES staff account.');
- }catch(error){lock(error.message||'Could not verify staff access.')}
+  if(profile)unlock(profile);else lock('No active session found. Sign in again with your authorized IQA WATCHES staff account.');
+ }catch(error){lock(error.message||'Could not verify staff access. Sign in again.');}
 }
 $('googleSignIn').addEventListener('click',async()=>{
  const button=$('googleSignIn');
