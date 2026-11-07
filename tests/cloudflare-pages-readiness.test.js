@@ -59,7 +59,7 @@ test('scheduled public health monitor targets Cloudflare Pages production', () =
 test('deployment runbook documents isolated previews and production-only rollback', () => {
   const guide = fs.readFileSync(path.join(root, 'DEPLOYMENT.md'), 'utf8');
   assert.ok(guide.includes('Pull-request previews and environment isolation'));
-  assert.ok(guide.includes('preview-disabled Supabase endpoint'));
+  assert.ok(guide.includes('deliberately invalid Supabase endpoint'));
   assert.ok(guide.includes('Rollback procedure'));
   assert.ok(guide.includes('Preview deployments are not valid rollback targets'));
   assert.ok(guide.includes('Rollback to this deployment'));
