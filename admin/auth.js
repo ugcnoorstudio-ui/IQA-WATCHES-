@@ -17,15 +17,31 @@ function unlock(profile){
  banner.querySelector('strong').textContent='AUTHENTICATED ADMIN SHELL · LIVE OWNER ACCESS';
  banner.querySelector('span').textContent='Owner identity verified. Live catalogue and owner-only operational records are connected. Only server-approved write actions are enabled; other changes remain safely disabled.';
  message('',false);
-if(window.IQA_ADMIN_REFRESH)window.IQA_ADMIN_REFRESH();
+ if(window.IQA_ADMIN_REFRESH)window.IQA_ADMIN_REFRESH();
 }
 async function init(){
  if(!backend||!backend.configured()){lock('Admin backend configuration is missing.');return}
  try{
   const profile=await backend.getActiveProfile();
-  if(profile)unlock(profile);else lock('Sign in with an authorized IQA WATCHES staff account.');
- }catch(error){lock(error.message||'Could not verify staff access.')}
+  if(profile)unlock(profile);else lock('No active session found. Sign in again with your authorized IQA WATCHES staff account.');
+ }catch(error){lock(error.message||'Could not verify staff access. Sign in again.');}
 }
+$('googleSignIn').addEventListener('click',async()=>{
+ const button=$('googleSignIn');
+ if(!backend||!backend.configured()){message('Admin backend configuration is missing.',true);return}
+ button.disabled=true;button.textContent='Connecting to Google…';
+ message('Redirecting to secure Google sign-in. Only active staff accounts can enter the admin panel.',false);
+ try{
+  const {error}=await backend.getClient().auth.signInWithOAuth({
+   provider:'google',
+   options:{redirectTo:window.location.origin+window.location.pathname}
+  });
+  if(error)throw error;
+ }catch(error){
+  message(error.message||'Google sign-in could not be started. Try email sign-in instead.',true);
+  button.disabled=false;button.textContent='Continue with Google';
+ }
+});
 $('loginForm').addEventListener('submit',async event=>{
  event.preventDefault();
  const email=$('authEmail').value.trim(),password=$('authPassword').value;
@@ -35,7 +51,7 @@ $('loginForm').addEventListener('submit',async event=>{
   if(!profile)throw new Error('This account could not be verified as active staff.');
   $('authPassword').value='';unlock(profile);
  }catch(error){message(error.message||'Sign-in failed. Check your credentials and try again.',true)}
- finally{button.disabled=false;button.textContent='Sign in securely'}
+ finally{button.disabled=false;button.textContent='Sign in with email'}
 });
 $('signOut').addEventListener('click',async()=>{
  const button=$('signOut');button.disabled=true;

@@ -114,7 +114,7 @@ test('Cloudinary media manager exposes all six media groups and safe owner-only 
   assert.match(backend, /listFailedImageUploads/);
   assert.match(backend, /clearFailedImageUpload/);
   assert.match(html, /media-manager\.js\?v=20261106-cloudinary-live-library-v2/);
-  assert.match(html, /backend\.js\?v=20261106-image-retry-v1/);
+  assert.match(html, /backend\.js\?v=20261107-auth-recovery-v2/);
   assert.match(html, /admin\.js\?v=20261106-phase4-product-editor/);
 });
 
