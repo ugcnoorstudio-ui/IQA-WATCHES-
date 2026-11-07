@@ -1152,6 +1152,20 @@ async function loadStorefrontCatalogue(){
   if(requestId===catalogueRequestId&&catalogueTimeoutId){clearTimeout(catalogueTimeoutId);catalogueTimeoutId=null}
  }
 }
+function filteredProducts(){
+ const query=$('searchInput')?.value.trim().toLocaleLowerCase('en-IN')||'';
+ const brand=$('brandFilter')?.value||'All';
+ const price=$('priceFilter')?.value||'all';
+ const sort=$('sortFilter')?.value||'featured';
+ const matchesCategory=p=>activeCategory==='All'||[p.category,p.audience,p.style,...(Array.isArray(p.tags)?p.tags:[])].some(value=>String(value||'').toLocaleLowerCase('en-IN')===activeCategory.toLocaleLowerCase('en-IN'));
+ const matchesPrice=p=>price==='under1000'?Number(p.price)<1000:price==='1000to2500'?Number(p.price)>=1000&&Number(p.price)<=2500:price==='over2500'?Number(p.price)>2500:true;
+ const searchable=p=>[p.name,p.brand,p.sku,p.category,p.audience,p.style,p.desc,p.colour,p.dial,p.strap,...(Array.isArray(p.tags)?p.tags:[])].filter(Boolean).join(' ').toLocaleLowerCase('en-IN');
+ const result=products.filter(p=>matchesCategory(p)&&(brand==='All'||p.brand===brand)&&matchesPrice(p)&&(!query||searchable(p).includes(query)));
+ if(sort==='low')result.sort((a,b)=>Number(a.price)-Number(b.price));
+ else if(sort==='high')result.sort((a,b)=>Number(b.price)-Number(a.price));
+ else if(sort==='name')result.sort((a,b)=>String(a.name).localeCompare(String(b.name),'en'));
+ return result;
+}
 function renderProducts(){
  const grid=$('productGrid'),count=$('resultsCount'),fallback=$('productStaticFallback');
  if(catalogueState==='loading'){
