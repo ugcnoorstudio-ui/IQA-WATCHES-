@@ -3,7 +3,7 @@
 create or replace function public.iqa_enforce_product_media_gallery_limit()
 returns trigger
 language plpgsql
-security definer
+security invoker
 set search_path = ''
 as $function$
 declare
