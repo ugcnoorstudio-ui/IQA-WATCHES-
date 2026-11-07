@@ -9,7 +9,7 @@ const ALLOWED_ORIGINS = new Set([
   "https://iqa-watches-storefront.pages.dev",
 ]);
 const CORS = {
-  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Origin": "https://iqa-watches-storefront.pages.dev",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
   "Access-Control-Allow-Methods": "POST, OPTIONS",
   "Vary": "Origin"
