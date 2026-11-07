@@ -34,8 +34,8 @@ test('Edge Functions allow Cloudflare Pages and legacy GitHub Pages origins only
     assert.ok(source.includes('https://iqa-watches-storefront.pages.dev'), slug + ' missing Cloudflare Pages origin');
     assert.ok(source.includes('https://ugcnoorstudio-ui.github.io'), slug + ' missing legacy origin');
     assert.ok(source.includes('ALLOWED_ORIGINS.has'), slug + ' missing server-side origin allowlist');
-    assert.ok(source.includes('"Access-Control-Allow-Origin": "*"' ) ||
-      source.includes('"Access-Control-Allow-Origin":"*"'), slug + ' missing non-credentialed CORS response header');
+    assert.ok(source.includes('"Access-Control-Allow-Origin": "https://iqa-watches-storefront.pages.dev"') ||
+      source.includes('"Access-Control-Allow-Origin":"https://iqa-watches-storefront.pages.dev"'), slug + ' must return only the production Pages origin');
     assert.ok(source.includes('new Response("Forbidden", { status: 403 })'), slug + ' must reject unapproved preflight origins');
   }
 });
