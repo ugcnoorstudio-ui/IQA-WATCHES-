@@ -184,3 +184,20 @@ Staging had zero rows in the listed business tables at the same audit point. Pro
 The production business dataset is small, but it is not disposable: preserve the three orders, three order items, three status events, inventory movement, activity history, idempotency records, customer address and all four Cloudinary media metadata records. Also include the private admin mutation idempotency ledger in the D1 model or document a formally approved retention alternative; do not silently omit it.
 
 **Audit limitation:** this count snapshot does not replace a consistent export/backup, full schema/index/trigger/constraint inspection, auth-provider configuration review, or restore test. No rows were changed or deleted by the count queries.
+
+
+## 9. Authentication verification prerequisite
+
+The Worker must independently verify Supabase access tokens before trusting their subject. Supabase's current guidance distinguishes asymmetric signing keys from the legacy shared-secret (HS256) mode:
+
+- For asymmetric signing, Workers can verify JWTs locally using the project's public JWKS endpoint: `/auth/v1/.well-known/jwks.json`.
+- The JWKS endpoint does not return usable public keys for legacy symmetric signing. Supabase recommends validating those tokens through the Auth `/auth/v1/user` endpoint instead.
+- Therefore, before implementing production token verification, inspect the project's current signing algorithm and key state. Do not assume that the public JWKS endpoint is populated.
+- Prefer a planned asymmetric signing-key migration if the project is still on legacy HS256, but do not rotate/revoke keys during this backend migration without a separate compatibility test, expiry window and rollback plan.
+- Regardless of local JWT verification, the login, OAuth callback and session refresh still depend on the Supabase Auth service. A successful Worker/D1 deployment cannot compensate for a blocked Auth endpoint.
+
+References:
+- [Supabase JWT verification guidance](https://supabase.com/docs/guides/auth/jwts)
+- [Supabase JWT signing keys and rotation](https://supabase.com/docs/guides/auth/signing-keys)
+- [Cloudflare D1 migrations](https://developers.cloudflare.com/d1/reference/migrations/)
+- [Cloudflare D1 Worker binding API](https://developers.cloudflare.com/d1/worker-api/)
