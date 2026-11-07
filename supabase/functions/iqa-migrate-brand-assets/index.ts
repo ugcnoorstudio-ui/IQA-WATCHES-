@@ -11,7 +11,7 @@ const SOURCES = [
   { key: "primary-logo", path: "assets/iqa-watches-primary-logo.svg", publicId: "iqa-watches-primary-logo" }
 ];
 const CORS = {
-  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Origin": "https://iqa-watches-storefront.pages.dev",
   "Access-Control-Allow-Headers": "authorization, apikey, content-type, x-client-info",
   "Access-Control-Allow-Methods": "POST, OPTIONS",
   "Vary": "Origin"
