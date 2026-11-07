@@ -32,6 +32,7 @@ jobs:
           set -euo pipefail
           test -n "$CLOUDFLARE_API_TOKEN"
           test -n "$CLOUDFLARE_ACCOUNT_ID"
+          test -n "${{ vars.CLOUDFLARE_WORKERS_SUBDOMAIN }}" || { echo "::error::Set repository variable CLOUDFLARE_WORKERS_SUBDOMAIN before deployment."; exit 1; }
           node --check cloudflare/src/index.js
           test -s cloudflare/migrations/0001_staging_bootstrap.sql
       - name: Create or reuse staging D1 and deploy Worker
@@ -58,8 +59,4 @@ jobs:
         run: |
           set -euo pipefail
           URL="https://iqa-watches-api-staging.${{ vars.CLOUDFLARE_WORKERS_SUBDOMAIN }}.workers.dev/healthz"
-          if [ -z "${{ vars.CLOUDFLARE_WORKERS_SUBDOMAIN }}" ]; then
-            echo "::error::Set repository variable CLOUDFLARE_WORKERS_SUBDOMAIN to the account workers.dev subdomain."
-            exit 1
-          fi
           curl --fail --silent --show-error --retry 5 --retry-delay 3 "$URL" | jq -e '.ok == true and .environment == "staging"'
