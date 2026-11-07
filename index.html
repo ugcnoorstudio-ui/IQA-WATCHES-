@@ -1220,7 +1220,6 @@ function responsiveCloudinarySrcset(value,widths=[320,480,800,1200]){
   }).join(', ');
  }catch{return ''}
 }
-window.iqaResponsiveCloudinarySrcset=responsiveCloudinarySrcset;
 function enhanceResponsiveCloudinaryImages(root=document){
  const scope=root&&root.querySelectorAll?root:document;
  scope.querySelectorAll('img[src*="res.cloudinary.com"]').forEach(img=>{
