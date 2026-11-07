@@ -30,4 +30,6 @@ test('database enforces the eight-image cap under concurrent uploads by locking 
   assert.match(migration, /select count\(\*\)[\s\S]*from public\.product_media/i);
   assert.match(migration, /v_count >= 8/);
   assert.match(migration, /at most 8 images/i);
+  assert.match(migration, /security invoker/i);
+  assert.doesNotMatch(migration, /security definer/i);
 });
