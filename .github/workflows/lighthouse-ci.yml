@@ -1,0 +1,34 @@
+name: IQA WATCHES Lighthouse CI
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  lighthouse:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Generate current product sitemap
+        run: node scripts/generate-sitemap.js
+      - name: Install Lighthouse CI
+        run: npm install --no-save --no-package-lock @lhci/cli@0.14.0
+      - name: Run Lighthouse on home and product routes
+        run: npx lhci autorun --config=./lighthouserc.json
+      - name: Upload Lighthouse reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: iqa-lighthouse-reports
+          path: .lighthouseci
+          if-no-files-found: ignore
+          include-hidden-files: true
