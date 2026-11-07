@@ -4,7 +4,6 @@ const URL=Deno.env.get("SUPABASE_URL")!;
 const ANON_KEY=Deno.env.get("SUPABASE_ANON_KEY")!;
 const SERVICE_KEY=Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 const ALLOWED_ORIGINS = new Set([
-  "https://ugcnoorstudio-ui.github.io",
   "https://iqa-watches-storefront.pages.dev",
 ]);
 const cors={"Access-Control-Allow-Origin":"https://iqa-watches-storefront.pages.dev","Access-Control-Allow-Headers":"authorization, x-client-info, apikey, content-type","Access-Control-Allow-Methods":"POST, OPTIONS","Vary":"Origin"};
