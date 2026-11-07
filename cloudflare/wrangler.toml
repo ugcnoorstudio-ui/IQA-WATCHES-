@@ -1,0 +1,13 @@
+name = "iqa-watches-api-staging"
+main = "src/index.js"
+compatibility_date = "2026-11-08"
+workers_dev = true
+
+[vars]
+APP_ENV = "staging"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "iqa-watches-staging"
+database_id = "REPLACE_WITH_STAGING_D1_DATABASE_ID"
+migrations_dir = "migrations"
