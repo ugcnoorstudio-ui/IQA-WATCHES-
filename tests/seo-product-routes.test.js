@@ -13,6 +13,8 @@ test('product routes are crawlable path URLs and Cloudflare Pages rewrites them 
   assert.match(html, /<script src="\.\/seo\.js\?v=/);
   assert.match(routes, /location\.pathname\.match\(\/\^\\\/products/);
   assert.match(routes, /window\.iqaProductPath/);
+  const html = read('index.html');
+  assert.equal((html.match(/view\.getAttribute\('href'\)\?\.startsWith\('\/products\/'\)/g) || []).length, 2, 'product anchors must bypass modal click interception');
   assert.match(redirects, /^\/products\/\* \/index\.html 200$/m);
 });
 
