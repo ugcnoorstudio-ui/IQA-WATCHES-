@@ -3,7 +3,7 @@ const ALLOWED_ORIGINS = new Set([
   "https://ugcnoorstudio-ui.github.io",
   "https://iqa-watches-storefront.pages.dev",
 ]);
-const CORS = {"Access-Control-Allow-Origin": "*", "Access-Control-Allow-Headers": "authorization, apikey, content-type, x-client-info", "Access-Control-Allow-Methods": "POST, OPTIONS", "Vary": "Origin"};
+const CORS = {"Access-Control-Allow-Origin": "https://iqa-watches-storefront.pages.dev", "Access-Control-Allow-Headers": "authorization, apikey, content-type, x-client-info", "Access-Control-Allow-Methods": "POST, OPTIONS", "Vary": "Origin"};
 const env = (k: string) => Deno.env.get(k)?.trim() || "";
 function out(body: unknown, status = 200) { return new Response(JSON.stringify(body), {status, headers: {...CORS, "Content-Type":"application/json", "Cache-Control":"no-store"}}); }
 async function sha1(s: string) { const d = await crypto.subtle.digest("SHA-1", new TextEncoder().encode(s)); return [...new Uint8Array(d)].map(x => x.toString(16).padStart(2,"0")).join(""); }
