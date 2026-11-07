@@ -58,6 +58,7 @@ test('admin surfaces Supabase cached-egress restrictions instead of silently fai
   const backend = read('admin/backend.js');
   const auth = read('admin/auth.js');
   assert.match(backend, /checkAuthAvailability/);
+  assert.match(backend, /onAuthStateChange, checkAuthAvailability/);
   assert.match(backend, /exceed_cached_egress_quota/);
   assert.match(backend, /HTTP 402/);
   assert.match(auth, /backend\.checkAuthAvailability\(\)/);
