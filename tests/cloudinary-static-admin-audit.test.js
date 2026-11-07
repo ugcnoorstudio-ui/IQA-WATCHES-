@@ -7,7 +7,9 @@ const read = file => fs.readFileSync(path.join(__dirname, '..', file), 'utf8');
 
 test('static Cloudinary migration is owner-gated and limited to six approved homepage image sources', () => {
   const fn = read('supabase/functions/iqa-migrate-static-cloudinary/index.ts');
-  assert.match(fn, /const ORIGIN = "https:\/\/ugcnoorstudio-ui\.github\.io"/);
+  assert.match(fn, /ALLOWED_ORIGINS\.has/);
+  assert.match(fn, /https:\/\/iqa-watches-storefront\.pages\.dev/);
+  assert.match(fn, /"Access-Control-Allow-Origin": "https:\/\/iqa-watches-storefront\.pages\.dev"/);
   assert.match(fn, /staff_profiles/);
   assert.match(fn, /profiles\[0\]\.role !== "owner"/);
   assert.match(fn, /profiles\[0\]\.active !== true/);

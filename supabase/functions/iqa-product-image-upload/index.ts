@@ -1,8 +1,11 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 
-const ORIGIN = "https://ugcnoorstudio-ui.github.io";
+const ALLOWED_ORIGINS = new Set([
+  "https://ugcnoorstudio-ui.github.io",
+  "https://iqa-watches-storefront.pages.dev",
+]);
 const CORS = {
-  "Access-Control-Allow-Origin": ORIGIN,
+  "Access-Control-Allow-Origin": "https://iqa-watches-storefront.pages.dev",
   "Access-Control-Allow-Headers": "authorization, apikey, content-type, x-client-info",
   "Access-Control-Allow-Methods": "POST, OPTIONS",
   "Vary": "Origin"
@@ -52,9 +55,13 @@ async function destroyCloudinary(cloud: string, apiKey: string, apiSecret: strin
 }
 
 Deno.serve(async (req: Request) => {
-  if (req.method === "OPTIONS") return new Response("ok", { headers: CORS });
+  if (req.method === "OPTIONS") {
+    return ALLOWED_ORIGINS.has(req.headers.get("origin") || "")
+      ? new Response("ok", { headers: CORS })
+      : new Response("Forbidden", { status: 403 });
+  }
   if (req.method !== "POST") return out({ error: "Method not allowed." }, 405);
-  if (req.headers.get("origin") !== ORIGIN) return out({ error: "Origin not allowed." }, 403);
+  if (!ALLOWED_ORIGINS.has(req.headers.get("origin") || "")) return out({ error: "Origin not allowed." }, 403);
 
   const bearer = (req.headers.get("authorization") || "").match(/^Bearer\s+(.+)$/i);
   if (!bearer) return out({ error: "Sign in is required." }, 401);
