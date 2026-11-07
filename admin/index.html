@@ -14,13 +14,15 @@
     <a class="auth-brand" href="../"><span class="auth-mark">I</span><span>IQA WATCHES<small>SECURE ADMINISTRATION</small></span></a>
     <p class="eyebrow gold">STAFF ACCESS · PRIVATE WORKSPACE</p>
     <h1 id="authTitle">Welcome back.</h1>
-    <p class="auth-copy">Sign in with your authorized staff account. Public registration is disabled.</p>
+    <p class="auth-copy">Sign in with your authorized staff account. Public staff registration is disabled.</p>
+    <button id="googleSignIn" class="auth-submit" type="button">Continue with Google</button>
+    <p class="auth-message" aria-hidden="true">Or sign in with your staff email</p>
     <form id="loginForm" autocomplete="on">
       <label for="authEmail">Staff email</label>
-      <input id="authEmail" name="email" type="email" autocomplete="username" value="ugcnoorstudio@gmail.com" required>
+      <input id="authEmail" name="email" type="email" autocomplete="username" placeholder="name@example.com" required>
       <label for="authPassword">Password</label>
       <input id="authPassword" name="password" type="password" autocomplete="current-password" required>
-      <button id="authSubmit" class="auth-submit" type="submit">Sign in securely</button>
+      <button id="authSubmit" class="auth-submit" type="submit">Sign in with email</button>
       <p id="authMessage" class="auth-message" role="status" aria-live="polite">Your access is verified against the staff directory.</p>
     </form>
     <div class="auth-foot"><span>Protected by Supabase Auth</span><a href="../">Return to storefront</a></div>
@@ -51,7 +53,7 @@
 <script src="./motion-studio.js"></script>
 <script src="./admin.js?v=20261106-phase4-product-editor"></script>
 <script src="./listing-assistant.js?v=2"></script>
-<script src="./auth.js?v=622dc3c3"></script>
+<script src="./auth.js?v=phase3-google-staff-auth-1"></script>
 <script src="./cloudinary-migration.js?v=20261106-unlinked-review"></script>
 <script src="./media-manager.js?v=20261106-cloudinary-live-library-v2"></script>
 </body></html>
