@@ -9,7 +9,7 @@ test('static Cloudinary migration is owner-gated and limited to six approved hom
   const fn = read('supabase/functions/iqa-migrate-static-cloudinary/index.ts');
   assert.match(fn, /ALLOWED_ORIGINS\.has/);
   assert.match(fn, /https:\/\/iqa-watches-storefront\.pages\.dev/);
-  assert.match(fn, /"Access-Control-Allow-Origin": "\*"/);
+  assert.match(fn, /"Access-Control-Allow-Origin": "https:\/\/iqa-watches-storefront\.pages\.dev"/);
   assert.match(fn, /staff_profiles/);
   assert.match(fn, /profiles\[0\]\.role !== "owner"/);
   assert.match(fn, /profiles\[0\]\.active !== true/);
