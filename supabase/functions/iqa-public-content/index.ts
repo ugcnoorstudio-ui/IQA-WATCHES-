@@ -6,7 +6,7 @@ const ALLOWED_ORIGINS = new Set([
   "https://ugcnoorstudio-ui.github.io",
   "https://iqa-watches-storefront.pages.dev",
 ]);
-const CORS = {"Access-Control-Allow-Origin":"*","Access-Control-Allow-Headers":"apikey, authorization, x-client-info","Access-Control-Allow-Methods":"GET, OPTIONS","Vary":"Origin"};
+const CORS = {"Access-Control-Allow-Origin":"https://iqa-watches-storefront.pages.dev","Access-Control-Allow-Headers":"apikey, authorization, x-client-info","Access-Control-Allow-Methods":"GET, OPTIONS","Vary":"Origin"};
 function reply(status:number,body:Record<string,unknown>){return new Response(JSON.stringify(body),{status,headers:{...CORS,"Content-Type":"application/json; charset=utf-8","Cache-Control":"no-store"}});}
 Deno.serve(async(req:Request)=>{
  if (req.method === "OPTIONS") {
