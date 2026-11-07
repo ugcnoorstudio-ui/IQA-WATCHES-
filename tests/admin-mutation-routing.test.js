@@ -24,7 +24,7 @@ test('admin product creation accepts at most eight photos, matching the product 
 });
 
 test('database enforces the eight-image cap under concurrent uploads by locking the parent product', () => {
-  const migration = read('supabase/migrations/20261107170000_enforce_eight_product_images.sql');
+  const migration = read('supabase/migrations/20261107193017_enforce_eight_product_images.sql');
   assert.match(migration, /before insert on public\.product_media/i);
   assert.match(migration, /from public\.products[\s\S]*for update/i);
   assert.match(migration, /select count\(\*\)[\s\S]*from public\.product_media/i);
