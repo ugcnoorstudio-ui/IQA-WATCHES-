@@ -21,9 +21,15 @@ test('Cloudflare Pages security headers are present and conservative', () => {
     'Do not add a CSP until all inline scripts and external origins are audited');
 });
 
-test('Cloudflare Pages deploy runs automatically only on main and gates upload on all browser tests', () => {
+test('Cloudflare Pages production deploy is main-only and pull requests get isolated previews', () => {
   const workflow = fs.readFileSync(path.join(root, '.github/workflows/deploy-cloudflare-pages.yml'), 'utf8');
   assert.match(workflow, /push:[\s\S]*branches: \[main\]/);
+  assert.match(workflow, /pull_request:/);
+  assert.match(workflow, /deploy-preview:/);
+  assert.match(workflow, /github.event.pull_request.head.repo.full_name == github.repository/);
+  assert.match(workflow, /preview-disabled\\.invalid/);
+  assert.match(workflow, /--branch=pr-\\$\\{\\{ github.event.pull_request.number \\}\\}/);
+  assert.match(workflow, /if: github.event_name != 'pull_request' && github.ref == 'refs\\/heads\\/main'/);
   assert.match(workflow, /workflow_dispatch:/);
   assert.match(workflow, /needs: preflight/);
   assert.match(workflow, /node --test tests\/\*\.test\.js/);
