@@ -9,7 +9,7 @@ const SOURCE_PATH = "7fea8610-9261-4bbe-b80a-5ba1e2745510/MP000000025248756_437W
 const FOLDER = "iqa-watches/unassigned-review";
 const PUBLIC_ID = "legacy-MP000000025248756-437Wx649H-202502030016151";
 const CORS = {
-  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Origin": "https://iqa-watches-storefront.pages.dev",
   "Access-Control-Allow-Headers": "authorization, apikey, content-type, x-client-info",
   "Access-Control-Allow-Methods": "POST, OPTIONS",
   "Vary": "Origin"
