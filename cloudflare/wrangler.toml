@@ -1,6 +1,6 @@
 name = "iqa-watches-api-staging"
 main = "src/index.js"
-compatibility_date = "2026-11-08"
+compatibility_date = "2026-11-07"
 workers_dev = true
 
 [vars]
