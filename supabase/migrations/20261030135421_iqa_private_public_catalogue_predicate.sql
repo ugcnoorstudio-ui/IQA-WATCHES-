@@ -33,3 +33,4 @@ ALTER POLICY product_media_public_read ON public.product_media
 
 REVOKE ALL ON FUNCTION public.iqa_is_public_product(uuid) FROM PUBLIC, anon, authenticated;
 DROP FUNCTION public.iqa_is_public_product(uuid);
+

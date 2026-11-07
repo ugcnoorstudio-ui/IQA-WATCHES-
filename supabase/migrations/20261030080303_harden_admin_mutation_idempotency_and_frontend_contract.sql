@@ -1,8 +1,3 @@
--- IQA WATCHES: owner-only, atomic product and inventory mutations.
--- Browser roles receive no direct table access; only the Edge Function's service role can call the RPC.
-create schema if not exists private;
-revoke all on schema private from public, anon, authenticated;
-grant usage on schema private to service_role;
 
 create table if not exists private.admin_mutation_requests (
  request_id uuid primary key,
@@ -34,6 +29,7 @@ begin
    if v_existing is null then raise exception 'This request is already being processed.'; end if;
    return v_existing;
  end if;
+
  if p_action='create_product' then
    v_name:=nullif(btrim(p_payload->>'name'),'');
    v_sku:=nullif(upper(btrim(p_payload->>'sku')),'');
@@ -83,8 +79,3 @@ end $$;
 revoke all on function private.iqa_admin_mutate(text,uuid,jsonb) from public,anon,authenticated;
 grant execute on function private.iqa_admin_mutate(text,uuid,jsonb) to service_role;
 
-create or replace function public.iqa_admin_mutate(p_action text,p_actor uuid,p_payload jsonb)
-returns jsonb language sql security definer set search_path = ''
-as $$ select private.iqa_admin_mutate(p_action,p_actor,p_payload) $$;
-revoke all on function public.iqa_admin_mutate(text,uuid,jsonb) from public,anon,authenticated;
-grant execute on function public.iqa_admin_mutate(text,uuid,jsonb) to service_role;

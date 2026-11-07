@@ -3,3 +3,4 @@
 ALTER POLICY brands_public_active_read ON public.brands TO anon;
 ALTER POLICY categories_public_active_read ON public.categories TO anon;
 ALTER POLICY product_media_public_read ON public.product_media TO anon;
+

@@ -1,0 +1,17 @@
+create policy "activity_logs_owner_read" on public.activity_logs for select to authenticated using (public.has_staff_role(array['owner']::public.staff_role[]));
+create policy "content_entries_owner_read" on public.content_entries for select to authenticated using (public.has_staff_role(array['owner']::public.staff_role[]));
+create policy "coupons_owner_read" on public.coupons for select to authenticated using (public.has_staff_role(array['owner']::public.staff_role[]));
+create policy "customers_owner_read" on public.customers for select to authenticated using (public.has_staff_role(array['owner']::public.staff_role[]));
+create policy "integration_events_owner_read" on public.integration_events for select to authenticated using (public.has_staff_role(array['owner']::public.staff_role[]));
+create policy "order_items_owner_read" on public.order_items for select to authenticated using (public.has_staff_role(array['owner']::public.staff_role[]));
+create policy "order_status_events_owner_read" on public.order_status_events for select to authenticated using (public.has_staff_role(array['owner']::public.staff_role[]));
+create policy "orders_owner_read" on public.orders for select to authenticated using (public.has_staff_role(array['owner']::public.staff_role[]));
+create policy "payment_events_owner_read" on public.payment_events for select to authenticated using (public.has_staff_role(array['owner']::public.staff_role[]));
+create policy "purchase_order_items_owner_read" on public.purchase_order_items for select to authenticated using (public.has_staff_role(array['owner']::public.staff_role[]));
+create policy "purchase_orders_owner_read" on public.purchase_orders for select to authenticated using (public.has_staff_role(array['owner']::public.staff_role[]));
+create policy "refunds_owner_read" on public.refunds for select to authenticated using (public.has_staff_role(array['owner']::public.staff_role[]));
+create policy "return_requests_owner_read" on public.return_requests for select to authenticated using (public.has_staff_role(array['owner']::public.staff_role[]));
+create policy "reviews_owner_read" on public.reviews for select to authenticated using (public.has_staff_role(array['owner']::public.staff_role[]));
+create policy "store_settings_owner_read" on public.store_settings for select to authenticated using (public.has_staff_role(array['owner']::public.staff_role[]));
+create policy "suppliers_owner_read" on public.suppliers for select to authenticated using (public.has_staff_role(array['owner']::public.staff_role[]));
+create policy "support_tickets_owner_read" on public.support_tickets for select to authenticated using (public.has_staff_role(array['owner']::public.staff_role[]));
