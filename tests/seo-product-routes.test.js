@@ -13,6 +13,8 @@ test('product routes are crawlable path URLs and Cloudflare Pages rewrites them 
   assert.match(html, /<script src="\.\/seo\.js\?v=/);
   assert.match(routes, /location\.pathname\.match\(\/\^\\\/products/);
   assert.match(routes, /window\.iqaProductPath/);
+  assert.match(html, /responsiveCloudinarySrcset\(p\.image\)/);
+  assert.match(html, /view\.getAttribute\('href'\)\?\.startsWith\('\/products\/'\)/);
   assert.equal((html.match(/view\.getAttribute\('href'\)\?\.startsWith\('\/products\/'\)/g) || []).length, 2, 'product anchors must bypass modal click interception');
   assert.match(redirects, /^\/products\/\* \/index\.html 200$/m);
 });
@@ -30,6 +32,7 @@ test('product metadata and JSON-LD are built from real catalogue fields without 
 test('sitemap contains the current approved catalogue products and robots blocks the private admin route', () => {
   const catalogue = JSON.parse(read('data/catalogue.json'));
   const sitemap = read('sitemap.xml');
+  assert.ok(catalogue.products.every(product => product.image.includes('c_limit,w_480/f_auto/q_auto')));
   const robots = read('robots.txt');
   for (const product of catalogue.products) {
     assert.ok(sitemap.includes(product.id), 'Missing sitemap product ' + product.id);
