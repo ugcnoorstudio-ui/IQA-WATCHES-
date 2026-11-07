@@ -7,7 +7,7 @@ function lock(text){
  gate.hidden=false;banner.hidden=true;shell.hidden=true;
  document.body.classList.add('auth-locked');
  $('authEmail').focus({preventScroll:true});
- if(text)message(text,true);
+ if(text)message(text,/failed|could not|error|missing|not active/i.test(text));
 }
 function unlock(profile){
  gate.hidden=true;banner.hidden=false;shell.hidden=false;
@@ -21,9 +21,11 @@ function unlock(profile){
 }
 async function init(){
  if(!backend||!backend.configured()){lock('Admin backend configuration is missing.');return}
+ const oauthError=new URLSearchParams(window.location.search).get('error_description');
+ if(oauthError){lock('Google sign-in was not completed: '+oauthError.slice(0,180));return;}
  try{
   const profile=await backend.getActiveProfile();
-  if(profile)unlock(profile);else lock('No active session found. Sign in again with your authorized IQA WATCHES staff account.');
+  if(profile)unlock(profile);else lock('Your previous browser session is no longer saved. Sign in again with your authorized IQA WATCHES staff account.');
  }catch(error){lock(error.message||'Could not verify staff access. Sign in again.');}
 }
 $('googleSignIn').addEventListener('click',async()=>{
@@ -62,7 +64,15 @@ $('signOut').addEventListener('click',async()=>{
 if(backend&&backend.configured()){
  try{
   backend.onAuthStateChange(event=>{
-   if(event==='SIGNED_OUT')lock('Your session has ended. Sign in again to continue.');
+   if(event==='SIGNED_OUT'){
+    lock('Your session has ended. Sign in again to continue.');
+    return;
+   }
+   // Supabase invokes auth callbacks while holding its internal auth lock.
+   // Defer profile verification to the next task to avoid re-entrant deadlocks.
+   if(event==='TOKEN_REFRESHED'||event==='USER_UPDATED'){
+    window.setTimeout(()=>{ recheckAccess(); },0);
+   }
   });
  }catch(_){}
 }
