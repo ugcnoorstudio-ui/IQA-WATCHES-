@@ -2,6 +2,12 @@ name: Provision and deploy IQA WATCHES staging API
 
 on:
   workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - '.github/workflows/deploy-cloudflare-staging.yml'
+      - 'cloudflare/**'
 
 permissions:
   contents: read
