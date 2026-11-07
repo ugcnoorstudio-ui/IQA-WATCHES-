@@ -1,9 +1,10 @@
--- Mumbai backend hardening follow-up.
--- All business tables remain deny-by-default; no browser CRUD policies are added.
 begin;
+-- Keep SECURITY DEFINER helpers unavailable to browser roles until reviewed policies/RPCs need them.
 revoke all on function public.current_staff_role() from public, anon, authenticated;
 revoke all on function public.is_active_staff() from public, anon, authenticated;
 revoke all on function public.has_staff_role(public.staff_role[]) from public, anon, authenticated;
+-- Revoke the default public function execution grant explicitly.
+-- Add indexes for foreign-key joins and delete/update checks.
 create index if not exists inventory_movements_variant_id_idx on public.inventory_movements(variant_id);
 create index if not exists inventory_movements_actor_idx on public.inventory_movements(actor);
 create index if not exists order_items_order_id_idx on public.order_items(order_id);

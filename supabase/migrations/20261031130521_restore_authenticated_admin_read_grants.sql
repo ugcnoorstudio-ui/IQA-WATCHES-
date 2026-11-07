@@ -1,0 +1,26 @@
+GRANT EXECUTE ON FUNCTION public.has_staff_role(public.staff_role[]) TO authenticated;
+GRANT SELECT ON TABLE
+ public.activity_logs,
+ public.brands,
+ public.categories,
+ public.content_entries,
+ public.coupons,
+ public.customers,
+ public.integration_events,
+ public.inventory_movements,
+ public.order_items,
+ public.order_status_events,
+ public.orders,
+ public.payment_events,
+ public.product_media,
+ public.product_variants,
+ public.products,
+ public.purchase_order_items,
+ public.purchase_orders,
+ public.refunds,
+ public.return_requests,
+ public.reviews,
+ public.store_settings,
+ public.suppliers,
+ public.support_tickets
+TO authenticated;
