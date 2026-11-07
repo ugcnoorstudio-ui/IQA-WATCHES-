@@ -34,7 +34,7 @@ const configs={
 products:{fields:[['name','Product name','text'],['sku','Unique SKU','text'],['brand','Brand','text'],['category','Category','text'],['audience','Audience','select','Men,Women,Unisex,Other'],['price','Selling price (INR)','number'],['mrp','MRP (INR)','number'],['stock','Initial stock','number'],['status','Publication state','select','Draft,Published,Archived,Scheduled'],['description','Description','textarea']],actions:['Add product','Import CSV','Export CSV']},
 categories:{fields:[['name','Category / brand name','text'],['type','Type','select','Category,Brand,Collection'],['slug','URL slug','text'],['status','State','select','Draft,Active,Archived']],actions:['Add entry','Export CSV']},
 inventory:{fields:[['sku','Product / variant SKU','text'],['movement','Movement','select','Stock in,Stock out,Adjustment,Receive purchase order'],['quantity','Quantity','number'],['reason','Mandatory reason','text'],['threshold','Low-stock threshold','number']],actions:['Record adjustment','Export movement CSV']},
-orders:{fields:[['orderId','Order number','text'],['status','Target status','select','Pending,Confirmed,Processing,Packed,Shipped,Delivered,Cancelled,Payment Failed,Return Requested,Returned,Refund Pending,Refunded'],['reason','Reason / reference','text']],actions:['Find order','Export CSV']},
+orders:{fields:[['orderId','Order number','text'],['status','Target status','select','Pending,Confirmed,Processing,Packed,Ready for Pickup,Shipped,Delivered,Cancelled,Payment Failed,Return Requested,Returned,Refund Pending,Refunded'],['reason','Reason / reference','text']],actions:['Find order','Export CSV']},
 customers:{fields:[['customerId','Customer ID / verified email','text'],['permission','Access purpose','select','Order support,Privacy request,Account deletion'],['reason','Case reference / reason','text']],actions:['Find customer','Export CSV']},
 payments:{fields:[['paymentId','Gateway payment reference','text'],['action','Workflow','select','Inspect payment,Request refund,Reconciliation issue'],['amount','Refund amount (INR)','number'],['reason','Reason','text']],actions:['Find payment','Export report']},
 shipping:{fields:[['pin','Serviceable PIN code','text'],['charge','Shipping charge (INR)','number'],['freeThreshold','Free shipping threshold (INR)','number'],['provider','Courier provider','text'],['tracking','Tracking URL template','url']],actions:['Save draft rule','Export CSV']},
@@ -360,7 +360,7 @@ if(form.matches('[data-product-create]')){
  const brandId=brandSelect.value,categoryId=categorySelect.value;
  const brandName=brandSelect.selectedOptions[0]?.textContent||'',categoryName=categorySelect.selectedOptions[0]?.textContent||'';
  if(!brandId||!categoryId||brandId==='__new__'||categoryId==='__new__')throw new Error('Choose an existing published brand and category. Create taxonomy separately in Categories & brands.');
- if(files.length>5)throw new Error('Upload no more than 5 product photos.');
+ if(files.length>8)throw new Error('Upload no more than 8 product photos.');
  if(files.some(file=>!['image/jpeg','image/png','image/webp','image/avif'].includes(file.type)||file.size<1||file.size>5*1024*1024))throw new Error('Each photo must be JPG, PNG, WebP or AVIF and no larger than 5 MB.');
  if(files.length&&String(values.image_alt_text||'').trim().length<3)throw new Error('Add image alt text when uploading product photos.');
  if(Number(values.mrp)<Number(values.selling_price))throw new Error('MRP must be equal to or greater than the selling price.');

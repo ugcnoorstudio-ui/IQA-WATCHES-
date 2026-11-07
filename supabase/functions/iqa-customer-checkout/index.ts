@@ -4,9 +4,11 @@ import { createClient } from "npm:@supabase/supabase-js@2";
 const URL = Deno.env.get("SUPABASE_URL")!;
 const ANON_KEY = Deno.env.get("SUPABASE_ANON_KEY")!;
 const SERVICE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-const ORIGIN = "https://ugcnoorstudio-ui.github.io";
+const ALLOWED_ORIGINS = new Set([
+  "https://iqa-watches-storefront.pages.dev",
+]);
 const cors = {
-  "Access-Control-Allow-Origin": ORIGIN,
+  "Access-Control-Allow-Origin": "https://iqa-watches-storefront.pages.dev",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-idempotency-key",
   "Access-Control-Allow-Methods": "POST, OPTIONS",
   "Vary": "Origin",
@@ -21,9 +23,13 @@ function validUuid(value: unknown): value is string {
   return typeof value === "string" && /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value);
 }
 Deno.serve(async (req: Request) => {
-  if (req.method === "OPTIONS") return new Response("ok", { headers: cors });
+  if (req.method === "OPTIONS") {
+    return ALLOWED_ORIGINS.has(req.headers.get("origin") || "")
+      ? new Response("ok", { headers: cors })
+      : new Response("Forbidden", { status: 403 });
+  }
   if (req.method !== "POST") return reply(405, { ok: false, error: "Method not allowed." });
-  if (req.headers.get("origin") !== ORIGIN) return reply(403, { ok: false, error: "Origin not allowed." });
+  if (!ALLOWED_ORIGINS.has(req.headers.get("origin") || "")) return reply(403, { ok: false, error: "Origin not allowed." });
 
   const authorization = req.headers.get("Authorization") || "";
   const token = authorization.startsWith("Bearer ") ? authorization.slice(7) : "";

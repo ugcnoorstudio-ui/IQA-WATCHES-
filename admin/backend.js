@@ -39,6 +39,23 @@
     return client;
   }
 
+  async function checkAuthAvailability() {
+    if (!configured()) throw new Error("IQA WATCHES admin backend configuration is missing.");
+    const response = await global.fetch(config.url + "/auth/v1/settings", {
+      method: "GET",
+      headers: { apikey: config.publishableKey, accept: "application/json" },
+      cache: "no-store"
+    });
+    let details = {};
+    try { details = await response.json(); } catch (_) {}
+    if (response.ok) return true;
+    const reason = String(details.message || details.msg || response.statusText || "Supabase Auth is unavailable").slice(0, 220);
+    if (response.status === 402 || /exceed_cached_egress_quota/i.test(reason)) {
+      throw new Error("Supabase has temporarily restricted this project because its cached egress quota was exceeded (HTTP 402). Admin login cannot continue until the project owner restores Supabase service. Your staff account and database records have not been deleted.");
+    }
+    throw new Error("Supabase Auth is unavailable (HTTP " + response.status + "): " + reason);
+  }
+
   async function getActiveProfile() {
     const supabaseClient = getClient();
     // A cleared browser auth cache is a normal signed-out state, not a fatal
@@ -94,6 +111,7 @@
   async function signIn(email, password) {
     if (!email || !password) throw new Error("Enter your staff email and password.");
     const supabaseClient = getClient();
+    await checkAuthAvailability();
     const { error } = await supabaseClient.auth.signInWithPassword({ email: email.trim(), password });
     if (error) throw error;
     try {
@@ -239,6 +257,6 @@
 
   global.IQA_ADMIN_BACKEND = Object.freeze({
     configured, getClient, signIn, signOut, getActiveProfile,
-    currentProfile, requireRole, readTable, countTable, mutate, uploadProductImage, listFailedImageUploads, clearFailedImageUpload, onAuthStateChange
+    currentProfile, requireRole, readTable, countTable, mutate, uploadProductImage, listFailedImageUploads, clearFailedImageUpload, onAuthStateChange, checkAuthAvailability
   });
 })(window);

@@ -7,7 +7,9 @@ const read = file => fs.readFileSync(path.join(__dirname, '..', file), 'utf8');
 
 test('static Cloudinary migration is owner-gated and limited to six approved homepage image sources', () => {
   const fn = read('supabase/functions/iqa-migrate-static-cloudinary/index.ts');
-  assert.match(fn, /const ORIGIN = "https:\/\/ugcnoorstudio-ui\.github\.io"/);
+  assert.match(fn, /ALLOWED_ORIGINS\.has/);
+  assert.match(fn, /https:\/\/iqa-watches-storefront\.pages\.dev/);
+  assert.match(fn, /"Access-Control-Allow-Origin": "https:\/\/iqa-watches-storefront\.pages\.dev"/);
   assert.match(fn, /staff_profiles/);
   assert.match(fn, /profiles\[0\]\.role !== "owner"/);
   assert.match(fn, /profiles\[0\]\.active !== true/);
@@ -114,7 +116,7 @@ test('Cloudinary media manager exposes all six media groups and safe owner-only 
   assert.match(backend, /listFailedImageUploads/);
   assert.match(backend, /clearFailedImageUpload/);
   assert.match(html, /media-manager\.js\?v=20261106-cloudinary-live-library-v2/);
-  assert.match(html, /backend\.js\?v=20261107-auth-recovery-v2/);
+  assert.match(html, /backend\.js\?v=20261107-auth-recovery-v3/);
   assert.match(html, /admin\.js\?v=20261106-phase4-product-editor/);
 });
 

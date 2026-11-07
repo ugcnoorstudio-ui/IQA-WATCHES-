@@ -1,0 +1,25 @@
+name: IQA WATCHES staging runtime smoke tests
+
+on:
+  workflow_dispatch:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'supabase/functions/**'
+      - 'tests/integration/staging-runtime-smoke.test.js'
+      - '.github/workflows/staging-runtime-smoke.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  staging-runtime-smoke:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Check staging Auth and Edge Function availability
+        run: node --test tests/integration/staging-runtime-smoke.test.js
