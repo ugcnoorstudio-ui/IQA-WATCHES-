@@ -203,7 +203,7 @@ test('every mobile menu link opens its real destination and closes the menu', as
 
 test('cart add, increment, decrement and remove work with responsive order summary', async ({ page, isMobile }) => {
   await openStore(page);
-  const card = page.locator('#productGrid .product-card').first();
+  const card = page.locator('#productGrid .product-card').nth(1);
   const productId = await card.locator('[data-add]').getAttribute('data-add');
   await card.locator('[data-add]').click();
   await navigateToHash(page, 'bag');
@@ -365,6 +365,7 @@ test('product detail tolerates null optional fields and ignores invalid gallery 
     Object.assign(product, {
       brand: null, category: null, style: null, colour: null, dial: null,
       strap: null, sku: null, desc: null, imageAlt: null, tags: null,
+      caseMaterial: 'Resin', waterResistance: '50 m',
       gallery: [{ src: null, alt: null }, { src: 'javascript:alert(1)', alt: 'unsafe' }]
     });
     location.hash = '#product/' + encodeURIComponent(id);
@@ -383,7 +384,7 @@ test('product detail tolerates null optional fields and ignores invalid gallery 
 
 test('cart contents and quantities persist after a full page reload', async ({ page }) => {
   await openStore(page);
-  const card = page.locator('#productGrid .product-card').first();
+  const card = page.locator('#productGrid .product-card').nth(1);
   const productId = await card.locator('[data-add]').getAttribute('data-add');
   await card.locator('[data-add]').click();
   await page.reload();
