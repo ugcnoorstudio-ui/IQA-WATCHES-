@@ -5,4 +5,3 @@ do $$ begin
   using (customer_id=(select private.current_customer_id()));
  end if;
 end $$;
-

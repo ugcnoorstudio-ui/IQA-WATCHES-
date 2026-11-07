@@ -73,4 +73,3 @@ $function$;
 
 revoke all on function public.iqa_admin_update_order_status(uuid,uuid,public.order_state,text) from public, anon, authenticated;
 grant execute on function public.iqa_admin_update_order_status(uuid,uuid,public.order_state,text) to service_role;
-

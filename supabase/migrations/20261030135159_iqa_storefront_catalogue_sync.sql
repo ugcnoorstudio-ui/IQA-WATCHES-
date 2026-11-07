@@ -318,4 +318,3 @@ $function$;
 
 REVOKE ALL ON FUNCTION public.iqa_catalogue_mutation(uuid, text, jsonb) FROM PUBLIC, anon, authenticated;
 GRANT EXECUTE ON FUNCTION public.iqa_catalogue_mutation(uuid, text, jsonb) TO service_role;
-

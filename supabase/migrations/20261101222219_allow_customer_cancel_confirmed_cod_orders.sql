@@ -14,4 +14,3 @@ begin
  end if;
  execute v_def;
 end $$;
-

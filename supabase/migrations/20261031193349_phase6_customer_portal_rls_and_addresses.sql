@@ -111,4 +111,3 @@ grant insert on public.return_requests to authenticated;
 grant select on public.reviews to anon, authenticated;
 grant insert (product_id,order_id,customer_id,rating,body,state,verified_purchase) on public.reviews to authenticated;
 grant select on public.coupons to authenticated;
-

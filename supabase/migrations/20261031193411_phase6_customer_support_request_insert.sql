@@ -6,4 +6,3 @@ do $$ begin
  end if;
 end $$;
 grant insert (customer_id,subject,body) on public.support_tickets to authenticated;
-

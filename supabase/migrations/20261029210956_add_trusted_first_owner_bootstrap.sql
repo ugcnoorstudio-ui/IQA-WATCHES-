@@ -44,4 +44,3 @@ $$;
 revoke all on function public.bootstrap_first_owner(uuid, text) from public, anon, authenticated;
 
 commit;
-

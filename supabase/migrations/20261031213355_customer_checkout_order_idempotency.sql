@@ -117,4 +117,3 @@ end;
 $$;
 revoke all on function public.iqa_create_customer_order(uuid,text,uuid,jsonb,numeric,jsonb) from public, anon, authenticated;
 grant execute on function public.iqa_create_customer_order(uuid,text,uuid,jsonb,numeric,jsonb) to service_role;
-

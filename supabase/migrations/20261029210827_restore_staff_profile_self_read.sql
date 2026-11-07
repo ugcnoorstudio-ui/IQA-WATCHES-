@@ -3,4 +3,3 @@
 begin;
 grant select on public.staff_profiles to authenticated;
 commit;
-

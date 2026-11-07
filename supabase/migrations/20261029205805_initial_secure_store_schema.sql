@@ -171,4 +171,3 @@ grant execute on function public.has_staff_role(public.staff_role[]) to authenti
 commit;
 -- No broad staff CRUD policies are included intentionally. Add narrowly scoped role/permission
 -- policies and server-side transactional RPCs after threat-model review. Never expose service-role keys.
-

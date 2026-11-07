@@ -209,4 +209,3 @@ revoke all on function public.iqa_update_product(uuid,jsonb) from public, anon, 
 revoke all on function public.iqa_update_product_variant(uuid,jsonb) from public, anon, authenticated;
 grant execute on function public.iqa_update_product(uuid,jsonb) to service_role;
 grant execute on function public.iqa_update_product_variant(uuid,jsonb) to service_role;
-

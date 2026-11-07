@@ -12,4 +12,3 @@ begin
  if position('ready_for_pickup' in v_def)=0 then raise exception 'Could not add pickup status transition'; end if;
  execute v_def;
 end $$;
-

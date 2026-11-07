@@ -53,4 +53,3 @@ select cron.schedule(
   '* * * * *',
   'select private.iqa_publish_due_content();'
 );
-

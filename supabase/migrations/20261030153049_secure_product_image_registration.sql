@@ -65,4 +65,3 @@ $$;
 
 revoke all on function public.iqa_register_product_image(uuid,uuid,text,text,boolean) from public, anon, authenticated;
 grant execute on function public.iqa_register_product_image(uuid,uuid,text,text,boolean) to service_role;
-

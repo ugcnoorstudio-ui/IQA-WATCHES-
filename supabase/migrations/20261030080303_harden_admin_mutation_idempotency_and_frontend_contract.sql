@@ -78,4 +78,3 @@ begin
 end $$;
 revoke all on function private.iqa_admin_mutate(text,uuid,jsonb) from public,anon,authenticated;
 grant execute on function private.iqa_admin_mutate(text,uuid,jsonb) to service_role;
-

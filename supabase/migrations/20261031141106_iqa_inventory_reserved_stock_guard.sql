@@ -122,4 +122,3 @@ begin
  update private.admin_mutation_requests set response=v_result where request_id=v_request_id;
  return v_result;
 end $function$
-
