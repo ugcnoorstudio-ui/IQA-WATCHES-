@@ -5,6 +5,8 @@ workers_dev = true
 
 [vars]
 APP_ENV = "staging"
+SUPABASE_URL = "https://qcxgsomqxfoueootxzpv.supabase.co"
+SUPABASE_PUBLISHABLE_KEY = "sb_publishable_EmGoVBFk35Mc7om3eULcgw_tmEXAAA5"
 
 [[d1_databases]]
 binding = "DB"
