@@ -3,7 +3,6 @@ import { createClient } from "npm:@supabase/supabase-js@2";
 const URL = Deno.env.get("SUPABASE_URL")!;
 const SERVICE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 const ALLOWED_ORIGINS = new Set([
-  "https://ugcnoorstudio-ui.github.io",
   "https://iqa-watches-storefront.pages.dev",
 ]);
 const CORS = {"Access-Control-Allow-Origin":"https://iqa-watches-storefront.pages.dev","Access-Control-Allow-Headers":"apikey, authorization, x-client-info","Access-Control-Allow-Methods":"GET, OPTIONS","Vary":"Origin"};
