@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+Disallow: /admin/
+Sitemap: https://iqa-watches-storefront.pages.dev/sitemap.xml
