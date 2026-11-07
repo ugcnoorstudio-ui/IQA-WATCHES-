@@ -43,8 +43,8 @@ test('checkout blocks order creation until delivery coverage and COD settings ar
 
 test('shipping workspace does not claim live courier booking when no courier integration exists', () => {
   const admin = read('admin/admin.js');
-  assert.match(admin, /courier integrations and tracking/);
-  assert.match(admin, /orders.*delivery_snapshot/);
+  assert.match(admin, /shipping:'Configure serviceable PIN codes, courier integrations, shipping rules and tracking\\.'/);
+  assert.match(admin, /shipping:\\[\\['orders','id,order_number,state,delivery_snapshot,created_at'\\]\\]/);
   assert.match(admin, /External integrations/);
   assert.match(admin, /courier providers are separate external services\. None is currently connected and verified/);
 });
