@@ -70,11 +70,12 @@ jobs:
         run: |
           set -euo pipefail
           cd cloudflare
-          DB_JSON="$(wrangler d1 list --json)"
-          DB_ID="$(printf '%s' "$DB_JSON" | jq -r '.. | objects | select(.name? == "iqa-watches-staging") | .uuid // empty' | head -n 1)"
+          API_BASE="https://api.cloudflare.com/client/v4/accounts/$CLOUDFLARE_ACCOUNT_ID/d1/database"
+          DB_JSON="$(curl --fail --silent --show-error --request GET "$API_BASE" --header "Authorization: Bearer $CLOUDFLARE_API_TOKEN" --header "Content-Type: application/json")"
+          DB_ID="$(printf '%s' "$DB_JSON" | jq -r '[.result[]? | select(.name == "iqa-watches-staging")][0].uuid // empty')"
           if [ -z "$DB_ID" ]; then
-            CREATE_OUTPUT="$(wrangler d1 create iqa-watches-staging --json)"
-            DB_ID="$(printf '%s' "$CREATE_OUTPUT" | jq -r '.. | objects | select(has("uuid")) | .uuid' | head -n 1)"
+            CREATE_JSON="$(curl --fail --silent --show-error --request POST "$API_BASE" --header "Authorization: Bearer $CLOUDFLARE_API_TOKEN" --header "Content-Type: application/json" --data '{"name":"iqa-watches-staging"}')"
+            DB_ID="$(printf '%s' "$CREATE_JSON" | jq -r '.result.uuid // empty')"
           fi
           [[ "$DB_ID" =~ ^[0-9a-fA-F-]{36}$ ]] || { echo "::error::Could not resolve a valid staging D1 database UUID."; exit 1; }
           sed "s/REPLACE_WITH_STAGING_D1_DATABASE_ID/$DB_ID/" wrangler.toml > wrangler.deploy.toml
@@ -86,5 +87,13 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          URL="https://iqa-watches-api-staging.$CLOUDFLARE_WORKERS_SUBDOMAIN.workers.dev/healthz"
+          HOST="${CLOUDFLARE_WORKERS_SUBDOMAIN#https://}"
+          HOST="${HOST#http://}"
+          HOST="${HOST%%/*}"
+          if [[ "$HOST" == *.workers.dev ]]; then
+            HOST="${HOST#*.}"
+            HOST="${HOST%.workers.dev}"
+          fi
+          [[ "$HOST" =~ ^[a-z0-9-]+$ ]] || { echo "::error::CLOUDFLARE_WORKERS_SUBDOMAIN must identify the workers.dev account subdomain."; exit 1; }
+          URL="https://iqa-watches-api-staging.$HOST.workers.dev/healthz"
           curl --fail --silent --show-error --retry 5 --retry-delay 3 "$URL" | jq -e '.ok == true and .environment == "staging"'
