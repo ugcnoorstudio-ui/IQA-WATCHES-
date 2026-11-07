@@ -34,11 +34,20 @@ Deno.serve(async(req:Request)=>{
   if(!body||typeof body!=="object"||Array.isArray(body)||typeof body.action!=="string"||!body.payload||typeof body.payload!=="object"||Array.isArray(body.payload))return reply(400,{ok:false,error:"Invalid request body."});
   const updateActions=["update_product","update_product_variant"];
   const taxonomyActions=["update_category","archive_category","update_brand","archive_brand"];
-  const allowed=["create_product","adjust_inventory","create_category","create_brand","assign_product_taxonomy","publish_product",...updateActions,...taxonomyActions];
+  const orderAction="update_order_status";
+  const contentAction="manage_content";
+  const allowed=["create_product","adjust_inventory","create_category","create_brand","assign_product_taxonomy","publish_product",...updateActions,...taxonomyActions,orderAction,contentAction];
   if(!allowed.includes(body.action))return reply(400,{ok:false,error:"This action is not enabled yet."});
-  const rpcName=updateActions.includes(body.action)?(body.action==="update_product"?"iqa_update_product":"iqa_update_product_variant"):taxonomyActions.includes(body.action)?"iqa_manage_taxonomy":"iqa_admin_mutate";
+  const rpcName=updateActions.includes(body.action)
+    ? (body.action==="update_product"?"iqa_update_product":"iqa_update_product_variant")
+    : taxonomyActions.includes(body.action)?"iqa_manage_taxonomy"
+    : body.action===orderAction?"iqa_admin_update_order_status"
+    : body.action===contentAction?"iqa_manage_content"
+    : "iqa_admin_mutate";
   const rpcPayload=taxonomyActions.includes(body.action)?{...body.payload,action:body.action.startsWith("update_")?"update":"archive",kind:body.action.endsWith("_category")?"category":"brand"}:body.payload;
-  const rpcArgs=rpcName==="iqa_admin_mutate"?{p_action:body.action,p_actor:u.user.id,p_payload:rpcPayload}:{p_actor:u.user.id,p_payload:rpcPayload};
+  const rpcArgs=body.action===orderAction
+    ? {p_actor:u.user.id,p_order_id:body.payload.order_id,p_new_state:body.payload.state,p_reason:body.payload.reason}
+    : rpcName==="iqa_admin_mutate"?{p_action:body.action,p_actor:u.user.id,p_payload:rpcPayload}:{p_actor:u.user.id,p_payload:rpcPayload};
   const {data,error}=await admin.rpc(rpcName,rpcArgs);
   if(error)return reply(400,{ok:false,error:String(error.message||"Operation failed.").slice(0,240)});
   return reply(200,data&&data.ok===true?data:{ok:false,error:"Operation was not confirmed."});
