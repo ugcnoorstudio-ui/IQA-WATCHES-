@@ -932,7 +932,22 @@ body.menu-open #menuBackdrop{display:block}
 </div>
 <div class="category-row" id="categoryChips" aria-label="Filter by category"><button class="chip active" data-category="All" aria-pressed="true">All styles</button><button class="chip" data-category="Men" aria-pressed="false">Men</button><button class="chip" data-category="Women" aria-pressed="false">Women</button><button class="chip" data-category="Unisex" aria-pressed="false">Unisex</button><button class="chip" data-category="Analog" aria-pressed="false">Analog</button><button class="chip" data-category="Chronograph" aria-pressed="false">Chronograph</button><button class="chip" data-category="New Arrivals" aria-pressed="false">New arrivals</button><button class="chip" data-category="Bestsellers" aria-pressed="false">Bestsellers</button></div>
 <div class="toolbar"><div class="search-wrap"><input id="searchInput" type="search" placeholder="Search watches or styles…" aria-label="Search watches"></div><select id="brandFilter" aria-label="Filter by brand"><option value="All">All brands</option></select><select id="priceFilter" aria-label="Filter by price"><option value="all">Any price</option><option value="under1000">Under ₹1,000</option><option value="1000to2500">₹1,000–₹2,500</option><option value="over2500">Over ₹2,500</option></select><select id="sortFilter" aria-label="Sort products"><option value="featured">Featured</option><option value="low">Price: low to high</option><option value="high">Price: high to low</option><option value="name">Name: A to Z</option></select></div>
-<div class="featured-products-heading"><div class="eyebrow">THE IQA EDIT</div><h2>Featured Watches</h2><p>Explore Owner-approved styles from the live catalogue.</p></div><div class="results-count" id="resultsCount" aria-live="polite" aria-atomic="true">Loading watches…</div><div class="product-grid" id="productGrid"></div>
+<div class="featured-products-heading"><div class="eyebrow">THE IQA EDIT</div><h2>Featured Watches</h2><p>Explore Owner-approved styles from the live catalogue.</p></div><div class="results-count" id="resultsCount" aria-live="polite" aria-atomic="true">Loading watches…</div><div class="product-grid" id="productGrid" aria-live="polite" aria-busy="true"></div>
+<!-- Static, crawlable catalogue preview. Hidden only after the live catalogue loads successfully. -->
+<div class="product-grid catalogue-static-fallback" id="productStaticFallback" aria-label="Featured watch catalogue">
+ <article class="product-card">
+  <div class="product-image"><img src="https://res.cloudinary.com/rrmdzam7/image/upload/v1793899720/iqa-watches/products/ee339630-71a4-430d-bccf-fb89244de399_5fad7fcf.png" alt="Casio AE-1200WHD-1AV silver stainless steel digital watch" loading="lazy" decoding="async"><span class="product-label">CASIO · Catalogue preview</span></div>
+  <div class="product-info"><div class="product-brand">CASIO</div><h3 class="product-title">AE-1200WHD-1AV Silver Stainless Steel World Time Digital Watch</h3><p class="product-desc">Digital · Silver stainless-steel band</p><div class="price-line"><span class="price">₹1,200</span><span class="old-price">₹3,995</span></div><p class="product-desc">Preview only. Confirm current price and availability with IQA WATCHES.</p></div>
+ </article>
+ <article class="product-card">
+  <div class="product-image"><img src="https://res.cloudinary.com/rrmdzam7/image/upload/v1793904334/iqa-watches/products/3b292642-5873-4936-b239-49ea015e3a03.png" alt="Casio AE-1200WHL-5AV brown leather World Time digital watch" loading="lazy" decoding="async"><span class="product-label">CASIO · Catalogue preview</span></div>
+  <div class="product-info"><div class="product-brand">CASIO</div><h3 class="product-title">AE-1200WHL-5AV Brown Leather World Time Digital Watch</h3><p class="product-desc">Digital · Brown leather band</p><div class="price-line"><span class="price">₹1,200</span><span class="old-price">₹4,495</span></div><p class="product-desc">Preview only. Confirm current price and availability with IQA WATCHES.</p></div>
+ </article>
+ <article class="product-card">
+  <div class="product-image"><img src="https://res.cloudinary.com/rrmdzam7/image/upload/v1793899716/iqa-watches/products/d1875a84-aedb-4311-a6a3-02dcd0c8a745_8331e06f.png" alt="Fastrack Thor multifunctional analogue watch" loading="lazy" decoding="async"><span class="product-label">FASTRACK · Catalogue preview</span></div>
+  <div class="product-info"><div class="product-brand">FASTRACK</div><h3 class="product-title">Thor Multifunctional Analogue Watch</h3><p class="product-desc">Analogue · Multifunctional</p><div class="price-line"><span class="price">₹1,200</span><span class="old-price">₹5,485</span></div><p class="product-desc">Preview only. Confirm current price and availability with IQA WATCHES.</p></div>
+ </article>
+</div>
 <p class="disclaimer"><strong>Live approved catalogue. Product visibility requires Owner approval, verified product details, a primary image and available stock. Online ordering and payments are not enabled yet.</p>
 </section>
 
@@ -1061,6 +1076,15 @@ body.menu-open #menuBackdrop{display:block}
 .payment-whatsapp-button:hover{background:#dfc58f;color:#211f1b}
 .payment-info-footnote{margin:16px 0 0;color:#a9a092;font-size:10px;line-height:1.7}
 @media(max-width:680px){.payment-info-section{padding:48px 5%}.payment-method-grid{grid-template-columns:1fr;gap:10px;margin:24px 0}.payment-method-card{padding:18px}.payment-method-card h3{margin-top:12px}.payment-whatsapp-row{align-items:stretch;flex-direction:column;padding:19px;gap:18px}.payment-whatsapp-button{justify-content:center;width:100%;min-height:48px}}
+
+/* Crawlable static Featured Watches preview */
+.catalogue-static-fallback{margin-top:18px}
+.catalogue-static-fallback[hidden]{display:none!important}
+.catalogue-static-fallback .product-image img{display:block;width:100%;height:100%;object-fit:contain}
+.catalogue-static-fallback .product-info{min-width:0;overflow-wrap:anywhere}
+.catalogue-static-fallback .product-desc{line-height:1.6}
+.catalogue-message a.button{display:inline-flex;align-items:center;justify-content:center;text-decoration:none;margin-top:8px}
+@media(max-width:680px){.catalogue-static-fallback{gap:16px 10px}}
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="./admin/backend-config.js?v=20261030"></script>
@@ -1153,23 +1177,29 @@ async function loadStorefrontCatalogue(){
 }
 function filteredProducts(){let list=products.filter(p=>{const q=$('searchInput').value.trim().toLowerCase();const tags=Array.isArray(p.tags)?p.tags:[];const searchOk=!q||[p.name,p.brand,p.category,p.audience,p.style,p.colour,p.dial,p.strap,p.sku,p.desc,...tags].filter(Boolean).join(' ').toLowerCase().includes(q);const categoryOk=activeCategory==='All'||p.category===activeCategory||p.audience===activeCategory||p.style===activeCategory||tags.includes(activeCategory);const brandOk=$('brandFilter').value==='All'||p.brand===$('brandFilter').value;const price=$('priceFilter').value;const priceOk=price==='all'||(price==='under1000'&&p.price<1000)||(price==='1000to2500'&&p.price>=1000&&p.price<=2500)||(price==='over2500'&&p.price>2500);return searchOk&&categoryOk&&brandOk&&priceOk});const sort=$('sortFilter').value;if(sort==='low')list.sort((a,b)=>a.price-b.price);if(sort==='high')list.sort((a,b)=>b.price-a.price);if(sort==='name')list.sort((a,b)=>a.name.localeCompare(b.name));return list}
 function renderProducts(){
- const grid=$('productGrid'),count=$('resultsCount');
+ const grid=$('productGrid'),count=$('resultsCount'),fallback=$('productStaticFallback');
  if(catalogueState==='loading'){
   count.textContent='Loading watches…';
   grid.setAttribute('aria-busy','true');
+  if(fallback)fallback.hidden=false;
   grid.innerHTML=Array.from({length:6},()=>'<article class="product-skeleton" aria-hidden="true"><div class="skeleton-image"></div><div class="skeleton-line skeleton-brand"></div><div class="skeleton-line skeleton-title"></div><div class="skeleton-line skeleton-price"></div><div class="skeleton-actions"><span></span><span></span></div></article>').join('');
   return;
  }
  grid.setAttribute('aria-busy','false');
+ if(catalogueState==='error'){
+  count.textContent='Catalogue temporarily unavailable';
+  if(fallback)fallback.hidden=false;
+  grid.innerHTML='<div class="empty-state catalogue-message" role="alert"><h3>We couldn’t load the latest watches.</h3><p>Please check your connection and try again. Our catalogue preview remains below.</p><button class="button light" type="button" data-catalogue-retry>Retry</button></div>';
+  return;
+ }
  const list=filteredProducts();
+ if(fallback)fallback.hidden=true;
  count.textContent=list.length+' verified '+(list.length===1?'watch':'watches');
  if(!list.length){
-  if(catalogueState==='error'){
-   grid.innerHTML='<div class="empty-state catalogue-message" role="alert"><h3>Couldn\'t load watches. Please try again.</h3><p>The collection may be temporarily unavailable.</p><button class="button light" type="button" data-catalogue-retry>Retry</button></div>';
-  }else if(products.length){
+  if(products.length){
    grid.innerHTML='<div class="empty-state catalogue-message"><h3>No watches match your filters</h3><p>Try changing your search or filter selections.</p><button class="button light" type="button" data-clear-catalogue-filters>Clear filters</button></div>';
   }else{
-   grid.innerHTML='<div class="empty-state catalogue-message"><h3>No published watches yet</h3><p>Our verified collection will appear here after the Owner publishes products with available stock.</p></div>';
+   grid.innerHTML='<div class="empty-state catalogue-message"><h3>New styles arriving soon</h3><p>We’re preparing our next collection. Have a watch in mind? Message us on WhatsApp.</p><a class="button light" target="_blank" rel="noopener noreferrer" href="https://wa.me/?text=Hello%20IQA%20WATCHES%2C%20please%20share%20your%20latest%20watch%20collection.">Message us on WhatsApp</a></div>';
   }
   return;
  }
@@ -1297,6 +1327,7 @@ function initSmartShopping(){
  document.getElementById('sizeCard').addEventListener('click',e=>{if(e.target.id!=='checkSize')return;const raw=Number(document.getElementById('wristValue').value),unit=document.getElementById('wristUnit').value,pref=document.getElementById('fitPreference').value,out=document.getElementById('sizeResults');if(!Number.isFinite(raw)||raw<=0||raw>(unit==='cm'?40:16)){out.textContent='Enter a valid wrist circumference measurement.';return}const cm=unit==='cm'?raw:raw*2.54;out.innerHTML='<strong>Measurement: '+cm.toFixed(1)+' cm ('+(cm/2.54).toFixed(2)+' in)</strong><p>Preferred look: '+({compact:'Compact',balanced:'Balanced',large:'Larger-looking'}[pref])+'. The current catalogue does not contain verified case diameter and lug-to-lug measurements, so a responsible product-specific size recommendation cannot yet be made.</p><p>Case diameter alone does not guarantee fit. Compare case diameter, lug-to-lug length, thickness, strap adjustment range and personal preference when verified dimensions are added.</p>'});
 }
 
+document.addEventListener('click',e=>{const retry=e.target.closest('[data-catalogue-retry]');if(!retry)return;retry.disabled=true;retry.textContent='Retrying…';loadStorefrontCatalogue();},true);
 document.addEventListener('click',e=>{const view=e.target.closest('[data-view]');if(!view)return;if(view.tagName==='A'){e.preventDefault();view.focus({preventScroll:true});}e.stopImmediatePropagation();openProduct(view.dataset.view);},true);
 document.addEventListener('click',e=>{const add=e.target.closest('[data-add]');if(add){if(addCart(add.dataset.add)){if($('modalWrap').classList.contains('open'))closeModal();location.hash='bag'}return}const buyNow=e.target.closest('[data-buy-now]');if(buyNow){const id=buyNow.dataset.buyNow,product=products.find(item=>item.id===id);if(!product||Number(product.stock)<1){toast('This watch is currently unavailable.');return}if($('modalWrap').classList.contains('open'))closeModal();window.iqaBuyNowSelection={productId:id,quantity:1};if(location.hash!=='#buy-now/'+encodeURIComponent(id))location.hash='buy-now/'+encodeURIComponent(id);else if(typeof window.renderRouteFromHash==='function')window.renderRouteFromHash();return}const brandBrowse=e.target.closest('[data-browse-brands]');if(brandBrowse){$('shop').scrollIntoView({behavior:'smooth'});setTimeout(()=>$('brandFilter')?.focus({preventScroll:true}),250);return}const wish=e.target.closest('[data-wish]');if(wish){toggleWish(wish.dataset.wish);return}const view=e.target.closest('[data-view]');if(view){if(view.tagName==='A'){e.preventDefault();view.focus({preventScroll:true})}openProduct(view.dataset.view);return}const qty=e.target.closest('[data-qty]');if(qty){const id=qty.dataset.qty,next=(cart[id]||0)+Number(qty.dataset.delta);if(next<=0)delete cart[id];else{const product=products.find(p=>p.id===id);const cap=Math.min(10,Number(product?.stock||0));if(next>cap){toast('Only '+cap+' unit(s) currently available.');return}cart[id]=next;}updateCounts();renderPanel('cart');return}const remove=e.target.closest('[data-remove]');if(remove){delete cart[remove.dataset.remove];updateCounts();renderPanel('cart');return}const catLink=e.target.closest('[data-category-link]');if(catLink){e.preventDefault();setCategory(catLink.dataset.categoryLink);$('mobileMenu').classList.remove('open');$('menuToggle').setAttribute('aria-expanded','false');$('shop').scrollIntoView({behavior:'smooth'});return}const chip=e.target.closest('[data-category]');if(chip){setCategory(chip.dataset.category);return}const policy=e.target.closest('[data-policy]');if(policy){e.preventDefault();location.hash=policy.dataset.policy==='Contact'?'contact':'care/'+({'About IQA WATCHES':'about-iqa-watches','Returns & refunds':'returns-refunds','Watch care':'watch-care','Authenticity':'authenticity','Grievance':'grievance','Shipping':'shipping','Warranty':'warranty','FAQ':'faq','Privacy':'privacy','Terms':'terms','Contact':'contact'}[policy.dataset.policy]||'faq');return}if(e.target.closest('#policyBack')){closeModal();history.pushState({},'',location.pathname+location.search+'#home');return}if(e.target.closest('#resetFilters')){resetFilters();return}if(e.target.closest('#continueShopping')){closePanel();location.hash='shop';return}if(e.target.closest('#checkoutStart')){closePanel();location.hash='checkout';return}if(e.target.closest('#drawerClose')){closePanel();return}if(e.target.closest('#modalClose')||e.target===$('modalWrap')){closeModal();return}});
 
