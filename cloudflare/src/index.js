@@ -5,7 +5,7 @@ const json = (body, status = 200) => new Response(JSON.stringify(body), {
 
 function getBearer(request) {
   const value = request.headers.get("authorization") || "";
-  const match = value.match(/^Bearer\\s+(.+)$/i);
+  const match = value.match(/^Bearer\s+(.+)$/i);
   return match ? match[1] : null;
 }
 
@@ -13,7 +13,7 @@ async function verifyWithSupabase(token, env) {
   if (!env.SUPABASE_URL || !env.SUPABASE_PUBLISHABLE_KEY) {
     return { configured: false, user: null };
   }
-  const base = env.SUPABASE_URL.replace(/\\/+$/, "");
+  const base = env.SUPABASE_URL.replace(/\/+$/, "");
   const response = await fetch(base + "/auth/v1/user", {
     headers: {
       apikey: env.SUPABASE_PUBLISHABLE_KEY,
