@@ -7,7 +7,7 @@ function lock(text){
  gate.hidden=false;banner.hidden=true;shell.hidden=true;
  document.body.classList.add('auth-locked');
  $('authEmail').focus({preventScroll:true});
- if(text)message(text,/failed|could not|error|missing|not active/i.test(text));
+ if(text)message(text,/failed|could not|error|missing|not active|restricted|unavailable|http/i.test(text));
 }
 function unlock(profile){
  gate.hidden=true;banner.hidden=false;shell.hidden=false;
@@ -34,6 +34,7 @@ $('googleSignIn').addEventListener('click',async()=>{
  button.disabled=true;button.textContent='Connecting to Google…';
  message('Redirecting to secure Google sign-in. Only active staff accounts can enter the admin panel.',false);
  try{
+  await backend.checkAuthAvailability();
   const {error}=await backend.getClient().auth.signInWithOAuth({
    provider:'google',
    options:{redirectTo:window.location.origin+window.location.pathname}
