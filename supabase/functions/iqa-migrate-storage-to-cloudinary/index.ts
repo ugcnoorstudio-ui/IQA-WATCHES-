@@ -1,6 +1,5 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 const ALLOWED_ORIGINS = new Set([
-  "https://ugcnoorstudio-ui.github.io",
   "https://iqa-watches-storefront.pages.dev",
 ]);
 const CORS = {"Access-Control-Allow-Origin": "https://iqa-watches-storefront.pages.dev", "Access-Control-Allow-Headers": "authorization, apikey, content-type, x-client-info", "Access-Control-Allow-Methods": "POST, OPTIONS", "Vary": "Origin"};
