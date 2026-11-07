@@ -27,12 +27,12 @@ test('all deployed browser-facing Edge Functions are tracked in source control',
   }
 });
 
-test('Edge Functions allow Cloudflare Pages and legacy GitHub Pages origins only', () => {
+test('Edge Functions allow only the active Cloudflare Pages origin', () => {
   for (const slug of functionSlugs) {
     const file = path.join(root, 'supabase', 'functions', slug, 'index.ts');
     const source = fs.readFileSync(file, 'utf8');
     assert.ok(source.includes('https://iqa-watches-storefront.pages.dev'), slug + ' missing Cloudflare Pages origin');
-    assert.ok(source.includes('https://ugcnoorstudio-ui.github.io'), slug + ' missing legacy origin');
+    assert.ok(!source.includes('https://ugcnoorstudio-ui.github.io'), slug + ' must reject the retired GitHub Pages origin');
     assert.ok(source.includes('ALLOWED_ORIGINS.has'), slug + ' missing server-side origin allowlist');
     assert.ok(source.includes('"Access-Control-Allow-Origin": "https://iqa-watches-storefront.pages.dev"') ||
       source.includes('"Access-Control-Allow-Origin":"https://iqa-watches-storefront.pages.dev"'), slug + ' must return only the production Pages origin');
