@@ -21,15 +21,18 @@ test('Cloudflare Pages security headers are present and conservative', () => {
     'Do not add a CSP until all inline scripts and external origins are audited');
 });
 
-test('Cloudflare Pages deployment is explicit, gated, and main-only', () => {
+test('Cloudflare Pages deploy runs automatically only on main and gates upload on all browser tests', () => {
   const workflow = fs.readFileSync(path.join(root, '.github/workflows/deploy-cloudflare-pages.yml'), 'utf8');
+  assert.match(workflow, /push:[\s\S]*branches: \[main\]/);
   assert.match(workflow, /workflow_dispatch:/);
-  assert.match(workflow, /refs\/heads\/main/);
+  assert.match(workflow, /needs: preflight/);
   assert.match(workflow, /node --test tests\/\*\.test\.js/);
   assert.match(workflow, /npx playwright test/);
   assert.match(workflow, /cloudflare\/wrangler-action@v4/);
   assert.match(workflow, /CLOUDFLARE_API_TOKEN/);
   assert.match(workflow, /CLOUDFLARE_ACCOUNT_ID/);
-  assert.match(workflow, /CLOUDFLARE_PAGES_PROJECT/);
+  assert.match(workflow, /pages\/projects/);
+  assert.match(workflow, /iqa-watches-storefront\.pages\.dev/);
   assert.match(workflow, /scripts\/monitor-public-health\.js/);
+  assert.doesNotMatch(workflow, /CLOUDFLARE_PAGES_PROJECT:\s*\$\{\{\s*vars\./);
 });
