@@ -23,5 +23,5 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 22
-      - name: Check storefront, admin shell and Supabase public catalogue
+      - name: Check storefront, admin shell and static Cloudinary catalogue
         run: node scripts/monitor-public-health.js
