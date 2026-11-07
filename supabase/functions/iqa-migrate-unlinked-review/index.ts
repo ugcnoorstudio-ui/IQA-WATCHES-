@@ -1,12 +1,15 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 
-const ORIGIN = "https://ugcnoorstudio-ui.github.io";
+const ALLOWED_ORIGINS = new Set([
+  "https://ugcnoorstudio-ui.github.io",
+  "https://iqa-watches-storefront.pages.dev",
+]);
 const BUCKET = "product-images";
 const SOURCE_PATH = "7fea8610-9261-4bbe-b80a-5ba1e2745510/MP000000025248756_437Wx649H_202502030016151.jpeg";
 const FOLDER = "iqa-watches/unassigned-review";
 const PUBLIC_ID = "legacy-MP000000025248756-437Wx649H-202502030016151";
 const CORS = {
-  "Access-Control-Allow-Origin": ORIGIN,
+  "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, apikey, content-type, x-client-info",
   "Access-Control-Allow-Methods": "POST, OPTIONS",
   "Vary": "Origin"
@@ -35,9 +38,13 @@ function secretValue(name: string) {
 }
 
 Deno.serve(async (req: Request) => {
-  if (req.method === "OPTIONS") return new Response("ok", { headers: CORS });
+  if (req.method === "OPTIONS") {
+    return ALLOWED_ORIGINS.has(req.headers.get("origin") || "")
+      ? new Response("ok", { headers: CORS })
+      : new Response("Forbidden", { status: 403 });
+  }
   if (req.method !== "POST") return out({ error: "POST required" }, 405);
-  if (req.headers.get("origin") !== ORIGIN) return out({ error: "Origin not allowed" }, 403);
+  if (!ALLOWED_ORIGINS.has(req.headers.get("origin") || "")) return out({ error: "Origin not allowed" }, 403);
   const bearer = (req.headers.get("authorization") || "").match(/^Bearer\s+(.+)$/i);
   if (!bearer) return out({ error: "Sign in required" }, 401);
 
