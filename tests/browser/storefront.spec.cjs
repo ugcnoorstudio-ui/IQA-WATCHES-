@@ -355,6 +355,32 @@ test('real approved catalogue normalizes required sellable fields and optional a
   }
 });
 
+test('Cloudinary primary and gallery images load successfully on product routes', async ({ page }) => {
+  await openStore(page);
+  const productIds = await page.evaluate(() => products.map(product => product.id));
+  expect(productIds.length).toBeGreaterThan(0);
+
+  for (const productId of productIds) {
+    await navigateToHash(page, 'product/' + encodeURIComponent(productId));
+    const mainImage = page.locator('#routeMainImage');
+    await expect(mainImage).toBeVisible();
+    await expect.poll(
+      () => mainImage.evaluate(image => image.complete && image.naturalWidth > 0),
+      { timeout: 15000 }
+    ).toBe(true);
+
+    const thumbnails = page.locator('#routeView [data-gallery-src]');
+    const thumbnailCount = await thumbnails.count();
+    for (let index = 0; index < thumbnailCount; index++) {
+      await thumbnails.nth(index).click();
+      await expect.poll(
+        () => mainImage.evaluate(image => image.complete && image.naturalWidth > 0),
+        { timeout: 15000 }
+      ).toBe(true);
+    }
+  }
+});
+
 test('product detail tolerates null optional fields and ignores invalid gallery media', async ({ page }) => {
   await openStore(page);
   const card = page.locator('#productGrid .product-card').first();
