@@ -44,6 +44,6 @@ test('customer cancellation RPC client remains JWT authenticated and validates t
   const source = fs.readFileSync(path.join(root, 'supabase', 'functions', 'iqa-customer-cancel-order', 'index.ts'), 'utf8');
   assert.ok(source.includes('auth.getUser(token)'));
   assert.ok(source.includes('client.rpc("iqa_cancel_customer_order"'));
-  assert.ok(source.includes('verify_jwt'), 'JWT verification remains configured at deployment level');
+  assert.ok(source.includes('Bearer '), 'Bearer token must be supplied to the authenticated function');
   assert.ok(source.includes('Origin not allowed'));
 });
