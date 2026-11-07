@@ -7,7 +7,7 @@ const path = require('node:path');
 
 const root = path.resolve(__dirname, '..');
 const config = fs.readFileSync(path.join(root, 'admin', 'backend-config.js'), 'utf8');
-const key = config.match(/publishableKey:\s*"([^"]+)"/)?.[1];
+const key = 'sb_publishable_EmGoVBFk35Mc7om3eULcgw_tmEXAAA5'; // staging publishable key; intentionally client-safe
 const endpoint = 'https://qcxgsomqxfoueootxzpv.supabase.co/functions/v1/iqa-public-content';
 const productionOrigin = 'https://iqa-watches-storefront.pages.dev';
 
