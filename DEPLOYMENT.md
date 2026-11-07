@@ -1,22 +1,43 @@
-# IQA WATCHES — GitHub Pages deployment
+# IQA WATCHES — Cloudflare Pages deployment
 
-## Source of truth
-- Repository: `ugcnoorstudio-ui/IQA-WATCHES-`
-- Production branch: `main`
-- Hosting target: GitHub Pages (GitHub Actions)
-- Build type: static site; the production entry point is the root `index.html`.
+## Target architecture
+- Source repository: `ugcnoorstudio-ui/IQA-WATCHES-`
+- Production source branch: `main`
+- Frontend hosting: Cloudflare Pages
+- Current fallback hosting: GitHub Pages (kept until Cloudflare production verification passes)
+- Site type: static HTML/JavaScript; root `index.html` is the Pages entry point.
+- Build command: `exit 0`
+- Build output directory: `.` (repository root)
 
-## Deployment
-The workflow at `.github/workflows/deploy-pages.yml` validates the required storefront/admin entry files, uploads the repository root as the Pages artifact, and deploys it to GitHub Pages. A push to `main` or a manual workflow dispatch starts deployment.
+A custom domain is **not required** for this phase. Cloudflare Pages provides a `<project>.pages.dev` hostname after the project is created and deployed. Do not purchase or configure `iqawatches.in` as part of this phase.
 
-## One-time repository setting
-In GitHub, open **Settings → Pages → Build and deployment** and set **Source** to **GitHub Actions**. This is a repository-level setting and is not changed by committing workflow files. The workflow needs the repository's Pages deployment permission.
+## Deployment workflow
+The workflow at `.github/workflows/deploy-cloudflare-pages.yml` is intentionally manual and main-only. It runs JavaScript syntax checks, all Node regression tests, desktop/mobile Playwright tests, deploys the root static site with Wrangler, and then runs the public health monitor against the Pages hostname.
 
-## Verification after each release
-1. Confirm the workflow run for the exact `main` commit completes successfully.
-2. Open the published Pages URL and confirm the storefront loads.
-3. Confirm `/admin/` loads the staff sign-in gate (not an authenticated session).
-4. Check browser console/network for missing relative assets and confirm the page is served from GitHub Pages.
-5. Confirm the deployed commit SHA matches the intended `main` commit.
+Before dispatching the workflow, create the Cloudflare Pages project in the Cloudflare dashboard and configure these GitHub repository settings:
 
-Do not use Netlify as a production publishing target for this project.
+### Actions secrets
+- `CLOUDFLARE_API_TOKEN`: Account API token with Cloudflare Pages Edit permission.
+- `CLOUDFLARE_ACCOUNT_ID`: Cloudflare account ID.
+
+### Actions variable
+- `CLOUDFLARE_PAGES_PROJECT`: exact Pages project name created in the dashboard. This determines the `https://<project>.pages.dev/` verification URL.
+
+Never paste API tokens into chat, source files, commit messages, or workflow YAML. Add them directly in GitHub **Settings → Secrets and variables → Actions**.
+
+## First-time Cloudflare Pages project setup
+1. In Cloudflare, open **Workers & Pages → Create application → Pages → Connect to Git**.
+2. Connect the GitHub account and select `ugcnoorstudio-ui/IQA-WATCHES-`.
+3. Use `main` as the production branch, root directory `/`, build command `exit 0`, and output directory `.`.
+4. Complete the initial setup. The Pages project will receive a `*.pages.dev` hostname.
+5. Add the GitHub Actions secrets and variable listed above.
+6. Review the `deploy-cloudflare-pages.yml` workflow and manually run it from `main`. It performs a full test gate before deploying and checks the live Pages hostname afterwards.
+
+Cloudflare's Git integration and Wrangler Direct Upload cannot be switched between later for an existing project. This repository uses a Git-connected Pages project for previews and Wrangler for an explicit, test-gated production deployment; do not create a Direct Upload project instead.
+
+## Release safety
+- Keep GitHub Pages available until Cloudflare's live monitor passes against the Pages URL.
+- Do not change the production link, Supabase OAuth redirect allow-list, or custom-domain DNS during the no-domain phase.
+- Do not delete old Supabase Storage assets.
+- Do not add paid Cloudflare features without explicit approval.
+- After Cloudflare production verification passes, the Pages hostname becomes the temporary production URL; custom-domain binding is deferred.
