@@ -825,7 +825,7 @@ test('premium customer login exposes Google, email and OTP sections with respons
 });
 
 
-test('Featured Watches includes crawlable static fallback cards and hides them after live catalogue loads', async ({ page }) => {
+test('Featured Watches uses crawlable fallback cards while the static catalogue snapshot hydrates', async ({ page }) => {
   await page.goto('/');
   const fallback = page.locator('#productStaticFallback');
   await expect(fallback).toBeAttached();
@@ -840,10 +840,10 @@ test('Featured Watches includes crawlable static fallback cards and hides them a
   await expect(fallback).toBeHidden();
 });
 
-test('catalogue loading failure shows retry action and retains static fallback', async ({ page }) => {
-  let failProducts = true;
-  await page.route('**/rest/v1/products**', async route => {
-    if (failProducts) {
+test('static catalogue loading failure shows retry action and retains crawlable fallback', async ({ page }) => {
+  let failCatalogue = true;
+  await page.route('**/data/catalogue.json*', async route => {
+    if (failCatalogue) {
       await route.abort('failed');
       return;
     }
@@ -856,7 +856,7 @@ test('catalogue loading failure shows retry action and retains static fallback',
   ).toBe('error');
   await expect(page.locator('#productGrid [data-catalogue-retry]')).toBeVisible();
   await expect(page.locator('#productStaticFallback')).toBeVisible();
-  failProducts = false;
+  failCatalogue = false;
   await page.locator('#productGrid [data-catalogue-retry]').click();
   await expect.poll(
     () => page.evaluate(() => typeof catalogueState === 'undefined' ? 'missing' : catalogueState),
