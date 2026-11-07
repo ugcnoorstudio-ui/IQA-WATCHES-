@@ -23,22 +23,35 @@ test('Cloudflare Pages security headers are present and conservative', () => {
 
 test('Cloudflare Pages production deploy is main-only and pull requests get isolated previews', () => {
   const workflow = fs.readFileSync(path.join(root, '.github/workflows/deploy-cloudflare-pages.yml'), 'utf8');
-  assert.match(workflow, /push:[\s\S]*branches: \[main\]/);
-  assert.match(workflow, /pull_request:/);
-  assert.match(workflow, /deploy-preview:/);
-  assert.match(workflow, /github.event.pull_request.head.repo.full_name == github.repository/);
-  assert.match(workflow, /preview-disabled\\.invalid/);
-  assert.match(workflow, /--branch=pr-\\$\\{\\{ github.event.pull_request.number \\}\\}/);
-  assert.match(workflow, /if: github.event_name != 'pull_request' && github.ref == 'refs\\/heads\\/main'/);
-  assert.match(workflow, /workflow_dispatch:/);
-  assert.match(workflow, /needs: preflight/);
-  assert.match(workflow, /node --test tests\/\*\.test\.js/);
-  assert.match(workflow, /npx playwright test/);
-  assert.match(workflow, /cloudflare\/wrangler-action@v4/);
-  assert.match(workflow, /CLOUDFLARE_API_TOKEN/);
-  assert.match(workflow, /CLOUDFLARE_ACCOUNT_ID/);
-  assert.match(workflow, /pages\/projects/);
-  assert.match(workflow, /iqa-watches-storefront\.pages\.dev/);
-  assert.match(workflow, /scripts\/monitor-public-health\.js/);
+  assert.ok(workflow.includes('push:\n    branches: [main]'));
+  assert.ok(workflow.includes('pull_request:'));
+  assert.ok(workflow.includes('deploy-preview:'));
+  assert.ok(workflow.includes('github.event.pull_request.head.repo.full_name == github.repository'));
+  assert.ok(workflow.includes('preview-disabled.invalid'));
+  assert.ok(workflow.includes('--branch=pr-${{ github.event.pull_request.number }}'));
+  assert.ok(workflow.includes("if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'"));
+  assert.ok(workflow.includes('workflow_dispatch:'));
+  assert.ok(workflow.includes('needs: preflight'));
+  assert.ok(workflow.includes('node --test tests/*.test.js'));
+  assert.ok(workflow.includes('npx playwright test'));
+  assert.ok(workflow.includes('cloudflare/wrangler-action@v4'));
+  assert.ok(workflow.includes('CLOUDFLARE_API_TOKEN'));
+  assert.ok(workflow.includes('CLOUDFLARE_ACCOUNT_ID'));
+  assert.ok(workflow.includes('pages/projects'));
+  assert.ok(workflow.includes('iqa-watches-storefront.pages.dev'));
+  assert.ok(workflow.includes('scripts/monitor-public-health.js'));
   assert.doesNotMatch(workflow, /CLOUDFLARE_PAGES_PROJECT:\s*\$\{\{\s*vars\./);
+});
+
+test('public health monitor retries transient Pages edge propagation failures', () => {
+  const monitor = fs.readFileSync(path.join(root, 'scripts/monitor-public-health.js'), 'utf8');
+  assert.ok(monitor.includes('retryDelaysMs = [2000, 4000, 8000, 12000]'));
+  assert.ok(monitor.includes('response.status >= 500'));
+  assert.ok(monitor.includes('setTimeout(resolve, delay)'));
+});
+
+test('scheduled public health monitor targets Cloudflare Pages production', () => {
+  const workflow = fs.readFileSync(path.join(root, '.github/workflows/iqa-public-health-monitor.yml'), 'utf8');
+  assert.ok(workflow.includes('IQA_STOREFRONT_URL: https://iqa-watches-storefront.pages.dev/'));
+  assert.ok(workflow.includes('Deploy IQA WATCHES to Cloudflare Pages'));
 });
