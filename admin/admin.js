@@ -360,7 +360,7 @@ if(form.matches('[data-product-create]')){
  const brandId=brandSelect.value,categoryId=categorySelect.value;
  const brandName=brandSelect.selectedOptions[0]?.textContent||'',categoryName=categorySelect.selectedOptions[0]?.textContent||'';
  if(!brandId||!categoryId||brandId==='__new__'||categoryId==='__new__')throw new Error('Choose an existing published brand and category. Create taxonomy separately in Categories & brands.');
- if(files.length>5)throw new Error('Upload no more than 5 product photos.');
+ if(files.length>8)throw new Error('Upload no more than 8 product photos.');
  if(files.some(file=>!['image/jpeg','image/png','image/webp','image/avif'].includes(file.type)||file.size<1||file.size>5*1024*1024))throw new Error('Each photo must be JPG, PNG, WebP or AVIF and no larger than 5 MB.');
  if(files.length&&String(values.image_alt_text||'').trim().length<3)throw new Error('Add image alt text when uploading product photos.');
  if(Number(values.mrp)<Number(values.selling_price))throw new Error('MRP must be equal to or greater than the selling price.');
