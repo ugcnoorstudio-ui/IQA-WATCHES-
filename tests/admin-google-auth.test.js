@@ -37,7 +37,7 @@ test('a cleared or revoked browser session is treated as signed out instead of b
   assert.match(backend, /!sessionData\.session/);
   assert.match(backend, /auth\.getUser\(\)/);
   assert.match(backend, /signOut\(\{ scope: "local" \}\)/);
-  assert.match(auth, /No active session found\. Sign in again/);
+  assert.match(auth, /Your previous browser session is no longer saved/);
 });
 
 
@@ -51,4 +51,14 @@ test('cleared browser session is explained without treating cache removal as acc
   const auth = read('admin/auth.js');
   assert.match(auth, /Your previous browser session is no longer saved/);
   assert.match(auth, /backend\.getActiveProfile\(\)/);
+});
+
+
+test('admin surfaces Supabase cached-egress restrictions instead of silently failing login', () => {
+  const backend = read('admin/backend.js');
+  const auth = read('admin/auth.js');
+  assert.match(backend, /checkAuthAvailability/);
+  assert.match(backend, /exceed_cached_egress_quota/);
+  assert.match(backend, /HTTP 402/);
+  assert.match(auth, /backend\.checkAuthAvailability\(\)/);
 });
