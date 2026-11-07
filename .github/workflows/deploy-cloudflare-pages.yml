@@ -105,8 +105,9 @@ jobs:
             test "$ok" = 1 || { echo "::error::Preview route failed: ${route}"; exit 1; }
             echo "PASS preview route: /${route}"
           done
-          grep -q 'preview-disabled.invalid' /tmp/iqa-preview-response || { echo "::error::Preview backend config is not isolated."; exit 1; }
-          ! grep -q 'nyhyfdququxnorqlnnqq.supabase.co' /tmp/iqa-preview-response || { echo "::error::Production Supabase URL leaked into preview."; exit 1; }
+          curl --fail --silent --show-error --max-time 15 "${IQA_PREVIEW_URL}admin/backend-config.js" -o /tmp/iqa-preview-backend-config.js
+          grep -q 'preview-disabled.invalid' /tmp/iqa-preview-backend-config.js || { echo "::error::Preview backend config is not isolated."; exit 1; }
+          ! grep -q 'nyhyfdququxnorqlnnqq.supabase.co' /tmp/iqa-preview-backend-config.js || { echo "::error::Production Supabase URL leaked into preview."; exit 1; }
           echo "PASS preview backend is disconnected from production Supabase."
 
   deploy:
