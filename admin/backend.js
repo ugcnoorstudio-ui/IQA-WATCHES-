@@ -41,12 +41,29 @@
 
   async function getActiveProfile() {
     const supabaseClient = getClient();
-    // getSession() reads browser storage and does not verify the identity with Auth.
-    // getUser() makes a server request; only this verified user ID may be used
-    // to look up the staff profile that gates the private workspace.
+    // A cleared browser auth cache is a normal signed-out state, not a fatal
+    // admin bootstrap error. Check storage first, then verify any session with Auth.
+    const { data: sessionData, error: sessionError } = await supabaseClient.auth.getSession();
+    if (sessionError) {
+      profile = null;
+      const message = String(sessionError.message || sessionError);
+      if (/session missing|refresh token|authsessionmissing/i.test(message)) {
+        await supabaseClient.auth.signOut({ scope: "local" }).catch(() => {});
+        return null;
+      }
+      throw sessionError;
+    }
+    if (!sessionData || !sessionData.session) { profile = null; return null; }
+
+    // getSession() only reads local storage; getUser() verifies identity with Auth.
     const { data: userData, error: userError } = await supabaseClient.auth.getUser();
     if (userError) {
       profile = null;
+      const message = String(userError.message || userError);
+      if (userError.status === 401 || /session missing|refresh token|authsessionmissing/i.test(message)) {
+        await supabaseClient.auth.signOut({ scope: "local" }).catch(() => {});
+        return null;
+      }
       throw userError;
     }
     const user = userData && userData.user;
