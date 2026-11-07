@@ -8,10 +8,28 @@ const base = (process.env.IQA_STOREFRONT_URL || 'https://ugcnoorstudio-ui.github
 const timeoutMs = 15000;
 const failures = [];
 
+const retryDelaysMs = [2000, 4000, 8000, 12000];
+
 async function request(url, options = {}) {
-  const response = await fetch(url, { ...options, signal: AbortSignal.timeout(timeoutMs) });
-  if (!response.ok) throw new Error('HTTP ' + response.status + ' for ' + url);
-  return response;
+  let lastError;
+  for (let attempt = 0; attempt <= retryDelaysMs.length; attempt += 1) {
+    try {
+      const response = await fetch(url, { ...options, signal: AbortSignal.timeout(timeoutMs) });
+      if (response.ok) return response;
+      lastError = new Error('HTTP ' + response.status + ' for ' + url);
+      const transient = response.status === 404 || response.status === 408 ||
+        response.status === 425 || response.status === 429 || response.status >= 500;
+      if (!transient || attempt === retryDelaysMs.length) throw lastError;
+    } catch (error) {
+      lastError = error;
+      if (attempt === retryDelaysMs.length) throw lastError;
+    }
+    const delay = retryDelaysMs[attempt];
+    console.warn('Retry ' + (attempt + 1) + '/' + retryDelaysMs.length +
+      ' after transient public-host response: ' + (lastError.message || lastError));
+    await new Promise(resolve => setTimeout(resolve, delay));
+  }
+  throw lastError || new Error('Public-host request failed: ' + url);
 }
 
 async function main() {

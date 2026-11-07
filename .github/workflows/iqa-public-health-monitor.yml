@@ -8,6 +8,7 @@ on:
     workflows:
       - pages build and deployment
       - Cinematic motion quality checks
+      - Deploy IQA WATCHES to Cloudflare Pages
     types:
       - completed
     branches:
@@ -25,6 +26,8 @@ jobs:
     if: ${{ github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
     timeout-minutes: 5
+    env:
+      IQA_STOREFRONT_URL: https://iqa-watches-storefront.pages.dev/
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
