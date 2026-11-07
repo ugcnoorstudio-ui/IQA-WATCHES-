@@ -39,3 +39,16 @@ test('a cleared or revoked browser session is treated as signed out instead of b
   assert.match(backend, /signOut\(\{ scope: "local" \}\)/);
   assert.match(auth, /No active session found\. Sign in again/);
 });
+
+
+test('admin revalidates staff access after Supabase refreshes the session token', () => {
+  const auth = read('admin/auth.js');
+  assert.match(auth, /event==='TOKEN_REFRESHED'\|\|event==='USER_UPDATED'/);
+  assert.match(auth, /window\.setTimeout\(\(\)=>\{ recheckAccess\(\); \},0\)/);
+});
+
+test('cleared browser session is explained without treating cache removal as account deletion', () => {
+  const auth = read('admin/auth.js');
+  assert.match(auth, /Your previous browser session is no longer saved/);
+  assert.match(auth, /backend\.getActiveProfile\(\)/);
+});
