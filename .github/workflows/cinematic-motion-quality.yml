@@ -26,6 +26,8 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 22
+      - name: Generate sitemap from the approved product snapshot
+        run: node scripts/generate-sitemap.js
       - name: Check JavaScript syntax
         run: |
           node --check assets/cinematic-story.js
