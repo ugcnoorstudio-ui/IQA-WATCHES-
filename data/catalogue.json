@@ -1,0 +1,125 @@
+{
+  "version": 1,
+  "source": "Supabase approved product snapshot",
+  "generated_at": "2026-11-07T13:31:00+05:30",
+  "delivery": "Cloudinary",
+  "products": [
+    {
+      "id": "7fea8610-9261-4bbe-b80a-5ba1e2745510",
+      "variantId": "fe5210f1-4647-48a0-841f-2110cd0e6c9d",
+      "name": "Fastrack thor multifunctional analogue",
+      "brand": "Fastrack",
+      "category": "Analog Watches",
+      "audience": "",
+      "style": "Analog",
+      "tags": [],
+      "price": 1200,
+      "compareAt": 5485,
+      "stock": 1,
+      "colour": "",
+      "dial": "",
+      "strap": "",
+      "sku": "Not listed",
+      "label": "Only 1 left",
+      "desc": "Fastrack thor multifunctional analogue watch ",
+      "image": "https://res.cloudinary.com/rrmdzam7/image/upload/v1793899716/iqa-watches/products/d1875a84-aedb-4311-a6a3-02dcd0c8a745_8331e06f.png",
+      "imageAlt": "Fastrack thor multifunctional analogue watch — primary view",
+      "gallery": [
+        {
+          "src": "https://res.cloudinary.com/rrmdzam7/image/upload/v1793899716/iqa-watches/products/d1875a84-aedb-4311-a6a3-02dcd0c8a745_8331e06f.png",
+          "alt": "Fastrack thor multifunctional analogue watch — primary view",
+          "isPrimary": true,
+          "sortOrder": 0
+        }
+      ],
+      "caseDiameter": "",
+      "caseThickness": "",
+      "lugToLug": "",
+      "caseMaterial": "",
+      "strapWidth": "",
+      "movement": "",
+      "waterResistance": "",
+      "warranty": ""
+    },
+    {
+      "id": "0a8836eb-b7ad-41b6-874f-3737e8e94482",
+      "variantId": "059194d8-0200-4aae-949e-f7fb7a1e2437",
+      "name": "Casio AE-1200WHL-5AV Brown Leather World Time Digital Watch",
+      "brand": "Casio",
+      "category": "Digital Watches",
+      "audience": "",
+      "style": "Digital",
+      "tags": [],
+      "price": 1200,
+      "compareAt": 4495,
+      "stock": 7,
+      "colour": "Brown",
+      "dial": "",
+      "strap": "Genuine Leather",
+      "sku": "AE-1200WHL-5AV",
+      "label": "7 in stock",
+      "desc": "The Casio AE-1200WHL-5AV brings the signature multi-display World Time design together with a brown genuine-leather band. Its digital display shows home time at a glance, while the world map display helps track time across 31 time zones and 48 cities. Features include a 1/100-second stopwatch, countdown timer, five daily or one-time alarms, amber LED illumination, full auto-calendar through 2099 and 12/24-hour time format. The resin case measures 45 × 42.1 × 12.5 mm and weighs 39 g. Powered by a CR2025 battery with an approximate 10-year battery life. Water resistance: 100 metres (10 bar). Resin glass. Official Casio India MRP: ₹4,495 (inclusive of taxes).",
+      "image": "https://res.cloudinary.com/rrmdzam7/image/upload/v1793904334/iqa-watches/products/3b292642-5873-4936-b239-49ea015e3a03.png",
+      "imageAlt": "Casio AE-1200WHL-5AV Brown Leather World Time Digital Watch",
+      "gallery": [
+        {
+          "src": "https://res.cloudinary.com/rrmdzam7/image/upload/v1793904334/iqa-watches/products/3b292642-5873-4936-b239-49ea015e3a03.png",
+          "alt": "Casio AE-1200WHL-5AV Brown Leather World Time Digital Watch",
+          "isPrimary": true,
+          "sortOrder": 1
+        },
+        {
+          "src": "https://res.cloudinary.com/rrmdzam7/image/upload/v1793899718/iqa-watches/products/72380da5-682f-4b86-a551-03d6cf283b8a_5c0de6d2.jpg",
+          "alt": "Casio AE-1200WHL-5AV Brown Leather World Time Digital Watch",
+          "isPrimary": false,
+          "sortOrder": 0
+        }
+      ],
+      "caseDiameter": "45 × 42.1 × 12.5",
+      "caseThickness": "",
+      "lugToLug": "",
+      "caseMaterial": "Resin",
+      "strapWidth": "",
+      "movement": "",
+      "waterResistance": "100 m / 10 bar",
+      "warranty": ""
+    },
+    {
+      "id": "b440d67b-7bd7-49bd-bdb3-817dc16b7ea7",
+      "variantId": "937f61ba-66e2-43eb-9ba4-e7bc2b24e09d",
+      "name": "Casio AE-1200WHD-1AV Silver Stainless Steel World Time Digital Watch",
+      "brand": "Casio",
+      "category": "Analog Watches",
+      "audience": "Men",
+      "style": "Digital",
+      "tags": [],
+      "price": 1200,
+      "compareAt": 3995,
+      "stock": 10,
+      "colour": "Silver",
+      "dial": "",
+      "strap": "Stainless Steel Band",
+      "sku": "AE-1200WHD-1AV",
+      "label": "10 in stock",
+      "desc": "The Casio AE-1200WHD-1AV combines a distinctive multi-display digital dial with a silver stainless-steel band. It offers World Time across 31 time zones and 48 cities, a 1/100-second stopwatch, countdown timer, five daily or one-time alarms, amber LED illumination, full auto-calendar through 2099 and 12/24-hour time format. The resin case measures 45 × 42.1 × 12.5 mm and weighs 91 g. Powered by a CR2025 battery with an approximate 10-year battery life. Water resistance: 100 metres (10 bar). Resin glass. Official Casio India MRP: ₹3,995 (inclusive of taxes).",
+      "image": "https://res.cloudinary.com/rrmdzam7/image/upload/v1793899720/iqa-watches/products/ee339630-71a4-430d-bccf-fb89244de399_5fad7fcf.png",
+      "imageAlt": "Casio AE-1200WHD-1AV Silver Stainless Steel World Time Digital Watch",
+      "gallery": [
+        {
+          "src": "https://res.cloudinary.com/rrmdzam7/image/upload/v1793899720/iqa-watches/products/ee339630-71a4-430d-bccf-fb89244de399_5fad7fcf.png",
+          "alt": "Casio AE-1200WHD-1AV Silver Stainless Steel World Time Digital Watch",
+          "isPrimary": true,
+          "sortOrder": 0
+        }
+      ],
+      "caseDiameter": "45 × 42.1 × 12.5",
+      "caseThickness": "",
+      "lugToLug": "",
+      "caseMaterial": "Resin",
+      "strapWidth": "",
+      "movement": "",
+      "waterResistance": "100 m / 10 bar",
+      "warranty": ""
+    }
+  ]
+}

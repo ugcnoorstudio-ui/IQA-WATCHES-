@@ -203,7 +203,7 @@ test('every mobile menu link opens its real destination and closes the menu', as
 
 test('cart add, increment, decrement and remove work with responsive order summary', async ({ page, isMobile }) => {
   await openStore(page);
-  const card = page.locator('#productGrid .product-card').first();
+  const card = page.locator('#productGrid .product-card').nth(1);
   const productId = await card.locator('[data-add]').getAttribute('data-add');
   await card.locator('[data-add]').click();
   await navigateToHash(page, 'bag');
@@ -365,6 +365,7 @@ test('product detail tolerates null optional fields and ignores invalid gallery 
     Object.assign(product, {
       brand: null, category: null, style: null, colour: null, dial: null,
       strap: null, sku: null, desc: null, imageAlt: null, tags: null,
+      caseMaterial: 'Resin', waterResistance: '50 m',
       gallery: [{ src: null, alt: null }, { src: 'javascript:alert(1)', alt: 'unsafe' }]
     });
     location.hash = '#product/' + encodeURIComponent(id);
@@ -383,7 +384,7 @@ test('product detail tolerates null optional fields and ignores invalid gallery 
 
 test('cart contents and quantities persist after a full page reload', async ({ page }) => {
   await openStore(page);
-  const card = page.locator('#productGrid .product-card').first();
+  const card = page.locator('#productGrid .product-card').nth(1);
   const productId = await card.locator('[data-add]').getAttribute('data-add');
   await card.locator('[data-add]').click();
   await page.reload();
@@ -825,7 +826,7 @@ test('premium customer login exposes Google, email and OTP sections with respons
 });
 
 
-test('Featured Watches includes crawlable static fallback cards and hides them after live catalogue loads', async ({ page }) => {
+test('Featured Watches uses crawlable fallback cards while the static catalogue snapshot hydrates', async ({ page }) => {
   await page.goto('/');
   const fallback = page.locator('#productStaticFallback');
   await expect(fallback).toBeAttached();
@@ -840,10 +841,10 @@ test('Featured Watches includes crawlable static fallback cards and hides them a
   await expect(fallback).toBeHidden();
 });
 
-test('catalogue loading failure shows retry action and retains static fallback', async ({ page }) => {
-  let failProducts = true;
-  await page.route('**/rest/v1/products**', async route => {
-    if (failProducts) {
+test('static catalogue loading failure shows retry action and retains crawlable fallback', async ({ page }) => {
+  let failCatalogue = true;
+  await page.route('**/data/catalogue.json*', async route => {
+    if (failCatalogue) {
       await route.abort('failed');
       return;
     }
@@ -856,7 +857,7 @@ test('catalogue loading failure shows retry action and retains static fallback',
   ).toBe('error');
   await expect(page.locator('#productGrid [data-catalogue-retry]')).toBeVisible();
   await expect(page.locator('#productStaticFallback')).toBeVisible();
-  failProducts = false;
+  failCatalogue = false;
   await page.locator('#productGrid [data-catalogue-retry]').click();
   await expect.poll(
     () => page.evaluate(() => typeof catalogueState === 'undefined' ? 'missing' : catalogueState),

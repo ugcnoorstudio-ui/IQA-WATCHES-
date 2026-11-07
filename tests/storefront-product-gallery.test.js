@@ -6,6 +6,7 @@ const vm = require('node:vm');
 
 const html = fs.readFileSync(path.join(__dirname, '..', 'index.html'), 'utf8');
 const routes = fs.readFileSync(path.join(__dirname, '..', 'routes.js'), 'utf8');
+const catalogue = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'data', 'catalogue.json'), 'utf8'));
 
 test('storefront inline application script remains syntactically valid', () => {
   const match = html.match(/<script>\s*([\s\S]*?)<\/script>/i);
@@ -13,11 +14,11 @@ test('storefront inline application script remains syntactically valid', () => {
   new vm.Script(match[1], { filename: 'index.html:inline-storefront' });
 });
 
-test('Supabase product_media metadata is mapped only to Cloudinary public gallery image URLs', () => {
-  assert.match(html, /from\('product_media'\)\.select\('id,product_id,storage_path,image_url,cloudinary_public_id,alt_text,sort_order,is_primary'\)/);
-  assert.match(html, /filter\(item=>typeof item\.image_url==='string'&&item\.image_url\.includes\('res\.cloudinary\.com'\)\)/);
-  assert.match(html, /gallery:galleryImages/);
-  assert.match(html, /const gallery=\(mediaByProduct\.get\(row\.id\)\|\|\[\]\)/);
+test('public product gallery snapshot contains only Cloudinary delivery URLs', () => {
+  assert.ok(Array.isArray(catalogue.products));
+  assert.ok(catalogue.products.every(product => /^https:\/\/res\.cloudinary\.com\//.test(product.image)));
+  assert.ok(catalogue.products.every(product => product.gallery.length > 0 && product.gallery.every(item => /^https:\/\/res\.cloudinary\.com\//.test(item.src))));
+  assert.doesNotMatch(JSON.stringify(catalogue), /supabase\.co\/storage|storage\.from\(/i);
   assert.doesNotMatch(html, /storage\.from\('product-images'\)\.getPublicUrl/);
 });
 
@@ -78,10 +79,9 @@ test('product detail modal renders real gallery photos and only supplied dimensi
   assert.doesNotMatch(modalContent.innerHTML, /Strap width/);
 });
 
-test('product detail modal maps verified dimensions from catalogue specs only', () => {
-  for (const field of ['case_diameter_mm', 'case_thickness_mm', 'lug_to_lug_mm', 'strap_width_mm']) {
-    assert.ok(html.includes(field), 'expected catalogue mapping for ' + field);
-  }
+test('static catalogue carries normalized dimensions and product details render only supplied values', () => {
+  assert.ok(catalogue.products.some(product => product.caseDiameter));
+  assert.ok(catalogue.products.every(product => product.caseThickness === '' || typeof product.caseThickness === 'string'));
   assert.ok(html.includes('dimensionRows'));
   assert.ok(html.includes('value!==null&&value!==undefined'));
 });

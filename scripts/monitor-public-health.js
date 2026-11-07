@@ -28,31 +28,36 @@ async function main() {
             !String(config.publishableKey || '').startsWith('sb_publishable_')) {
           throw new Error('Public Supabase configuration is missing or malformed');
         }
-        const endpoint = new URL('/rest/v1/products', config.url);
-        endpoint.search = new URLSearchParams({
-          select: 'id',
-          state: 'eq.published',
-          is_sample: 'eq.false',
-          verified_sellable: 'eq.true',
-          limit: '1'
-        }).toString();
-        const catalogue = await request(endpoint, {
-          headers: { apikey: config.publishableKey }
-        });
-        const rows = await catalogue.json();
-        if (!Array.isArray(rows)) throw new Error('Supabase catalogue response was not an array');
-        console.log('PASS Supabase public catalogue endpoint (' + rows.length + ' sample row(s) returned)');
+        console.log('PASS Supabase public configuration is present; no public Data API request is made by this monitor.');
       }
     } catch (error) {
       failures.push(error.message || String(error));
       console.error('FAIL ' + route + ': ' + (error.message || error));
     }
   }
+
+  try {
+    const response = await request(new URL('data/catalogue.json', base));
+    const snapshot = await response.json();
+    if (!snapshot || !Array.isArray(snapshot.products) || snapshot.products.length === 0) {
+      throw new Error('Static catalogue snapshot is missing or empty');
+    }
+    const invalid = snapshot.products.filter(product =>
+      !product.id || !product.name || !(Number(product.price) > 0) || !(Number(product.stock) > 0) ||
+      typeof product.image !== 'string' || !product.image.startsWith('https://res.cloudinary.com/')
+    );
+    if (invalid.length) throw new Error(invalid.length + ' catalogue item(s) have invalid sellable fields or non-Cloudinary images');
+    console.log('PASS static Cloudinary catalogue (' + snapshot.products.length + ' approved in-stock product(s))');
+  } catch (error) {
+    failures.push(error.message || String(error));
+    console.error('FAIL static catalogue: ' + (error.message || error));
+  }
+
   if (failures.length) {
-    console.error('\nPublic health monitoring failed: ' + failures.length + ' check(s).');
+    console.error('\\nPublic health monitoring failed: ' + failures.length + ' check(s).');
     process.exitCode = 1;
   } else {
-    console.log('\nAll public availability and catalogue checks passed.');
+    console.log('\\nAll public availability and static catalogue checks passed.');
   }
 }
 

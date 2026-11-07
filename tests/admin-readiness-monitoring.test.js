@@ -17,7 +17,7 @@ test('admin readiness explains recurring public health schedule and its coverage
   const admin = read('admin/admin.js');
   assert.match(admin, /Recurring public health checks/);
   assert.match(admin, /every 30 minutes/);
-  assert.match(admin, /storefront, admin shell and public Supabase catalogue/);
+  assert.match(admin, /storefront, admin shell and static Cloudinary catalogue/);
   assert.match(admin, /GitHub Actions/);
 });
 
@@ -34,8 +34,9 @@ test('public monitor checks storefront, admin, public config and approved catalo
   assert.match(script, /IQA_STOREFRONT_URL/);
   assert.match(script, /admin\/backend-config\.js/);
   assert.match(script, /sb_publishable_/);
-  assert.match(script, /\/rest\/v1\/products/);
-  assert.match(script, /verified_sellable/);
+  assert.match(script, /data\/catalogue\.json/);
+  assert.match(script, /https:\/\/res\.cloudinary\.com/);
+  assert.doesNotMatch(script, /\/rest\/v1\/products|verified_sellable/);
   assert.doesNotMatch(script, /service_role|secret_key|password/i);
 });
 
