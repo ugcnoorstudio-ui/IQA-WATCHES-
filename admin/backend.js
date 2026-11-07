@@ -257,6 +257,6 @@
 
   global.IQA_ADMIN_BACKEND = Object.freeze({
     configured, getClient, signIn, signOut, getActiveProfile,
-    currentProfile, requireRole, readTable, countTable, mutate, uploadProductImage, listFailedImageUploads, clearFailedImageUpload, onAuthStateChange
+    currentProfile, requireRole, readTable, countTable, mutate, uploadProductImage, listFailedImageUploads, clearFailedImageUpload, onAuthStateChange, checkAuthAvailability
   });
 })(window);
