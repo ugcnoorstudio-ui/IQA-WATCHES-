@@ -144,3 +144,43 @@ Only after Gate E:
 - Do not store Supabase service-role keys or Cloudinary secrets in frontend code.
 - Do not treat a green static build as proof that checkout, Auth, D1 or Worker runtime works.
 - Supabase Auth is still a live dependency. If its quota block persists, the retained login service must be restored and tested before cutover.
+
+
+## 8. Production data snapshot (read-only audit, 2026-11-08)
+
+Exact row counts were queried from the production database for the following business tables. These are a planning baseline only; repeat the snapshot immediately before migration and reconcile again after import.
+
+| Table | Production rows |
+|---|---:|
+| staff_profiles | 1 |
+| products | 3 |
+| product_variants | 3 |
+| inventory_movements | 1 |
+| customers | 2 |
+| customer_addresses | 1 |
+| orders | 3 |
+| order_items | 3 |
+| order_status_events | 3 |
+| payment_events | 0 |
+| refunds | 0 |
+| coupons | 0 |
+| support_tickets | 0 |
+| return_requests | 0 |
+| suppliers | 0 |
+| purchase_orders | 0 |
+| purchase_order_items | 0 |
+| content_entries | 0 |
+| reviews | 0 |
+| activity_logs | 28 |
+| integration_events | 0 |
+| store_settings | 2 |
+| product_media | 4 |
+| checkout_idempotency | 3 |
+| private.admin_mutation_requests | 23 |
+| Supabase Auth users (identity service; do not migrate out) | 5 |
+
+Staging had zero rows in the listed business tables at the same audit point. Production has five Auth users and one active staff profile according to the earlier role audit; the five Auth identities remain in Supabase Auth and must not be copied into D1 as passwords or treated as business records. D1 should store only the verified Auth subject IDs needed to link customers/staff.
+
+The production business dataset is small, but it is not disposable: preserve the three orders, three order items, three status events, inventory movement, activity history, idempotency records, customer address and all four Cloudinary media metadata records. Also include the private admin mutation idempotency ledger in the D1 model or document a formally approved retention alternative; do not silently omit it.
+
+**Audit limitation:** this count snapshot does not replace a consistent export/backup, full schema/index/trigger/constraint inspection, auth-provider configuration review, or restore test. No rows were changed or deleted by the count queries.
