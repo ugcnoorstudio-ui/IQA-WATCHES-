@@ -29,3 +29,13 @@ test('Google sign-in never grants access solely because an OAuth session exists'
   assert.match(auth, /if\(profile\)unlock\(profile\);else lock/);
   assert.match(auth, /backend\.getActiveProfile\(\)/);
 });
+
+test('a cleared or revoked browser session is treated as signed out instead of breaking admin bootstrap', () => {
+  const backend = read('admin/backend.js');
+  const auth = read('admin/auth.js');
+  assert.match(backend, /auth\.getSession\(\)/);
+  assert.match(backend, /!sessionData\.session/);
+  assert.match(backend, /auth\.getUser\(\)/);
+  assert.match(backend, /signOut\(\{ scope: "local" \}\)/);
+  assert.match(auth, /No active session found\. Sign in again/);
+});
