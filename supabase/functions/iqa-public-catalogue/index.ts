@@ -3,7 +3,7 @@ import { createClient } from "npm:@supabase/supabase-js@2";
 
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 const SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-const ALLOWED_ORIGIN = "https://ugcnoorstudio-ui.github.io";
+const ALLOWED_ORIGIN = "https://iqa-watches-storefront.pages.dev";
 const CACHE_CONTROL = "public, max-age=60, stale-while-revalidate=300";
 
 function response(status: number, body: Record<string, unknown>, origin: string | null) {
