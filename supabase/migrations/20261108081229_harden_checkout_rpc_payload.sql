@@ -1,6 +1,5 @@
 -- Reject malformed direct RPC payloads before any idempotency or order rows are created.
--- The Edge Function validates these conditions too; this repeats the contract at the
--- database transaction boundary so service-role callers cannot bypass it accidentally.
+-- Safe to replay when the provider migration ledger has a different version ID.
 do $migration$
 declare
   v_def text;
@@ -35,6 +34,15 @@ begin
   select pg_get_functiondef(
     'public.iqa_create_customer_order(uuid,text,uuid,jsonb,numeric,jsonb)'::regprocedure
   ) into v_def;
+
+  -- If the exact hardening has already been applied out-of-band, do not fail or
+  -- rewrite the function a second time when the repository migration later runs.
+  if position('Cart must not contain duplicate variant lines' in v_def) > 0
+     and position('Each cart item must be a JSON object' in v_def) > 0
+     and position('p_items is null' in v_def) > 0 then
+    raise notice 'Checkout RPC payload hardening is already present; skipping replay.';
+    return;
+  end if;
 
   if position(v_old in v_def) = 0 then
     raise exception 'Checkout RPC definition did not match the expected baseline; refusing to alter it';

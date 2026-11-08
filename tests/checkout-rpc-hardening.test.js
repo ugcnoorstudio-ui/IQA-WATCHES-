@@ -25,3 +25,10 @@ test('checkout RPC migration refuses to rewrite an unexpected function definitio
   assert.match(migration, /refusing to alter it/);
   assert.match(migration, /execute v_def/);
 });
+
+
+test('checkout RPC migration safely skips when the hardening is already present', () => {
+  assert.match(migration, /position\('Cart must not contain duplicate variant lines' in v_def\) > 0/);
+  assert.match(migration, /position\('Each cart item must be a JSON object' in v_def\) > 0/);
+  assert.match(migration, /already present; skipping replay/);
+});
