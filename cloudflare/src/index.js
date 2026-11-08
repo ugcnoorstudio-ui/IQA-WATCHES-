@@ -36,6 +36,9 @@ function getBearer(request) {
 }
 
 async function verifyWithSupabase(token, env) {
+  if (env.SUPABASE_UPSTREAM_CHECK_ENABLED === "false") {
+    return { configured: false, user: null };
+  }
   if (!env.SUPABASE_URL || !env.SUPABASE_PUBLISHABLE_KEY) {
     return { configured: false, user: null };
   }
@@ -102,6 +105,12 @@ async function publicCatalogue(request, env) {
   if (new URL(request.url).search) {
     return json({ ok: false, error: "query_parameters_not_supported" }, 400, corsHeaders(origin));
   }
+  if (env.SUPABASE_UPSTREAM_CHECK_ENABLED === "false") {
+    return json({ ok: false, error: "supabase_upstream_paused" }, 503, {
+      ...corsHeaders(origin),
+      "retry-after": "300"
+    });
+  }
   if (!env.SUPABASE_URL || !env.SUPABASE_PUBLISHABLE_KEY) {
     return json({ ok: false, error: "catalogue_not_configured" }, 503, corsHeaders(origin));
   }
@@ -133,6 +142,11 @@ async function publicContent(request, env, ctx) {
   }
   if (new URL(request.url).search) {
     return json({ ok: false, error: "query_parameters_not_supported" }, 400);
+  }
+  if (env.SUPABASE_UPSTREAM_CHECK_ENABLED === "false") {
+    return json({ ok: false, error: "supabase_upstream_paused" }, 503, {
+      "retry-after": "300"
+    });
   }
   if (!env.SUPABASE_URL || !env.SUPABASE_PUBLISHABLE_KEY) {
     return json({ ok: false, error: "public_content_not_configured" }, 503);
