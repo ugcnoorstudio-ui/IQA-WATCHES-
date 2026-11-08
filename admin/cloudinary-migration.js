@@ -43,6 +43,49 @@ function mount(){
  box.append(title,copy,button,status);
  host.prepend(box);
 
+ if(window.IQA_STORAGE_LOCKDOWN_ACTION_ENABLED===true&&!host.querySelector('[data-cloudinary-storage-privacy]')){
+  const privacyBox=document.createElement('section');
+  privacyBox.className='panel';
+  privacyBox.setAttribute('data-cloudinary-storage-privacy','');
+  privacyBox.style.marginBottom='18px';
+  const privacyTitle=document.createElement('h3');
+  privacyTitle.textContent='Disable public Supabase Storage access';
+  const privacyCopy=document.createElement('p');
+  privacyCopy.className='muted';
+  privacyCopy.textContent='All current product image URLs are verified on Cloudinary. This owner-only action makes the legacy product-images bucket private through the Supabase Storage API. Existing files remain available to secure migration/rollback functions; no file or product record is deleted.';
+  const privacyButton=document.createElement('button');
+  privacyButton.type='button';privacyButton.className='btn primary';
+  privacyButton.textContent='Make legacy product-images bucket private';
+  const privacyStatus=document.createElement('p');
+  privacyStatus.className='muted';privacyStatus.setAttribute('role','status');privacyStatus.setAttribute('aria-live','polite');
+  privacyButton.addEventListener('click',async()=>{
+   if(busy)return;
+   if(!window.confirm('Make the legacy product-images bucket private? The action rechecks Cloudinary URLs and live database references. Existing Storage files will NOT be deleted.'))return;
+   busy=true;privacyButton.disabled=true;privacyButton.textContent='Verifying images and changing access…';
+   privacyStatus.textContent='Checking owner session, Cloudinary references and legacy Storage URLs…';
+   try{
+    api.requireRole(['owner']);
+    const client=api.getClient();
+    const {data:{session},error:sessionError}=await client.auth.getSession();
+    if(sessionError||!session?.access_token)throw sessionError||new Error('Your owner session has expired. Sign in again.');
+    const {data,error}=await client.functions.invoke('iqa-lock-down-product-images',{body:{}});
+    if(error)throw error;
+    if(!data||data.ok!==true||data.public!==false)throw new Error(data?.error||'Private bucket visibility was not confirmed.');
+    privacyStatus.textContent=data.already_private
+      ? 'The product-images bucket is already private. Existing files are preserved.'
+      : 'Public Storage access is now disabled. Existing files are preserved and storefront product images continue to load from Cloudinary.';
+    privacyStatus.style.color='#385947';
+    privacyButton.textContent='Product image Storage is private';
+   }catch(error){
+    privacyStatus.textContent='Storage access was not changed: '+(error?.message||String(error));
+    privacyStatus.style.color='#9b3b2f';
+    privacyButton.textContent='Retry private Storage setup';
+   }finally{busy=false;privacyButton.disabled=false;}
+  });
+  privacyBox.append(privacyTitle,privacyCopy,privacyButton,privacyStatus);
+  host.prepend(privacyBox);
+ }
+
  if(!host.querySelector('[data-cloudinary-static-migration]')){
   const staticBox=document.createElement('section');
   staticBox.className='panel';
