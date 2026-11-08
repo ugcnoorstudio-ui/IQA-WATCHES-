@@ -60,7 +60,7 @@ Source of truth: GitHub `main`, staging Supabase project, and the current storef
 
 **Additional production finding:** the live storefront currently reads `data/catalogue.json`, not Supabase directly. The snapshot is dated 2026-11-07. Production currently has 3 approved products, 3 available variants, and 4 Cloudinary media rows; the snapshot contains the same 3 product cards, but there is no confirmed automatic refresh path. This can make displayed price/stock stale after admin changes, although checkout revalidates on the server.
 
-**In progress in PR #153:** the read-only `iqa-public-catalogue` Edge Function is already deployed once to staging with `verify_jwt=false`; PR #153 carries the current source, dynamic CORS allowlist, public-catalogue regression tests and storefront loader switch. PR #150 has already merged the shared CORS/OAuth allowlist for checkout, cancellation, public content, admin health and image upload. PR #153 extends the same allowlist to admin mutation, Cloudinary media library and public catalogue. The static JSON remains only as a clearly labelled preview fallback. Staging has no catalogue rows, so a real product payload cannot be exercised. Staging and production Edge Function/Auth requests are currently returning HTTP 402 due to Supabase quota/usage limits; do not claim live verification or promote production functions until the quota issue is resolved and staging smoke tests pass.
+**In progress in PR #153:** the read-only `iqa-public-catalogue` Edge Function is already deployed once to staging with `verify_jwt=false`; PR #153 carries the current source, dynamic CORS allowlist, public-catalogue regression tests and storefront loader switch. PR #150 has already merged the shared CORS/OAuth allowlist for checkout, cancellation, public content, admin health and image upload. PR #153 extends the same allowlist to admin mutation, Cloudinary media library and public catalogue. The static JSON remains only as a clearly labelled preview fallback. Staging has no catalogue rows, so a real product payload cannot be exercised. HTTP 402 responses have been observed on staging and production Auth/Edge Function endpoints, but the available logs do not expose the response reason; quota/usage exhaustion is not confirmed. Do not claim live verification or promote production functions until the project owner checks the Supabase dashboard/support details and staging smoke tests pass.
 
 **Known UI limitation:** the current storefront product model selects one available variant per product. Products with multiple sellable variants need a variant selector before those options are offered to customers.
 
@@ -96,7 +96,7 @@ Source of truth: GitHub `main`, staging Supabase project, and the current storef
 
 **Status: Not launch-ready; external owner inputs and verification required.**
 
-**Production advisor review:** no health lints; security advisor reports leaked-password protection disabled and flags the authenticated customer-cancellation SECURITY DEFINER RPC (its ownership/COD checks and stock release were exercised in staging). Performance advisor reports an unindexed checkout-idempotency foreign key, unused indexes, and multiple permissive SELECT policies. These are review items; no indexes or policies were blindly dropped. Backup schedule/restore capability could not be verified through the connected tools. Supabase logs confirm HTTP 402 quota/usage failures on Auth and Edge Function endpoints in both staging and production; SQL read-only access remains available.
+**Production advisor review:** no health lints; security advisor reports leaked-password protection disabled and flags the authenticated customer-cancellation SECURITY DEFINER RPC (its ownership/COD checks and stock release were exercised in staging). Performance advisor reports an unindexed checkout-idempotency foreign key, unused indexes, and multiple permissive SELECT policies. These are review items; no indexes or policies were blindly dropped. Backup schedule/restore capability could not be verified through the connected tools. Supabase logs show HTTP 402 responses on Auth and Edge Function endpoints in both staging and production; the available log fields do not identify the cause. SQL read-only access remains available.
 
 - Confirm production/staging environment separation, secrets, access roles, and rollback procedure.
 - Verify backup schedule and perform a restore test before accepting real customer orders.
@@ -117,8 +117,8 @@ Source of truth: GitHub `main`, staging Supabase project, and the current storef
 7. Review the three production-missing migrations (`20261107193017`, `20261108060625`, `20261108081229`) and explicitly approve a controlled production catch-up only after staging verification.
 8. Confirm backup schedule and perform a restore test in the Supabase dashboard.
 9. Review the disabled leaked-password protection setting and the customer-cancellation SECURITY DEFINER advisory; approve the Auth policy and least-privilege treatment.
-10. Review the Supabase HTTP 402 quota/usage limit in the dashboard and decide whether to wait for reset or approve a plan/usage change; no paid change is made automatically.
-11. Approve the final production launch after quota recovery, backup/restore, security and end-to-end checks.
+10. Inspect the Supabase dashboard, project status, billing/usage, and gateway/function details for the observed HTTP 402 responses; confirm the actual cause before deciding on any corrective action. No paid plan change is made automatically.
+11. Approve the final production launch only after the HTTP 402 cause is identified and resolved (if applicable), backup/restore, security and end-to-end checks pass.
 
 ## Current verified staging observations
 
@@ -130,7 +130,7 @@ Source of truth: GitHub `main`, staging Supabase project, and the current storef
 - Public content Edge Function: JWT verification disabled by design for published public content only.
 - Public catalogue Edge Function: deployed once to staging with JWT verification disabled; it is read-only and filters to approved, available products.
 - Shared CORS/OAuth allowlist source changes are in merged PR #150; additional admin/media/catalogue CORS source changes are in PR #153. Do not redeploy production functions from the PR branch.
-- HTTP 402 quota/usage failures are confirmed in both staging and production Auth/Edge Function logs. Treat runtime smoke tests as blocked until the owner resolves the quota; do not retry in a loop or mark them passed.
+- HTTP 402 responses are present in both staging and production Auth/Edge Function logs, but the available logs do not identify the response reason. Treat affected runtime smoke tests as blocked pending owner-side dashboard/support diagnosis; do not assume quota exhaustion, retry in a loop, or mark them passed.
 
 ## Completion rule
 
@@ -160,7 +160,7 @@ A phase is complete only when code, tests, staging verification, and documentati
 - Production's `iqa_create_customer_order` still has the pre-hardening SQL NULL cart check and lacks the duplicate-variant guard. It retains row-level stock locking, but the missing payload guards are a critical production data-integrity risk.
 - Production is missing staging migrations `20261107193017`, `20261108060625`, and `20261108081229`. No production migration has been applied.
 - Production and staging Edge Function deployments are not fully synchronized with the current source. Production does not yet have `iqa-public-catalogue`; several deployed functions still have the older single-origin CORS behavior. The current source fixes are not considered runtime-verified.
-- Staging Edge Function logs contain HTTP 402 quota/usage responses. A separate HTTP 401 invalid-key event is not treated as a quota success or a passed test. The connected tools do not expose the billing detail behind the 402; check the Supabase dashboard before attempting further runtime requests. Do not retry in a loop.
+- Staging Edge Function logs contain HTTP 402 responses. A separate HTTP 401 invalid-key event is not treated as a successful request or a passed test. The connected tools expose neither the 402 response body nor a definitive cause; inspect project status, billing/usage, gateway details, and support notices before further runtime requests. Do not retry in a loop.
 - Production Auth security advisor still reports leaked-password protection disabled. The authenticated customer-cancellation SECURITY DEFINER warning remains an intentional reviewed path: it uses an empty search path, verifies `auth.uid()` and customer ownership, restricts cancellation to eligible pending/confirmed COD orders, locks inventory, and releases reserved stock transactionally.
 - All 26 public tables have RLS enabled in both projects. The checkout idempotency table intentionally has no user-facing policy. Multiple permissive SELECT policy and unused-index warnings remain review items; no policy or index was blindly removed.
 - The current product catalogue still exposes only one available variant per product and does not yet implement server pagination. Product detail URLs remain hash routes; the sitemap intentionally contains only the crawlable homepage, and product structured data is not yet implemented.
@@ -168,4 +168,4 @@ A phase is complete only when code, tests, staging verification, and documentati
 - Backup schedule and restore capability remain unverified through the connected tools. No Storage files or customer data were deleted.
 
 ### Current release gate
-Do not merge PR #153 or promote Edge Functions until the staging 402 blocker is resolved, source-controlled Edge Functions are deployed and smoke-tested in staging, and the public-catalogue/checkout paths pass against disposable staging fixtures. Do not apply the three production migrations until staging verification is complete and the owner gives explicit production approval.
+Do not merge PR #153 or promote Edge Functions until the staging HTTP 402 responses have been diagnosed, source-controlled Edge Functions are deployed and smoke-tested in staging, and the public-catalogue/checkout paths pass against disposable staging fixtures. Do not apply the three production migrations until staging verification is complete and the owner gives explicit production approval.
