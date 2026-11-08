@@ -1087,7 +1087,7 @@ body.menu-open #menuBackdrop{display:block}
 @media(max-width:680px){.catalogue-static-fallback{gap:16px 10px}}
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="./admin/backend-config.js?v=20261030"></script>
+<script src="./admin/backend-config.js?v=20261108-quota-pause"></script>
 <script>
 const DEMO_MODE=false; // Public catalogue uses the approved static snapshot; Supabase remains for admin/auth.
 let products=[];
@@ -1430,6 +1430,6 @@ $('mobileMenu').addEventListener('click',e=>{if(e.target.closest('a'))setMobileM
 <script src="./assets/cinematic-story.js" defer></script>
 <script src="./routes.js?v=20261106-google-unified"></script>
 <script src="./customer-storefront.js?v=20261101"></script>
-<script src="./assets/published-content-sync.js?v=20261103-a2"></script>
+<script src="./assets/published-content-sync.js?v=20261108-worker-proxy-kill-switch"></script>
 </body>
 </html>
