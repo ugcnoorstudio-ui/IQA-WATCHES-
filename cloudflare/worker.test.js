@@ -83,3 +83,24 @@ test("me endpoint rejects a token Supabase Auth does not validate", async () => 
     globalThis.fetch = originalFetch;
   }
 });
+
+test("cache probe is staging-only and returns a cacheable origin-specific response", async () => {
+  const origin = "https://iqa-watches-storefront.pages.dev";
+  const response = await worker.fetch(request("/api/v1/cache-probe", { origin }), { APP_ENV: "staging" });
+  assert.equal(response.status, 200);
+  assert.deepEqual(await response.json(), {
+    ok: true,
+    probe: "cloudflare-edge-cache",
+    environment: "staging"
+  });
+  assert.equal(response.headers.get("cache-control"), "public, max-age=60, s-maxage=60");
+  assert.equal(response.headers.get("access-control-allow-origin"), origin);
+  assert.equal(response.headers.get("vary"), "Origin");
+  assert.equal(response.headers.get("x-iqa-cache-probe"), "true");
+});
+
+test("cache probe is unavailable outside staging", async () => {
+  const response = await worker.fetch(request("/api/v1/cache-probe"), { APP_ENV: "production" });
+  assert.equal(response.status, 404);
+  assert.deepEqual(await response.json(), { ok: false, error: "not_found" });
+});
