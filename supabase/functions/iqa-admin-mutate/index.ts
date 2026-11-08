@@ -27,13 +27,28 @@ Deno.serve(async(req:Request)=>{
   if(!body||typeof body!=="object"||Array.isArray(body)||typeof body.action!=="string"||!body.payload||typeof body.payload!=="object"||Array.isArray(body.payload))return reply(400,{ok:false,error:"Invalid request body."});
   const updateActions=["update_product","update_product_variant"];
   const taxonomyActions=["update_category","archive_category","update_brand","archive_brand"];
-  const allowed=["create_product","adjust_inventory","create_category","create_brand","assign_product_taxonomy","publish_product",...updateActions,...taxonomyActions];
+  const allowed=["create_product","adjust_inventory","create_category","create_brand","assign_product_taxonomy","publish_product",...updateActions,...taxonomyActions,"update_order_status","manage_content"];
   if(!allowed.includes(body.action))return reply(400,{ok:false,error:"This action is not enabled yet."});
+  if(body.action==="update_order_status"){
+    const p=body.payload as Record<string,unknown>;
+    if(typeof p.order_id!=="string"||typeof p.state!=="string"||typeof p.reason!=="string")return reply(400,{ok:false,error:"Order ID, target status and reason are required."});
+    const valid=["confirmed","processing","packed","ready_for_pickup","shipped","delivered","cancelled"];
+    if(!valid.includes(p.state))return reply(400,{ok:false,error:"Unsupported order status."});
+    const {data,error}=await admin.rpc("iqa_admin_update_order_status",{p_actor:u.user.id,p_order_id:p.order_id,p_new_state:p.state,p_reason:p.reason});
+    if(error)return reply(400,{ok:false,error:String(error.message||"Order update failed.").slice(0,240)});
+    return reply(200,data&&data.ok===true?data:{ok:false,error:"Order update was not confirmed."});
+  }
+  if(body.action==="manage_content"){
+    const p=body.payload as Record<string,unknown>;
+    const {data,error}=await admin.rpc("iqa_manage_content",{p_actor:u.user.id,p_payload:p});
+    if(error)return reply(400,{ok:false,error:String(error.message||"Content operation failed.").slice(0,240)});
+    return reply(200,data&&data.ok===true?data:{ok:false,error:"Content operation was not confirmed."});
+  }
   const rpcName=updateActions.includes(body.action)?(body.action==="update_product"?"iqa_update_product":"iqa_update_product_variant"):taxonomyActions.includes(body.action)?"iqa_manage_taxonomy":"iqa_admin_mutate";
   const rpcPayload=taxonomyActions.includes(body.action)?{...body.payload,action:body.action.startsWith("update_")?"update":"archive",kind:body.action.endsWith("_category")?"category":"brand"}:body.payload;
   const rpcArgs=rpcName==="iqa_admin_mutate"?{p_action:body.action,p_actor:u.user.id,p_payload:rpcPayload}:{p_actor:u.user.id,p_payload:rpcPayload};
   const {data,error}=await admin.rpc(rpcName,rpcArgs);
   if(error)return reply(400,{ok:false,error:String(error.message||"Operation failed.").slice(0,240)});
-  return reply(200,data&&data.ok===true?data:{ok:false,error:"Operation was not confirmed."});
+  return reply(200,data&&data.ok===true?data:{ok:false,error:"The operation was not confirmed."});
  }catch(_e){return reply(500,{ok:false,error:"Administrative operation failed. Check server logs."});}
 });
