@@ -13,11 +13,10 @@ test("Phase 2 audit records the verified staging/production controls and outstan
     "iqa_cancel_customer_order",
     "auth_leaked_password_protection",
     "42 migration records",
-    "39 migrations",
-    "20261107193017",
-    "20261108060625",
-    "20261108081229",
-    "No Production migration was applied",
+    "20261108134447",
+    "20261108134449",
+    "20261108134452",
+    "Production migration catch-up completed"
     "Phase 2 status:"
   ]) assert.ok(doc.includes(phrase), "Missing audit contract: " + phrase);
 });
