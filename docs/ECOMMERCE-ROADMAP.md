@@ -26,7 +26,9 @@ Source of truth: GitHub `main`, staging Supabase project, and the current storef
 - Ran rollback-only staging fixtures covering valid order creation, exact stock reservation, idempotent replay, duplicate cart rejection, and insufficient-stock rejection.
 - Confirmed temporary customer/product/order fixtures were fully rolled back.
 
-**Production caution:** production migration history currently ends at `20261105075427`; staging has three later migrations: `20261107193017` (eight-image cap), `20261108060625` (checkout idempotency index), and `20261108081229` (checkout payload hardening). Production checkout RPC still has the pre-hardening validation. The hardening migration has been applied and fully tested in staging only. The migration filename in the PR is being aligned to the recorded staging version to prevent duplicate application. No production migration has been run; production catch-up requires a deliberate release decision.\n\n**Remaining before real checkout:** configure verified COD and delivery rules, confirm the customer sign-in/address flow, and run a controlled end-to-end test. Shipping/courier integrations remain deferred.
+**Production caution:** production migration history currently ends at `20261105075427`; staging has three later migrations: `20261107193017` (eight-image cap), `20261108060625` (checkout idempotency index), and `20261108081229` (checkout payload hardening). Production checkout RPC still has the pre-hardening validation. The hardening migration has been applied and fully tested in staging only. The migration filename in the PR is being aligned to the recorded staging version to prevent duplicate application. No production migration has been run; production catch-up requires a deliberate release decision.
+
+**Remaining before real checkout:** configure verified COD and delivery rules, confirm the customer sign-in/address flow, and run a controlled end-to-end test. Shipping/courier integrations remain deferred.
 
 ## Phase 2 — Authentication, authorization, RLS, and customer privacy
 
@@ -40,7 +42,9 @@ Source of truth: GitHub `main`, staging Supabase project, and the current storef
 - Supabase advisor still reports an authenticated SECURITY DEFINER customer-cancellation RPC. Its current implementation checks order ownership and COD eligibility, but this warning must remain on the review list until regression coverage and least-privilege review are complete.
 - Multiple permissive SELECT policies are performance warnings, not grounds for blind policy deletion.
 
-**Staging tests passed:** customer A/B profile and address isolation; customer B cannot cancel customer A's order; the owning customer can cancel pending COD and release reserved stock; support staff cannot update order state; owner can perform permitted transitions and invalid state jumps are rejected. All fixtures were rolled back.\n\n**Next work:** test session expiry and data export/deletion request handling. Production advisor still flags leaked-password protection as disabled; enable it only after confirming the Auth policy with the owner. Do not loosen RLS to make the UI work.
+**Staging tests passed:** customer A/B profile and address isolation; customer B cannot cancel customer A's order; the owning customer can cancel pending COD and release reserved stock; support staff cannot update order state; owner can perform permitted transitions and invalid state jumps are rejected. All fixtures were rolled back.
+
+**Next work:** test session expiry and data export/deletion request handling. Production advisor still flags leaked-password protection as disabled; enable it only after confirming the Auth policy with the owner. Do not loosen RLS to make the UI work.
 
 ## Phase 3 — Catalogue, product data, inventory, and media
 
@@ -52,11 +56,17 @@ Source of truth: GitHub `main`, staging Supabase project, and the current storef
 - Public catalogue policies expose only approved published/sellable products and available active variants.
 - The staging database currently has no live catalogue records.
 
-**Additional production finding:** the live storefront currently reads `data/catalogue.json`, not Supabase directly. The snapshot is dated 2026-11-07. Production currently has 3 approved products, 3 available variants, and 4 Cloudinary media rows; the snapshot contains the same 3 product cards, but there is no confirmed automatic refresh path. This can make displayed price/stock stale after admin changes, although checkout revalidates on the server.\n\n**In progress:** a read-only `iqa-public-catalogue` Edge Function has been added to the repository and deployed to staging (JWT disabled only because it is public, read-only; CORS is restricted to the current GitHub Pages origin). It returns only published, non-sample, verified products with active in-stock variants and Cloudinary images. Staging has no catalogue rows, so its real product payload cannot be exercised there. Production deployment and storefront-loader integration are intentionally not done yet; the function must pass CI and review first.\n\n**Next work:** validate the public endpoint response/headers in staging, deploy it to production only after CI and review, then switch the storefront loader from the static JSON snapshot with a safe fallback. Also verify owner-only product creation/update/archive, variant pricing, stock adjustment audit trail, image ordering/alt text, Cloudinary upload failure handling, CSV import validation, and out-of-stock catalogue behavior. Preserve all legacy Storage assets.
+**Additional production finding:** the live storefront currently reads `data/catalogue.json`, not Supabase directly. The snapshot is dated 2026-11-07. Production currently has 3 approved products, 3 available variants, and 4 Cloudinary media rows; the snapshot contains the same 3 product cards, but there is no confirmed automatic refresh path. This can make displayed price/stock stale after admin changes, although checkout revalidates on the server.
+
+**In progress:** a read-only `iqa-public-catalogue` Edge Function is in the PR and has been deployed once to staging. That first staging version still uses the old GitHub Pages CORS origin; the PR corrects it to the verified Cloudflare Pages origin and updates checkout, cancellation, public content, admin, and media Edge Functions using current production source as the base. The PR also switches the storefront loader to the live endpoint, retaining the static JSON only as a preview fallback. Staging has no catalogue rows, so a real product payload cannot be exercised there. After CI passes, redeploy the corrected functions to staging, then production, before merging the frontend switch.
+
+**Next work:** verify the production endpoint through the public health monitor after deployment; verify owner-only product creation/update/archive, variant pricing, stock adjustment audit trail, image ordering/alt text, Cloudinary upload failure handling, CSV import validation, and out-of-stock catalogue behavior. Preserve all legacy Storage assets.
 
 ## Phase 4 — Orders, customer service, returns, and business operations
 
-**Status: Partial backend foundation; payment and shipping integrations intentionally deferred.**\n\n**Staging tests passed:** COD checkout creates a confirmed order with stock reservation; idempotent replay does not reserve twice; insufficient stock and duplicate variants reject; customer ownership checks and stock release on cancellation pass; owner-only status transitions pass.
+**Status: Partial backend foundation; payment and shipping integrations intentionally deferred.**
+
+**Staging tests passed:** COD checkout creates a confirmed order with stock reservation; idempotent replay does not reserve twice; insufficient stock and duplicate variants reject; customer ownership checks and stock release on cancellation pass; owner-only status transitions pass.
 
 - COD order creation and selected order-state transitions exist.
 - Customer order cancellation and customer-owned order reads are implemented.
@@ -69,7 +79,7 @@ Source of truth: GitHub `main`, staging Supabase project, and the current storef
 
 ## Phase 5 — Storefront experience, accessibility, performance, and SEO
 
-**Status: Existing experience and browser tests; SEO foundation being added.**
+**Status: Existing experience and browser tests; SEO and live-catalogue updates are in PR #149 pending CI.**
 
 - Storefront has product detail pages, gallery controls, compare, recently viewed, category/brand routes, and customer-facing delivery-information placeholders.
 - Product detail UI uses approved catalogue data and avoids claiming ratings that do not exist.
@@ -80,7 +90,9 @@ Source of truth: GitHub `main`, staging Supabase project, and the current storef
 
 ## Phase 6 — Launch readiness, reliability, legal/compliance, and operating controls
 
-**Status: Not launch-ready; external owner inputs and verification required.**\n\n**Production advisor review:** no health lints; security advisor reports leaked-password protection disabled and flags the authenticated customer-cancellation SECURITY DEFINER RPC (its ownership/COD checks and stock release were exercised in staging). Performance advisor reports an unindexed checkout-idempotency foreign key, unused indexes, and multiple permissive SELECT policies. These are review items; no indexes or policies were blindly dropped. Backup schedule/restore capability could not be verified through the connected tools.
+**Status: Not launch-ready; external owner inputs and verification required.**
+
+**Production advisor review:** no health lints; security advisor reports leaked-password protection disabled and flags the authenticated customer-cancellation SECURITY DEFINER RPC (its ownership/COD checks and stock release were exercised in staging). Performance advisor reports an unindexed checkout-idempotency foreign key, unused indexes, and multiple permissive SELECT policies. These are review items; no indexes or policies were blindly dropped. Backup schedule/restore capability could not be verified through the connected tools.
 
 - Confirm production/staging environment separation, secrets, access roles, and rollback procedure.
 - Verify backup schedule and perform a restore test before accepting real customer orders.
@@ -97,7 +109,10 @@ Source of truth: GitHub `main`, staging Supabase project, and the current storef
 3. Review and approve the legal/policy copy and warranty/return terms.
 4. Configure COD and delivery coverage/charges only when ready to accept those orders.
 5. Provide a real test customer account and address for a controlled checkout rehearsal.
-6. Add the Cloudflare Pages URL to Supabase Auth Site URL / Redirect URLs and verify Google OAuth on the Cloudflare host.\n7. Approve the production checkout RPC hardening migration after staging verification.\n8. Confirm backup schedule and perform a restore test in the Supabase dashboard.\n9. Approve the final production launch after backup/restore and security checks.
+6. Add the Cloudflare Pages URL to Supabase Auth Site URL / Redirect URLs and verify Google OAuth on the Cloudflare host.
+7. Approve the production checkout RPC hardening migration after staging verification.
+8. Confirm backup schedule and perform a restore test in the Supabase dashboard.
+9. Approve the final production launch after backup/restore and security checks.
 
 ## Current verified staging observations
 
