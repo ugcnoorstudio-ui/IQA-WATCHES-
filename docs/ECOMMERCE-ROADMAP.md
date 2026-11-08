@@ -149,7 +149,7 @@ A phase is complete only when code, tests, staging verification, and documentati
 - The storefront checkout now persists an idempotency key across retries, scoped to the authenticated user, selected address, and exact cart lines. It reuses that key after transient failures, clears it only after confirmed order creation, and removes only cart quantities that still match the confirmed order.
 - Added `tests/checkout-idempotency.test.js` to exercise key reuse, key rotation on user/address/cart changes, and successful clearing.
 - SEO regression coverage now also checks the descriptive homepage title, meta description, and private-admin `noindex,nofollow`.
-- The previous PR #153 test run passed syntax and local regression tests, including the new checkout idempotency unit test. Desktop/mobile Playwright checks and the isolated Cloudflare preview are still required on the latest commit before PR #153 can be considered CI-verified.
+- Latest PR #153 commit `1b166f4e9d76f42765848f15f56cad23905d0ad5` passed syntax and local regression tests, desktop/mobile Playwright browser checks (79 passed), and isolated Cloudflare preview route/backend-isolation verification. The production deploy job was skipped; PR #153 remains open and no production migration or Edge Function was deployed.
 
 ### Fresh staging checks
 - The staging checkout RPC was exercised with SQL NULL, JSON null, object, empty-array, non-object line, and duplicate-variant payloads. Each was rejected at the database boundary with its expected error.
