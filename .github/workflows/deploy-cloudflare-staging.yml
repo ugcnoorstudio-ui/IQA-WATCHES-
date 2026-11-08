@@ -87,6 +87,12 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
+          ENABLED="$(sed -n 's/^SUPABASE_UPSTREAM_CHECK_ENABLED = "\(.*\)"/\1/p' cloudflare/wrangler.toml)"
+          if [ "$ENABLED" != "true" ]; then
+            echo "::warning::Supabase upstream checks are paused while the project is Cached Egress restricted. No Supabase request was sent."
+            echo "available=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
           SUPABASE_URL="$(sed -n 's/^SUPABASE_URL = "\(.*\)"/\1/p' cloudflare/wrangler.toml)"
           SUPABASE_KEY="$(sed -n 's/^SUPABASE_PUBLISHABLE_KEY = "\(.*\)"/\1/p' cloudflare/wrangler.toml)"
           test -n "$SUPABASE_URL"
