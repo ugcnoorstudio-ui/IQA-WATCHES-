@@ -1132,9 +1132,9 @@ async function loadStorefrontCatalogue(){
   controller.abort();renderProducts();
  },10000);
  try{
-  // Public storefront reads a small, same-origin static snapshot. Product photos
-  // are delivered by Cloudinary; no public Supabase Data API calls are needed.
-  const catalogueUrl=new URL('data/catalogue.json',document.baseURI);
+  // Public storefront reads the approved catalogue through a read-only Edge Function.
+  // The service-role key remains server-side; product photos are delivered by Cloudinary.
+  const catalogueUrl=new URL('functions/v1/iqa-public-catalogue','https://nyhyfdququxnorqlnnqq.supabase.co/');
   const response=await fetch(catalogueUrl,{signal:controller.signal,headers:{Accept:'application/json'}});
   if(!response.ok)throw new Error('Static catalogue request failed: '+response.status);
   const payload=await response.json();
@@ -1189,7 +1189,7 @@ function renderProducts(){
  if(catalogueState==='error'){
   count.textContent='Catalogue temporarily unavailable';
   if(fallback)fallback.hidden=false;
-  grid.innerHTML='<div class="empty-state catalogue-message" role="alert"><h3>We couldn’t load the latest watches.</h3><p>Please check your connection and try again. Our catalogue preview remains below.</p><button class="button light" type="button" data-catalogue-retry>Retry</button></div>';
+  grid.innerHTML='<div class="empty-state catalogue-message" role="alert"><h3>We couldn’t load the latest watches.</h3><p>Please check your connection and try again. A cached catalogue preview remains below; current price and stock are revalidated at checkout.</p><button class="button light" type="button" data-catalogue-retry>Retry</button></div>';
   return;
  }
  const list=filteredProducts();
