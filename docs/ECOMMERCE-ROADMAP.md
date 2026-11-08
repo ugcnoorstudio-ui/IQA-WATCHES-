@@ -60,7 +60,9 @@ Source of truth: GitHub `main`, staging Supabase project, and the current storef
 
 **In progress:** a read-only `iqa-public-catalogue` Edge Function is in the PR and has been deployed once to staging. That first staging version still uses the old GitHub Pages CORS origin; the PR corrects it to the verified Cloudflare Pages origin and updates checkout, cancellation, public content, admin, and media Edge Functions using current production source as the base. The PR also switches the storefront loader to the live endpoint, retaining the static JSON only as a preview fallback. Staging has no catalogue rows, so a real product payload cannot be exercised there. After CI passes, redeploy the corrected functions to staging, then production, before merging the frontend switch.
 
-**Known UI limitation:** the current storefront product model selects one available variant per product. Products with multiple sellable variants need a variant selector before those options are offered to customers.\n\n**Next work:** verify the production endpoint through the public health monitor after deployment; add a variant selector before selling multi-variant products; verify owner-only product creation/update/archive, variant pricing, stock adjustment audit trail, image ordering/alt text, Cloudinary upload failure handling, CSV import validation, and out-of-stock catalogue behavior. Preserve all legacy Storage assets.
+**Known UI limitation:** the current storefront product model selects one available variant per product. Products with multiple sellable variants need a variant selector before those options are offered to customers.
+
+**Next work:** verify the production endpoint through the public health monitor after deployment; add a variant selector before selling multi-variant products; verify owner-only product creation/update/archive, variant pricing, stock adjustment audit trail, image ordering/alt text, Cloudinary upload failure handling, CSV import validation, and out-of-stock catalogue behavior. Preserve all legacy Storage assets.
 
 ## Phase 4 — Orders, customer service, returns, and business operations
 
