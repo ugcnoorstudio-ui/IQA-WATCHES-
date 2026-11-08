@@ -14,6 +14,7 @@ Source of truth: GitHub `main`, staging Supabase project, and the current storef
 - No new paid service without explicit approval.
 - No custom domain, payment gateway, shipping/courier integration, or shipment tracking in this execution.
 - Every code change must pass CI and browser tests before merge/deploy.
+- Pull-request Cloudflare previews replace backend configuration with an invalid preview endpoint and must never connect to production Supabase.
 
 ## Phase 1 — Checkout, order integrity, and inventory reservation
 
