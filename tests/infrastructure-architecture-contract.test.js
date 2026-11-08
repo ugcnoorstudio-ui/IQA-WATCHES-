@@ -35,7 +35,7 @@ test('catalogue caching is short-lived and does not turn checkout into cache aut
   assert.match(doc, /current stock and price on the server at checkout/i);
   assert.match(doc, /Do not cache customer profile\/address, cart, admin, order, checkout, authentication/i);
   const worker = read('cloudflare/src/index.js');
-  assert.match(worker, /cache-control: "no-store"/);
+  assert.match(worker, /"cache-control": "no-store"/);
 });
 
 test('product image uploads use Cloudinary and avoid Supabase Storage writes', () => {
