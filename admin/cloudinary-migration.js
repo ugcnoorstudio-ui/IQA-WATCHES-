@@ -43,7 +43,7 @@ function mount(){
  box.append(title,copy,button,status);
  host.prepend(box);
 
- if(!host.querySelector('[data-cloudinary-storage-privacy]')){
+ if(window.IQA_STORAGE_LOCKDOWN_ACTION_ENABLED===true&&!host.querySelector('[data-cloudinary-storage-privacy]')){
   const privacyBox=document.createElement('section');
   privacyBox.className='panel';
   privacyBox.setAttribute('data-cloudinary-storage-privacy','');
