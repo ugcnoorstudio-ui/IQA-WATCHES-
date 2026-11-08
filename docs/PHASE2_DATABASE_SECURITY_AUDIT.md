@@ -1,15 +1,17 @@
 # IQA WATCHES — Phase 2 Database & Security Audit
 
-Audit date: 2026-11-08  
-Scope: Connected Supabase Staging and Production projects, checked-in migrations, security baseline and Supabase Advisors.  
-Staging project: `qcxgsomqxfoueootxzpv`  
+Audit date: 2026-11-08
+Scope: Connected Supabase Staging and Production projects, checked-in migrations, security baseline and Supabase Advisors.
+Staging project: `qcxgsomqxfoueootxzpv`
 Production project: `nyhyfdququxnorqlnnqq`
 
 ## Executive result
 
-The live database baseline is substantially hardened. The read-only Phase 2 SQL acceptance script passed in both environments. No database DDL, data mutation, Auth configuration change or production migration was applied during this audit.
+The live database baseline is substantially hardened. The read-only Phase 2 SQL acceptance script passed in both environments. After review, the three Staging migrations were applied to Production using the connected Supabase migration tool and verified in the live schema. No customer/order data was modified and no Auth configuration change was made.
 
-Phase 2 is **not fully closed**: Production is three migrations behind Staging; Production Auth leaked-password protection is disabled; and provider-side session/password configuration cannot be changed through the connected Supabase tools. These are explicit release blockers, not assumed complete.
+Staging and Production now each report 42 migration records and the same 42 migration names. Supabase recorded the three Production-applied migrations under provider-generated versions `20261108134447`, `20261108134449` and `20261108134452`, while Staging retains the original migration versions. This timestamp difference is documented; the migration files in PR #153 must remain replay-safe before they are merged or run by a future CLI push.
+
+Phase 2's database migration catch-up is complete. Production Auth leaked-password protection is still disabled, and provider-side session/password configuration cannot be changed through the connected Supabase tools. Those are remaining release blockers.
 
 ## 1. Verified database controls
 
@@ -56,24 +58,25 @@ The `private.iqa_is_public_product(uuid)` helper is also SECURITY DEFINER, but l
 
 - Unused-index findings are informational while the catalogue and operational tables have little/no production-like traffic. Do not drop indexes solely from this snapshot.
 - Multiple permissive SELECT policy warnings reflect separate customer-owner and staff-owner access paths. Do not combine or delete policies without proving the equivalent role matrix and row predicates.
-- Production reports one unindexed foreign key on `checkout_idempotency.order_id`; Staging reports none. The index migration is recorded in Staging but is absent from Production migration history and is included in the migration-parity work tracked in PR #153.
+- The `checkout_idempotency.order_id` index is now present in both environments after the Production catch-up. Re-run Advisor after representative traffic before considering any index removal.
 
 ## 4. Migration parity
 
-Live migration history:
+Live migration history after the approved catch-up:
 
-- Staging: 42 migrations.
-- Production: 39 migrations.
+- Staging: 42 migration records.
+- Production: 42 migration records.
+- Both environments contain the same 42 migration names.
 
-Staging has three migrations not yet recorded in Production:
+The three migrations applied to Production were:
 
-1. `20261107193017_enforce_eight_product_images`
-2. `20261108060625_index_checkout_idempotency_order_id`
-3. `20261108081229_harden_checkout_rpc_payload`
+1. `enforce_eight_product_images` — recorded as version `20261108134447` in Production; Staging version `20261107193017`.
+2. `index_checkout_idempotency_order_id` — recorded as version `20261108134449` in Production; Staging version `20261108060625`.
+3. `harden_checkout_rpc_payload` — recorded as version `20261108134452` in Production; Staging version `20261108081229`.
 
-The current `main` branch has a checkout-hardening migration file with a different timestamp (`20261108133000_harden_checkout_rpc_payload.sql`). PR #153 restores the exact Staging-recorded filenames and migration-parity checks. Review that PR before any production catch-up. **No Production migration was applied** because the established project guardrail requires explicit release approval.
+The live schema was re-queried after application: the eight-image trigger exists, the checkout `order_id` index exists, and the checkout RPC rejects null/non-array/empty payloads, non-object cart entries and duplicate variant lines. Both environments passed the read-only security acceptance script. No production customer/order rows were changed.
 
-Until Production catches up, do not assume the latest eight-image constraint, checkout foreign-key index or direct-RPC payload hardening is present there. The Edge Function's request validation is not a substitute for the database-level migration.
+**Migration-ledger caution:** The migration tool recorded new Production version timestamps rather than copying Staging's historical version IDs. PR #153 migration files must be replay-safe before merge; the checkout hardening migration is being updated to recognize an already-hardened function and skip safely rather than failing its baseline-text guard.
 
 ## 5. Authentication and authorization rules retained
 
@@ -107,8 +110,9 @@ The script is read-only and creates no fixtures or database objects.
 - [x] Review the authenticated SECURITY DEFINER cancellation RPC and preserve its ownership/COD checks.
 - [x] Run the read-only SQL security acceptance script in Staging and Production.
 - [x] Record Advisor findings and distinguish intentional warnings from remediation items.
-- [ ] Review/merge PR #153 migration parity files, then obtain explicit approval before Production migration catch-up.
+- [x] Apply the three reviewed migrations to Production and verify the resulting schema and 42 migration-name parity.
+- [ ] Keep PR #153's migration files replay-safe for the differing Production version IDs before merging; do not run a blind CLI push.
 - [ ] Enable Production leaked-password protection in Supabase Auth settings and verify the setting.
 - [ ] Verify session-expiry, recovery, MFA and privacy-request flows before launch.
 
-**Phase 2 status: database/RLS audit and regression guardrails completed; production configuration and migration-parity items remain open. No production mutation was performed.**
+**Phase 2 status: database/RLS audit, security acceptance tests and Production migration catch-up completed. Production leaked-password protection and session/recovery/MFA/privacy-flow acceptance remain open.**

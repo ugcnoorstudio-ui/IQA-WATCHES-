@@ -65,3 +65,14 @@ The leaked-password protection Advisor warning remains open. Enable it in Supaba
 - `public.iqa_cancel_customer_order(uuid)` is an intentional authenticated SECURITY DEFINER RPC. Its live definition checks `auth.uid()`, customer/order ownership, pending COD eligibility, locks order/variant rows, releases reserved stock safely, writes an order-status event and uses an empty search_path. The Advisor warning is retained as a reviewed exception and protected by `supabase/tests/security_baseline.sql`.
 - Staging has 42 recorded migrations; Production has 39. Production is three migrations behind and catch-up is blocked pending explicit release approval. PR #153 restores the exact Staging migration versions.
 - Production leaked-password protection remains disabled and must be enabled in Supabase Auth settings before launch. This provider setting was not changed by the connected tools.
+
+
+## Production migration catch-up — 2026-11-08
+
+The three Staging migrations absent from Production were applied to Production after approval and verified in the live schema:
+
+- Eight-image product media trigger: active, parent product row lock retained, empty search_path.
+- `checkout_idempotency_order_id_idx`: present.
+- Checkout RPC payload validation: null/non-array/empty carts, non-object items and duplicate variant lines rejected at the database boundary.
+
+Both environments now report 42 migration records and matching migration names. Production's provider-generated migration versions are `20261108134447`, `20261108134449` and `20261108134452`; they differ from Staging's historical timestamps. The PR #153 migration files must therefore be replay-safe before a future CLI push. Production Auth leaked-password protection remains disabled and is a launch blocker.
