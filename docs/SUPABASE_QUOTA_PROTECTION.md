@@ -11,6 +11,7 @@ These are separate meters. The displayed Logs Query allowance is 100 GB and the 
 
 ## Controls already in place
 - Browser tests on localhost and preview hosts are prevented from calling the Production content function (PR #157).
+- The Production storefront live CMS sync has a temporary kill switch set to off while Cached Egress is restricted. Static homepage content and the static Cloudinary catalogue remain available; live CMS overrides and dynamic collections pause until the Worker proxy is verified.
 - Public product images in the database point to Cloudinary; the legacy Supabase Storage objects are retained for rollback and are not deleted.
 - Cloudflare Worker routes are prepared for public content (60-second cache) and catalogue (5-minute cache), with origin-specific CORS and 24-hour preflight caching. These Worker cache hits avoid repeat Supabase Edge Function calls and can reduce API-origin traffic/uncached egress; **they do not reduce Supabase Storage Cached Egress**.
 - The staging Worker has a static cache probe that does not call Supabase. It verifies Cloudflare edge HITs and CORS while Supabase is quota-restricted.
@@ -23,7 +24,7 @@ These are separate meters. The displayed Logs Query allowance is 100 GB and the 
 - Do not remove spend caps or upgrade plans automatically.
 - Keep product media on Cloudinary and large files on Cloudflare R2.
 - Make the legacy `product-images` Storage bucket private. Production currently has exactly one bucket (`product-images`), it is public, and it contains six objects. A read-only preflight found zero live Supabase Storage URL references in product specs, order snapshots, content entries or store settings, and zero unverified product-media rows. Staging already has this bucket private with zero objects. Production's bucket is not yet changed. The owner-only Storage API action is the automated route once the project accepts function requests. The no-cost dashboard fallback is Storage → Buckets → `product-images` → Edit bucket → turn **Public** off and Save. Do not delete objects or update `storage.buckets` / `storage.objects` directly with SQL.
-- Do not route the Production storefront to the Worker until the Production Worker is deployed and Staging confirms real cache HITs.
+- Do not route the Production storefront to the Worker until the Production Worker is deployed and Staging confirms real cache HITs. Keep `publicContentSyncEnabled: false` until that point; enable it together with the verified Worker proxy URL.
 
 ## Expected outcome
 After the monthly quota resets or Supabase service is restored, enabling the Worker upstream gate and routing the storefront through it should serve repeated public-content requests from Cloudflare cache and reduce calls to Supabase APIs. Separately, making the unused legacy Storage bucket private prevents new public downloads from those six legacy objects and is the direct control for Cached Egress. Neither action can reverse usage already recorded for the current cycle.
