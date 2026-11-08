@@ -13,6 +13,7 @@
     "iqa-watches-storefront.pages.dev",
   ]);
   if (window.__IQA_DISABLE_PUBLISHED_CONTENT_SYNC__ === true ||
+      (config && config.publicContentSyncEnabled === false) ||
       !productionHosts.has(hostname)) return;
   function text(node, value) { if (node && typeof value === "string") node.textContent = value; }
   function applyHero(item) {
