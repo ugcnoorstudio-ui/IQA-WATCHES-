@@ -6,12 +6,16 @@ on:
     paths:
       - '.github/workflows/deploy-cloudflare-staging.yml'
       - 'cloudflare/**'
+      - 'supabase/functions/iqa-public-content/**'
+      - 'supabase/functions/iqa-public-catalogue/**'
   push:
     branches:
       - main
     paths:
       - '.github/workflows/deploy-cloudflare-staging.yml'
       - 'cloudflare/**'
+      - 'supabase/functions/iqa-public-content/**'
+      - 'supabase/functions/iqa-public-catalogue/**'
 
 permissions:
   contents: read
@@ -78,6 +82,28 @@ jobs:
           URL="https://iqa-watches-api-staging.ugcnoorstudio.workers.dev/healthz"
           RESPONSE="$(curl --fail --silent --show-error --retry 5 --retry-delay 3 "$URL")"
           printf '%s' "$RESPONSE" | jq -e '.ok == true and .environment == "staging"'
+      - name: Verify Staging Supabase public function upstreams
+        shell: bash
+        run: |
+          set -euo pipefail
+          SUPABASE_URL="$(sed -n 's/^SUPABASE_URL = "\(.*\)"/\1/p' cloudflare/wrangler.toml)"
+          SUPABASE_KEY="$(sed -n 's/^SUPABASE_PUBLISHABLE_KEY = "\(.*\)"/\1/p' cloudflare/wrangler.toml)"
+          test -n "$SUPABASE_URL"
+          test -n "$SUPABASE_KEY"
+          for FUNCTION in "iqa-public-content" "iqa-public-catalogue"; do
+            BODY="$(mktemp)"
+            STATUS="$(curl --silent --show-error -o "$BODY" -w '%{http_code}' \
+              -H "apikey: $SUPABASE_KEY" -H "accept: application/json" \
+              "$SUPABASE_URL/functions/v1/$FUNCTION")"
+            echo "Staging upstream $FUNCTION returned HTTP $STATUS"
+            if [ "$STATUS" != "200" ]; then
+              cat "$BODY"
+              rm -f "$BODY"
+              exit 1
+            fi
+            jq -e '.ok == true' "$BODY" >/dev/null
+            rm -f "$BODY"
+          done
       - name: Verify public API edge cache and CORS isolation
         shell: bash
         run: |
