@@ -186,3 +186,38 @@ test("catalogue route is available only when explicitly enabled for staging", as
     globalThis.fetch = originalFetch;
   }
 });
+
+test("unrelated HTTP 402 responses are not cached as Supabase quota restrictions", async () => {
+  const originalFetch = globalThis.fetch;
+  const originalCaches = globalThis.caches;
+  const entries = new Map();
+  let upstreamCalls = 0;
+  globalThis.caches = {
+    default: {
+      match: async (key) => entries.get(key.url)?.clone() || null,
+      put: async (key, response) => { entries.set(key.url, response.clone()); }
+    }
+  };
+  globalThis.fetch = async () => {
+    upstreamCalls += 1;
+    return new Response(JSON.stringify({ message: "payment_required" }), { status: 402 });
+  };
+  try {
+    const env = {
+      SUPABASE_URL: "https://example.supabase.co",
+      SUPABASE_PUBLISHABLE_KEY: "publishable-test-key"
+    };
+    const first = await worker.fetch(request("/api/v1/public-content"), env);
+    const second = await worker.fetch(request("/api/v1/public-content"), env);
+    assert.equal(first.status, 503);
+    assert.equal(second.status, 503);
+    assert.equal(first.headers.get("x-iqa-upstream-status"), null);
+    assert.equal(second.headers.get("x-content-cache"), null);
+    assert.equal(upstreamCalls, 2);
+    assert.equal(entries.size, 0);
+  } finally {
+    globalThis.fetch = originalFetch;
+    if (originalCaches === undefined) delete globalThis.caches;
+    else globalThis.caches = originalCaches;
+  }
+});
