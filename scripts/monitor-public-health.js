@@ -7,6 +7,7 @@ const vm = require('node:vm');
 const base = (process.env.IQA_STOREFRONT_URL || 'https://ugcnoorstudio-ui.github.io/IQA-WATCHES-/').replace(/\/?$/, '/');
 const timeoutMs = 15000;
 const failures = [];
+let publicSupabaseConfig = null;
 
 const retryDelaysMs = [2000, 4000, 8000, 12000];
 
@@ -46,11 +47,40 @@ async function main() {
             !String(config.publishableKey || '').startsWith('sb_publishable_')) {
           throw new Error('Public Supabase configuration is missing or malformed');
         }
-        console.log('PASS Supabase public configuration is present; no public Data API request is made by this monitor.');
+        publicSupabaseConfig = config;
+        console.log('PASS Supabase public configuration is present; browser requests use the read-only catalogue Edge Function.');
       }
     } catch (error) {
       failures.push(error.message || String(error));
       console.error('FAIL ' + route + ': ' + (error.message || error));
+    }
+  }
+
+  if (!publicSupabaseConfig) {
+    failures.push('Public Supabase configuration was not available for catalogue API verification');
+  } else {
+    try {
+      const storefrontOrigin = new URL(base).origin;
+      const endpoint = new URL('/functions/v1/iqa-public-catalogue', publicSupabaseConfig.url);
+      const response = await request(endpoint, {
+        headers: { Accept: 'application/json', Origin: storefrontOrigin }
+      });
+      if (response.headers.get('access-control-allow-origin') !== storefrontOrigin) {
+        throw new Error('Public catalogue CORS does not allow the production storefront origin');
+      }
+      const payload = await response.json();
+      if (!payload || payload.ok !== true || !Array.isArray(payload.products) || payload.products.length === 0) {
+        throw new Error('Public catalogue API returned no approved products or an invalid response');
+      }
+      const invalid = payload.products.filter(product =>
+        !product.id || !product.name || !(Number(product.price) > 0) || !(Number(product.stock) > 0) ||
+        typeof product.image !== 'string' || !product.image.startsWith('https://res.cloudinary.com/')
+      );
+      if (invalid.length) throw new Error(invalid.length + ' public API product(s) have invalid price, stock or Cloudinary image fields');
+      console.log('PASS live public catalogue Edge Function (' + payload.products.length + ' approved in-stock product(s), CORS verified)');
+    } catch (error) {
+      failures.push(error.message || String(error));
+      console.error('FAIL live public catalogue API: ' + (error.message || error));
     }
   }
 
