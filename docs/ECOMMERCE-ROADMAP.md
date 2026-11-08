@@ -88,7 +88,7 @@ Source of truth: GitHub `main`, staging Supabase project, and the current storef
 - Confirm privacy policy, terms, returns/refunds policy, warranty wording, contact details, business identity, tax/GST treatment, and customer-consent language with the owner.
 - Verify support inbox and response ownership.
 - Run final accessibility, performance, security-advisor, dependency, and browser regression checks.
-- No custom domain is assumed; use the current GitHub Pages URL until the owner purchases/configures a domain.
+- No custom domain is assumed; use the verified Cloudflare Pages production hostname. GitHub Pages remains a fallback until the owner decides otherwise.
 
 ## Owner actions required before real public sales
 
