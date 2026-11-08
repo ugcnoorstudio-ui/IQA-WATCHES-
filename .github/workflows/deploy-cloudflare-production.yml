@@ -1,0 +1,66 @@
+name: Deploy IQA WATCHES production API
+
+on:
+  workflow_dispatch:
+    inputs:
+      confirm_production_deploy:
+        description: "Type YES to deploy the Production Worker. This does not switch the storefront to it."
+        required: true
+        type: choice
+        options:
+          - "NO"
+          - "YES"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: iqa-watches-cloudflare-production
+  cancel-in-progress: false
+
+jobs:
+  deploy-production:
+    if: inputs.confirm_production_deploy == 'YES'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    environment: production
+    steps:
+      - name: Checkout main
+        uses: actions/checkout@v4
+        with:
+          ref: main
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Install Wrangler
+        run: npm install --global wrangler@4
+      - name: Validate Production configuration
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.IQA_CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.IQA_CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          set -euo pipefail
+          test -n "$CLOUDFLARE_API_TOKEN" || { echo "::error::Missing IQA_CLOUDFLARE_API_TOKEN secret."; exit 1; }
+          test -n "$CLOUDFLARE_ACCOUNT_ID" || { echo "::error::Missing IQA_CLOUDFLARE_ACCOUNT_ID secret."; exit 1; }
+          test -s cloudflare/src/index.js
+          grep -q '^APP_ENV = "production"$' cloudflare/wrangler.production.toml
+          grep -q '^SUPABASE_UPSTREAM_CHECK_ENABLED = "false"$' cloudflare/wrangler.production.toml
+          grep -q '^PUBLIC_CATALOGUE_ENABLED = "false"$' cloudflare/wrangler.production.toml
+      - name: Deploy Production Worker
+        working-directory: cloudflare
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.IQA_CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.IQA_CLOUDFLARE_ACCOUNT_ID }}
+        run: wrangler deploy --config wrangler.production.toml
+      - name: Verify Production Worker health without calling Supabase
+        shell: bash
+        run: |
+          set -euo pipefail
+          BASE="https://iqa-watches-api-production.ugcnoorstudio.workers.dev"
+          HEALTH="$(curl --fail --silent --show-error --retry 5 --retry-delay 3 "$BASE/healthz")"
+          printf '%s' "$HEALTH" | jq -e '.ok == true and .environment == "production"'
+          PROBE_STATUS="$(curl --silent --show-error -o /dev/null -w '%{http_code}' "$BASE/api/v1/cache-probe")"
+          CATALOGUE_STATUS="$(curl --silent --show-error -o /dev/null -w '%{http_code}' "$BASE/api/v1/catalogue")"
+          test "$PROBE_STATUS" = "404"
+          test "$CATALOGUE_STATUS" = "404"
