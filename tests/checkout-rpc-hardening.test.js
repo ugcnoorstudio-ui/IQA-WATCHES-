@@ -16,7 +16,7 @@ test('checkout RPC rejects null, non-array, and empty item payloads at the datab
 test('checkout RPC rejects duplicate variant lines before reserving inventory', () => {
   assert.match(migration, /where item\.value \? 'variant_id'/);
   assert.match(migration, /group by item\.value->>'variant_id'/);
-  assert.match(migration, /having count\\(\\*\\) > 1/);
+  assert.match(migration, /having count\(\*\) > 1/);
   assert.match(migration, /Cart must not contain duplicate variant lines/);
 });
 
