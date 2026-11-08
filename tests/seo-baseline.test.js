@@ -8,7 +8,7 @@ const [html, robots, sitemap] = await Promise.all([
   readFile(new URL('../sitemap.xml', import.meta.url), 'utf8'),
 ]);
 
-const canonical = 'https://ugcnoorstudio-ui.github.io/IQA-WATCHES-/';
+const canonical = 'https://iqa-watches-storefront.pages.dev/';
 
 test('homepage declares one canonical URL for the current public site', () => {
   assert.ok(html.includes('<link rel="canonical" href="' + canonical + '">'));
