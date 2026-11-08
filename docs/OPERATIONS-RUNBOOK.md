@@ -114,3 +114,32 @@ Before launch, the business owner must record (in the password manager / interna
 - Backup schedule and restore test are not verified.
 
 This runbook must be reviewed after every material architecture change and at least quarterly.
+
+
+## 11. Production migration preflight — read-only verification (2026-11-08)
+
+The following facts were verified directly against both Supabase databases. This is a review record, not migration approval.
+
+| Check | Staging | Production |
+|---|---|---|
+| Eight-image trigger | Present | Absent |
+| Maximum existing media rows per product | 0 (no staging media rows) | 2 |
+| Total product media rows | 0 | 4 |
+| Checkout idempotency order index | Present | Absent |
+| Checkout RPC hardening baseline | Hardened definition present | Exact expected pre-hardening baseline found |
+| Checkout RPC search_path | Empty | Empty |
+| Checkout RPC EXECUTE for anon | Denied | Denied |
+| Checkout RPC EXECUTE for authenticated | Denied | Denied |
+| Checkout RPC EXECUTE for service_role | Allowed | Allowed |
+
+The production checkout RPC has the expected baseline text required by migration `20261108081229`, and the RPC's current owner and execution grants match staging. This makes the migration's guarded function-replacement precondition appear satisfied. It does not prove a production migration is safe in every respect and does not authorize applying it.
+
+The production media count is currently below the eight-image limit. Migration `20261107193017` creates a row-locking trigger to serialize concurrent inserts for a product. Migration `20261108060625` adds the missing `checkout_idempotency(order_id)` index. Migration `20261108081229` adds database-boundary checks for null/non-array/empty/oversized carts, non-object cart lines, and duplicate variant lines.
+
+**Required before production catch-up:** review all three exact migration files, confirm a verified backup/export and restore plan, schedule a low-traffic maintenance window, obtain explicit owner approval, apply one reviewed migration batch, then re-check migration history, trigger/index/function definition and grants. Run checkout tests only in staging; do not create production test orders or customer fixtures.
+
+## 12. Cloudflare Worker build-check investigation
+
+Cloudflare's GitHub integration posted a failed Worker build for PR #154's documentation-only commit `a9a6f1bf3e57c78ce212f39a9452aecc3de4dd3d` (build ID `c656a851-532b-4e55-a8c9-7907ea6e1b76`). Similar failed Worker build notifications exist on PR #153 commits that do not change Worker source. This suggests the check may be triggered by the repository integration/build configuration independently of changed Worker files; it does not establish the underlying build error.
+
+The connected tools could not access the authenticated Cloudflare build log. Do not infer the cause or change the Worker build command blindly. Inspect the linked build's full log in Cloudflare Dashboard, confirm the configured repository, production/staging environment, root directory, build command, deploy command, and branch filters. If the Worker service is intended to deploy only from `main`, ensure pull-request builds are validation-only and cannot deploy production. Record the exact error before changing configuration.
