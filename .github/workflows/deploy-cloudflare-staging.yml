@@ -78,3 +78,41 @@ jobs:
           URL="https://iqa-watches-api-staging.ugcnoorstudio.workers.dev/healthz"
           RESPONSE="$(curl --fail --silent --show-error --retry 5 --retry-delay 3 "$URL")"
           printf '%s' "$RESPONSE" | jq -e '.ok == true and .environment == "staging"'
+      - name: Verify public API edge cache and CORS isolation
+        shell: bash
+        run: |
+          set -euo pipefail
+          BASE="https://iqa-watches-api-staging.ugcnoorstudio.workers.dev"
+          ORIGINS=("https://ugcnoorstudio-ui.github.io" "https://iqa-watches-storefront.pages.dev")
+          for ROUTE in "/api/v1/public-content" "/api/v1/catalogue"; do
+            for ORIGIN in "${ORIGINS[@]}"; do
+              FIRST_HEADERS="$(mktemp)"
+              FIRST_BODY="$(mktemp)"
+              SECOND_HEADERS="$(mktemp)"
+              SECOND_BODY="$(mktemp)"
+              curl --fail --silent --show-error --retry 3 --retry-delay 2 \
+                -D "$FIRST_HEADERS" -o "$FIRST_BODY" -H "Origin: $ORIGIN" "$BASE$ROUTE"
+              jq -e '.ok == true' "$FIRST_BODY"
+              grep -iqF "access-control-allow-origin: $ORIGIN" "$FIRST_HEADERS"
+              curl --fail --silent --show-error --retry 3 --retry-delay 2 \
+                -D "$SECOND_HEADERS" -o "$SECOND_BODY" -H "Origin: $ORIGIN" "$BASE$ROUTE"
+              jq -e '.ok == true' "$SECOND_BODY"
+              grep -iqF "access-control-allow-origin: $ORIGIN" "$SECOND_HEADERS"
+              if ! grep -iqE '^cf-cache-status: (HIT|REVALIDATED)' "$SECOND_HEADERS"; then
+                echo "::error::Expected an edge cache HIT for $ROUTE and $ORIGIN."
+                cat "$SECOND_HEADERS"
+                exit 1
+              fi
+              rm -f "$FIRST_HEADERS" "$FIRST_BODY" "$SECOND_HEADERS" "$SECOND_BODY"
+            done
+          done
+          PREFLIGHT_HEADERS="$(mktemp)"
+          PREFLIGHT_STATUS="$(curl --silent --show-error -o /dev/null -w '%{http_code}' \
+            -D "$PREFLIGHT_HEADERS" -X OPTIONS \
+            -H "Origin: https://iqa-watches-storefront.pages.dev" \
+            -H "Access-Control-Request-Method: GET" \
+            -H "Access-Control-Request-Headers: apikey" \
+            "$BASE/api/v1/public-content")"
+          test "$PREFLIGHT_STATUS" = "204"
+          grep -iqF "access-control-max-age: 86400" "$PREFLIGHT_HEADERS"
+          rm -f "$PREFLIGHT_HEADERS"
