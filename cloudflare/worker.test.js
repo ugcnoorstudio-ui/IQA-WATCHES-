@@ -221,3 +221,62 @@ test("unrelated HTTP 402 responses are not cached as Supabase quota restrictions
     else globalThis.caches = originalCaches;
   }
 });
+
+test("Production upstream pause blocks public-content requests before Supabase", async () => {
+  const originalFetch = globalThis.fetch;
+  let upstreamCalls = 0;
+  globalThis.fetch = async () => { upstreamCalls += 1; throw new Error("Supabase must not be called"); };
+  try {
+    const response = await worker.fetch(request("/api/v1/public-content"), {
+      SUPABASE_UPSTREAM_CHECK_ENABLED: "false",
+      SUPABASE_URL: "https://example.supabase.co",
+      SUPABASE_PUBLISHABLE_KEY: "publishable-test-key"
+    });
+    assert.equal(response.status, 503);
+    assert.equal((await response.json()).error, "supabase_upstream_paused");
+    assert.equal(response.headers.get("retry-after"), "300");
+    assert.equal(upstreamCalls, 0);
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
+
+test("Production upstream pause blocks catalogue requests before Supabase", async () => {
+  const originalFetch = globalThis.fetch;
+  let upstreamCalls = 0;
+  globalThis.fetch = async () => { upstreamCalls += 1; throw new Error("Supabase must not be called"); };
+  try {
+    const response = await worker.fetch(request("/api/v1/catalogue"), {
+      APP_ENV: "staging",
+      PUBLIC_CATALOGUE_ENABLED: "true",
+      SUPABASE_UPSTREAM_CHECK_ENABLED: "false",
+      SUPABASE_URL: "https://example.supabase.co",
+      SUPABASE_PUBLISHABLE_KEY: "publishable-test-key"
+    });
+    assert.equal(response.status, 503);
+    assert.equal((await response.json()).error, "supabase_upstream_paused");
+    assert.equal(upstreamCalls, 0);
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
+
+test("Production upstream pause blocks Supabase Auth verification", async () => {
+  const originalFetch = globalThis.fetch;
+  let upstreamCalls = 0;
+  globalThis.fetch = async () => { upstreamCalls += 1; throw new Error("Supabase Auth must not be called"); };
+  try {
+    const response = await worker.fetch(request("/api/v1/me", {
+      authorization: "Bearer valid-looking-token"
+    }), {
+      SUPABASE_UPSTREAM_CHECK_ENABLED: "false",
+      SUPABASE_URL: "https://example.supabase.co",
+      SUPABASE_PUBLISHABLE_KEY: "publishable-test-key"
+    });
+    assert.equal(response.status, 503);
+    assert.equal((await response.json()).error, "auth_not_configured");
+    assert.equal(upstreamCalls, 0);
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
