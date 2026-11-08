@@ -7,6 +7,7 @@ const files = [
   '../supabase/functions/iqa-public-content/index.ts',
   '../supabase/functions/iqa-admin-health/index.ts',
   '../supabase/functions/iqa-product-image-upload/index.ts',
+  '../supabase/functions/iqa-customer-cancel-order/index.ts',
 ];
 const sources = await Promise.all(files.map(path => readFile(new URL(path, import.meta.url), 'utf8')));
 
@@ -35,7 +36,7 @@ test('preflight requests reject origins outside the allowlist before granting CO
 });
 
 test('checkout and administrative functions retain explicit POST method restrictions', () => {
-  for (const index of [0, 2, 3]) {
+  for (const index of [0, 2, 3, 4]) {
     assert.match(sources[index], /req\.method\s*!==\s*["']POST["']/);
   }
   assert.match(sources[1], /req\.method\s*!==\s*["']GET["']/);
