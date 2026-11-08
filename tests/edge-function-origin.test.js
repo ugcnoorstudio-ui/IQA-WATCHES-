@@ -39,6 +39,6 @@ test('PR preview CORS is restricted to the exact Cloudflare preview hostname pat
 test('preflight requests explicitly handle OPTIONS and validate the requesting origin', () => {
   for (const source of sources) {
     assert.match(source, /(?:req|request)\.method\s*===\s*["']OPTIONS["']/);
-    assert.match(source, /allowedOrigin\(origin\)/);
+    assert.match(source, /allowedOrigin\((?:origin|(?:req|request)\.headers\.get\(["']origin["']\))\)/);
   }
 });
