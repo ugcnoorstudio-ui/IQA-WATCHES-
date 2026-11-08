@@ -176,6 +176,15 @@ async function publicContent(request, env, ctx) {
   }
   if (!upstream.ok) {
     if (upstream.status === 402) {
+      const quotaPayload = await upstream.clone().json().catch(() => null);
+      const quotaCode = quotaPayload && (
+        quotaPayload.message === "exceed_cached_egress_quota" ||
+        quotaPayload.code === "exceed_cached_egress_quota" ||
+        quotaPayload.error === "exceed_cached_egress_quota"
+      );
+      if (!quotaCode) {
+        return json({ ok: false, error: "public_content_unavailable" }, 503);
+      }
       const quotaMarker = new Response(JSON.stringify({ __iqa_quota_restricted: true }), {
         status: 200,
         headers: {
