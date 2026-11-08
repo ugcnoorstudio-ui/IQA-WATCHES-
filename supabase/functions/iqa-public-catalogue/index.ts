@@ -12,7 +12,7 @@ const CACHE_CONTROL = "public, max-age=60, stale-while-revalidate=300";
 function response(status: number, body: Record<string, unknown>, origin: string | null) {
   const headers: Record<string, string> = {
     "Content-Type": "application/json; charset=utf-8",
-    "Cache-Control": CACHE_CONTROL,
+    "Cache-Control": status === 200 ? CACHE_CONTROL : "no-store",
     "Vary": "Origin",
     "X-Content-Type-Options": "nosniff",
   };
@@ -42,7 +42,7 @@ function number(value: unknown): number {
 Deno.serve(async (request: Request) => {
   const origin = request.headers.get("origin");
   if (origin && !allowedOrigin(origin)) {
-    return new Response("Origin not allowed.", { status: 403, headers: { "Vary": "Origin" } });
+    return new Response("Origin not allowed.", { status: 403, headers: { "Vary": "Origin", "Cache-Control": "no-store" } });
   }
   if (request.method === "OPTIONS") {
     return new Response(null, {
