@@ -1,0 +1,37 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import { readFile } from 'node:fs/promises';
+
+const [html, robots, sitemap, admin] = await Promise.all([
+  readFile(new URL('../index.html', import.meta.url), 'utf8'),
+  readFile(new URL('../robots.txt', import.meta.url), 'utf8'),
+  readFile(new URL('../sitemap.xml', import.meta.url), 'utf8'),
+  readFile(new URL('../admin/index.html', import.meta.url), 'utf8'),
+]);
+
+const canonical = 'https://iqa-watches-storefront.pages.dev/';
+
+test('homepage declares one canonical URL for the current public site', () => {
+  assert.ok(html.includes('<link rel="canonical" href="' + canonical + '">'));
+  assert.match(html, /<meta name="robots" content="index,follow">/);
+  assert.ok(html.includes('<meta property="og:url" content="' + canonical + '">'));
+  assert.match(html, /<meta property="og:site_name" content="IQA WATCHES">/);
+  assert.match(html, /<meta name="twitter:card" content="summary_large_image">/);
+});
+
+test('robots file allows public storefront crawling and points to the sitemap', () => {
+  assert.match(robots, /User-agent: \*/);
+  assert.ok(robots.includes('Allow: /'));
+  assert.ok(robots.includes('Sitemap: ' + canonical + 'sitemap.xml'));
+});
+
+test('sitemap contains only the crawlable canonical homepage, not hash routes', () => {
+  assert.ok(sitemap.includes('<loc>' + canonical + '</loc>'));
+  assert.doesNotMatch(sitemap, /#(?:product|shop|category|brand)\//);
+});
+
+test('storefront has a descriptive title and meta description while admin stays noindex', () => {
+  assert.match(html, /<title>IQA WATCHES \| Elevate your style\.<\/title>/);
+  assert.match(html, /<meta name="description" content="IQA WATCHES — [^"]+">/);
+  assert.match(admin, /<meta name="robots" content="noindex,nofollow">/);
+});

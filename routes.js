@@ -2,6 +2,20 @@
 const root=document.getElementById('routeView');
 const $r=id=>document.getElementById(id);
 const esc=v=>typeof escapeHtml==='function'?escapeHtml(v):String(v??'');
+const CHECKOUT_IDEMPOTENCY_STORAGE_KEY='iqa-checkout-idempotency-v1';
+function getCheckoutIdempotencyKey(userId,addressId,items){
+ const fingerprint=JSON.stringify({userId,addressId,items});
+ let saved=null;
+ try{saved=JSON.parse(localStorage.getItem(CHECKOUT_IDEMPOTENCY_STORAGE_KEY)||'null')}catch(_){}
+ if(saved&&saved.fingerprint===fingerprint&&typeof saved.key==='string'&&saved.key.length>=16&&saved.key.length<=100)return saved.key;
+ if(typeof crypto==='undefined'||typeof crypto.randomUUID!=='function')throw new Error('Secure order retry protection is unavailable in this browser. Please update your browser and try again.');
+ const key=crypto.randomUUID();
+ localStorage.setItem(CHECKOUT_IDEMPOTENCY_STORAGE_KEY,JSON.stringify({fingerprint,key}));
+ return key;
+}
+function clearCheckoutIdempotencyKey(){
+ localStorage.removeItem(CHECKOUT_IDEMPOTENCY_STORAGE_KEY);
+}
 function hero(k,t,d){return '<header class="route-hero"><div class="eyebrow">'+esc(k)+'</div><h1>'+esc(t)+'</h1><p>'+esc(d)+'</p></header>'}
 function product(id){
  if(typeof catalogueState!=='undefined'&&catalogueState==='loading'){
@@ -103,11 +117,18 @@ async function renderCheckoutRoute(){
    button.disabled=true;button.textContent='Placing your order…';message.textContent='Please wait while we securely verify your watch, stock and delivery address.';   try{
     const cfg=window.IQA_SUPABASE_CONFIG,session=(await client.auth.getSession()).data.session;
     if(!cfg?.url||!cfg?.publishableKey||!session?.access_token)throw new Error('Your secure session expired. Please sign in again.');
-    const requestKey=crypto.randomUUID(),orderItems=entries.map(x=>({product_id:String(x.p.id||''),variant_id:String(x.p.variantId||''),quantity:Number(x.qty)}));
+    const orderItems=entries.map(x=>({product_id:String(x.p.id||''),variant_id:String(x.p.variantId||''),quantity:Number(x.qty)}));
+    const requestKey=getCheckoutIdempotencyKey(user.id,selected.id,orderItems);
     if(orderItems.some(x=>!(/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(x.product_id))))throw new Error('A selected watch is missing its catalogue product reference. Please refresh your bag.');
     const response=await fetch(cfg.url.replace(/\/$/,'')+'/functions/v1/iqa-customer-checkout',{method:'POST',headers:{'Content-Type':'application/json','apikey':cfg.publishableKey,'Authorization':'Bearer '+session.access_token,'x-idempotency-key':requestKey},body:JSON.stringify({address_id:selected.id,items:orderItems})});
     const result=await response.json().catch(()=>({}));if(!response.ok||result.ok!==true)throw new Error(result.error||'We could not place your order. Please try again.');
     const order=result.order||{};
+    clearCheckoutIdempotencyKey();
+    if(typeof cart!=='undefined'&&cart&&typeof cart==='object'){
+     for(const item of orderItems){if(Number(cart[item.product_id]||0)===item.quantity)delete cart[item.product_id];}
+    }
+    if(typeof updateCounts==='function')updateCounts();
+    sessionStorage.removeItem('iqa-checkout-address');
     infoRoute('IQA WATCHES · ORDER CONFIRMED','Thank you. Your order is placed.','Your Cash on Delivery order has been recorded successfully.','<section class="checkout-section order-success" role="status"><div class="eyebrow">ORDER CONFIRMATION</div><h2>Order placed successfully ✓</h2><p>Your order number is <strong>'+esc(order.order_number||'Confirmed')+'</strong>.</p><p>Payment method: <strong>Cash on Delivery</strong></p><p>Order total: <strong>'+money(Number(order.payable_total??total))+'</strong></p><p class="route-note">Please keep your phone available for delivery coordination. Payment is due when the watch is delivered.</p><a class="button" href="#orders">View my orders</a> <a class="button light" href="#shop">Continue shopping</a></section>');
    }catch(err){message.textContent=err.message||'Order could not be placed. Please try again.';button.disabled=false;button.textContent='Confirm COD Order';}
   });

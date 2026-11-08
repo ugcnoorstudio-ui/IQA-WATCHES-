@@ -1,12 +1,17 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 
-const ORIGIN = "https://ugcnoorstudio-ui.github.io";
-const CORS = {
-  "Access-Control-Allow-Origin": ORIGIN,
-  "Access-Control-Allow-Headers": "authorization, apikey, content-type, x-client-info",
-  "Access-Control-Allow-Methods": "POST, OPTIONS",
-  "Vary": "Origin"
-};
+const ALLOWED_ORIGINS = new Set(["https://ugcnoorstudio-ui.github.io", "https://iqa-watches-storefront.pages.dev"]);
+function allowedOrigin(origin: string | null): boolean {
+  return !!origin && (ALLOWED_ORIGINS.has(origin) || /^https:\/\/pr-[1-9][0-9]*\.iqa-watches-storefront\.pages\.dev$/.test(origin));
+}
+function corsHeaders(origin: string | null): Record<string, string> {
+  const headers: Record<string, string> = {
+    "Access-Control-Allow-Headers": "authorization, apikey, content-type, x-client-info",
+    "Access-Control-Allow-Methods": "POST, OPTIONS", "Vary": "Origin",
+  };
+  if (allowedOrigin(origin)) headers["Access-Control-Allow-Origin"] = origin;
+  return headers;
+}
 const env = (name: string) => Deno.env.get(name)?.trim() || "";
 function secretValue(name: string) {
   const raw = env(name);
@@ -14,19 +19,24 @@ function secretValue(name: string) {
   try { const parsed = JSON.parse(raw); return typeof parsed?.default === "string" ? parsed.default : raw; }
   catch { return raw; }
 }
-function out(body: unknown, status = 200) {
+function out(body: unknown, status = 200, origin: string | null = null) {
   return new Response(JSON.stringify(body), {
     status,
-    headers: { ...CORS, "Content-Type": "application/json", "Cache-Control": "no-store" }
+    headers: { ...corsHeaders(origin), "Content-Type": "application/json", "Cache-Control": "no-store" }
   });
 }
 
 Deno.serve(async (req: Request) => {
-  if (req.method === "OPTIONS") return new Response("ok", { headers: CORS });
-  if (req.method !== "POST") return out({ error: "POST required" }, 405);
-  if (req.headers.get("origin") !== ORIGIN) return out({ error: "Origin not allowed" }, 403);
+  const origin = req.headers.get("origin");
+  const send = (body: unknown, status = 200) => out(body, status, origin);
+  if (req.method === "OPTIONS") {
+    if (!allowedOrigin(origin)) return new Response("Origin not allowed.", { status: 403 });
+    return new Response("ok", { headers: corsHeaders(origin) });
+  }
+  if (req.method !== "POST") return send({ error: "POST required" }, 405);
+  if (!allowedOrigin(origin)) return send({ error: "Origin not allowed" }, 403);
   const bearer = (req.headers.get("authorization") || "").match(/^Bearer\s+(.+)$/i);
-  if (!bearer) return out({ error: "Sign in required" }, 401);
+  if (!bearer) return send({ error: "Sign in required" }, 401);
 
   const supabaseUrl = env("SUPABASE_URL");
   const anon = env("SUPABASE_ANON_KEY") || secretValue("SUPABASE_PUBLISHABLE_KEYS");
@@ -35,23 +45,23 @@ Deno.serve(async (req: Request) => {
   const apiKey = env("CLOUDINARY_API_KEY");
   const apiSecret = env("CLOUDINARY_API_SECRET");
   if (!supabaseUrl || !anon || !service || !cloud || !apiKey || !apiSecret) {
-    return out({ error: "Cloudinary media library configuration is incomplete." }, 503);
+    return send({ error: "Cloudinary media library configuration is incomplete." }, 503);
   }
 
   const auth = await fetch(supabaseUrl + "/auth/v1/user", {
     headers: { apikey: anon, Authorization: "Bearer " + bearer[1] }
   });
-  if (!auth.ok) return out({ error: "Invalid or expired staff session." }, 401);
+  if (!auth.ok) return send({ error: "Invalid or expired staff session." }, 401);
   const user = await auth.json();
-  if (!user?.id) return out({ error: "Unable to verify staff identity." }, 401);
+  if (!user?.id) return send({ error: "Unable to verify staff identity." }, 401);
 
   const profile = await fetch(supabaseUrl + "/rest/v1/staff_profiles?select=user_id,role,active&user_id=eq." + encodeURIComponent(user.id), {
     headers: { apikey: service, Authorization: "Bearer " + service, Accept: "application/json" }
   });
-  if (!profile.ok) return out({ error: "Could not verify staff permissions." }, 503);
+  if (!profile.ok) return send({ error: "Could not verify staff permissions." }, 503);
   const profiles = await profile.json();
   if (!Array.isArray(profiles) || profiles.length !== 1 || profiles[0].role !== "owner" || profiles[0].active !== true) {
-    return out({ error: "Active owner permission is required." }, 403);
+    return send({ error: "Active owner permission is required." }, 403);
   }
 
   const endpoint = new URL("https://api.cloudinary.com/v1_1/" + encodeURIComponent(cloud) + "/resources/image/upload");
@@ -62,7 +72,7 @@ Deno.serve(async (req: Request) => {
   });
   const payload = await response.json().catch(() => ({}));
   if (!response.ok || !Array.isArray(payload.resources)) {
-    return out({
+    return send({
       error: "Cloudinary asset listing failed.",
       detail: payload?.error?.message || "Unexpected Admin API response"
     }, 502);
@@ -84,7 +94,7 @@ Deno.serve(async (req: Request) => {
     asset.secure_url.startsWith("https://res.cloudinary.com/" + cloud + "/")
   );
 
-  return out({
+  return send({
     ok: true,
     cloud_name: cloud,
     total: resources.length,

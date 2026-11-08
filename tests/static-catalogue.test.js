@@ -7,14 +7,24 @@ const root = path.join(__dirname, '..');
 const html = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
 const catalogue = JSON.parse(fs.readFileSync(path.join(root, 'data', 'catalogue.json'), 'utf8'));
 
-test('public storefront catalogue is served as a small static snapshot, not fetched from Supabase', () => {
+test('public storefront reads the approved catalogue through the read-only Edge Function', () => {
   const start = html.indexOf('async function loadStorefrontCatalogue(){');
   const end = html.indexOf('function renderProducts(){', start);
   assert.ok(start >= 0 && end > start, 'catalogue loader must exist');
   const loader = html.slice(start, end);
-  assert.match(loader, /data\/catalogue\.json/);
+  assert.match(loader, /functions\/v1\/iqa-public-catalogue/);
   assert.match(loader, /fetch\(catalogueUrl/);
-  assert.doesNotMatch(loader, /storefrontClient|\.from\(['"]products|product_variants|product_media/);
+  assert.doesNotMatch(loader, /storefrontClient|\.from\(['"]products|product_variants|product_media|service_role/);
+});
+
+test('static JSON is only a preview fallback and is visibly labelled as cached', () => {
+  const start = html.indexOf('async function loadStorefrontCatalogue(){');
+  const end = html.indexOf('function renderProducts(){', start);
+  const loader = html.slice(start, end);
+  assert.ok(loader.includes("new URL('data/catalogue.json'"));
+  assert.match(loader, /catalogueSourceForLoad='snapshot'/);
+  assert.match(html, /Cached catalogue preview only/);
+  assert.match(html, /Current price and stock are revalidated at checkout/);
 });
 
 test('static storefront snapshot contains only published-style, in-stock Cloudinary products', () => {
@@ -31,7 +41,7 @@ test('static storefront snapshot contains only published-style, in-stock Cloudin
   assert.equal(new Set(catalogue.products.map(product => product.id)).size, catalogue.products.length);
 });
 
-test('static snapshot includes the three currently approved in-stock watches', () => {
+test('cached preview snapshot contains the three current sample product cards', () => {
   assert.deepEqual(
     catalogue.products.map(product => product.name).sort(),
     [
