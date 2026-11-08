@@ -26,7 +26,7 @@ Source of truth: GitHub `main`, staging Supabase project, and the current storef
 - Ran rollback-only staging fixtures covering valid order creation, exact stock reservation, idempotent replay, duplicate cart rejection, and insufficient-stock rejection.
 - Confirmed temporary customer/product/order fixtures were fully rolled back.
 
-**Production caution:** production migration history currently ends at `20261105075427`; staging has three later migrations: `20261107193017` (eight-image cap), `20261108060625` (checkout idempotency index), and `20261108081229` (checkout payload hardening). Production checkout RPC still has the pre-hardening validation. The hardening migration has been applied and fully tested in staging only. The migration filename is aligned in PR #152 to the exact staging version so it cannot be applied twice under a second timestamp. No production migration has been run; production is three migrations behind staging and catch-up requires separate review and explicit release approval.
+**Production caution:** production migration history currently ends at `20261105075427`; staging has three later migrations: `20261107193017` (eight-image cap), `20261108060625` (checkout idempotency index), and `20261108081229` (checkout payload hardening). Production checkout RPC still has the pre-hardening validation. The hardening migration has been applied and fully tested in staging only. All three migration files missing from the main branch are now restored in PR #152 using the recorded staging versions: `20261107193017` (eight-image cap), `20261108060625` (checkout idempotency order index), and `20261108081229` (checkout payload hardening). The checkout migration filename matches staging exactly, preventing duplicate application. No production migration has been run; production is still three migrations behind staging and catch-up requires separate review and explicit release approval.
 
 **Remaining before real checkout:** configure verified COD and delivery rules, confirm the customer sign-in/address flow, and run a controlled end-to-end test. Shipping/courier integrations remain deferred.
 
@@ -55,6 +55,7 @@ Source of truth: GitHub `main`, staging Supabase project, and the current storef
 - Cloudinary product media integration is present; the product image count is capped at eight.
 - Public catalogue policies expose only approved published/sellable products and available active variants.
 - The staging database currently has no live catalogue records.
+- The staging eight-image limit was exercised with eight temporary media rows; the ninth insert was rejected and the product/media fixtures were fully rolled back (remaining fixture rows: zero).
 
 **Additional production finding:** the live storefront currently reads `data/catalogue.json`, not Supabase directly. The snapshot is dated 2026-11-07. Production currently has 3 approved products, 3 available variants, and 4 Cloudinary media rows; the snapshot contains the same 3 product cards, but there is no confirmed automatic refresh path. This can make displayed price/stock stale after admin changes, although checkout revalidates on the server.
 
