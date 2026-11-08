@@ -14,7 +14,7 @@ These are separate meters. Cached Egress is the immediate reason reported by the
 - Public product images in the database point to Cloudinary; the legacy Supabase Storage objects are retained for rollback and are not deleted.
 - Cloudflare Worker routes are prepared for public content (60-second cache) and catalogue (5-minute cache), with origin-specific CORS and 24-hour preflight caching.
 - The staging Worker has a static cache probe that does not call Supabase. It verifies Cloudflare edge HITs and CORS while Supabase is quota-restricted.
-- The staging workflow checks Supabase availability with one request. If the response is the known Cached Egress 402, it warns and skips Supabase-backed cache tests instead of repeatedly retrying.
+- The staging workflow has `SUPABASE_UPSTREAM_CHECK_ENABLED = "false"` while the project is restricted, so it sends no Supabase request. After the monthly quota resets and a controlled health check succeeds, change it to `true`; the workflow then resumes the upstream and real API cache tests. It never retries repeatedly.
 - The recurring public health monitor checks static Cloudflare Pages resources only; it does not query Supabase Logs or public Edge Functions.
 
 ## Operating rules
