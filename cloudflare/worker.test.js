@@ -104,3 +104,62 @@ test("cache probe is unavailable outside staging", async () => {
   assert.equal(response.status, 404);
   assert.deepEqual(await response.json(), { ok: false, error: "not_found" });
 });
+
+test("production catalogue route stays disabled until its Supabase function is deployed", async () => {
+  const originalFetch = globalThis.fetch;
+  let upstreamCalls = 0;
+  globalThis.fetch = async () => {
+    upstreamCalls += 1;
+    return new Response(JSON.stringify({ ok: true, products: [] }), { status: 200 });
+  };
+  try {
+    const response = await worker.fetch(request("/api/v1/catalogue"), {
+      APP_ENV: "production",
+      PUBLIC_CATALOGUE_ENABLED: "false",
+      SUPABASE_URL: "https://example.supabase.co",
+      SUPABASE_PUBLISHABLE_KEY: "publishable-test-key"
+    });
+    assert.equal(response.status, 404);
+    assert.equal(upstreamCalls, 0);
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
+
+test("public-content caches Supabase Cached Egress 402 for 30 seconds", async () => {
+  const originalFetch = globalThis.fetch;
+  const originalCaches = globalThis.caches;
+  const entries = new Map();
+  let upstreamCalls = 0;
+  globalThis.caches = {
+    default: {
+      match: async (key) => entries.get(key.url)?.clone() || null,
+      put: async (key, response) => { entries.set(key.url, response.clone()); }
+    }
+  };
+  globalThis.fetch = async () => {
+    upstreamCalls += 1;
+    return new Response(JSON.stringify({ message: "exceed_cached_egress_quota" }), { status: 402 });
+  };
+  const env = {
+    SUPABASE_URL: "https://example.supabase.co",
+    SUPABASE_PUBLISHABLE_KEY: "publishable-test-key"
+  };
+  try {
+    const first = await worker.fetch(request("/api/v1/public-content"), env);
+    assert.equal(first.status, 503);
+    assert.equal(first.headers.get("x-content-cache"), "MISS");
+    assert.equal(first.headers.get("retry-after"), "30");
+    assert.equal(first.headers.get("x-iqa-upstream-status"), "402");
+
+    const second = await worker.fetch(request("/api/v1/public-content"), env);
+    assert.equal(second.status, 503);
+    assert.equal(second.headers.get("x-content-cache"), "HIT");
+    assert.equal(second.headers.get("cache-control"), "public, max-age=30, s-maxage=30, stale-while-revalidate=60");
+    assert.equal(upstreamCalls, 1);
+  } finally {
+    globalThis.fetch = originalFetch;
+    if (originalCaches === undefined) delete globalThis.caches;
+    else globalThis.caches = originalCaches;
+  }
+});
