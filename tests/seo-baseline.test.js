@@ -31,7 +31,7 @@ test('sitemap contains only the crawlable canonical homepage, not hash routes', 
 });
 
 test('storefront has a descriptive title and meta description while admin stays noindex', () => {
-  assert.match(html, /<title>IQA WATCHES \\| Elevate your style\\.<\\/title>/);
+  assert.match(html, /<title>IQA WATCHES \| Elevate your style\.<\/title>/);
   assert.match(html, /<meta name="description" content="IQA WATCHES — [^"]+">/);
   assert.match(admin, /<meta name="robots" content="noindex,nofollow">/);
 });
