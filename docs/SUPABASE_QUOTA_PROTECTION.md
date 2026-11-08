@@ -21,7 +21,7 @@ These are separate meters. Cached Egress is the immediate reason reported by the
 - Do not run broad or frequent Supabase Logs Explorer queries. Log Query usage is driven by reading/scanning logs, not by the normal public API request count. Use only a narrow time window and exact filters when an investigation is necessary.
 - Do not remove spend caps or upgrade plans automatically.
 - Keep product media on Cloudinary and large files on Cloudflare R2.
-- Make the legacy `product-images` Storage bucket private through the owner-only Storage API action after the function is deployed and the project can accept API requests. Do not update `storage.buckets` or `storage.objects` directly with SQL.
+- Make the legacy `product-images` Storage bucket private. Because project API requests currently return 402, the owner-only Edge Function cannot be invoked until service is restored. The Supabase Dashboard remains accessible during a Fair Use restriction; the immediate no-cost action is Storage → Buckets → `product-images` → Edit bucket → turn **Public** off and Save. Do not delete objects. The owner-only Storage API action is the automated route once service is restored. Do not update `storage.buckets` or `storage.objects` directly with SQL.
 - Do not route the Production storefront to the Worker until the Production Worker is deployed and Staging confirms real cache HITs.
 
 ## Expected outcome
