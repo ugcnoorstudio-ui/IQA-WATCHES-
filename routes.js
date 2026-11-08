@@ -202,7 +202,7 @@ function renderAuth(mode='login'){
  $r('customerGoogleSignIn').addEventListener('click',async e=>{
   const button=e.currentTarget;button.disabled=true;  try{
    const client=customerAuthClient();
-   const {error}=await client.auth.signInWithOAuth({provider:'google',options:{redirectTo:'https://ugcnoorstudio-ui.github.io/IQA-WATCHES-/'}});
+   const {error}=await client.auth.signInWithOAuth({provider:'google',options:{redirectTo:window.location.origin+window.location.pathname}});
    if(error)throw error;
   }catch(err){$r('authMessage').textContent=err.message||'Google sign-in could not be started.';button.disabled=false;}
  });
