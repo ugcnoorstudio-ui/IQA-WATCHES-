@@ -28,10 +28,15 @@ test('Edge Function CORS never reflects an arbitrary untrusted Origin', () => {
   }
 });
 
-test('preflight requests reject origins outside the allowlist before granting CORS', () => {
-  for (const source of sources) {
+test('preflight requests reject untrusted browser origins before granting CORS', () => {
+  for (const [index, source] of sources.entries()) {
     assert.match(source, /req\.method\s*===\s*["']OPTIONS["']/);
-    assert.match(source, /if\s*\(!allowedOrigin\(origin\)\)/);
+    if (index === 1) {
+      // Public content also supports non-browser callers that omit Origin.
+      assert.match(source, /if\(origin&&!allowedOrigin\(origin\)\)/);
+    } else {
+      assert.match(source, /if\s*\(!allowedOrigin\(origin\)\)/);
+    }
   }
 });
 
