@@ -163,3 +163,26 @@ test("public-content caches Supabase Cached Egress 402 for 30 seconds", async ()
     else globalThis.caches = originalCaches;
   }
 });
+
+test("catalogue route is available only when explicitly enabled for staging", async () => {
+  const originalFetch = globalThis.fetch;
+  let upstreamCalls = 0;
+  globalThis.fetch = async (url) => {
+    upstreamCalls += 1;
+    assert.equal(url, "https://example.supabase.co/functions/v1/iqa-public-catalogue");
+    return new Response(JSON.stringify({ ok: true, products: [] }), { status: 200 });
+  };
+  try {
+    const response = await worker.fetch(request("/api/v1/catalogue"), {
+      APP_ENV: "staging",
+      PUBLIC_CATALOGUE_ENABLED: "true",
+      SUPABASE_URL: "https://example.supabase.co",
+      SUPABASE_PUBLISHABLE_KEY: "publishable-test-key"
+    });
+    assert.equal(response.status, 200);
+    assert.equal(response.headers.get("cache-control"), "public, max-age=300, stale-while-revalidate=600");
+    assert.equal(upstreamCalls, 1);
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
