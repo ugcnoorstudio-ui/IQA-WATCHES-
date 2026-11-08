@@ -3,6 +3,7 @@ main = "src/index.js"
 compatibility_date = "2026-11-07"
 workers_dev = true
 
+# Enable Workers Caching for safe GET responses returned by this Worker.
 [cache]
 enabled = true
 
@@ -10,9 +11,3 @@ enabled = true
 APP_ENV = "staging"
 SUPABASE_URL = "https://qcxgsomqxfoueootxzpv.supabase.co"
 SUPABASE_PUBLISHABLE_KEY = "sb_publishable_EmGoVBFk35Mc7om3eULcgw_tmEXAAA5"
-
-[[d1_databases]]
-binding = "DB"
-database_name = "iqa-watches-staging"
-database_id = "REPLACE_WITH_STAGING_D1_DATABASE_ID"
-migrations_dir = "migrations"
