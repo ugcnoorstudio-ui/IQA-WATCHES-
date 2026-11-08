@@ -17,6 +17,16 @@ test('public storefront reads the approved catalogue through the read-only Edge 
   assert.doesNotMatch(loader, /storefrontClient|\.from\(['"]products|product_variants|product_media|service_role/);
 });
 
+test('static JSON is only a preview fallback and is visibly labelled as cached', () => {
+  const start = html.indexOf('async function loadStorefrontCatalogue(){');
+  const end = html.indexOf('function renderProducts(){', start);
+  const loader = html.slice(start, end);
+  assert.match(loader, /new URL\('data\\/catalogue\\.json'/);
+  assert.match(loader, /catalogueSourceForLoad='snapshot'/);
+  assert.match(html, /Cached catalogue preview only/);
+  assert.match(html, /Current price and stock are revalidated at checkout/);
+});
+
 test('static storefront snapshot contains only published-style, in-stock Cloudinary products', () => {
   assert.equal(catalogue.version, 1);
   assert.ok(catalogue.products.length >= 1);
@@ -31,7 +41,7 @@ test('static storefront snapshot contains only published-style, in-stock Cloudin
   assert.equal(new Set(catalogue.products.map(product => product.id)).size, catalogue.products.length);
 });
 
-test('static snapshot includes the three currently approved in-stock watches', () => {
+test('cached preview snapshot contains the three current sample product cards', () => {
   assert.deepEqual(
     catalogue.products.map(product => product.name).sort(),
     [
