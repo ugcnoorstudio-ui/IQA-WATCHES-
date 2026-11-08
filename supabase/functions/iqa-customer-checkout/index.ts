@@ -28,7 +28,7 @@ function validUuid(value: unknown): value is string {
 }
 Deno.serve(async (req: Request) => {
   const origin = req.headers.get("origin") || "";
-  const respond = (status: number, body: Record<string, unknown>) => respond(status, body, origin);
+  const respond = (status: number, body: Record<string, unknown>) => reply(status, body, origin);
   if (req.method === "OPTIONS") {
     return ALLOWED_ORIGINS.has(origin)
       ? new Response("ok", { headers: corsHeaders(origin) })
