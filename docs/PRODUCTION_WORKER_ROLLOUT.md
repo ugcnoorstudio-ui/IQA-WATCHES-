@@ -1,6 +1,6 @@
 # Production Cloudflare Worker rollout
 
-The Production Worker is prepared as `iqa-watches-api-production`, but its deployment is manual and requires the workflow input `confirm_production_deploy = YES`. The workflow does not switch the storefront to the Worker and does not call Supabase during health validation.
+The Production Worker is prepared as `iqa-watches-api-production`, but its deployment is manual and requires the workflow input `confirm_production_deploy = YES`. The Worker-level `SUPABASE_UPSTREAM_CHECK_ENABLED = "false"` gate blocks all public-content, catalogue, and Auth upstream requests while the project is restricted. The workflow health validation calls only `/healthz`.
 
 ## Safe rollout sequence
 
@@ -16,5 +16,7 @@ The Production Worker is prepared as `iqa-watches-api-production`, but its deplo
 
 - The Production Worker uses the Production project URL and publishable key only; no service-role key is stored in Cloudflare or GitHub.
 - The Production catalogue route is disabled until the corresponding Edge Function is deployed and explicitly enabled.
+- The global upstream pause is enforced inside the Worker itself, not only in CI. When set to `false`, public content, catalogue and Auth routes return a local 503 without contacting Supabase.
+- Do not switch the storefront proxy URL while the global upstream pause is false. After quota recovery, enable one controlled upstream route at a time and verify cache HITs before enabling the storefront proxy.
 - The 402 Cached Egress response is negatively cached for 30 seconds by the Worker, limiting repeated upstream attempts while the project is restricted.
 - The deployment workflow is manual-only and never changes the storefront proxy URL.
