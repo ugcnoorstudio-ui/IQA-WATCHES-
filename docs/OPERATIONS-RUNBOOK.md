@@ -106,7 +106,7 @@ Before launch, the business owner must record (in the password manager / interna
 ## 10. Known open release blockers at last review
 
 - PR #153 is open; the Cloudflare Workers external build check is failing. Cloudflare Pages preview and GitHub Actions runs succeeded, but this does not clear the Worker build failure.
-- Supabase Auth/Edge Function runtime requests returned HTTP 402 quota/usage errors; runtime smoke tests are blocked.
+- Supabase Auth/Edge Function runtime requests returned HTTP 402 responses; the available log rows do not expose the gateway's reason, so do not assume quota exhaustion without the dashboard response/error details. Runtime smoke tests remain blocked.
 - Production is three migrations behind staging.
 - Production leaked-password protection is disabled.
 - Staging currently has no live catalogue records; product/customer/order data must be seeded and verified through approved workflows before launch.
@@ -143,3 +143,20 @@ The production media count is currently below the eight-image limit. Migration `
 Cloudflare's GitHub integration posted a failed Worker build for PR #154's documentation-only commit `a9a6f1bf3e57c78ce212f39a9452aecc3de4dd3d` (build ID `c656a851-532b-4e55-a8c9-7907ea6e1b76`). Similar failed Worker build notifications exist on PR #153 commits that do not change Worker source. This suggests the check may be triggered by the repository integration/build configuration independently of changed Worker files; it does not establish the underlying build error.
 
 The connected tools could not access the authenticated Cloudflare build log. Do not infer the cause or change the Worker build command blindly. Inspect the linked build's full log in Cloudflare Dashboard, confirm the configured repository, production/staging environment, root directory, build command, deploy command, and branch filters. If the Worker service is intended to deploy only from `main`, ensure pull-request builds are validation-only and cannot deploy production. Record the exact error before changing configuration.
+
+
+## 13. Supabase HTTP 402 log review — 2026-11-08
+
+A read-only review of the latest 24-hour unified logs found these production Edge Function gateway responses:
+
+| Endpoint | Method | HTTP status | Events |
+|---|---:|---:|---:|
+| `/functions/v1/iqa-public-content` | OPTIONS | 402 | 14,789 |
+| `/functions/v1/iqa-public-content` | GET | 402 | 391 |
+| `/functions/v1/iqa-public-catalogue` | GET | 402 | 3,840 |
+
+Staging showed 12 OPTIONS and 12 GET responses with HTTP 402 for `iqa-public-content` in the queried log window. The available log attributes show gateway status and request metadata, but no response body or explicit reason for the 402. Therefore the earlier assumption that these responses necessarily mean quota exhaustion is **not verified**. The 402 requests do not prove that the Edge Function code itself executed; the gateway may have rejected them before invocation.
+
+The production 402 traffic is unusually concentrated in cloud-hosted US networks, with requests frequently lacking an Origin header. This is an observation only—not proof of malicious activity, a DDoS, or a specific crawler. Do not block entire networks or change CORS based on this alone.
+
+**Next diagnostic:** the project owner should inspect Supabase Dashboard project status, billing/usage, Edge Functions deployment/runtime state, API gateway response details, and support notices for both project refs. Capture the exact 402 response body or request ID correlation from provider support if available. Do not upgrade a plan, disable functions, weaken auth, or change RLS as a workaround. Re-run one controlled staging smoke test only after the gateway returns a normal response.
