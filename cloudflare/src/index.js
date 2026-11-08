@@ -98,7 +98,7 @@ async function publicCatalogue(request, env) {
     // current price and stock against Supabase and never trusts this cached snapshot.
     return json(payload, 200, {
       ...corsHeaders(origin),
-      "cache-control": "public, max-age=300, stale-while-revalidate=3600"
+      "cache-control": "public, max-age=300, stale-while-revalidate=600"
     });
   } catch {
     return json({ ok: false, error: "catalogue_temporarily_unavailable" }, 503, corsHeaders(origin));
