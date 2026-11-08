@@ -3,6 +3,9 @@ main = "src/index.js"
 compatibility_date = "2026-11-07"
 workers_dev = true
 
+[cache]
+enabled = true
+
 [vars]
 APP_ENV = "staging"
 SUPABASE_URL = "https://qcxgsomqxfoueootxzpv.supabase.co"
