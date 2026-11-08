@@ -27,7 +27,7 @@ Source of truth: GitHub `main`, staging Supabase project, and the current storef
 - Ran rollback-only staging fixtures covering valid order creation, exact stock reservation, idempotent replay, duplicate cart rejection, and insufficient-stock rejection.
 - Confirmed temporary customer/product/order fixtures were fully rolled back.
 
-**Production caution:** production migration history currently ends at `20261105075427`; staging has three later migrations: `20261107193017` (eight-image cap), `20261108060625` (checkout idempotency index), and `20261108081229` (checkout payload hardening). Production checkout RPC still has the pre-hardening validation. The hardening migration has been applied and fully tested in staging only. All three migration files missing from the main branch are now restored in PR #152 using the recorded staging versions: `20261107193017` (eight-image cap), `20261108060625` (checkout idempotency order index), and `20261108081229` (checkout payload hardening). The checkout migration filename matches staging exactly, preventing duplicate application. No production migration has been run; production is still three migrations behind staging and catch-up requires separate review and explicit release approval.
+**Production caution:** production migration history currently ends at `20261105075427`; staging has three later migrations: `20261107193017` (eight-image cap), `20261108060625` (checkout idempotency index), and `20261108081229` (checkout payload hardening). Production checkout RPC still has the pre-hardening validation. The hardening migration has been applied and fully tested in staging only. All three migration files missing from the main branch are now restored in PR #153 using the recorded staging versions: `20261107193017` (eight-image cap), `20261108060625` (checkout idempotency order index), and `20261108081229` (checkout payload hardening). The checkout migration filename matches staging exactly, preventing duplicate application. No production migration has been run; production is still three migrations behind staging and catch-up requires separate review and explicit release approval.
 
 **Remaining before real checkout:** configure verified COD and delivery rules, confirm the customer sign-in/address flow, and run a controlled end-to-end test. Shipping/courier integrations remain deferred.
 
@@ -60,7 +60,7 @@ Source of truth: GitHub `main`, staging Supabase project, and the current storef
 
 **Additional production finding:** the live storefront currently reads `data/catalogue.json`, not Supabase directly. The snapshot is dated 2026-11-07. Production currently has 3 approved products, 3 available variants, and 4 Cloudinary media rows; the snapshot contains the same 3 product cards, but there is no confirmed automatic refresh path. This can make displayed price/stock stale after admin changes, although checkout revalidates on the server.
 
-**In progress in PR #152:** the read-only `iqa-public-catalogue` Edge Function is already deployed once to staging with `verify_jwt=false`; PR #152 carries the current source, dynamic CORS allowlist, public-catalogue regression tests and storefront loader switch. PR #150 has already merged the shared CORS/OAuth allowlist for checkout, cancellation, public content, admin health and image upload. PR #152 extends the same allowlist to admin mutation, Cloudinary media library and public catalogue. The static JSON remains only as a clearly labelled preview fallback. Staging has no catalogue rows, so a real product payload cannot be exercised. Staging and production Edge Function/Auth requests are currently returning HTTP 402 due to Supabase quota/usage limits; do not claim live verification or promote production functions until the quota issue is resolved and staging smoke tests pass.
+**In progress in PR #153:** the read-only `iqa-public-catalogue` Edge Function is already deployed once to staging with `verify_jwt=false`; PR #153 carries the current source, dynamic CORS allowlist, public-catalogue regression tests and storefront loader switch. PR #150 has already merged the shared CORS/OAuth allowlist for checkout, cancellation, public content, admin health and image upload. PR #153 extends the same allowlist to admin mutation, Cloudinary media library and public catalogue. The static JSON remains only as a clearly labelled preview fallback. Staging has no catalogue rows, so a real product payload cannot be exercised. Staging and production Edge Function/Auth requests are currently returning HTTP 402 due to Supabase quota/usage limits; do not claim live verification or promote production functions until the quota issue is resolved and staging smoke tests pass.
 
 **Known UI limitation:** the current storefront product model selects one available variant per product. Products with multiple sellable variants need a variant selector before those options are offered to customers.
 
@@ -83,7 +83,7 @@ Source of truth: GitHub `main`, staging Supabase project, and the current storef
 
 ## Phase 5 — Storefront experience, accessibility, performance, and SEO
 
-**Status: Existing experience and browser tests; live-catalogue, canonical metadata, robots.txt, sitemap and SEO regression coverage are in PR #152 pending final CI/browser checks.**
+**Status: Existing experience and browser tests; live-catalogue, canonical metadata, robots.txt, sitemap and SEO regression coverage are in PR #153 pending final CI/browser checks.**
 
 - Storefront has product detail pages, gallery controls, compare, recently viewed, category/brand routes, and customer-facing delivery-information placeholders.
 - Product detail UI uses approved catalogue data and avoids claiming ratings that do not exist.
@@ -129,9 +129,43 @@ Source of truth: GitHub `main`, staging Supabase project, and the current storef
 - Checkout Edge Function: JWT verification enabled.
 - Public content Edge Function: JWT verification disabled by design for published public content only.
 - Public catalogue Edge Function: deployed once to staging with JWT verification disabled; it is read-only and filters to approved, available products.
-- Shared CORS/OAuth allowlist source changes are in merged PR #150; additional admin/media/catalogue CORS source changes are in PR #152. Do not redeploy production functions from the PR branch.
+- Shared CORS/OAuth allowlist source changes are in merged PR #150; additional admin/media/catalogue CORS source changes are in PR #153. Do not redeploy production functions from the PR branch.
 - HTTP 402 quota/usage failures are confirmed in both staging and production Auth/Edge Function logs. Treat runtime smoke tests as blocked until the owner resolves the quota; do not retry in a loop or mark them passed.
 
 ## Completion rule
 
 A phase is complete only when code, tests, staging verification, and documentation all pass. A skipped external integration is marked deferred—not complete. Production deployment is not a substitute for end-to-end business acceptance.
+
+## Execution update — 2026-11-08
+
+### Verified repository and deployment state
+- PR #146 was merged after its Worker tests, storefront checks, and Cloudflare preview checks passed. The staging Worker deployment ran on `main`; the deployment workflow and `/healthz` verification completed successfully.
+- The `main` Cloudflare Pages deployment and GitHub Pages deployment triggered by that merge both completed successfully. The recurring public-health monitor on `main` also completed successfully. This redeployed the existing main storefront; it did not deploy PR #153 or apply a database migration.
+- PR #145 was closed only after confirming its sole changed file, `supabase/functions/iqa-admin-mutate/index.ts`, was preserved byte-for-byte in PR #153.
+- PR #149's five Edge Function files not listed in PR #153 are already present in `main` with the merged PR #150 CORS allowlist changes. PR #152's changed-file set is fully represented in PR #153. PR #151's unique title/description and admin `noindex` assertions have been restored into `tests/seo-baseline.test.js`.
+
+### PR #153 current work
+- The CORS regression test now accepts either direct origin validation or a request-origin value validated before the OPTIONS branch. Runtime CORS allowlists were not weakened.
+- The storefront checkout now persists an idempotency key across retries, scoped to the authenticated user, selected address, and exact cart lines. It reuses that key after transient failures, clears it only after confirmed order creation, and removes only cart quantities that still match the confirmed order.
+- Added `tests/checkout-idempotency.test.js` to exercise key reuse, key rotation on user/address/cart changes, and successful clearing.
+- SEO regression coverage now also checks the descriptive homepage title, meta description, and private-admin `noindex,nofollow`.
+- The previous PR #153 test run passed syntax and local regression tests, including the new checkout idempotency unit test. Desktop/mobile Playwright checks and the isolated Cloudflare preview are still required on the latest commit before PR #153 can be considered CI-verified.
+
+### Fresh staging checks
+- The staging checkout RPC was exercised with SQL NULL, JSON null, object, empty-array, non-object line, and duplicate-variant payloads. Each was rejected at the database boundary with its expected error.
+- `checkout_idempotency` remained at zero rows after those negative tests; no staging order, customer, address, product, or inventory fixture was created or changed.
+- Staging currently has zero products, variants, customers, addresses, orders, order items, and checkout idempotency rows. Positive checkout, stock-reservation, concurrency, and replay tests therefore cannot be independently repeated without creating disposable fixtures. The previous rollback-only test results remain recorded above, but are not represented as freshly rerun here.
+
+### Production and runtime blockers
+- Production's `iqa_create_customer_order` still has the pre-hardening SQL NULL cart check and lacks the duplicate-variant guard. It retains row-level stock locking, but the missing payload guards are a critical production data-integrity risk.
+- Production is missing staging migrations `20261107193017`, `20261108060625`, and `20261108081229`. No production migration has been applied.
+- Production and staging Edge Function deployments are not fully synchronized with the current source. Production does not yet have `iqa-public-catalogue`; several deployed functions still have the older single-origin CORS behavior. The current source fixes are not considered runtime-verified.
+- Staging Edge Function logs contain HTTP 402 quota/usage responses. A separate HTTP 401 invalid-key event is not treated as a quota success or a passed test. The connected tools do not expose the billing detail behind the 402; check the Supabase dashboard before attempting further runtime requests. Do not retry in a loop.
+- Production Auth security advisor still reports leaked-password protection disabled. The authenticated customer-cancellation SECURITY DEFINER warning remains an intentional reviewed path: it uses an empty search path, verifies `auth.uid()` and customer ownership, restricts cancellation to eligible pending/confirmed COD orders, locks inventory, and releases reserved stock transactionally.
+- All 26 public tables have RLS enabled in both projects. The checkout idempotency table intentionally has no user-facing policy. Multiple permissive SELECT policy and unused-index warnings remain review items; no policy or index was blindly removed.
+- The current product catalogue still exposes only one available variant per product and does not yet implement server pagination. Product detail URLs remain hash routes; the sitemap intentionally contains only the crawlable homepage, and product structured data is not yet implemented.
+- Legal pages remain preview/draft content: seller identity, support contacts, grievance officer, returns/refunds, warranty coverage, privacy terms, and authenticity/sourcing claims require verified business information and legal review.
+- Backup schedule and restore capability remain unverified through the connected tools. No Storage files or customer data were deleted.
+
+### Current release gate
+Do not merge PR #153 or promote Edge Functions until the staging 402 blocker is resolved, source-controlled Edge Functions are deployed and smoke-tested in staging, and the public-catalogue/checkout paths pass against disposable staging fixtures. Do not apply the three production migrations until staging verification is complete and the owner gives explicit production approval.
