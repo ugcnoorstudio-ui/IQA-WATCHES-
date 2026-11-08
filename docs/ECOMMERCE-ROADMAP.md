@@ -26,7 +26,7 @@ Source of truth: GitHub `main`, staging Supabase project, and the current storef
 - Ran rollback-only staging fixtures covering valid order creation, exact stock reservation, idempotent replay, duplicate cart rejection, and insufficient-stock rejection.
 - Confirmed temporary customer/product/order fixtures were fully rolled back.
 
-**Production caution:** the production checkout RPC still has the pre-hardening payload validation. The new migration has been applied and fully tested in staging, but it has not been applied to production. Production deployment requires a deliberate migration step after the owner accepts the release.\n\n**Remaining before real checkout:** configure verified COD and delivery rules, confirm the customer sign-in/address flow, and run a controlled end-to-end test. Shipping/courier integrations remain deferred.
+**Production caution:** production migration history currently ends at `20261105075427`; staging has three later migrations: `20261107193017` (eight-image cap), `20261108060625` (checkout idempotency index), and `20261108081229` (checkout payload hardening). Production checkout RPC still has the pre-hardening validation. The hardening migration has been applied and fully tested in staging only. The migration filename in the PR is being aligned to the recorded staging version to prevent duplicate application. No production migration has been run; production catch-up requires a deliberate release decision.\n\n**Remaining before real checkout:** configure verified COD and delivery rules, confirm the customer sign-in/address flow, and run a controlled end-to-end test. Shipping/courier integrations remain deferred.
 
 ## Phase 2 — Authentication, authorization, RLS, and customer privacy
 
