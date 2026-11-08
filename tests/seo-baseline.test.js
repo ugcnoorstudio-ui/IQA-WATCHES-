@@ -2,10 +2,11 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 
-const [html, robots, sitemap] = await Promise.all([
+const [html, robots, sitemap, admin] = await Promise.all([
   readFile(new URL('../index.html', import.meta.url), 'utf8'),
   readFile(new URL('../robots.txt', import.meta.url), 'utf8'),
   readFile(new URL('../sitemap.xml', import.meta.url), 'utf8'),
+  readFile(new URL('../admin/index.html', import.meta.url), 'utf8'),
 ]);
 
 const canonical = 'https://iqa-watches-storefront.pages.dev/';
@@ -27,4 +28,10 @@ test('robots file allows public storefront crawling and points to the sitemap', 
 test('sitemap contains only the crawlable canonical homepage, not hash routes', () => {
   assert.ok(sitemap.includes('<loc>' + canonical + '</loc>'));
   assert.doesNotMatch(sitemap, /#(?:product|shop|category|brand)\//);
+});
+
+test('storefront has a descriptive title and meta description while admin stays noindex', () => {
+  assert.match(html, /<title>IQA WATCHES \\| Elevate your style\\.<\\/title>/);
+  assert.match(html, /<meta name="description" content="IQA WATCHES — [^"]+">/);
+  assert.match(admin, /<meta name="robots" content="noindex,nofollow">/);
 });
