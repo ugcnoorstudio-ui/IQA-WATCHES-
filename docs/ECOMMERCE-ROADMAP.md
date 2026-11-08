@@ -26,13 +26,13 @@ Source of truth: GitHub `main`, staging Supabase project, and the current storef
 - Ran rollback-only staging fixtures covering valid order creation, exact stock reservation, idempotent replay, duplicate cart rejection, and insufficient-stock rejection.
 - Confirmed temporary customer/product/order fixtures were fully rolled back.
 
-**Remaining before real checkout:** seed approved products and variants, create a real customer profile/address, configure verified COD and delivery rules, and run a controlled end-to-end test. These are not configured in staging yet.
+**Production caution:** the production checkout RPC still has the pre-hardening payload validation. The new migration has been applied and fully tested in staging, but it has not been applied to production. Production deployment requires a deliberate migration step after the owner accepts the release.\n\n**Remaining before real checkout:** configure verified COD and delivery rules, confirm the customer sign-in/address flow, and run a controlled end-to-end test. Shipping/courier integrations remain deferred.
 
 ## Phase 2 — Authentication, authorization, RLS, and customer privacy
 
 **Status: Baseline audit completed; targeted remediation remains.**
 
-- All 26 public tables currently have RLS enabled.
+- All 26 public tables have RLS enabled in both staging and production (26/26 verified in each).
 - Customer addresses are scoped through the authenticated customer's own profile.
 - Admin mutation Edge Function verifies the user session and active owner role before privileged RPC calls.
 - Checkout order-creation RPC is not executable by anon or authenticated roles.
@@ -88,7 +88,7 @@ Source of truth: GitHub `main`, staging Supabase project, and the current storef
 - Confirm privacy policy, terms, returns/refunds policy, warranty wording, contact details, business identity, tax/GST treatment, and customer-consent language with the owner.
 - Verify support inbox and response ownership.
 - Run final accessibility, performance, security-advisor, dependency, and browser regression checks.
-- No custom domain is assumed; use the verified Cloudflare Pages production hostname. GitHub Pages remains a fallback until the owner decides otherwise.
+- No custom domain is assumed; use the verified Cloudflare Pages production hostname. GitHub Pages remains a static fallback; authenticated admin/checkout APIs are being aligned to the verified Cloudflare production origin.
 
 ## Owner actions required before real public sales
 
@@ -97,7 +97,7 @@ Source of truth: GitHub `main`, staging Supabase project, and the current storef
 3. Review and approve the legal/policy copy and warranty/return terms.
 4. Configure COD and delivery coverage/charges only when ready to accept those orders.
 5. Provide a real test customer account and address for a controlled checkout rehearsal.
-6. Approve the final production launch after backup/restore and security checks.
+6. Add the Cloudflare Pages URL to Supabase Auth Site URL / Redirect URLs and verify Google OAuth on the Cloudflare host.\n7. Approve the production checkout RPC hardening migration after staging verification.\n8. Confirm backup schedule and perform a restore test in the Supabase dashboard.\n9. Approve the final production launch after backup/restore and security checks.
 
 ## Current verified staging observations
 
