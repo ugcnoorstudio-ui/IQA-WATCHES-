@@ -3,6 +3,10 @@ main = "src/index.js"
 compatibility_date = "2026-11-07"
 workers_dev = true
 
+# Enable Workers Caching for safe GET responses returned by this Worker.
+[cache]
+enabled = true
+
 [vars]
 APP_ENV = "staging"
 SUPABASE_URL = "https://qcxgsomqxfoueootxzpv.supabase.co"
