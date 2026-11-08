@@ -2,6 +2,10 @@ name: Provision and deploy IQA WATCHES staging API
 
 on:
   workflow_dispatch:
+  pull_request:
+    paths:
+      - '.github/workflows/deploy-cloudflare-staging.yml'
+      - 'cloudflare/**'
   push:
     branches:
       - main
@@ -18,7 +22,7 @@ concurrency:
 
 jobs:
   test-staging:
-    if: github.ref == 'refs/heads/main'
+    if: github.event_name == 'pull_request' || github.ref == 'refs/heads/main'
     runs-on: ubuntu-24.04
     timeout-minutes: 10
     defaults:
