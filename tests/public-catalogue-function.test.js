@@ -27,6 +27,6 @@ test('public catalogue delivers Cloudinary-only images and read-only cached resp
 });
 
 test('public catalogue CORS is limited to the current storefront origin', () => {
-  assert.match(source, /https:\/\/ugcnoorstudio-ui\.github\.io/);
+  assert.match(source, /https:\/\/iqa-watches-storefront\.pages\.dev/);
   assert.match(source, /origin !== ALLOWED_ORIGIN/);
 });
