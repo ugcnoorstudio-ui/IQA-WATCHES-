@@ -26,15 +26,10 @@ function getBearer(request) {
 }
 
 async function verifyWithSupabase(token, env) {
-  if (!env.SUPABASE_URL || !env.SUPABASE_PUBLISHABLE_KEY) {
-    return { configured: false, user: null };
-  }
+  if (!env.SUPABASE_URL || !env.SUPABASE_PUBLISHABLE_KEY) return { configured: false, user: null };
   const base = env.SUPABASE_URL.replace(/\\/+$/, "");
   const response = await fetch(base + "/auth/v1/user", {
-    headers: {
-      apikey: env.SUPABASE_PUBLISHABLE_KEY,
-      authorization: "Bearer " + token
-    }
+    headers: { apikey: env.SUPABASE_PUBLISHABLE_KEY, authorization: "Bearer " + token }
   });
   if (!response.ok) return { configured: true, user: null };
   const user = await response.json();
@@ -47,16 +42,20 @@ async function publicContent(request, env, ctx) {
     return json({ ok: false, error: "public_content_not_configured" }, 503);
   }
 
-  // The cache key deliberately excludes cookies, authorization and query strings:
-  // this endpoint contains published, public-only content and accepts GET only.
+  // This endpoint returns published public content only. Its cache key is
+  // independent of cookies, user identity and authorization headers.
   const cache = globalThis.caches && globalThis.caches.default;
   const cacheKey = new Request(new URL("/__iqa_cache/public-content/v1", request.url).toString(), { method: "GET" });
   if (cache) {
     try {
       const hit = await cache.match(cacheKey);
-      if (hit) return hit;
+      if (hit) {
+        const headers = new Headers(hit.headers);
+        headers.set("x-content-cache", "HIT");
+        return new Response(hit.body, { status: hit.status, headers });
+      }
     } catch {
-      // A cache outage must not take the public storefront offline.
+      // Cache outage must not take the public storefront offline.
     }
   }
 
@@ -64,31 +63,28 @@ async function publicContent(request, env, ctx) {
   let upstream;
   try {
     upstream = await fetch(base + "/functions/v1/iqa-public-content", {
-      method: "GET",
-      headers: { apikey: env.SUPABASE_PUBLISHABLE_KEY }
+      method: "GET", headers: { apikey: env.SUPABASE_PUBLISHABLE_KEY }
     });
   } catch {
     return json({ ok: false, error: "public_content_unavailable" }, 503);
   }
-
   if (!upstream.ok) {
     return json({ ok: false, error: "public_content_unavailable" }, upstream.status >= 500 ? 503 : upstream.status);
   }
 
   const headers = new Headers(upstream.headers);
   headers.set("content-type", "application/json; charset=utf-8");
-  headers.set("cache-control", "public, max-age=0, s-maxage=60, stale-while-revalidate=300");
+  headers.set("cache-control", "public, max-age=60, s-maxage=60, stale-while-revalidate=300");
   headers.set("x-content-cache", "MISS");
   const response = new Response(upstream.body, { status: 200, headers });
 
   if (cache) {
     try {
-      const stored = new Response(response.clone().body, { status: response.status, headers: new Headers(response.headers) });
-      const write = cache.put(cacheKey, stored);
+      const write = cache.put(cacheKey, response.clone());
       if (ctx && typeof ctx.waitUntil === "function") ctx.waitUntil(write);
       else await write;
     } catch {
-      // Cache writes are best-effort; origin remains the source of truth.
+      // Cache writes are best-effort; Supabase remains the source of truth.
     }
   }
   return response;
@@ -114,6 +110,7 @@ export default {
       return new Response(response.body, { status: response.status, headers });
     }
 
+    // Authenticated customer data is deliberately not cached.
     if (url.pathname === "/api/v1/me" && request.method === "GET") {
       const token = getBearer(request);
       if (!token) return json({ ok: false, error: "unauthorized" }, 401);
