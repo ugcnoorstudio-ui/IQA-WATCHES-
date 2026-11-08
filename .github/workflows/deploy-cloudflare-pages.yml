@@ -1,10 +1,8 @@
 name: Deploy IQA WATCHES to Cloudflare Pages
 
 on:
-  # Production deploys are restricted to main and always pass the full test gate.
   push:
     branches: [main]
-  # Every PR gets the same test gate; same-repository PRs also get an isolated preview.
   pull_request:
     branches: [main]
     types: [opened, synchronize, reopened, ready_for_review]
@@ -46,6 +44,8 @@ jobs:
           node --check customer-storefront.js
       - name: Run unit and regression tests
         run: node --test tests/*.test.js
+      - name: Test Cloudflare Worker routes and public cache
+        run: npm --prefix cloudflare test
       - name: Install Playwright test runner
         run: npm install --no-save --no-package-lock @playwright/test@1.55.0
       - name: Install Chromium
@@ -131,9 +131,9 @@ jobs:
           test -s data/catalogue.json
 
           API="https://api.cloudflare.com/client/v4/accounts/$CLOUDFLARE_ACCOUNT_ID/pages/projects/$CLOUDFLARE_PAGES_PROJECT"
-          RESPONSE="$(curl -sS -w '\n%{http_code}' -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" "$API")"
-          HTTP_STATUS="${RESPONSE##*$'\n'}"
-          BODY="${RESPONSE%$'\n'*}"
+          RESPONSE="$(curl -sS -w '\\n%{http_code}' -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" "$API")"
+          HTTP_STATUS="${RESPONSE##*$'\\n'}"
+          BODY="${RESPONSE%$'\\n'*}"
 
           if [ "$HTTP_STATUS" = "200" ]; then
             echo "$BODY" | jq -e '.success == true' >/dev/null
