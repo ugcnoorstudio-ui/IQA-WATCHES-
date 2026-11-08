@@ -4,7 +4,7 @@
 const fs = require('node:fs');
 const vm = require('node:vm');
 
-const base = (process.env.IQA_STOREFRONT_URL || 'https://ugcnoorstudio-ui.github.io/IQA-WATCHES-/').replace(/\/?$/, '/');
+const base = (process.env.IQA_STOREFRONT_URL || 'https://iqa-watches-storefront.pages.dev/').replace(/\/?$/, '/');
 const timeoutMs = 15000;
 const failures = [];
 let publicSupabaseConfig = null;
@@ -105,7 +105,7 @@ async function main() {
     console.error('\\nPublic health monitoring failed: ' + failures.length + ' check(s).');
     process.exitCode = 1;
   } else {
-    console.log('\\nAll public availability and static catalogue checks passed.');
+    console.log('\\nAll public availability, live catalogue, and static fallback checks passed.');
   }
 }
 
