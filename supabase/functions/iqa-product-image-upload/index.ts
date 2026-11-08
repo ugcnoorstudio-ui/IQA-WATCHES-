@@ -1,6 +1,6 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 
-const ORIGIN = "https://ugcnoorstudio-ui.github.io";
+const ORIGIN = "https://iqa-watches-storefront.pages.dev";
 const CORS = {
   "Access-Control-Allow-Origin": ORIGIN,
   "Access-Control-Allow-Headers": "authorization, apikey, content-type, x-client-info",
