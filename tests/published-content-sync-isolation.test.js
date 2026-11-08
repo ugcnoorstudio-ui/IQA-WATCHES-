@@ -7,6 +7,7 @@ const source = await readFile(
   new URL('../assets/published-content-sync.js', import.meta.url),
   'utf8',
 );
+const storefrontHtml = await readFile(new URL('../index.html', import.meta.url), 'utf8');
 
 function execute(hostname, disableSync = false, proxyUrl = '', syncEnabled = true) {
   let calls = 0;
@@ -80,4 +81,11 @@ test('approved production storefront keeps direct Supabase fallback until proxy 
 test('production storefronts do not call Supabase while the content-sync kill switch is off', () => {
   assert.equal(execute('ugcnoorstudio-ui.github.io', false, '', false).calls, 0);
   assert.equal(execute('iqa-watches-storefront.pages.dev', false, '', false).calls, 0);
+});
+
+test('storefront loads the quota-safe config before the cache-busted content-sync script', () => {
+  const configIndex = storefrontHtml.indexOf('admin/backend-config.js?v=20261108-quota-pause');
+  const syncIndex = storefrontHtml.indexOf('assets/published-content-sync.js?v=20261108-worker-proxy-kill-switch');
+  assert.ok(configIndex >= 0, 'cache-busted backend config script must be present');
+  assert.ok(syncIndex > configIndex, 'content-sync script must load after the backend config');
 });
