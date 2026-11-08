@@ -10,5 +10,6 @@ enabled = true
 [vars]
 APP_ENV = "staging"
 SUPABASE_UPSTREAM_CHECK_ENABLED = "false"
+PUBLIC_CATALOGUE_ENABLED = "true"
 SUPABASE_URL = "https://qcxgsomqxfoueootxzpv.supabase.co"
 SUPABASE_PUBLISHABLE_KEY = "sb_publishable_EmGoVBFk35Mc7om3eULcgw_tmEXAAA5"
