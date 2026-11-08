@@ -99,7 +99,7 @@ Source of truth: GitHub `main`, staging Supabase project, and the current storef
 - Confirm production/staging environment separation, secrets, access roles, and rollback procedure.
 - Verify backup schedule and perform a restore test before accepting real customer orders.
 - Configure monitored alerts for checkout failures, stock mismatches, auth failures, and Edge Function errors.
-- Confirm privacy policy, terms, returns/refunds policy, warranty wording, contact details, business identity, tax/GST treatment, and customer-consent language with the owner.
+- No dedicated privacy, terms, returns/refunds, or warranty policy pages were found in the repository. Owner must approve the business identity, support contacts, policy wording, GST/tax treatment, and customer-consent language before public sales.
 - Verify support inbox and response ownership.
 - Run final accessibility, performance, security-advisor, dependency, and browser regression checks.
 - No custom domain is assumed; use the verified Cloudflare Pages production hostname. GitHub Pages remains a static fallback; authenticated admin/checkout APIs are being aligned to the verified Cloudflare production origin.
