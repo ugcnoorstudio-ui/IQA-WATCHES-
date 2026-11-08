@@ -1,8 +1,9 @@
-/* Public Supabase client configuration for IQA WATCHES admin.
- * Publishable key is designed for browser use. RLS remains mandatory.
- * NEVER add service_role/secret keys, database passwords, or payment secrets.
+/* STAGING-ONLY Supabase client configuration for IQA WATCHES.
+ * This file is intentionally isolated to feat/clerk-auth-staging.
+ * It must never be merged into main or used by Production.
+ * Public publishable key only; RLS remains mandatory.
  */
 window.IQA_SUPABASE_CONFIG = Object.freeze({
-  url: "https://nyhyfdququxnorqlnnqq.supabase.co",
-  publishableKey: "sb_publishable_coViYn8Fl7F-8JkxhRCstA_zfo_VR9C"
+  url: "https://qcxgsomqxfoueootxzpv.supabase.co",
+  publishableKey: "sb_publishable_EmGoVBFk35Mc7om3eULcgw_tmEXAAA5"
 });
