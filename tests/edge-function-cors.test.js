@@ -33,7 +33,7 @@ test('preflight requests reject untrusted browser origins before granting CORS',
     assert.match(source, /req\.method\s*===\s*["']OPTIONS["']/);
     if (index === 1) {
       // Public content also supports non-browser callers that omit Origin.
-      assert.match(source, /if\(origin&&!allowedOrigin\(origin\)\)/);
+      assert.match(source, /if\s*\(\s*origin\s*&&\s*!allowedOrigin\(origin\)\s*\)/);
     } else {
       assert.match(source, /if\s*\(!allowedOrigin\(origin\)\)/);
     }
