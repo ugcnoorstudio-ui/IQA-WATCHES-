@@ -7,7 +7,7 @@ The Production usage figures supplied for the current monthly cycle are:
 - Log Queries: 168 GB used against 100 GB.
 - Cached Egress: 34 GB used against 5 GB.
 
-These are separate meters. Cached Egress is the immediate reason reported by the 402 response. Previously consumed monthly usage is historical and cannot be reduced retroactively.
+These are separate meters. Cached Egress is the immediate reason reported by the 402 response; Supabase documents that Cached Egress applies only to Storage CDN cache hits. Logs Query is not billed directly, and the published allowance/degraded-state enforcement is currently marked not yet enforced. The 168 GB figure is therefore not the cause of this 402, but repeated broad log scans should still stop. Previously consumed monthly usage is historical and cannot be reduced retroactively.
 
 ## Controls already in place
 - Browser tests on localhost and preview hosts are prevented from calling the Production content function (PR #157).
