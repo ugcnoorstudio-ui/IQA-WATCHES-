@@ -2,7 +2,7 @@ import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "npm:@supabase/supabase-js@2";
 const URL = Deno.env.get("SUPABASE_URL")!;
 const SERVICE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-const ORIGIN = "https://ugcnoorstudio-ui.github.io";
+const ORIGIN = "https://iqa-watches-storefront.pages.dev";
 const CORS = {"Access-Control-Allow-Origin":ORIGIN,"Access-Control-Allow-Headers":"apikey, authorization, x-client-info","Access-Control-Allow-Methods":"GET, OPTIONS","Vary":"Origin"};
 function reply(status:number,body:Record<string,unknown>){return new Response(JSON.stringify(body),{status,headers:{...CORS,"Content-Type":"application/json; charset=utf-8","Cache-Control":"no-store"}});}
 Deno.serve(async(req:Request)=>{
