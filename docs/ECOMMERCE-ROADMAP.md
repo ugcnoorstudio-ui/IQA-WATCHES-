@@ -1,6 +1,6 @@
 # IQA WATCHES — Six-Phase E-commerce Execution Roadmap
 
-Last reviewed: 2026-11-08  
+Last reviewed: 2026-11-08
 Source of truth: GitHub `main`, staging Supabase project, and the current storefront deployment.
 
 ## Operating guardrails
