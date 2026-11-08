@@ -96,7 +96,7 @@ test("public catalogue proxies only the read-only Supabase function and returns 
       headers: { origin: "https://iqa-watches-storefront.pages.dev" }
     }), env);
     assert.equal(response.status, 200);
-    assert.equal(response.headers.get("cache-control"), "public, max-age=300, stale-while-revalidate=3600");
+    assert.equal(response.headers.get("cache-control"), "public, max-age=300, stale-while-revalidate=600");
     assert.equal(response.headers.get("access-control-allow-origin"), "https://iqa-watches-storefront.pages.dev");
     assert.equal(response.headers.get("vary"), "Origin");
     assert.deepEqual(await response.json(), { ok: true, products: [{ id: "public-product" }] });
