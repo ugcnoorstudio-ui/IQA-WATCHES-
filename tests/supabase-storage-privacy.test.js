@@ -36,5 +36,5 @@ test('private bucket change uses the official Storage API and is owner-only', ()
 test('admin UI requires owner role and invokes the protected Storage API action', () => {
   assert.match(adminSource, /api\.requireRole\(\['owner'\]\)/);
   assert.match(adminSource, /iqa-lock-down-product-images/);
-  assert.match(adminSource, /Existing files will NOT be deleted/);
+  assert.match(adminSource, /Existing Storage files will NOT be deleted/);
 });
