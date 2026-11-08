@@ -26,7 +26,7 @@ Source of truth: GitHub `main`, staging Supabase project, and the current storef
 - Ran rollback-only staging fixtures covering valid order creation, exact stock reservation, idempotent replay, duplicate cart rejection, and insufficient-stock rejection.
 - Confirmed temporary customer/product/order fixtures were fully rolled back.
 
-**Production caution:** production migration history currently ends at `20261105075427`; staging has three later migrations: `20261107193017` (eight-image cap), `20261108060625` (checkout idempotency index), and `20261108081229` (checkout payload hardening). Production checkout RPC still has the pre-hardening validation. The hardening migration has been applied and fully tested in staging only. The migration filename in the PR is being aligned to the recorded staging version to prevent duplicate application. No production migration has been run; production catch-up requires a deliberate release decision.
+**Production caution:** production migration history currently ends at `20261105075427`; staging has three later migrations: `20261107193017` (eight-image cap), `20261108060625` (checkout idempotency index), and `20261108081229` (checkout payload hardening). Production checkout RPC still has the pre-hardening validation. The hardening migration has been applied and fully tested in staging only. The migration filename is aligned in PR #152 to the exact staging version so it cannot be applied twice under a second timestamp. No production migration has been run; production is three migrations behind staging and catch-up requires separate review and explicit release approval.
 
 **Remaining before real checkout:** configure verified COD and delivery rules, confirm the customer sign-in/address flow, and run a controlled end-to-end test. Shipping/courier integrations remain deferred.
 
@@ -58,7 +58,7 @@ Source of truth: GitHub `main`, staging Supabase project, and the current storef
 
 **Additional production finding:** the live storefront currently reads `data/catalogue.json`, not Supabase directly. The snapshot is dated 2026-11-07. Production currently has 3 approved products, 3 available variants, and 4 Cloudinary media rows; the snapshot contains the same 3 product cards, but there is no confirmed automatic refresh path. This can make displayed price/stock stale after admin changes, although checkout revalidates on the server.
 
-**In progress:** a read-only `iqa-public-catalogue` Edge Function is in the PR and has been deployed once to staging. That first staging version still uses the old GitHub Pages CORS origin; the PR corrects it to the verified Cloudflare Pages origin and updates checkout, cancellation, public content, admin, and media Edge Functions using current production source as the base. The PR also switches the storefront loader to the live endpoint, retaining the static JSON only as a preview fallback. Staging has no catalogue rows, so a real product payload cannot be exercised there. After CI passes, redeploy the corrected functions to staging, then production, before merging the frontend switch.
+**In progress in PR #152:** the read-only `iqa-public-catalogue` Edge Function is already deployed once to staging with `verify_jwt=false`; PR #152 carries the current source, dynamic CORS allowlist, public-catalogue regression tests and storefront loader switch. PR #150 has already merged the shared CORS/OAuth allowlist for checkout, cancellation, public content, admin health and image upload. PR #152 extends the same allowlist to admin mutation, Cloudinary media library and public catalogue. The static JSON remains only as a clearly labelled preview fallback. Staging has no catalogue rows, so a real product payload cannot be exercised. Staging and production Edge Function/Auth requests are currently returning HTTP 402 due to Supabase quota/usage limits; do not claim live verification or promote production functions until the quota issue is resolved and staging smoke tests pass.
 
 **Known UI limitation:** the current storefront product model selects one available variant per product. Products with multiple sellable variants need a variant selector before those options are offered to customers.
 
@@ -81,7 +81,7 @@ Source of truth: GitHub `main`, staging Supabase project, and the current storef
 
 ## Phase 5 — Storefront experience, accessibility, performance, and SEO
 
-**Status: Existing experience and browser tests; SEO and live-catalogue updates are in PR #149 pending CI.**
+**Status: Existing experience and browser tests; live-catalogue, canonical metadata, robots.txt, sitemap and SEO regression coverage are in PR #152 pending final CI/browser checks.**
 
 - Storefront has product detail pages, gallery controls, compare, recently viewed, category/brand routes, and customer-facing delivery-information placeholders.
 - Product detail UI uses approved catalogue data and avoids claiming ratings that do not exist.
@@ -94,7 +94,7 @@ Source of truth: GitHub `main`, staging Supabase project, and the current storef
 
 **Status: Not launch-ready; external owner inputs and verification required.**
 
-**Production advisor review:** no health lints; security advisor reports leaked-password protection disabled and flags the authenticated customer-cancellation SECURITY DEFINER RPC (its ownership/COD checks and stock release were exercised in staging). Performance advisor reports an unindexed checkout-idempotency foreign key, unused indexes, and multiple permissive SELECT policies. These are review items; no indexes or policies were blindly dropped. Backup schedule/restore capability could not be verified through the connected tools.
+**Production advisor review:** no health lints; security advisor reports leaked-password protection disabled and flags the authenticated customer-cancellation SECURITY DEFINER RPC (its ownership/COD checks and stock release were exercised in staging). Performance advisor reports an unindexed checkout-idempotency foreign key, unused indexes, and multiple permissive SELECT policies. These are review items; no indexes or policies were blindly dropped. Backup schedule/restore capability could not be verified through the connected tools. Supabase logs confirm HTTP 402 quota/usage failures on Auth and Edge Function endpoints in both staging and production; SQL read-only access remains available.
 
 - Confirm production/staging environment separation, secrets, access roles, and rollback procedure.
 - Verify backup schedule and perform a restore test before accepting real customer orders.
@@ -112,9 +112,11 @@ Source of truth: GitHub `main`, staging Supabase project, and the current storef
 4. Configure COD and delivery coverage/charges only when ready to accept those orders.
 5. Provide a real test customer account and address for a controlled checkout rehearsal.
 6. Add the Cloudflare Pages URL to Supabase Auth Site URL / Redirect URLs and verify Google OAuth on the Cloudflare host.
-7. Approve the production checkout RPC hardening migration after staging verification.
+7. Review the three production-missing migrations (`20261107193017`, `20261108060625`, `20261108081229`) and explicitly approve a controlled production catch-up only after staging verification.
 8. Confirm backup schedule and perform a restore test in the Supabase dashboard.
-9. Approve the final production launch after backup/restore and security checks.
+9. Review the disabled leaked-password protection setting and the customer-cancellation SECURITY DEFINER advisory; approve the Auth policy and least-privilege treatment.
+10. Review the Supabase HTTP 402 quota/usage limit in the dashboard and decide whether to wait for reset or approve a plan/usage change; no paid change is made automatically.
+11. Approve the final production launch after quota recovery, backup/restore, security and end-to-end checks.
 
 ## Current verified staging observations
 
@@ -124,7 +126,9 @@ Source of truth: GitHub `main`, staging Supabase project, and the current storef
 - Product image bucket: public legacy bucket with 5 MB limit and JPEG/PNG/WebP/AVIF MIME allowlist. Do not delete or migrate existing files without audit.
 - Checkout Edge Function: JWT verification enabled.
 - Public content Edge Function: JWT verification disabled by design for published public content only.
-- Staging checkout and public-content functions were redeployed from the current GitHub main source to remove stale CORS configuration that advertised an unverified Pages origin.
+- Public catalogue Edge Function: deployed once to staging with JWT verification disabled; it is read-only and filters to approved, available products.
+- Shared CORS/OAuth allowlist source changes are in merged PR #150; additional admin/media/catalogue CORS source changes are in PR #152. Do not redeploy production functions from the PR branch.
+- HTTP 402 quota/usage failures are confirmed in both staging and production Auth/Edge Function logs. Treat runtime smoke tests as blocked until the owner resolves the quota; do not retry in a loop or mark them passed.
 
 ## Completion rule
 
