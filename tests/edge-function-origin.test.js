@@ -5,6 +5,7 @@ import { readFile } from 'node:fs/promises';
 const origin = 'https://iqa-watches-storefront.pages.dev';
 const paths = [
   '../supabase/functions/iqa-customer-checkout/index.ts',
+  '../supabase/functions/iqa-customer-cancel-order/index.ts',
   '../supabase/functions/iqa-public-content/index.ts',
   '../supabase/functions/iqa-admin-mutate/index.ts',
   '../supabase/functions/iqa-cloudinary-media-library/index.ts',
