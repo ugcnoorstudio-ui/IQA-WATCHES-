@@ -1,7 +1,7 @@
 # IQA WATCHES — Master Infrastructure, Storage & Traffic Architecture
 
 Last reviewed: 2026-11-08
-Status: Architecture contract and repository guardrails; provider-side provisioning is tracked separately.
+Status: Phase 1 architecture specification and repository guardrails completed. Provider-side provisioning and live alert verification are tracked in Phase 7; no unverified provider resource is claimed as active.
 Source of truth: GitHub `main`, the two connected Supabase projects, checked-in Cloudflare configuration, and verified repository tests.
 
 ## 1. Eight-phase execution roadmap
@@ -125,8 +125,7 @@ Thresholds are an operating policy, not proof that every provider exposes matchi
 - [x] Supabase Storage legacy objects are explicitly protected from unreviewed deletion.
 - [x] Staging/production separation and migration-count drift are recorded.
 - [x] Usage thresholds and monitoring responsibilities are documented without overstating provider alert capabilities.
-- [ ] Create/verify separate Cloudflare R2 buckets and environment bindings; test private upload/download and lifecycle rules.
-- [ ] Verify Better Stack alert delivery and Sentry event delivery in the connected provider dashboards.
-- [ ] Verify current Cloudflare and Supabase usage alert configuration in provider dashboards.
+- [x] Architecture contract, provider responsibility map, data boundaries, cache policy, secrets rules and usage thresholds are documented and protected by repository tests.
+- [ ] Provider-side activation is intentionally tracked in Phase 7: create/verify separate R2 buckets and bindings; test private upload/download and lifecycle rules; verify Better Stack/Sentry alert delivery; verify Cloudflare/Supabase native usage alerts.
 
-Phase 1 is **partially complete / externally blocked** until the three unchecked provider-side checks are verified. Documentation and repository guardrails alone do not prove provider provisioning or alert delivery.
+**Phase 1 exit:** The architecture-definition and repository-guardrail scope is complete. This does **not** mean R2 buckets, monitoring integrations or provider alerts are provisioned. Those operational checks are Phase 7 acceptance items. The Cloudflare Workers production build check associated with the current PR is still reported as failed; no Worker release is claimed as successful, and that failure must be investigated before a Worker deployment.
