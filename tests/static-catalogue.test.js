@@ -7,14 +7,14 @@ const root = path.join(__dirname, '..');
 const html = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
 const catalogue = JSON.parse(fs.readFileSync(path.join(root, 'data', 'catalogue.json'), 'utf8'));
 
-test('public storefront catalogue is served as a small static snapshot, not fetched from Supabase', () => {
+test('public storefront reads the approved catalogue through the read-only Edge Function', () => {
   const start = html.indexOf('async function loadStorefrontCatalogue(){');
   const end = html.indexOf('function renderProducts(){', start);
   assert.ok(start >= 0 && end > start, 'catalogue loader must exist');
   const loader = html.slice(start, end);
-  assert.match(loader, /data\/catalogue\.json/);
+  assert.match(loader, /functions\/v1\/iqa-public-catalogue/);
   assert.match(loader, /fetch\(catalogueUrl/);
-  assert.doesNotMatch(loader, /storefrontClient|\.from\(['"]products|product_variants|product_media/);
+  assert.doesNotMatch(loader, /storefrontClient|\.from\(['"]products|product_variants|product_media|service_role/);
 });
 
 test('static storefront snapshot contains only published-style, in-stock Cloudinary products', () => {
