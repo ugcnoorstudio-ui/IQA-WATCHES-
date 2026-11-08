@@ -14,6 +14,8 @@ test('homepage declares one canonical URL for the current public site', () => {
   assert.ok(html.includes('<link rel="canonical" href="' + canonical + '">'));
   assert.match(html, /<meta name="robots" content="index,follow">/);
   assert.ok(html.includes('<meta property="og:url" content="' + canonical + '">'));
+  assert.match(html, /<meta property="og:site_name" content="IQA WATCHES">/);
+  assert.match(html, /<meta name="twitter:card" content="summary_large_image">/);
 });
 
 test('robots file allows public storefront crawling and points to the sitemap', () => {
