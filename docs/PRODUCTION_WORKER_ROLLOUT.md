@@ -1,6 +1,6 @@
 # Production Cloudflare Worker rollout
 
-The Production Worker is prepared as `iqa-watches-api-production`, but its deployment is manual and requires the workflow input `confirm_production_deploy = YES`. The Worker-level `SUPABASE_UPSTREAM_CHECK_ENABLED = "false"` gate blocks all public-content, catalogue, and Auth upstream requests while the project is restricted. The workflow health validation calls only `/healthz`.
+The Production storefront content-sync flag is temporarily off while Supabase Cached Egress is restricted. The static homepage and product catalogue remain available; only live CMS overrides/collections are paused. Re-enable this flag only after the Production Worker proxy is deployed and verified. The Production Worker is prepared as `iqa-watches-api-production`, but its deployment is manual and requires the workflow input `confirm_production_deploy = YES`. The Worker-level `SUPABASE_UPSTREAM_CHECK_ENABLED = "false"` gate blocks all public-content, catalogue, and Auth upstream requests while the project is restricted. The workflow health validation calls only `/healthz`.
 
 ## Safe rollout sequence
 
@@ -8,7 +8,7 @@ The Production Worker is prepared as `iqa-watches-api-production`, but its deplo
 2. Verify the Production `iqa-public-content` function returns HTTP 200 using a single controlled request.
 3. Run the manual `Deploy IQA WATCHES production API` workflow with explicit approval. It deploys the Worker and checks only `/healthz`; the staging-only cache probe and production catalogue route must both return 404.
 4. Confirm the Worker can serve `/api/v1/public-content` and that repeated requests return a Cloudflare cache HIT.
-5. Only then set `publicContentProxyUrl` in `admin/backend-config.js` to `https://iqa-watches-api-production.ugcnoorstudio.workers.dev/api/v1/public-content`.
+5. Only then set `publicContentSyncEnabled: true` and `publicContentProxyUrl` in `admin/backend-config.js` to `https://iqa-watches-api-production.ugcnoorstudio.workers.dev/api/v1/public-content`.
 6. Re-run the storefront browser tests. The proxy request uses only the safelisted `Accept` header and `credentials: omit`; it does not send the Supabase publishable key from the browser.
 7. Keep the direct Supabase fallback until the proxy is verified; do not enable the proxy while the project still returns HTTP 402.
 
