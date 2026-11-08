@@ -21,7 +21,7 @@ test('static JSON is only a preview fallback and is visibly labelled as cached',
   const start = html.indexOf('async function loadStorefrontCatalogue(){');
   const end = html.indexOf('function renderProducts(){', start);
   const loader = html.slice(start, end);
-  assert.match(loader, /new URL\('data\\/catalogue\\.json'/);
+  assert.ok(loader.includes("new URL('data/catalogue.json'"));
   assert.match(loader, /catalogueSourceForLoad='snapshot'/);
   assert.match(html, /Cached catalogue preview only/);
   assert.match(html, /Current price and stock are revalidated at checkout/);
