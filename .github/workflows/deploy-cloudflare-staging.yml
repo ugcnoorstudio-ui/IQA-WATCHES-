@@ -82,29 +82,90 @@ jobs:
           URL="https://iqa-watches-api-staging.ugcnoorstudio.workers.dev/healthz"
           RESPONSE="$(curl --fail --silent --show-error --retry 5 --retry-delay 3 "$URL")"
           printf '%s' "$RESPONSE" | jq -e '.ok == true and .environment == "staging"'
-      - name: Verify Staging Supabase public function upstreams
+      - name: Check Staging Supabase availability without repeated retries
+        id: upstream
         shell: bash
         run: |
           set -euo pipefail
+          ENABLED="$(sed -n 's/^SUPABASE_UPSTREAM_CHECK_ENABLED = "\(.*\)"/\1/p' cloudflare/wrangler.toml)"
+          if [ "$ENABLED" != "true" ]; then
+            echo "::warning::Supabase upstream checks are paused while the project is Cached Egress restricted. No Supabase request was sent."
+            echo "available=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
           SUPABASE_URL="$(sed -n 's/^SUPABASE_URL = "\(.*\)"/\1/p' cloudflare/wrangler.toml)"
           SUPABASE_KEY="$(sed -n 's/^SUPABASE_PUBLISHABLE_KEY = "\(.*\)"/\1/p' cloudflare/wrangler.toml)"
           test -n "$SUPABASE_URL"
           test -n "$SUPABASE_KEY"
-          for FUNCTION in "iqa-public-content" "iqa-public-catalogue"; do
-            BODY="$(mktemp)"
-            STATUS="$(curl --silent --show-error -o "$BODY" -w '%{http_code}' \
+          BODY="$(mktemp)"
+          STATUS="$(curl --silent --show-error -o "$BODY" -w '%{http_code}' \
+            -H "apikey: $SUPABASE_KEY" -H "accept: application/json" \
+            "$SUPABASE_URL/functions/v1/iqa-public-content")"
+          echo "Staging Supabase public-content returned HTTP $STATUS"
+          if [ "$STATUS" = "200" ] && jq -e '.ok == true' "$BODY" >/dev/null; then
+            CATALOGUE_BODY="$(mktemp)"
+            CATALOGUE_STATUS="$(curl --silent --show-error -o "$CATALOGUE_BODY" -w '%{http_code}' \
               -H "apikey: $SUPABASE_KEY" -H "accept: application/json" \
-              "$SUPABASE_URL/functions/v1/$FUNCTION")"
-            echo "Staging upstream $FUNCTION returned HTTP $STATUS"
-            if [ "$STATUS" != "200" ]; then
-              cat "$BODY"
-              rm -f "$BODY"
+              "$SUPABASE_URL/functions/v1/iqa-public-catalogue")"
+            echo "Staging Supabase public-catalogue returned HTTP $CATALOGUE_STATUS"
+            if [ "$CATALOGUE_STATUS" = "200" ] && jq -e '.ok == true' "$CATALOGUE_BODY" >/dev/null; then
+              echo "available=true" >> "$GITHUB_OUTPUT"
+            elif [ "$CATALOGUE_STATUS" = "402" ] && grep -q "exceed_cached_egress_quota" "$CATALOGUE_BODY"; then
+              echo "::warning::Staging Supabase is restricted by Cached Egress quota; live Supabase-backed cache acceptance is deferred."
+              echo "available=false" >> "$GITHUB_OUTPUT"
+            else
+              cat "$CATALOGUE_BODY"
+              rm -f "$BODY" "$CATALOGUE_BODY"
               exit 1
             fi
-            jq -e '.ok == true' "$BODY" >/dev/null
+            rm -f "$CATALOGUE_BODY"
+          elif [ "$STATUS" = "402" ] && grep -q "exceed_cached_egress_quota" "$BODY"; then
+            echo "::warning::Staging Supabase is restricted by Cached Egress quota; live Supabase-backed cache acceptance is deferred."
+            echo "available=false" >> "$GITHUB_OUTPUT"
+          else
+            cat "$BODY"
             rm -f "$BODY"
+            exit 1
+          fi
+          rm -f "$BODY"
+      - name: Verify Cloudflare edge cache and CORS with static staging probe
+        shell: bash
+        run: |
+          set -euo pipefail
+          BASE="https://iqa-watches-api-staging.ugcnoorstudio.workers.dev"
+          ORIGINS=("https://ugcnoorstudio-ui.github.io" "https://iqa-watches-storefront.pages.dev")
+          for ORIGIN in "${ORIGINS[@]}"; do
+            FIRST_HEADERS="$(mktemp)"
+            FIRST_BODY="$(mktemp)"
+            SECOND_HEADERS="$(mktemp)"
+            SECOND_BODY="$(mktemp)"
+            curl --fail --silent --show-error -D "$FIRST_HEADERS" -o "$FIRST_BODY" \
+              -H "Origin: $ORIGIN" "$BASE/api/v1/cache-probe"
+            jq -e '.ok == true and .probe == "cloudflare-edge-cache"' "$FIRST_BODY"
+            grep -iqF "access-control-allow-origin: $ORIGIN" "$FIRST_HEADERS"
+            curl --fail --silent --show-error -D "$SECOND_HEADERS" -o "$SECOND_BODY" \
+              -H "Origin: $ORIGIN" "$BASE/api/v1/cache-probe"
+            jq -e '.ok == true and .probe == "cloudflare-edge-cache"' "$SECOND_BODY"
+            grep -iqF "access-control-allow-origin: $ORIGIN" "$SECOND_HEADERS"
+            if ! grep -iqE '^cf-cache-status: (HIT|REVALIDATED)' "$SECOND_HEADERS"; then
+              echo "::error::Expected an edge cache HIT for the staging cache probe and $ORIGIN."
+              cat "$SECOND_HEADERS"
+              exit 1
+            fi
+            rm -f "$FIRST_HEADERS" "$FIRST_BODY" "$SECOND_HEADERS" "$SECOND_BODY"
           done
+          PREFLIGHT_HEADERS="$(mktemp)"
+          PREFLIGHT_STATUS="$(curl --silent --show-error -o /dev/null -w '%{http_code}' \
+            -D "$PREFLIGHT_HEADERS" -X OPTIONS \
+            -H "Origin: https://iqa-watches-storefront.pages.dev" \
+            -H "Access-Control-Request-Method: GET" \
+            -H "Access-Control-Request-Headers: apikey" \
+            "$BASE/api/v1/cache-probe")"
+          test "$PREFLIGHT_STATUS" = "204"
+          grep -iqF "access-control-max-age: 86400" "$PREFLIGHT_HEADERS"
+          rm -f "$PREFLIGHT_HEADERS"
       - name: Verify public API edge cache and CORS isolation
+        if: steps.upstream.outputs.available == 'true'
         shell: bash
         run: |
           set -euo pipefail

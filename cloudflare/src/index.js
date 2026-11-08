@@ -52,6 +52,38 @@ async function verifyWithSupabase(token, env) {
   return { configured: true, user: { id: user.id, email: user.email || null } };
 }
 
+async function cacheProbe(request, env) {
+  const originHeader = request.headers.get("origin");
+  const origin = allowedOrigin(originHeader);
+  if (originHeader && !origin) {
+    return json({ ok: false, error: "origin_not_allowed" }, 403, { vary: "Origin" });
+  }
+  if (env.APP_ENV !== "staging") {
+    return json({ ok: false, error: "not_found" }, 404, corsHeaders(origin));
+  }
+  if (request.method === "OPTIONS") {
+    return new Response(null, { status: 204, headers: corsHeaders(origin) });
+  }
+  if (request.method !== "GET") {
+    return json({ ok: false, error: "method_not_allowed" }, 405, corsHeaders(origin));
+  }
+  if (request.headers.has("authorization") || request.headers.has("cookie")) {
+    return json({ ok: false, error: "credentials_not_supported" }, 400, corsHeaders(origin));
+  }
+  if (new URL(request.url).search) {
+    return json({ ok: false, error: "query_parameters_not_supported" }, 400, corsHeaders(origin));
+  }
+  return json({
+    ok: true,
+    probe: "cloudflare-edge-cache",
+    environment: "staging"
+  }, 200, {
+    ...corsHeaders(origin),
+    "cache-control": "public, max-age=60, s-maxage=60",
+    "x-iqa-cache-probe": "true"
+  });
+}
+
 async function publicCatalogue(request, env) {
   const originHeader = request.headers.get("origin");
   const origin = allowedOrigin(originHeader);
@@ -165,6 +197,9 @@ export default {
     const originHeader = request.headers.get("origin");
     const origin = allowedOrigin(originHeader);
 
+    if (url.pathname === "/api/v1/cache-probe") {
+      return cacheProbe(request, env);
+    }
     if (url.pathname === "/api/v1/catalogue") {
       return publicCatalogue(request, env);
     }
