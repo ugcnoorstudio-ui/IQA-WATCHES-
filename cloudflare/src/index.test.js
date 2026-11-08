@@ -18,7 +18,8 @@ function makeCache() {
 }
 
 test("public content is fetched once and then served from shared cache", async () => {
-  const previous = globalThis.caches;
+  const previousCaches = globalThis.caches;
+  const previousFetch = globalThis.fetch;
   const cache = makeCache();
   globalThis.caches = { default: cache };
   let upstreamCalls = 0;
@@ -37,13 +38,14 @@ test("public content is fetched once and then served from shared cache", async (
     await ctx.pending;
     assert.equal(first.status, 200);
     assert.match(first.headers.get("cache-control"), /s-maxage=60/);
-    assert.equal(first.headers.get("access-control-allow-origin"), "https://iqa-watches-storefront.pages.dev");
+    assert.equal(first.headers.get("x-content-cache"), "MISS");
     const second = await worker.fetch(request(), env, ctx);
     assert.equal(second.status, 200);
-    assert.equal(second.headers.get("x-content-cache"), null);
+    assert.equal(second.headers.get("x-content-cache"), "HIT");
     assert.equal(upstreamCalls, 1);
   } finally {
-    globalThis.caches = previous;
+    globalThis.caches = previousCaches;
+    globalThis.fetch = previousFetch;
   }
 });
 
