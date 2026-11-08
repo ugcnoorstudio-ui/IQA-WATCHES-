@@ -2,6 +2,10 @@ name: Provision and deploy IQA WATCHES staging API
 
 on:
   workflow_dispatch:
+  pull_request:
+    paths:
+      - '.github/workflows/deploy-cloudflare-staging.yml'
+      - 'cloudflare/**'
   push:
     branches:
       - main
@@ -18,7 +22,7 @@ concurrency:
 
 jobs:
   test-staging:
-    if: github.ref == 'refs/heads/main'
+    if: github.event_name == 'pull_request' || github.ref == 'refs/heads/main'
     runs-on: ubuntu-24.04
     timeout-minutes: 10
     defaults:
@@ -58,27 +62,15 @@ jobs:
           set -euo pipefail
           test -n "$CLOUDFLARE_API_TOKEN" || { echo "::error::Missing IQA_CLOUDFLARE_API_TOKEN secret."; exit 1; }
           test -n "$CLOUDFLARE_ACCOUNT_ID" || { echo "::error::Missing IQA_CLOUDFLARE_ACCOUNT_ID secret."; exit 1; }
-          test -s cloudflare/migrations/0001_staging_bootstrap.sql
-          grep -q 'REPLACE_WITH_STAGING_D1_DATABASE_ID' cloudflare/wrangler.toml
-      - name: Create or reuse staging D1 and deploy Worker
+          test -s cloudflare/src/index.js
+          grep -q '^SUPABASE_URL = ' cloudflare/wrangler.toml
+          grep -q '^SUPABASE_PUBLISHABLE_KEY = ' cloudflare/wrangler.toml
+      - name: Deploy Supabase-connected staging Worker
+        working-directory: cloudflare
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.IQA_CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.IQA_CLOUDFLARE_ACCOUNT_ID }}
-        shell: bash
-        run: |
-          set -euo pipefail
-          cd cloudflare
-          API_BASE="https://api.cloudflare.com/client/v4/accounts/$CLOUDFLARE_ACCOUNT_ID/d1/database"
-          DB_JSON="$(curl --fail --silent --show-error --request GET "$API_BASE" --header "Authorization: Bearer $CLOUDFLARE_API_TOKEN" --header "Content-Type: application/json")"
-          DB_ID="$(printf '%s' "$DB_JSON" | jq -r '[.result[]? | select(.name == "iqa-watches-staging")][0].uuid // empty')"
-          if [ -z "$DB_ID" ]; then
-            CREATE_JSON="$(curl --fail --silent --show-error --request POST "$API_BASE" --header "Authorization: Bearer $CLOUDFLARE_API_TOKEN" --header "Content-Type: application/json" --data '{"name":"iqa-watches-staging"}')"
-            DB_ID="$(printf '%s' "$CREATE_JSON" | jq -r '.result.uuid // empty')"
-          fi
-          [[ "$DB_ID" =~ ^[0-9a-fA-F-]{36}$ ]] || { echo "::error::Could not resolve a valid staging D1 database UUID."; exit 1; }
-          sed "s/REPLACE_WITH_STAGING_D1_DATABASE_ID/$DB_ID/" wrangler.toml > wrangler.deploy.toml
-          wrangler d1 migrations apply iqa-watches-staging --remote --config wrangler.deploy.toml
-          wrangler deploy --config wrangler.deploy.toml
+        run: wrangler deploy --config wrangler.toml
       - name: Verify staging Worker health endpoint
         shell: bash
         run: |
