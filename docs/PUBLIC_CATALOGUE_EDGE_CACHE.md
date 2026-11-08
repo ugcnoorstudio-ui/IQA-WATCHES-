@@ -14,7 +14,7 @@ Serve the public, approved, sellable product catalogue from Cloudflare's edge ca
 
 ## Cache policy
 
-- Public catalogue response: `public, max-age=300, stale-while-revalidate=3600`.
+- Public catalogue response: `public, max-age=300, stale-while-revalidate=600`.
 - CORS preflight: `Access-Control-Max-Age: 86400`.
 - Errors, invalid payloads and configuration failures: `Cache-Control: no-store`.
 - `Vary: Origin` keeps browser CORS responses origin-aware.
