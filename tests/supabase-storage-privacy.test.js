@@ -38,3 +38,9 @@ test('admin UI requires owner role and invokes the protected Storage API action'
   assert.match(adminSource, /iqa-lock-down-product-images/);
   assert.match(adminSource, /Existing Storage files will NOT be deleted/);
 });
+
+test('Storage privacy action fails closed when any preflight table exceeds 1,000 rows', () => {
+  assert.equal((functionSource.match(/\.limit\(1001\)/g) || []).length, 5);
+  assert.match(functionSource, /result\.data\?\.length \?\? 0\) > 1000/);
+  assert.match(functionSource, /safe 1,000-row scan limit/);
+});
