@@ -118,3 +118,8 @@ test('customer navigation does not inject a second homepage shortcuts row',()=>{
  assert.doesNotMatch(storefront,/customerQuickNav/);
  assert.doesNotMatch(storefront,/Browse watch collections/);
 });
+
+test('customer Google OAuth returns to the active storefront host instead of a hard-coded deployment', () => {
+  assert.match(routes, /signInWithOAuth\(\{provider:'google',options:\{redirectTo:window\.location\.origin\+window\.location\.pathname\}\}\)/);
+  assert.doesNotMatch(routes, /redirectTo:'https:\/\/ugcnoorstudio-ui\.github\.io\/IQA-WATCHES-\//);
+});
