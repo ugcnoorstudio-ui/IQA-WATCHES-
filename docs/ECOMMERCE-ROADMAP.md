@@ -40,7 +40,7 @@ Source of truth: GitHub `main`, staging Supabase project, and the current storef
 - Supabase advisor still reports an authenticated SECURITY DEFINER customer-cancellation RPC. Its current implementation checks order ownership and COD eligibility, but this warning must remain on the review list until regression coverage and least-privilege review are complete.
 - Multiple permissive SELECT policies are performance warnings, not grounds for blind policy deletion.
 
-**Next work:** test customer A/B isolation, staff role boundaries, cancellation ownership/state transitions, session expiry, and data export/deletion request handling. Do not loosen RLS to make the UI work.
+**Staging tests passed:** customer A/B profile and address isolation; customer B cannot cancel customer A's order; the owning customer can cancel pending COD and release reserved stock; support staff cannot update order state; owner can perform permitted transitions and invalid state jumps are rejected. All fixtures were rolled back.\n\n**Next work:** test session expiry and data export/deletion request handling. Production advisor still flags leaked-password protection as disabled; enable it only after confirming the Auth policy with the owner. Do not loosen RLS to make the UI work.
 
 ## Phase 3 — Catalogue, product data, inventory, and media
 
@@ -52,11 +52,11 @@ Source of truth: GitHub `main`, staging Supabase project, and the current storef
 - Public catalogue policies expose only approved published/sellable products and available active variants.
 - The staging database currently has no live catalogue records.
 
-**Next work:** verify owner-only product creation/update/archive, variant pricing, stock adjustment audit trail, image ordering/alt text, Cloudinary upload failure handling, CSV import validation, and out-of-stock catalogue behavior. Preserve all legacy Storage assets.
+**Additional production finding:** the live storefront currently reads `data/catalogue.json`, not Supabase directly. The snapshot is dated 2026-11-07. Production currently has 3 approved products, 3 available variants, and 4 Cloudinary media rows; the snapshot contains the same 3 product cards, but there is no confirmed automatic refresh path. This can make displayed price/stock stale after admin changes, although checkout revalidates on the server.\n\n**Next work:** implement and verify a secure public-catalogue refresh path; verify owner-only product creation/update/archive, variant pricing, stock adjustment audit trail, image ordering/alt text, Cloudinary upload failure handling, CSV import validation, and out-of-stock catalogue behavior. Preserve all legacy Storage assets.
 
 ## Phase 4 — Orders, customer service, returns, and business operations
 
-**Status: Partial backend foundation; payment and shipping integrations intentionally deferred.**
+**Status: Partial backend foundation; payment and shipping integrations intentionally deferred.**\n\n**Staging tests passed:** COD checkout creates a confirmed order with stock reservation; idempotent replay does not reserve twice; insufficient stock and duplicate variants reject; customer ownership checks and stock release on cancellation pass; owner-only status transitions pass.
 
 - COD order creation and selected order-state transitions exist.
 - Customer order cancellation and customer-owned order reads are implemented.
@@ -80,7 +80,7 @@ Source of truth: GitHub `main`, staging Supabase project, and the current storef
 
 ## Phase 6 — Launch readiness, reliability, legal/compliance, and operating controls
 
-**Status: Not launch-ready; external owner inputs and verification required.**
+**Status: Not launch-ready; external owner inputs and verification required.**\n\n**Production advisor review:** no health lints; security advisor reports leaked-password protection disabled and flags the authenticated customer-cancellation SECURITY DEFINER RPC (its ownership/COD checks and stock release were exercised in staging). Performance advisor reports an unindexed checkout-idempotency foreign key, unused indexes, and multiple permissive SELECT policies. These are review items; no indexes or policies were blindly dropped. Backup schedule/restore capability could not be verified through the connected tools.
 
 - Confirm production/staging environment separation, secrets, access roles, and rollback procedure.
 - Verify backup schedule and perform a restore test before accepting real customer orders.
