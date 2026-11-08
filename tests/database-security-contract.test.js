@@ -12,7 +12,7 @@ test("Phase 2 audit records the verified staging/production controls and outstan
     "checkout_idempotency",
     "iqa_cancel_customer_order",
     "auth_leaked_password_protection",
-    "42 migrations",
+    "42 migration records",
     "39 migrations",
     "20261107193017",
     "20261108060625",
