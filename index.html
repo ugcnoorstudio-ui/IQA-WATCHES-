@@ -95,6 +95,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
 .skeleton-actions{display:flex;gap:8px;margin:18px 12px 0}
 .skeleton-actions span{height:36px;flex:1;border:1px solid #e2dccf;background:#eee9df}
 .catalogue-message{min-height:190px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px}
+.catalogue-preview-notice{grid-column:1/-1;padding:10px 14px;border:1px solid var(--line);color:var(--muted);font-size:12px;line-height:1.6;text-align:center;background:rgba(255,255,255,.55)}
 .catalogue-message h3{margin:0;color:var(--ink);font-family:var(--serif);font-size:clamp(21px,2.5vw,27px);font-weight:400}
 .catalogue-message p{margin:0 0 8px;max-width:420px;color:var(--muted);font-size:13px}
 .catalogue-message .button{min-height:44px;padding:11px 22px}
@@ -1099,9 +1100,10 @@ body.menu-open #menuBackdrop{display:block}
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="./admin/backend-config.js?v=20261030"></script>
 <script>
-const DEMO_MODE=false; // Public catalogue uses the approved static snapshot; Supabase remains for admin/auth.
+const DEMO_MODE=false; // Public catalogue uses a read-only Supabase Edge Function; static JSON is a preview fallback.
 let products=[];
 let catalogueState='loading';
+let catalogueSource='supabase';
 let catalogueError='';
 const money=n=>new Intl.NumberFormat('en-IN',{style:'currency',currency:'INR',maximumFractionDigits:0}).format(n);
 const safeLoad=(key,fallback)=>{try{return JSON.parse(localStorage.getItem(key))??fallback}catch{return fallback}};
@@ -1122,7 +1124,7 @@ async function loadStorefrontCatalogue(){
  if(catalogueRequestController)catalogueRequestController.abort();
  const controller=new AbortController();
  catalogueRequestController=controller;
- catalogueState='loading';catalogueError='';products=[];
+ catalogueState='loading';catalogueSource='supabase';catalogueError='';products=[];
  renderProducts();
  let timedOut=false;
  catalogueTimeoutId=setTimeout(()=>{
@@ -1132,14 +1134,32 @@ async function loadStorefrontCatalogue(){
   controller.abort();renderProducts();
  },10000);
  try{
-  // Public storefront reads the approved catalogue through a read-only Edge Function.
-  // The service-role key remains server-side; product photos are delivered by Cloudinary.
+  // The live, read-only Edge Function is the source of truth. Use the same-origin
+  // static JSON only as a clearly labelled preview when the API is unavailable.
   const catalogueUrl=new URL('functions/v1/iqa-public-catalogue','https://nyhyfdququxnorqlnnqq.supabase.co/');
-  const response=await fetch(catalogueUrl,{signal:controller.signal,headers:{Accept:'application/json'}});
-  if(!response.ok)throw new Error('Static catalogue request failed: '+response.status);
-  const payload=await response.json();
-  if(!payload||!Array.isArray(payload.products))throw new Error('Static catalogue format is invalid.');
+  let payload,catalogueSourceForLoad='supabase';
+  try{
+   const response=await fetch(catalogueUrl,{signal:controller.signal,headers:{Accept:'application/json'}});
+   if(!response.ok)throw new Error('Live catalogue request failed: '+response.status);
+   payload=await response.json();
+   if(!payload||!Array.isArray(payload.products))throw new Error('Live catalogue response format is invalid.');
+  }catch(liveError){
+   if(requestId!==catalogueRequestId||timedOut)return;
+   const fallbackUrl=new URL('data/catalogue.json',document.baseURI);
+   const fallbackResponse=await fetch(fallbackUrl,{signal:controller.signal,headers:{Accept:'application/json'}});
+   if(!fallbackResponse.ok)throw liveError;
+   payload=await fallbackResponse.json();
+   if(!payload||!Array.isArray(payload.products))throw liveError;
+   catalogueSourceForLoad='snapshot';
+  }
   if(requestId!==catalogueRequestId||timedOut)return;
+  catalogueSource=catalogueSourceForLoad;
+  if(catalogueSource==='supabase'&&payload.products.length===0){
+   products=[];knownProductIds=new Set();cart={};wishlist=[];
+   catalogueState='ready';catalogueError='';updateCatalogueFilters();renderProducts();updateCounts();initSmartShopping();
+   window.dispatchEvent(new Event('catalogue:ready'));
+   return;
+  }
   products=payload.products.map(item=>{
    const gallery=(Array.isArray(item.gallery)?item.gallery:[]).map(image=>({
     src:safeImageUrl(image.src),alt:String(image.alt||item.name),isPrimary:Boolean(image.isPrimary),sortOrder:Number(image.sortOrder)||0
@@ -1147,7 +1167,7 @@ async function loadStorefrontCatalogue(){
    const image=safeImageUrl(item.image);
    return {...item,image,gallery};
   }).filter(item=>item.id&&item.name&&item.price>0&&item.stock>0&&item.image&&item.image.startsWith('https://res.cloudinary.com/'));
-  if(!products.length)throw new Error('No approved in-stock products are available in the static catalogue.');
+  if(!products.length)throw new Error('No approved in-stock products are available in the catalogue response.');
   knownProductIds=new Set(products.map(item=>item.id));
   cart=Object.fromEntries(Object.entries(storedCart&&typeof storedCart==='object'&&!Array.isArray(storedCart)?storedCart:{}).filter(([id,qty])=>knownProductIds.has(id)&&Number.isInteger(qty)&&qty>0).map(([id,qty])=>[id,Math.min(qty,10,products.find(item=>item.id===id)?.stock||0)]).filter(([,qty])=>qty>0));
   wishlist=Array.isArray(storedWishlist)?[...new Set(storedWishlist.filter(id=>knownProductIds.has(id)))]:[];
@@ -1156,7 +1176,7 @@ async function loadStorefrontCatalogue(){
  }catch(error){
   if(requestId!==catalogueRequestId||timedOut)return;
   catalogueState='error';catalogueError="Couldn't load watches. Please try again.";
-  console.error('IQA WATCHES static catalogue load failed:',error);window.dispatchEvent(new Event('catalogue:error'));
+  console.error('IQA WATCHES live catalogue and preview fallback failed:',error);window.dispatchEvent(new Event('catalogue:error'));
   try{renderProducts();initSmartShopping()}catch(renderError){console.error('IQA WATCHES catalogue fallback render failed:',renderError)}
  }finally{
   if(requestId===catalogueRequestId&&catalogueTimeoutId){clearTimeout(catalogueTimeoutId);catalogueTimeoutId=null}
@@ -1203,7 +1223,8 @@ function renderProducts(){
   }
   return;
  }
- grid.innerHTML=list.map(p=>'<article class="product-card"><div class="product-image"><a class="product-image-link" href="#product/'+encodeURIComponent(p.id)+'" data-view="'+escapeHtml(p.id)+'" aria-label="View details for '+escapeHtml(p.name)+'"><img loading="lazy" decoding="async" src="'+escapeHtml(safeImageUrl(p.image))+'" alt="'+escapeHtml(p.imageAlt||p.name)+'"></a><span class="product-label">'+escapeHtml(p.label)+'</span><button class="wish-btn '+(wishlist.includes(p.id)?'selected':'')+'" data-wish="'+p.id+'" aria-label="'+(wishlist.includes(p.id)?'Remove '+escapeHtml(p.name)+' from wishlist':'Add '+escapeHtml(p.name)+' to wishlist')+'" aria-pressed="'+(wishlist.includes(p.id)?'true':'false')+'">♡</button></div><div class="product-info"><div class="product-brand">'+escapeHtml(p.brand)+'</div><h3 class="product-title"><a href="#product/'+encodeURIComponent(p.id)+'" data-view="'+escapeHtml(p.id)+'">'+escapeHtml(p.name)+'</a></h3><p class="product-desc">'+escapeHtml(p.category)+' · '+escapeHtml(p.style)+'</p><div class="price-line"><span class="price">'+money(p.price)+'</span>'+(p.compareAt>p.price?'<span class="old-price">'+money(p.compareAt)+'</span>':'')+'</div><div class="card-actions"><a class="quick-view" href="#product/'+encodeURIComponent(p.id)+'" aria-label="View details for '+escapeHtml(p.name)+'">View details</a><button class="add-cart" type="button" data-add="'+escapeHtml(p.id)+'" aria-label="Add '+escapeHtml(p.name)+' to bag">Add to Bag</button></div></div></article>').join('');
+ const previewNotice=catalogueSource==='snapshot'?'<div class="catalogue-preview-notice" role="status">Cached catalogue preview only. Current price and stock are revalidated at checkout.</div>':'';
+ grid.innerHTML=previewNotice+list.map(p=>'<article class="product-card"><div class="product-image"><a class="product-image-link" href="#product/'+encodeURIComponent(p.id)+'" data-view="'+escapeHtml(p.id)+'" aria-label="View details for '+escapeHtml(p.name)+'"><img loading="lazy" decoding="async" src="'+escapeHtml(safeImageUrl(p.image))+'" alt="'+escapeHtml(p.imageAlt||p.name)+'"></a><span class="product-label">'+escapeHtml(p.label)+'</span><button class="wish-btn '+(wishlist.includes(p.id)?'selected':'')+'" data-wish="'+p.id+'" aria-label="'+(wishlist.includes(p.id)?'Remove '+escapeHtml(p.name)+' from wishlist':'Add '+escapeHtml(p.name)+' to wishlist')+'" aria-pressed="'+(wishlist.includes(p.id)?'true':'false')+'">♡</button></div><div class="product-info"><div class="product-brand">'+escapeHtml(p.brand)+'</div><h3 class="product-title"><a href="#product/'+encodeURIComponent(p.id)+'" data-view="'+escapeHtml(p.id)+'">'+escapeHtml(p.name)+'</a></h3><p class="product-desc">'+escapeHtml(p.category)+' · '+escapeHtml(p.style)+'</p><div class="price-line"><span class="price">'+money(p.price)+'</span>'+(p.compareAt>p.price?'<span class="old-price">'+money(p.compareAt)+'</span>':'')+'</div><div class="card-actions"><a class="quick-view" href="#product/'+encodeURIComponent(p.id)+'" aria-label="View details for '+escapeHtml(p.name)+'">View details</a><button class="add-cart" type="button" data-add="'+escapeHtml(p.id)+'" aria-label="Add '+escapeHtml(p.name)+' to bag">Add to Bag</button></div></div></article>').join('');
 }
 function updateCounts(){$('cartCount').textContent=Object.values(cart).reduce((a,b)=>a+b,0);$('wishCount').textContent=wishlist.length;saveState()}
 function openPanel(mode){$('overlay').classList.add('open');$('drawer').classList.add('open');$('drawer').setAttribute('aria-hidden','false');document.body.classList.add('locked');$('drawerTitle').textContent=mode==='wishlist'?'Your wishlist':'Your bag';renderPanel(mode)}
