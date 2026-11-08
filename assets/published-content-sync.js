@@ -2,13 +2,16 @@
   "use strict";
   const config = window.IQA_SUPABASE_CONFIG;
   const endpoint = "https://nyhyfdququxnorqlnnqq.supabase.co/functions/v1/iqa-public-content";
-  // Local Playwright/dev runs must never call the live Production Supabase API.
-  // The storefront remains fully testable with its static catalogue and HTML fallback.
+  // Only the two explicitly approved production storefront hosts may sync live content.
+  // This blocks localhost, Playwright, GitHub Pages previews, Cloudflare PR previews,
+  // and any future preview/custom host until it is deliberately allowlisted here.
   const hostname = window.location && window.location.hostname;
-  const isLocalTestHost = hostname === "localhost" || hostname === "127.0.0.1" ||
-    hostname === "::1" || hostname === "[::1]" ||
-    (typeof hostname === "string" && hostname.endsWith(".localhost"));
-  if (window.__IQA_DISABLE_PUBLISHED_CONTENT_SYNC__ === true || isLocalTestHost) return;
+  const productionHosts = new Set([
+    "ugcnoorstudio-ui.github.io",
+    "iqa-watches-storefront.pages.dev",
+  ]);
+  if (window.__IQA_DISABLE_PUBLISHED_CONTENT_SYNC__ === true ||
+      !productionHosts.has(hostname)) return;
   function text(node, value) { if (node && typeof value === "string") node.textContent = value; }
   function applyHero(item) {
     const host = document.querySelector(".hero-copy");
