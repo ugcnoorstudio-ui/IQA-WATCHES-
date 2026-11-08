@@ -62,5 +62,10 @@ jobs:
           printf '%s' "$HEALTH" | jq -e '.ok == true and .environment == "production"'
           PROBE_STATUS="$(curl --silent --show-error -o /dev/null -w '%{http_code}' "$BASE/api/v1/cache-probe")"
           CATALOGUE_STATUS="$(curl --silent --show-error -o /dev/null -w '%{http_code}' "$BASE/api/v1/catalogue")"
+          CONTENT_BODY="$(mktemp)"
+          CONTENT_STATUS="$(curl --silent --show-error -o "$CONTENT_BODY" -w '%{http_code}' "$BASE/api/v1/public-content")"
           test "$PROBE_STATUS" = "404"
           test "$CATALOGUE_STATUS" = "404"
+          test "$CONTENT_STATUS" = "503"
+          jq -e '.ok == false and .error == "supabase_upstream_paused"' "$CONTENT_BODY"
+          rm -f "$CONTENT_BODY"
