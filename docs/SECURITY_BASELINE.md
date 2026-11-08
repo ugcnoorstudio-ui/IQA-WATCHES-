@@ -63,7 +63,7 @@ The leaked-password protection Advisor warning remains open. Enable it in Supaba
 - Anonymous users have no public-schema write grants. Authenticated writes are limited to customer self-service flows and column-scoped review/support submissions, with RLS ownership checks.
 - `checkout_idempotency` has RLS enabled, no policies, and no anon/authenticated table grants; this is intentional and server-only.
 - `public.iqa_cancel_customer_order(uuid)` is an intentional authenticated SECURITY DEFINER RPC. Its live definition checks `auth.uid()`, customer/order ownership, pending COD eligibility, locks order/variant rows, releases reserved stock safely, writes an order-status event and uses an empty search_path. The Advisor warning is retained as a reviewed exception and protected by `supabase/tests/security_baseline.sql`.
-- Staging has 42 recorded migrations; Production has 39. Production is three migrations behind and catch-up is blocked pending explicit release approval. PR #153 restores the exact Staging migration versions.
+- Staging and Production each now have 42 migration records and matching migration names. The three catch-up migrations were applied to Production under provider-generated version IDs `20261108134447`, `20261108134449` and `20261108134452`. PR #153 contains replay-safe source migration definitions; do not use a blind CLI push because the provider ledger timestamps differ.
 - Production leaked-password protection remains disabled and must be enabled in Supabase Auth settings before launch. This provider setting was not changed by the connected tools.
 
 
