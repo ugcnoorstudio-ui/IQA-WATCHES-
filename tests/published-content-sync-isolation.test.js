@@ -65,7 +65,8 @@ test('approved production storefront uses Cloudflare Worker proxy without Supaba
   assert.equal(result.calls, 1);
   assert.equal(result.request.url, proxyUrl);
   assert.equal(result.request.options.credentials, 'omit');
-  assert.deepEqual(result.request.options.headers, { accept: 'application/json' });
+  assert.equal(result.request.options.headers.accept, 'application/json');
+  assert.equal(Object.keys(result.request.options.headers).length, 1);
   assert.equal(result.request.options.headers.apikey, undefined);
 });
 
