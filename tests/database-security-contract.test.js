@@ -16,7 +16,7 @@ test("Phase 2 audit records the verified staging/production controls and outstan
     "20261108134447",
     "20261108134449",
     "20261108134452",
-    "Production migration catch-up completed"
+    "Production migration catch-up completed",
     "Phase 2 status:"
   ]) assert.ok(doc.includes(phrase), "Missing audit contract: " + phrase);
 });
