@@ -18,7 +18,7 @@ test('homepage declares one canonical URL for the current public site', () => {
 
 test('robots file allows public storefront crawling and points to the sitemap', () => {
   assert.match(robots, /User-agent: \*/);
-  assert.match(robots, /Allow: \/);
+  assert.ok(robots.includes('Allow: /'));
   assert.ok(robots.includes('Sitemap: ' + canonical + 'sitemap.xml'));
 });
 
