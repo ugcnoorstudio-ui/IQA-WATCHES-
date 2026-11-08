@@ -44,3 +44,11 @@ test('checkout remains authenticated and idempotent with COD only; no online gat
   assert.match(routes, /UPI · Google Pay · PhonePe · Paytm/);
   assert.match(routes, /Coming Soon/);
 });
+test('checkout CORS echoes only explicitly approved storefront origins', () => {
+  assert.match(checkout, /const ALLOWED_ORIGINS = new Set\(\[/);
+  assert.match(checkout, /https:\/\/ugcnoorstudio-ui\.github\.io/);
+  assert.match(checkout, /https:\/\/iqa-watches-storefront\.pages\.dev/);
+  assert.match(checkout, /headers\["Access-Control-Allow-Origin"\] = origin/);
+  assert.match(checkout, /if \(!ALLOWED_ORIGINS\.has\(origin\)\)/);
+  assert.doesNotMatch(checkout, /const ORIGIN =/);
+});
