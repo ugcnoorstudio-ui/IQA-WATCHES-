@@ -26,6 +26,11 @@ test('public catalogue delivers Cloudinary-only images and read-only cached resp
   assert.doesNotMatch(source, /\.insert\(|\.update\(|\.delete\(/);
 });
 
+test('public catalogue caches only successful responses and never caches errors', () => {
+  assert.match(source, /"Cache-Control": status === 200 \? CACHE_CONTROL : "no-store"/);
+  assert.match(source, /status: 403, headers: \{ "Vary": "Origin", "Cache-Control": "no-store" \}/);
+});
+
 test('public catalogue CORS is limited to the current storefront origin', () => {
   assert.match(source, /https:\/\/iqa-watches-storefront\.pages\.dev/);
   assert.match(source, /https:\/\/ugcnoorstudio-ui\.github\.io/);
