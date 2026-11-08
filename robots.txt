@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://ugcnoorstudio-ui.github.io/IQA-WATCHES-/sitemap.xml
+Sitemap: https://iqa-watches-storefront.pages.dev/sitemap.xml
