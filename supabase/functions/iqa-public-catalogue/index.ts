@@ -3,7 +3,10 @@ import { createClient } from "npm:@supabase/supabase-js@2";
 
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 const SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-const ALLOWED_ORIGIN = "https://iqa-watches-storefront.pages.dev";
+const ALLOWED_ORIGINS = new Set(["https://ugcnoorstudio-ui.github.io", "https://iqa-watches-storefront.pages.dev"]);
+function allowedOrigin(origin: string | null): boolean {
+  return !!origin && (ALLOWED_ORIGINS.has(origin) || /^https:\/\/pr-[1-9][0-9]*\.iqa-watches-storefront\.pages\.dev$/.test(origin));
+}
 const CACHE_CONTROL = "public, max-age=60, stale-while-revalidate=300";
 
 function response(status: number, body: Record<string, unknown>, origin: string | null) {
@@ -13,7 +16,7 @@ function response(status: number, body: Record<string, unknown>, origin: string 
     "Vary": "Origin",
     "X-Content-Type-Options": "nosniff",
   };
-  if (origin === ALLOWED_ORIGIN) headers["Access-Control-Allow-Origin"] = ALLOWED_ORIGIN;
+  if (allowedOrigin(origin)) headers["Access-Control-Allow-Origin"] = origin!;
   return new Response(JSON.stringify(body), { status, headers });
 }
 
@@ -38,14 +41,14 @@ function number(value: unknown): number {
 
 Deno.serve(async (request: Request) => {
   const origin = request.headers.get("origin");
-  if (origin && origin !== ALLOWED_ORIGIN) {
+  if (origin && !allowedOrigin(origin)) {
     return new Response("Origin not allowed.", { status: 403, headers: { "Vary": "Origin" } });
   }
   if (request.method === "OPTIONS") {
     return new Response(null, {
       status: 204,
       headers: {
-        ...(origin === ALLOWED_ORIGIN ? { "Access-Control-Allow-Origin": ALLOWED_ORIGIN } : {}),
+        ...(allowedOrigin(origin) ? { "Access-Control-Allow-Origin": origin! } : {}),
         "Access-Control-Allow-Headers": "apikey, authorization, x-client-info",
         "Access-Control-Allow-Methods": "GET, OPTIONS",
         "Access-Control-Max-Age": "86400",
