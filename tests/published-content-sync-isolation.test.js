@@ -8,12 +8,12 @@ const source = await readFile(
   'utf8',
 );
 
-function execute(hostname, disableSync = false, proxyUrl = '') {
+function execute(hostname, disableSync = false, proxyUrl = '', syncEnabled = true) {
   let calls = 0;
   let request = null;
   const window = {
     location: { hostname },
-    IQA_SUPABASE_CONFIG: { publishableKey: 'test-publishable-key', publicContentProxyUrl: proxyUrl },
+    IQA_SUPABASE_CONFIG: { publishableKey: 'test-publishable-key', publicContentProxyUrl: proxyUrl, publicContentSyncEnabled: syncEnabled },
     __IQA_DISABLE_PUBLISHED_CONTENT_SYNC__: disableSync,
   };
   const document = {
@@ -75,4 +75,9 @@ test('approved production storefront keeps direct Supabase fallback until proxy 
   assert.equal(result.calls, 1);
   assert.equal(result.request.url, 'https://nyhyfdququxnorqlnnqq.supabase.co/functions/v1/iqa-public-content');
   assert.equal(result.request.options.headers.apikey, 'test-publishable-key');
+});
+
+test('production storefronts do not call Supabase while the content-sync kill switch is off', () => {
+  assert.equal(execute('ugcnoorstudio-ui.github.io', false, '', false).calls, 0);
+  assert.equal(execute('iqa-watches-storefront.pages.dev', false, '', false).calls, 0);
 });
