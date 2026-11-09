@@ -19,7 +19,8 @@ test('Buy Now selection can continue directly into the same COD checkout', () =>
   assert.match(routes, /const entries=buyNowIntent\?\[buyNowIntent\]/);
   assert.doesNotMatch(routes, /addCart\(productItem\.id\)/);
   assert.match(routes, /location\.hash='checkout'/);
-  assert.match(routes, /Cash on Delivery is available/);
+  assert.match(routes, /Payment options and delivery terms are confirmed only after secure checkout/);
+  assert.match(routes, /Continue to secure checkout/);
   assert.doesNotMatch(routes, /Secure checkout is not enabled yet/);
 });
 
