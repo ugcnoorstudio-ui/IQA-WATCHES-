@@ -102,15 +102,25 @@ Deno.serve(async (request: Request) => {
     }
 
     const [mediaResult, productsResult, orderItemsResult, contentResult, settingsResult] = await Promise.all([
-      admin.from("product_media").select("image_url,cloudinary_public_id").limit(1000),
-      admin.from("products").select("specs").limit(1000),
-      admin.from("order_items").select("product_snapshot").limit(1000),
-      admin.from("content_entries").select("body").limit(1000),
-      admin.from("store_settings").select("value").limit(1000)
+      admin.from("product_media").select("image_url,cloudinary_public_id").limit(1001),
+      admin.from("products").select("specs").limit(1001),
+      admin.from("order_items").select("product_snapshot").limit(1001),
+      admin.from("content_entries").select("body").limit(1001),
+      admin.from("store_settings").select("value").limit(1001)
     ]);
 
     for (const result of [mediaResult, productsResult, orderItemsResult, contentResult, settingsResult]) {
       if (result.error) throw result.error;
+    }
+
+    // Supabase's default row cap is 1,000. Fetch one extra row and fail closed
+    // rather than silently missing a Storage URL beyond the first 1,000 records.
+    if ([mediaResult, productsResult, orderItemsResult, contentResult, settingsResult]
+      .some((result) => (result.data?.length ?? 0) > 1000)) {
+      return reply(409, {
+        ok: false,
+        error: "A preflight table exceeds the safe 1,000-row scan limit. No Storage visibility change was made."
+      }, origin);
     }
 
     const media = mediaResult.data ?? [];

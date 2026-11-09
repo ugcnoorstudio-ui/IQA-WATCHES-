@@ -1,7 +1,9 @@
 (function () {
   "use strict";
-  const config = window.IQA_SUPABASE_CONFIG;
-  const endpoint = "https://nyhyfdququxnorqlnnqq.supabase.co/functions/v1/iqa-public-content";
+  const config = window.IQA_SUPABASE_CONFIG || null;
+  const directEndpoint = "https://nyhyfdququxnorqlnnqq.supabase.co/functions/v1/iqa-public-content";
+  const proxyEndpoint = config && typeof config.publicContentProxyUrl === "string" ? config.publicContentProxyUrl.trim() : "";
+  const endpoint = proxyEndpoint || directEndpoint;
   // Only the two explicitly approved production storefront hosts may sync live content.
   // This blocks localhost, Playwright, GitHub Pages previews, Cloudflare PR previews,
   // and any future preview/custom host until it is deliberately allowlisted here.
@@ -11,6 +13,7 @@
     "iqa-watches-storefront.pages.dev",
   ]);
   if (window.__IQA_DISABLE_PUBLISHED_CONTENT_SYNC__ === true ||
+      (config && config.publicContentSyncEnabled === false) ||
       !productionHosts.has(hostname)) return;
   function text(node, value) { if (node && typeof value === "string") node.textContent = value; }
   function applyHero(item) {
@@ -61,9 +64,12 @@
     section.append(head,grid); trust.insertAdjacentElement("afterend",section);
   }
   async function loadPublishedContent() {
-    if (!config || !config.publishableKey) return;
+    if (!proxyEndpoint && (!config || !config.publishableKey)) return;
     try {
-      const response = await fetch(endpoint,{method:"GET",headers:{apikey:config.publishableKey}});
+      const requestOptions = proxyEndpoint
+        ? {method:"GET",headers:{accept:"application/json"},credentials:"omit"}
+        : {method:"GET",headers:{apikey:config.publishableKey}};
+      const response = await fetch(endpoint,requestOptions);
       if (!response.ok) throw new Error("Published content request failed.");
       const result = await response.json();
       if (!result || result.ok !== true || !Array.isArray(result.items)) throw new Error("Published content response was invalid.");

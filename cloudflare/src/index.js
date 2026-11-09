@@ -36,6 +36,9 @@ function getBearer(request) {
 }
 
 async function verifyWithSupabase(token, env) {
+  if (env.SUPABASE_UPSTREAM_CHECK_ENABLED === "false") {
+    return { configured: false, user: null };
+  }
   if (!env.SUPABASE_URL || !env.SUPABASE_PUBLISHABLE_KEY) {
     return { configured: false, user: null };
   }
@@ -102,6 +105,12 @@ async function publicCatalogue(request, env) {
   if (new URL(request.url).search) {
     return json({ ok: false, error: "query_parameters_not_supported" }, 400, corsHeaders(origin));
   }
+  if (env.SUPABASE_UPSTREAM_CHECK_ENABLED === "false") {
+    return json({ ok: false, error: "supabase_upstream_paused" }, 503, {
+      ...corsHeaders(origin),
+      "retry-after": "300"
+    });
+  }
   if (!env.SUPABASE_URL || !env.SUPABASE_PUBLISHABLE_KEY) {
     return json({ ok: false, error: "catalogue_not_configured" }, 503, corsHeaders(origin));
   }
@@ -134,6 +143,11 @@ async function publicContent(request, env, ctx) {
   if (new URL(request.url).search) {
     return json({ ok: false, error: "query_parameters_not_supported" }, 400);
   }
+  if (env.SUPABASE_UPSTREAM_CHECK_ENABLED === "false") {
+    return json({ ok: false, error: "supabase_upstream_paused" }, 503, {
+      "retry-after": "300"
+    });
+  }
   if (!env.SUPABASE_URL || !env.SUPABASE_PUBLISHABLE_KEY) {
     return json({ ok: false, error: "public_content_not_configured" }, 503);
   }
@@ -146,6 +160,15 @@ async function publicContent(request, env, ctx) {
     try {
       const hit = await cache.match(cacheKey);
       if (hit) {
+        const cachedPayload = await hit.clone().json().catch(() => null);
+        if (cachedPayload && cachedPayload.__iqa_quota_restricted === true) {
+          return json({ ok: false, error: "public_content_temporarily_restricted" }, 503, {
+            "cache-control": "public, max-age=30, s-maxage=30, stale-while-revalidate=60",
+            "retry-after": "30",
+            "x-content-cache": "HIT",
+            "x-iqa-upstream-status": "402"
+          });
+        }
         const headers = new Headers(hit.headers);
         headers.set("x-content-cache", "HIT");
         return new Response(hit.body, { status: hit.status, headers });
@@ -166,6 +189,39 @@ async function publicContent(request, env, ctx) {
     return json({ ok: false, error: "public_content_unavailable" }, 503);
   }
   if (!upstream.ok) {
+    if (upstream.status === 402) {
+      const quotaPayload = await upstream.clone().json().catch(() => null);
+      const quotaCode = quotaPayload && (
+        quotaPayload.message === "exceed_cached_egress_quota" ||
+        quotaPayload.code === "exceed_cached_egress_quota" ||
+        quotaPayload.error === "exceed_cached_egress_quota"
+      );
+      if (!quotaCode) {
+        return json({ ok: false, error: "public_content_unavailable" }, 503);
+      }
+      const quotaMarker = new Response(JSON.stringify({ __iqa_quota_restricted: true }), {
+        status: 200,
+        headers: {
+          "content-type": "application/json; charset=utf-8",
+          "cache-control": "public, max-age=30, s-maxage=30, stale-while-revalidate=60"
+        }
+      });
+      if (cache) {
+        try {
+          const write = cache.put(cacheKey, quotaMarker.clone());
+          if (ctx && typeof ctx.waitUntil === "function") ctx.waitUntil(write);
+          else await write;
+        } catch {
+          // Best-effort negative cache; keep the restricted response safe.
+        }
+      }
+      return json({ ok: false, error: "public_content_temporarily_restricted" }, 503, {
+        "cache-control": "public, max-age=30, s-maxage=30, stale-while-revalidate=60",
+        "retry-after": "30",
+        "x-content-cache": "MISS",
+        "x-iqa-upstream-status": "402"
+      });
+    }
     return json({ ok: false, error: "public_content_unavailable" }, 503);
   }
   const payload = await upstream.json();
@@ -201,6 +257,9 @@ export default {
       return cacheProbe(request, env);
     }
     if (url.pathname === "/api/v1/catalogue") {
+      if (env.PUBLIC_CATALOGUE_ENABLED !== "true") {
+        return json({ ok: false, error: "not_found" }, 404, corsHeaders(origin));
+      }
       return publicCatalogue(request, env);
     }
     if (url.pathname === "/api/v1/public-content") {

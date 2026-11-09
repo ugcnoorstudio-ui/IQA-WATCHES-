@@ -4,6 +4,7 @@ import worker from "../src/index.js";
 
 const env = {
   APP_ENV: "staging",
+  PUBLIC_CATALOGUE_ENABLED: "true",
   SUPABASE_URL: "https://example.supabase.co",
   SUPABASE_PUBLISHABLE_KEY: "sb_publishable_test"
 };
