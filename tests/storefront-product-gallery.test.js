@@ -102,7 +102,8 @@ test('full-screen product image viewer is present and supports keyboard-accessib
 });
 
 test('Buy Now uses an isolated quantity selection instead of mutating the cart', () => {
-  assert.match(html, /window\.iqaBuyNowSelection=\{productId:id,quantity:1\}/);
+  assert.match(html, /const requestedQuantity=Number\(buyNow\.dataset\.pdpQuantity\)\|\|1/);
+  assert.match(html, /window\.iqaBuyNowSelection=\{productId:id,quantity:Math\.max\(1,Math\.min\(Number\(product\.stock\)\|\|1,requestedQuantity\)\)\}/);
   assert.doesNotMatch(html, /const buyNow=e\.target\.closest\('\[data-buy-now\]'\);if\(buyNow\)\{const id=buyNow\.dataset\.buyNow;if\(!addCart\(id\)\)/);
 });
 
