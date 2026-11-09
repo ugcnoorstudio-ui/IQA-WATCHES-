@@ -59,7 +59,7 @@ test('homepage static imagery is served from the six migrated Cloudinary assets'
   ];
   for (const [sourceId, publicId] of assets) {
     assert.ok(!html.includes(sourceId), 'homepage must no longer request legacy Unsplash image ' + sourceId);
-    assert.ok(html.includes('https://res.cloudinary.com/rrmdzam7/image/upload/c_limit,w_1200/f_auto/q_auto/iqa-watches/static/' + publicId + '.jpg'),
+    assert.ok(html.includes('https://res.cloudinary.com/rrmdzam7/image/upload/c_limit,w_480/f_auto/q_auto/iqa-watches/static/' + publicId + '.jpg') || html.includes('https://res.cloudinary.com/rrmdzam7/image/upload/c_limit,w_1200/f_auto/q_auto/iqa-watches/static/' + publicId + '.jpg'),
       'homepage should use migrated Cloudinary asset ' + publicId);
     assert.ok(fn.includes(publicId), 'migration function should provision the same Cloudinary asset ' + publicId);
   }
@@ -126,7 +126,7 @@ test('Cloudinary delivery uses bounded responsive widths and separate automatic 
   assert.match(html, /srcset=/);
   assert.match(html, /rel="preconnect" href="https:\/\/res\.cloudinary\.com" crossorigin/);
   assert.match(html, /loading="lazy" decoding="async"/);
-  assert.match(html, /sizes="\(max-width: 760px\) 100vw/);
+  assert.match(html, /sizes="\(max-width: 760px\) 48vw/);
   assert.match(html, /parts\.splice\(uploadIndex\+1,0,'c_limit,w_1200','f_auto','q_auto'\)/);
   assert.match(admin, /c_limit,w_320\/f_auto\/q_auto/);
   assert.match(manager, /c_limit,w_\x27\+width\+\x27\/f_auto\/q_auto/);

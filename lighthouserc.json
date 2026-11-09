@@ -1,0 +1,48 @@
+{
+  "ci": {
+    "collect": {
+      "startServerCommand": "node scripts/serve-spa.js",
+      "startServerReadyPattern": "IQA SEO server listening",
+      "url": [
+        "http://localhost:4173/",
+        "http://localhost:4173/products/fastrack-thor-multifunctional-analogue/d1875a84-aedb-4311-a6a3-02dcd0c8a745"
+      ],
+      "numberOfRuns": 1,
+      "settings": {
+        "chromeFlags": "--no-sandbox --disable-dev-shm-usage"
+      }
+    },
+    "assert": {
+      "assertions": {
+        "categories:accessibility": [
+          "error",
+          {
+            "minScore": 0.85
+          }
+        ],
+        "categories:seo": [
+          "error",
+          {
+            "minScore": 0.9
+          }
+        ],
+        "categories:best-practices": [
+          "warn",
+          {
+            "minScore": 0.8
+          }
+        ],
+        "categories:performance": [
+          "warn",
+          {
+            "minScore": 0.45
+          }
+        ]
+      }
+    },
+    "upload": {
+      "target": "filesystem",
+      "outputDir": ".lighthouseci"
+    }
+  }
+}
