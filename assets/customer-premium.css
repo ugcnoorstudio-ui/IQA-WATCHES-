@@ -385,3 +385,8 @@ body:has(.route-sticky-buybar){padding-bottom:88px}
 .route-product-details-body p{margin:0;color:var(--muted);font-size:13px;line-height:1.85}
 .route-product-about{margin-top:0;border-top:0}
 @media(max-width:680px){#iqa-image-lightbox [data-lightbox-back]{min-height:44px;min-width:88px}.route-product-details>summary{min-height:52px}}
+
+/* Product detail wishlist control */
+.route-product-copy .route-wish-button{display:flex;width:100%;min-height:46px;align-items:center;justify-content:center;margin:10px 0 4px;border-color:#cfc4b2;background:transparent;color:#28251f;font-size:10px;letter-spacing:1px;text-transform:uppercase}
+.route-product-copy .route-wish-button:hover,.route-product-copy .route-wish-button.is-saved{border-color:#a8864c;background:#f2ecdf;color:#76582b}
+.route-product-copy .route-wish-button[aria-pressed=true]{font-weight:700}
