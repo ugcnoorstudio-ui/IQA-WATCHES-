@@ -15,7 +15,9 @@ test('cart drawer starts the real secure COD checkout instead of a preview-only 
 
 test('Buy Now selection can continue directly into the same COD checkout', () => {
   assert.match(routes, /data-buy-now-checkout/);
-  assert.match(routes, /addCart\(productItem\.id\)/);
+  assert.match(routes, /sessionStorage\.setItem\('iqa-checkout-buy-now'/);
+  assert.match(routes, /const entries=buyNowIntent\?\[buyNowIntent\]/);
+  assert.doesNotMatch(routes, /addCart\(productItem\.id\)/);
   assert.match(routes, /location\.hash='checkout'/);
   assert.match(routes, /Cash on Delivery is available/);
   assert.doesNotMatch(routes, /Secure checkout is not enabled yet/);
