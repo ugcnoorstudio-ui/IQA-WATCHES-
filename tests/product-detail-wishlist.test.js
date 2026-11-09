@@ -19,7 +19,7 @@ test('dedicated product detail page exposes an accessible wishlist control', () 
   assert.match(routes, /data-pdp-add=/);
   assert.match(routes, /addCartQuantity\(id,quantity\)/);
   assert.match(storefront, /function addCartQuantity\(id,quantity=1\)/);
-  assert.match(storefront, /iqa-checkout-buy-now/);
+  assert.match(routes, /iqa-checkout-buy-now/);
   assert.match(routes, /const entries=buyNowIntent\?\[buyNowIntent\]/);
   assert.doesNotMatch(routes, /for\(let index=0;index<quantity;index\+\+\)\{if\(!addCart\(productItem\.id\)\)return;\}/);
 });
