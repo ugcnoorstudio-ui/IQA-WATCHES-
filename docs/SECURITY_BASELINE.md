@@ -10,7 +10,7 @@
 - Anonymous users can read published categories, brands and product-media metadata. Authenticated staff reads require an active staff role.
 - Authenticated staff can read full product/variant and inventory records only when their staff role passes the corresponding RLS policy.
 - The `private.iqa_is_public_product(uuid)` SECURITY DEFINER predicate is in the non-exposed `private` schema. Anonymous execution is granted only because the catalogue RLS policies call it; the schema is not exposed through the Data API.
-- Seventeen other business tables intentionally have RLS enabled with no policies. They remain inaccessible through browser roles until table/role-specific policies are reviewed.
+- `public.checkout_idempotency` intentionally has RLS enabled with no policies and no browser-role table grants; it is restricted to trusted server-side database operations.
 - Both `public.iqa_admin_mutate(text,uuid,jsonb)` and `public.iqa_catalogue_mutation(uuid,text,jsonb)` are executable only by `service_role`. Each checks the actor's active Owner profile before privileged writes.
 - The `iqa-admin-mutate` Edge Function is ACTIVE at version 4 with platform JWT verification enabled. It verifies the caller's Supabase Auth identity and allow-lists operations before forwarding them to the database.
 - Product images are stored in the intentionally public `product-images` bucket for storefront delivery. Upload, overwrite and delete are restricted to active Owners through Storage RLS.
@@ -32,7 +32,7 @@
 - The public catalogue predicate is no longer in the exposed `public` schema.
 - Security Advisor reports no remaining public SECURITY DEFINER RPC warning for the catalogue predicate.
 - Performance Advisor's overlapping-permissive-policy warning was resolved by limiting public category/brand/media policies to `anon` and staff policies to `authenticated`.
-- Security Advisor still reports 17 unrelated RLS-enabled tables with no policies (intentionally inaccessible) and leaked-password protection disabled.
+- Security Advisor reports the intentional `checkout_idempotency` no-policy notice and the reviewed authenticated `iqa_cancel_customer_order` SECURITY DEFINER RPC. Production additionally reports leaked-password protection disabled; Staging did not report this setting.
 - Performance Advisor reports unused indexes while tables are empty; these are informational and should be re-evaluated after real catalogue traffic.
 
 ## Negative acceptance tests before launch
@@ -54,3 +54,25 @@
 The Owner identity, Auth login gate, catalogue schema, public catalogue read policies, Owner-only product creation/inventory adjustment/taxonomy/image/publication workflow and public storefront data loader are implemented in the active project. No real product records have been entered. The authenticated Owner workflow has not yet been exercised end-to-end with a live product and image. Customer/order/payment CRUD, storefront checkout and MFA enforcement are not enabled.
 
 The leaked-password protection Advisor warning remains open. Enable it in Supabase Auth settings before production.
+
+
+## Phase 2 verification update — 2026-11-08
+
+- Read-only Phase 2 security acceptance SQL passed in both connected Staging and Production projects.
+- All 26 public tables have RLS enabled in both environments; no public table was found without RLS and no public views currently exist.
+- Anonymous users have no public-schema write grants. Authenticated writes are limited to customer self-service flows and column-scoped review/support submissions, with RLS ownership checks.
+- `checkout_idempotency` has RLS enabled, no policies, and no anon/authenticated table grants; this is intentional and server-only.
+- `public.iqa_cancel_customer_order(uuid)` is an intentional authenticated SECURITY DEFINER RPC. Its live definition checks `auth.uid()`, customer/order ownership, pending COD eligibility, locks order/variant rows, releases reserved stock safely, writes an order-status event and uses an empty search_path. The Advisor warning is retained as a reviewed exception and protected by `supabase/tests/security_baseline.sql`.
+- Staging and Production each now have 42 migration records and matching migration names. The three catch-up migrations were applied to Production under provider-generated version IDs `20261108134447`, `20261108134449` and `20261108134452`. PR #153 contains replay-safe source migration definitions; do not use a blind CLI push because the provider ledger timestamps differ.
+- Production leaked-password protection remains disabled and must be enabled in Supabase Auth settings before launch. This provider setting was not changed by the connected tools.
+
+
+## Production migration catch-up — 2026-11-08
+
+The three Staging migrations absent from Production were applied to Production after approval and verified in the live schema:
+
+- Eight-image product media trigger: active, parent product row lock retained, empty search_path.
+- `checkout_idempotency_order_id_idx`: present.
+- Checkout RPC payload validation: null/non-array/empty carts, non-object items and duplicate variant lines rejected at the database boundary.
+
+Both environments now report 42 migration records and matching migration names. Production's provider-generated migration versions are `20261108134447`, `20261108134449` and `20261108134452`; they differ from Staging's historical timestamps. The PR #153 migration files must therefore be replay-safe before a future CLI push. Production Auth leaked-password protection remains disabled and is a launch blocker.
