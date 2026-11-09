@@ -565,8 +565,8 @@ test('Buy Now keeps its own quantity and does not mutate the shopping bag', asyn
   await expect.poll(() => page.evaluate(() => location.hash)).toBe('#buy-now/' + encodeURIComponent(selectedId));
   const buyNow = page.locator('#routeView');
   await expect(buyNow).toContainText(/Review your selected timepiece/i);
-  await expect(buyNow).toContainText(/Cash on Delivery is available/i);
-  await expect(buyNow).toContainText(/Confirm your delivery details and address at secure checkout/i);
+  await expect(buyNow).toContainText(/Payment options and delivery terms are confirmed only after secure checkout/i);
+  await expect(buyNow).toContainText(/Online payment availability is not currently configured/i);
   await expect(buyNow.locator('[data-buy-now-checkout]')).toBeVisible();
   await expect(buyNow.locator('.buy-now-quantity strong')).toHaveText('1');
   await expect(buyNow.locator('[data-qty]')).toHaveCount(0);
