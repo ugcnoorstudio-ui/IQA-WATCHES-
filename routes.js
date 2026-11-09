@@ -474,7 +474,6 @@ document.addEventListener('click',event=>{
   const id=decodeURIComponent((location.hash.split('/')[1]||'')),item=products.find(product=>product.id===id);
   if(!item)return;
   const max=Math.max(1,Math.min(10,Number(item.stock)||1)),state=window.iqaPdpSelection?.productId===id?window.iqaPdpSelection:{productId:id,quantity:1};
-  const next=Math.max(1,Math.min(max,Number(state.quantity)||1+Number(quantityButton.dataset.pdpQty)));
   const quantity=Math.max(1,Math.min(max,(Number(state.quantity)||1)+Number(quantityButton.dataset.pdpQty)));
   window.iqaPdpSelection={productId:id,quantity};
   const value=document.querySelector('[data-pdp-quantity-value]');if(value)value.textContent=String(quantity);
