@@ -127,6 +127,7 @@ Deno.serve(async (request: Request) => {
             colour: text(options.colour ?? options.color ?? options.band_colour ?? options.strap_colour ?? options.case_colour),
             dial: text(options.dial ?? options.dial_colour),
             strap: text(options.strap ?? options.strap_material ?? options.band_material),
+            caseMaterial: text(options.case ?? options.case_material ?? options.case_material_type),
             label: text(options.label ?? options.name),
           };
         })
@@ -154,6 +155,7 @@ Deno.serve(async (request: Request) => {
         id: product.id,
         variantId: selected.id,
         variants: availableVariants,
+        variantDetails: { case: selected.caseMaterial, strap: selected.strap },
         name: text(product.name),
         brand: text(product.brand),
         category: text(product.category),
