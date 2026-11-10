@@ -23,3 +23,11 @@ test('dedicated product detail page exposes an accessible wishlist control', () 
   assert.match(routes, /const entries=buyNowIntent\?\[buyNowIntent\]/);
   assert.doesNotMatch(routes, /for\(let index=0;index<quantity;index\+\+\)\{if\(!addCart\(productItem\.id\)\)return;\}/);
 });
+
+test('dedicated PDP renders only the real approved variant configuration', () => {
+  assert.match(routes, /p\.variantDetails\?\.case/);
+  assert.match(routes, /p\.variantDetails\?\.strap/);
+  assert.match(routes, /aria-label="Available product configuration"/);
+  assert.match(storefront, /const variantDetails=item\.variantDetails/);
+  assert.match(premiumCss, /\.route-pdp-variant-chip/);
+});
