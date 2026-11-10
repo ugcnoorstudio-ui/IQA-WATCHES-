@@ -249,6 +249,16 @@ test('wishlist persists in browser storage after reload and can be removed', asy
   await expect.poll(() => page.evaluate(() => JSON.parse(localStorage.getItem('iqa-preview-wishlist') || '[]'))).not.toContain(productId);
 });
 
+test('PDP displays the real approved case and strap configuration', async ({ page }) => {
+  await openStore(page);
+  await navigateToHash(page, 'product/0a8836eb-b7ad-41b6-874f-3737e8e94482');
+  const detail = page.locator('#routeView');
+  await expect(detail).toContainText('Available configuration');
+  await expect(detail).toContainText('Black Resin');
+  await expect(detail).toContainText('Brown Genuine Leather');
+  await expect(detail).toContainText('₹1,200');
+});
+
 test('comparison accepts two distinct catalogue products and clears', async ({ page }) => {
   await openStore(page);
   const initialHash = await page.evaluate(() => location.hash);
