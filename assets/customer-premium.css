@@ -399,3 +399,9 @@ body:has(.route-sticky-buybar){padding-bottom:88px}
 .route-pdp-quantity-controls button:disabled{opacity:.35;cursor:not-allowed}
 .route-pdp-quantity-controls strong{min-width:20px;text-align:center;font-size:14px;color:#1f1c16}
 .route-pdp-quantity small{color:#777064;font-size:11px}
+
+/* Approved live product variant details (read-only until multiple sellable options exist). */
+.route-pdp-variant{display:flex;align-items:center;flex-wrap:wrap;gap:8px;margin:12px 0 4px}
+.route-pdp-variant-title{width:100%;color:#777064;font-size:10px;font-weight:700;letter-spacing:.09em;text-transform:uppercase}
+.route-pdp-variant-chip{display:inline-flex;align-items:center;gap:5px;padding:7px 10px;border:1px solid #ded6c9;background:#fffdf9;color:#4d473d;font-size:11px}
+.route-pdp-variant-chip b{color:#1f1c16;font-weight:700}
