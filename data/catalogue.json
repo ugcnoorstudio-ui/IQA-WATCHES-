@@ -1,7 +1,7 @@
 {
   "version": 1,
   "source": "Supabase approved product snapshot",
-  "generated_at": "2026-11-07T13:31:00+05:30",
+  "generated_at": "2026-11-10T04:41:08.722Z",
   "delivery": "Cloudinary",
   "products": [
     {
@@ -19,7 +19,6 @@
       "colour": "",
       "dial": "",
       "strap": "",
-      "sku": "Not listed",
       "label": "Only 1 left",
       "desc": "Fastrack thor multifunctional analogue watch ",
       "image": "https://res.cloudinary.com/rrmdzam7/image/upload/v1793899716/iqa-watches/products/d1875a84-aedb-4311-a6a3-02dcd0c8a745_8331e06f.png",
@@ -39,7 +38,8 @@
       "strapWidth": "",
       "movement": "",
       "waterResistance": "",
-      "warranty": ""
+      "warranty": "",
+      "variantDetails": {}
     },
     {
       "id": "0a8836eb-b7ad-41b6-874f-3737e8e94482",
@@ -56,7 +56,6 @@
       "colour": "Brown",
       "dial": "",
       "strap": "Genuine Leather",
-      "sku": "AE-1200WHL-5AV",
       "label": "7 in stock",
       "desc": "The Casio AE-1200WHL-5AV brings the signature multi-display World Time design together with a brown genuine-leather band. Its digital display shows home time at a glance, while the world map display helps track time across 31 time zones and 48 cities. Features include a 1/100-second stopwatch, countdown timer, five daily or one-time alarms, amber LED illumination, full auto-calendar through 2099 and 12/24-hour time format. The resin case measures 45 × 42.1 × 12.5 mm and weighs 39 g. Powered by a CR2025 battery with an approximate 10-year battery life. Water resistance: 100 metres (10 bar). Resin glass. Official Casio India MRP: ₹4,495 (inclusive of taxes).",
       "image": "https://res.cloudinary.com/rrmdzam7/image/upload/v1793904334/iqa-watches/products/3b292642-5873-4936-b239-49ea015e3a03.png",
@@ -82,7 +81,11 @@
       "strapWidth": "",
       "movement": "",
       "waterResistance": "100 m / 10 bar",
-      "warranty": ""
+      "warranty": "",
+      "variantDetails": {
+        "case": "Black Resin",
+        "strap": "Brown Genuine Leather"
+      }
     },
     {
       "id": "b440d67b-7bd7-49bd-bdb3-817dc16b7ea7",
@@ -99,7 +102,6 @@
       "colour": "Silver",
       "dial": "",
       "strap": "Stainless Steel Band",
-      "sku": "AE-1200WHD-1AV",
       "label": "10 in stock",
       "desc": "The Casio AE-1200WHD-1AV combines a distinctive multi-display digital dial with a silver stainless-steel band. It offers World Time across 31 time zones and 48 cities, a 1/100-second stopwatch, countdown timer, five daily or one-time alarms, amber LED illumination, full auto-calendar through 2099 and 12/24-hour time format. The resin case measures 45 × 42.1 × 12.5 mm and weighs 91 g. Powered by a CR2025 battery with an approximate 10-year battery life. Water resistance: 100 metres (10 bar). Resin glass. Official Casio India MRP: ₹3,995 (inclusive of taxes).",
       "image": "https://res.cloudinary.com/rrmdzam7/image/upload/v1793899720/iqa-watches/products/ee339630-71a4-430d-bccf-fb89244de399_5fad7fcf.png",
@@ -119,7 +121,11 @@
       "strapWidth": "",
       "movement": "",
       "waterResistance": "100 m / 10 bar",
-      "warranty": ""
+      "warranty": "",
+      "variantDetails": {
+        "case": "Black Resin",
+        "strap": "Silver Stainless Steel"
+      }
     }
   ]
 }
