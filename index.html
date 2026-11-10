@@ -1135,8 +1135,9 @@ async function loadStorefrontCatalogue(){
     src:safeImageUrl(image.src),alt:String(image.alt||item.name),isPrimary:Boolean(image.isPrimary),sortOrder:Number(image.sortOrder)||0
    })).filter(image=>image.src);
    const image=safeImageUrl(item.image);
-   return {...item,image,gallery};
-  }).filter(item=>item.id&&item.name&&item.price>0&&item.stock>0&&item.image&&item.image.startsWith('https://res.cloudinary.com/'));
+   const variantDetails=item.variantDetails&&typeof item.variantDetails==='object'&&!Array.isArray(item.variantDetails)?item.variantDetails:{};
+   return {...item,image,gallery,variantDetails};
+  }).filter(item=>item.id&&item.name&&item.price>0&&item.stock>0&&item.variantId&&item.image&&item.image.startsWith('https://res.cloudinary.com/'));
   if(!products.length)throw new Error('No approved in-stock products are available in the static catalogue.');
   knownProductIds=new Set(products.map(item=>item.id));
   cart=Object.fromEntries(Object.entries(storedCart&&typeof storedCart==='object'&&!Array.isArray(storedCart)?storedCart:{}).filter(([id,qty])=>knownProductIds.has(id)&&Number.isInteger(qty)&&qty>0).map(([id,qty])=>[id,Math.min(qty,10,products.find(item=>item.id===id)?.stock||0)]).filter(([,qty])=>qty>0));
