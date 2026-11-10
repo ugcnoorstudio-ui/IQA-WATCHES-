@@ -113,12 +113,26 @@ Deno.serve(async (request: Request) => {
     const media = mediaResult.data || [];
     const output = products.flatMap((product) => {
       const availableVariants = variants
-        .filter((variant) => variant.product_id === product.id &&
-          variant.active === true &&
-          number(variant.stock_on_hand) > number(variant.stock_reserved))
-        .sort((a, b) => text(a.sku).localeCompare(text(b.sku)));
-      const variant = availableVariants[0];
-      if (!variant) return [];
+        .filter((variant) => variant.product_id === product.id && variant.active === true)
+        .map((variant) => {
+          const stock = Math.max(0, number(variant.stock_on_hand) - number(variant.stock_reserved));
+          const price = number(variant.selling_price ?? product.selling_price);
+          if (stock <= 0 || price <= 0) return null;
+          const options = variant.options && typeof variant.options === "object" && !Array.isArray(variant.options)
+            ? variant.options as Record<string, unknown> : {};
+          return {
+            id: text(variant.id),
+            price,
+            stock,
+            colour: text(options.colour ?? options.color ?? options.band_colour ?? options.strap_colour ?? options.case_colour),
+            dial: text(options.dial ?? options.dial_colour),
+            strap: text(options.strap ?? options.strap_material ?? options.band_material),
+            label: text(options.label ?? options.name),
+          };
+        })
+        .filter((variant): variant is NonNullable<typeof variant> => variant !== null)
+        .sort((a, b) => a.id.localeCompare(b.id));
+      if (!availableVariants.length) return [];
 
       const gallery = media
         .filter((image) => image.product_id === product.id && isCloudinaryUrl(image.image_url))
@@ -134,28 +148,26 @@ Deno.serve(async (request: Request) => {
 
       const specs = product.specs && typeof product.specs === "object" && !Array.isArray(product.specs)
         ? product.specs as Record<string, unknown> : {};
-      const price = number(variant.selling_price ?? product.selling_price);
-      const availableStock = Math.max(0, number(variant.stock_on_hand) - number(variant.stock_reserved));
-      if (price <= 0 || availableStock <= 0) return [];
-
       const primary = gallery[0];
+      const selected = availableVariants[0];
       return [{
         id: product.id,
-        variantId: variant.id,
+        variantId: selected.id,
+        variants: availableVariants,
         name: text(product.name),
         brand: text(product.brand),
         category: text(product.category),
         audience: text(product.audience),
         style: text(specs.style ?? specs.display),
         tags: Array.isArray(specs.tags) ? specs.tags.filter((tag): tag is string => typeof tag === "string") : [],
-        price,
-        compareAt: number(product.mrp) || price,
-        stock: availableStock,
-        colour: text(specs.band_colour ?? specs.strap_colour ?? specs.case_colour),
-        dial: text(specs.dial_colour ?? specs.dial),
-        strap: text(specs.strap_material ?? specs.band_material ?? specs.strap),
-        sku: text(variant.sku),
-        label: availableStock <= 3 ? "Only " + availableStock + " left" : availableStock + " in stock",
+        price: selected.price,
+        compareAt: number(product.mrp) || selected.price,
+        stock: selected.stock,
+        colour: selected.colour || text(specs.band_colour ?? specs.strap_colour ?? specs.case_colour),
+        dial: selected.dial || text(specs.dial_colour ?? specs.dial),
+        strap: selected.strap || text(specs.strap_material ?? specs.band_material ?? specs.strap),
+        sku: "",
+        label: selected.stock <= 3 ? "Only " + selected.stock + " left" : selected.stock + " in stock",
         desc: text(product.description),
         image: primary.src,
         imageAlt: primary.alt,
