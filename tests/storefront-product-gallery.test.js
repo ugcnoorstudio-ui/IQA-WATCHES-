@@ -126,3 +126,9 @@ test('public catalogue exposes real variant details and omits internal SKU field
   assert.equal(brownLeather.variantDetails.strap, 'Brown Genuine Leather');
   assert.equal(brownLeather.stock, 7);
 });
+
+test('public model codes remain searchable without exposing internal SKU fields', () => {
+  assert.ok(catalogue.products.some(product => product.modelCode));
+  assert.ok(catalogue.products.every(product => !Object.hasOwn(product, 'sku')));
+  assert.ok(html.includes('p.modelCode'));
+});
