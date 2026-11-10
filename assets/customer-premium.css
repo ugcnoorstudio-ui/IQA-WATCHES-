@@ -385,3 +385,23 @@ body:has(.route-sticky-buybar){padding-bottom:88px}
 .route-product-details-body p{margin:0;color:var(--muted);font-size:13px;line-height:1.85}
 .route-product-about{margin-top:0;border-top:0}
 @media(max-width:680px){#iqa-image-lightbox [data-lightbox-back]{min-height:44px;min-width:88px}.route-product-details>summary{min-height:52px}}
+
+/* Product detail wishlist control */
+.route-product-copy .route-wish-button{display:flex;width:100%;min-height:46px;align-items:center;justify-content:center;margin:10px 0 4px;border-color:#cfc4b2;background:transparent;color:#28251f;font-size:10px;letter-spacing:1px;text-transform:uppercase}
+.route-product-copy .route-wish-button:hover,.route-product-copy .route-wish-button.is-saved{border-color:#a8864c;background:#f2ecdf;color:#76582b}
+.route-product-copy .route-wish-button[aria-pressed=true]{font-weight:700}
+
+/* Product detail quantity selector */
+.route-pdp-quantity{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin:18px 0 8px;padding:14px 0;border-top:1px solid #e9e2d6;border-bottom:1px solid #e9e2d6;color:#4d473d;font-size:12px}
+.route-pdp-quantity>span{font-weight:600;letter-spacing:.5px;text-transform:uppercase}
+.route-pdp-quantity-controls{display:inline-flex;align-items:center;gap:14px;border:1px solid #ded6c9;border-radius:4px;background:#fffdf9;padding:4px 8px}
+.route-pdp-quantity-controls button{width:32px;height:32px;border:0;background:transparent;color:#29251e;font-size:20px;cursor:pointer}
+.route-pdp-quantity-controls button:disabled{opacity:.35;cursor:not-allowed}
+.route-pdp-quantity-controls strong{min-width:20px;text-align:center;font-size:14px;color:#1f1c16}
+.route-pdp-quantity small{color:#777064;font-size:11px}
+
+/* Approved live product variant details (read-only until multiple sellable options exist). */
+.route-pdp-variant{display:flex;align-items:center;flex-wrap:wrap;gap:8px;margin:12px 0 4px}
+.route-pdp-variant-title{width:100%;color:#777064;font-size:10px;font-weight:700;letter-spacing:.09em;text-transform:uppercase}
+.route-pdp-variant-chip{display:inline-flex;align-items:center;gap:5px;padding:7px 10px;border:1px solid #ded6c9;background:#fffdf9;color:#4d473d;font-size:11px}
+.route-pdp-variant-chip b{color:#1f1c16;font-weight:700}

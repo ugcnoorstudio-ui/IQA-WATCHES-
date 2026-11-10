@@ -12,14 +12,14 @@ function product(id){
  }
  const p=products.find(x=>x.id===id);
  if(!p){root.innerHTML=hero('IQA WATCHES · PRODUCT','Product not found','This product is not currently in the approved catalogue.')+'<div class="route-content"><a class="button" href="#shop">Shop All</a></div>';return}
- const casio=p.sku==='CAS-AE1200WHL5AV-001'||p.sku==='CAS-AE1200WHL5AVDF-001'||p.sku==='AE-1200WHL-5AV'||p.sku==='AE-1200WHL-5AVDF';
+ const casio=p.modelCode==='CAS-AE1200WHL5AV-001'||p.modelCode==='CAS-AE1200WHL5AVDF-001'||p.modelCode==='AE-1200WHL-5AV'||p.modelCode==='AE-1200WHL-5AVDF';
  const galleryItems=(Array.isArray(p.gallery)?p.gallery:[]).map(item=>({src:safeImageUrl(item.src),alt:String(item.alt||p.name)})).filter(item=>item.src);
  if(!galleryItems.length&&p.image){const fallback=safeImageUrl(p.image);if(fallback)galleryItems.push({src:fallback,alt:p.imageAlt||p.name})}
  const primaryIndex=galleryItems.findIndex(item=>item.src===safeImageUrl(p.image));
  if(primaryIndex>0)galleryItems.unshift(galleryItems.splice(primaryIndex,1)[0]);
  const mainImage=galleryItems[0]||{src:'',alt:p.name};
  const thumbnails=galleryItems.length>1?'<div class="route-gallery-thumbs" aria-label="Product images">'+galleryItems.map((item,index)=>'<button type="button" class="route-gallery-thumb" data-gallery-src="'+esc(item.src)+'" data-gallery-alt="'+esc(item.alt)+'" aria-pressed="'+(index===0?'true':'false')+'" aria-label="Show product image '+(index+1)+'"><img src="'+esc(item.src)+'" alt="" loading="lazy"></button>').join('')+'</div>':'';
- const specRows=[['Brand',p.brand],['Category',p.category],['Watch type',p.style],['Audience',p.audience],['Dial colour',p.dial],['Colour',p.colour],['Case diameter',p.caseDiameter?p.caseDiameter+' mm':''],['Case thickness',p.caseThickness?p.caseThickness+' mm':''],['Lug-to-lug',p.lugToLug?p.lugToLug+' mm':''],['Case material',p.caseMaterial],['Strap',p.strap],['Strap width',p.strapWidth?p.strapWidth+' mm':''],['Movement',p.movement],['Water resistance',p.waterResistance],['Warranty',p.warranty],['SKU',p.sku]].filter(([,value])=>value!==null&&value!==undefined&&String(value).trim()!=='');
+ const specRows=[['Brand',p.brand],['Category',p.category],['Watch type',p.style],['Audience',p.audience],['Dial colour',p.dial],['Colour',p.colour],['Case diameter',p.caseDiameter?p.caseDiameter+' mm':''],['Case thickness',p.caseThickness?p.caseThickness+' mm':''],['Lug-to-lug',p.lugToLug?p.lugToLug+' mm':''],['Case material',p.caseMaterial],['Case configuration',p.variantDetails?.case],['Strap',p.strap],['Strap configuration',p.variantDetails?.strap],['Strap width',p.strapWidth?p.strapWidth+' mm':''],['Movement',p.movement],['Water resistance',p.waterResistance],['Warranty',p.warranty]].filter(([,value])=>value!==null&&value!==undefined&&String(value).trim()!=='');
  const specs='<details class="route-product-details"><summary><span>View product specifications</span><span aria-hidden="true">＋</span></summary><div class="route-product-details-body"><table class="route-specs"><tbody>'+specRows.map(([label,value])=>'<tr><th>'+esc(label)+'</th><td>'+esc(value)+'</td></tr>').join('')+'</tbody></table></div></details>';
  const related=products.filter(item=>item.id!==p.id&&Number(item.stock)>0).map(item=>({item,score:(item.category===p.category?4:0)+(item.brand===p.brand?3:0)+(item.style===p.style?2:0)+(item.audience===p.audience?1:0)})).sort((a,b)=>b.score-a.score||Math.abs(Number(a.item.price)-Number(p.price))-Math.abs(Number(b.item.price)-Number(p.price))).slice(0,4).map(x=>x.item);
  const recommendations='<section class="route-recommendations"><div class="eyebrow">THE IQA EDIT</div><h2>You May Also Like</h2><p class="route-note">Suggestions are selected from currently published, in-stock watches with similar catalogue attributes.</p><div class="route-grid">'+(related.length?related.map(item=>'<article class="route-card"><a href="#product/'+encodeURIComponent(item.id)+'" data-view="'+esc(item.id)+'"><img src="'+esc(safeImageUrl(item.image))+'" alt="'+esc(item.imageAlt||item.name)+'" loading="lazy"></a><div class="route-card-copy"><div class="product-brand">'+esc(item.brand)+'</div><h3><a href="#product/'+encodeURIComponent(item.id)+'" data-view="'+esc(item.id)+'">'+esc(item.name)+'</a></h3><p>'+money(item.price)+' · '+Number(item.stock)+' available</p><div class="route-actions"><a class="button light" href="#product/'+encodeURIComponent(item.id)+'" data-view="'+esc(item.id)+'">View details</a><button class="button" type="button" data-add="'+esc(item.id)+'">Add to bag</button></div></div></article>').join(''):'<p class="route-note">More watches coming soon.</p>')+'</div></section>';
@@ -29,19 +29,29 @@ function product(id){
  const assurance='<div class="route-product-assurance"><article><strong>Catalogue checked</strong><span>Product details are sourced from the approved store catalogue.</span></article><article><strong>Availability</strong><span>'+Number(p.stock)+' unit'+(Number(p.stock)===1?'':'s')+' shown in the latest catalogue update.</span></article><article><strong>Delivery information</strong><span>Delivery fee and ETA are not yet configured for checkout.</span></article><article><strong>Warranty</strong><span>'+esc(p.warranty||'Not verified in the catalogue.')+'</span></article></div>';
  const reviewSummary='<section class="route-review-summary"><h3>Customer reviews</h3><p>No published customer reviews are available for this watch yet. We will show a star rating only after genuine customer reviews have been approved.</p></section>';
  const discountMarkup=discount?'<span class="sample-label">'+discount+'% below listed MRP</span>':'<span class="sample-label">APPROVED CATALOGUE · '+Number(p.stock)+' AVAILABLE</span>';
- root.innerHTML=hero('THE IQA COLLECTION',p.name,'Explore the gallery, current catalogue price and verified product specifications.')+'<div class="route-content route-product-page"><nav class="route-product-breadcrumb" aria-label="Breadcrumb"><a href="#home">Home</a><span aria-hidden="true">/</span><a href="#shop">Shop all</a><span aria-hidden="true">/</span><span aria-current="page">'+esc(p.name)+'</span></nav><div class="route-product-layout"><div class="route-product-media"><div class="route-gallery"><div class="route-gallery-main"><img id="routeMainImage" role="button" tabindex="0" aria-label="Open full-screen product image" src="'+esc(mainImage.src)+'" alt="'+esc(mainImage.alt)+'" loading="eager" onerror="this.alt=&#39;Product image unavailable&#39;;this.style.opacity=&#39;.25&#39;"></div>'+thumbnails+'</div></div><div class="route-product-copy"><div class="eyebrow">'+esc(p.brand)+' · IQA WATCHES</div><h2>'+esc(p.name)+'</h2><p class="route-product-price">'+money(p.price)+' '+(p.compareAt>p.price?'<del>'+money(p.compareAt)+'</del>':'')+'</p>'+discountMarkup+ratingNote+'<section class="route-product-highlights"><h3>Watch highlights</h3><ul><li>'+esc(p.brand||'IQA WATCHES')+' timepiece</li><li>'+esc(p.style||p.category||'Everyday watch')+'</li><li>'+esc(p.movement||'Movement details available below')+'</li><li>'+esc(p.waterResistance||'Water resistance details available below')+'</li></ul></section>'+specs+description+assurance+reviewSummary+'</div></div>'+recommendations+'</div><div class="route-sticky-buybar" role="region" aria-label="Purchase options"><div class="route-sticky-price"><span>Price</span><strong>'+money(p.price)+'</strong></div><div class="route-sticky-actions"><button class="button route-add-button" type="button" data-add="'+esc(p.id)+'" '+(Number(p.stock)<1?'disabled':'')+'>Add to Cart</button><button class="button route-buy-button" type="button" data-buy-now="'+esc(p.id)+'" '+(Number(p.stock)<1?'disabled':'')+'>Buy Now</button></div></div>';
+ const variantRows=[['Case',p.variantDetails?.case],['Strap',p.variantDetails?.strap]].filter(([,value])=>typeof value==='string'&&value.trim());
+ const variantMarkup=variantRows.length?'<section class="route-pdp-variant" aria-label="Available product configuration"><span class="route-pdp-variant-title">Available configuration</span>'+variantRows.map(([label,value])=>'<span class="route-pdp-variant-chip"><b>'+esc(label)+'</b> '+esc(value)+'</span>').join('')+'</section>':'';
+ const maxPdpQuantity=Math.max(1,Math.min(10,Number(p.stock)||1));
+ const currentPdpQuantity=window.iqaPdpSelection?.productId===p.id?Number(window.iqaPdpSelection.quantity)||1:1;
+ const pdpQuantity=Math.max(1,Math.min(maxPdpQuantity,currentPdpQuantity));
+ window.iqaPdpSelection={productId:p.id,quantity:pdpQuantity};
+ const quantitySelector='<div class="route-pdp-quantity" aria-label="Choose quantity"><span>Quantity</span><div class="route-pdp-quantity-controls"><button type="button" data-pdp-qty="-1" aria-label="Decrease quantity" '+(pdpQuantity<=1?'disabled':'')+'>−</button><strong data-pdp-quantity-value aria-live="polite">'+pdpQuantity+'</strong><button type="button" data-pdp-qty="1" aria-label="Increase quantity" '+(pdpQuantity>=maxPdpQuantity?'disabled':'')+'>+</button></div><small>Up to '+Number(p.stock)+' available</small></div>';
+ const wishlistSaved=wishlist.includes(p.id);
+ const wishlistButton='<button class="button light route-wish-button" type="button" data-pdp-wish="'+esc(p.id)+'" aria-pressed="'+(wishlistSaved?'true':'false')+'" aria-label="'+(wishlistSaved?'Remove '+esc(p.name)+' from wishlist':'Add '+esc(p.name)+' to wishlist')+'">'+(wishlistSaved?'♥ Saved to wishlist':'♡ Save to wishlist')+'</button>';
+ root.innerHTML=hero('THE IQA COLLECTION',p.name,'Explore the gallery, current catalogue price and verified product specifications.')+'<div class="route-content route-product-page"><nav class="route-product-breadcrumb" aria-label="Breadcrumb"><a href="#home">Home</a><span aria-hidden="true">/</span><a href="#shop">Shop all</a><span aria-hidden="true">/</span><span aria-current="page">'+esc(p.name)+'</span></nav><div class="route-product-layout"><div class="route-product-media"><div class="route-gallery"><div class="route-gallery-main"><img id="routeMainImage" role="button" tabindex="0" aria-label="Open full-screen product image" src="'+esc(mainImage.src)+'" alt="'+esc(mainImage.alt)+'" loading="eager" onerror="this.alt=&#39;Product image unavailable&#39;;this.style.opacity=&#39;.25&#39;"></div>'+thumbnails+'</div></div><div class="route-product-copy"><div class="eyebrow">'+esc(p.brand)+' · IQA WATCHES</div><h2>'+esc(p.name)+'</h2><p class="route-product-price">'+money(p.price)+' '+(p.compareAt>p.price?'<del>'+money(p.compareAt)+'</del>':'')+'</p>'+discountMarkup+variantMarkup+quantitySelector+wishlistButton+ratingNote+'<section class="route-product-highlights"><h3>Watch highlights</h3><ul><li>'+esc(p.brand||'IQA WATCHES')+' timepiece</li><li>'+esc(p.style||p.category||'Everyday watch')+'</li><li>'+esc(p.movement||'Movement details available below')+'</li><li>'+esc(p.waterResistance||'Water resistance details available below')+'</li></ul></section>'+specs+description+assurance+reviewSummary+'</div></div>'+recommendations+'</div><div class="route-sticky-buybar" role="region" aria-label="Purchase options"><div class="route-sticky-price"><span>Price</span><strong>'+money(p.price)+'</strong></div><div class="route-sticky-actions"><button class="button route-add-button" type="button" data-pdp-add="'+esc(p.id)+'" data-pdp-quantity="'+pdpQuantity+'" '+(Number(p.stock)<1?'disabled':'')+'>Add to Cart</button><button class="button route-buy-button" type="button" data-buy-now="'+esc(p.id)+'" data-pdp-quantity="'+pdpQuantity+'" '+(Number(p.stock)<1?'disabled':'')+'>Buy Now</button></div></div>';
 }
 
 function renderBuyNow(id){
  const p=products.find(item=>item.id===id);
  if(!p||Number(p.stock)<1){root.innerHTML=hero('IQA WATCHES · BUY NOW','Watch unavailable','This product is not currently available in the approved catalogue.')+'<div class="route-content"><a class="button" href="#shop">Back to Shop</a></div>';return;}
  if(!window.iqaBuyNowSelection||window.iqaBuyNowSelection.productId!==p.id)window.iqaBuyNowSelection={productId:p.id,quantity:1};
- const quantity=Math.max(1,Math.min(Number(p.stock)||1,Number(window.iqaBuyNowSelection.quantity)||1));
+ const quantity=Math.max(1,Math.min(10,Number(p.stock)||1,Number(window.iqaBuyNowSelection.quantity)||1));
  window.iqaBuyNowSelection.quantity=quantity;
  const subtotal=Number(p.price)*quantity;
- root.innerHTML=hero('IQA WATCHES · BUY NOW','Review your selected timepiece','This selection is separate from your shopping bag. Final order totals are confirmed only by secure checkout.')+'<div class="route-content"><a class="route-back-link" href="#product/'+encodeURIComponent(p.id)+'">← Back to watch details</a><section class="buy-now-panel"><div class="buy-now-image"><img src="'+esc(safeImageUrl(p.image))+'" alt="'+esc(p.imageAlt||p.name)+'"></div><div class="buy-now-copy"><span class="buy-now-kicker">Your selection · IQA WATCHES</span><h2>'+esc(p.name)+'</h2><p class="buy-now-price">'+money(p.price)+'</p><p class="buy-now-description">'+esc(String(p.desc||'').slice(0,180))+(String(p.desc||'').length>180?'…':'')+'</p><div class="buy-now-summary"><div class="total-row"><span>Quantity</span><div class="qty buy-now-quantity" aria-label="Buy Now quantity"><button type="button" data-buy-qty="-1" aria-label="Decrease Buy Now quantity" '+(quantity<=1?'disabled':'')+'>−</button><strong aria-live="polite">'+quantity+'</strong><button type="button" data-buy-qty="1" aria-label="Increase Buy Now quantity" '+(quantity>=Number(p.stock)?'disabled':'')+'>+</button></div></div><div class="total-row"><span>Item subtotal</span><strong>'+money(subtotal)+'</strong></div><div class="total-row"><span>Delivery</span><span>Calculated after address and store settings are verified</span></div></div><div class="buy-now-status"><strong>Cash on Delivery is available.</strong> Confirm your delivery details and address at secure checkout. Online payment methods will be added later.</div><div class="buy-now-actions"><button class="button" type="button" data-buy-now-checkout>Continue to COD Checkout</button><a class="button light" href="#bag">View Shopping Bag</a><a class="button" href="#shop">Continue exploring</a></div></div></section></div>';
+ root.innerHTML=hero('IQA WATCHES · BUY NOW','Review your selected timepiece','This selection is separate from your shopping bag. Final order totals are confirmed only by secure checkout.')+'<div class="route-content"><a class="route-back-link" href="#product/'+encodeURIComponent(p.id)+'">← Back to watch details</a><section class="buy-now-panel"><div class="buy-now-image"><img src="'+esc(safeImageUrl(p.image))+'" alt="'+esc(p.imageAlt||p.name)+'"></div><div class="buy-now-copy"><span class="buy-now-kicker">Your selection · IQA WATCHES</span><h2>'+esc(p.name)+'</h2><p class="buy-now-price">'+money(p.price)+'</p><p class="buy-now-description">'+esc(String(p.desc||'').slice(0,180))+(String(p.desc||'').length>180?'…':'')+'</p><div class="buy-now-summary"><div class="total-row"><span>Quantity</span><div class="qty buy-now-quantity" aria-label="Buy Now quantity"><button type="button" data-buy-qty="-1" aria-label="Decrease Buy Now quantity" '+(quantity<=1?'disabled':'')+'>−</button><strong aria-live="polite">'+quantity+'</strong><button type="button" data-buy-qty="1" aria-label="Increase Buy Now quantity" '+(quantity>=Math.min(10,Number(p.stock)||1)?'disabled':'')+'>+</button></div></div><div class="total-row"><span>Item subtotal</span><strong>'+money(subtotal)+'</strong></div><div class="total-row"><span>Delivery</span><span>Calculated after address and store settings are verified</span></div></div><div class="buy-now-status"><strong>Payment options and delivery terms are confirmed only after secure checkout validates your account and store settings.</strong> Online payment availability is not currently configured.</div><div class="buy-now-actions"><button class="button" type="button" data-buy-now-checkout>Continue to secure checkout</button><a class="button light" href="#bag">View Shopping Bag</a><a class="button" href="#shop">Continue exploring</a></div></div></section></div>';
 }
 function renderBagRoute(){
+ try{sessionStorage.removeItem('iqa-checkout-buy-now')}catch(_){}
  const entries=Object.entries(cart||{}).map(([id,qty])=>({p:products.find(x=>x.id===id),qty:Number(qty)})).filter(x=>x.p&&x.qty>0);
  const subtotal=entries.reduce((sum,x)=>sum+x.p.price*x.qty,0);
  const shippingFee=subtotal>500?0:40,total=subtotal+shippingFee;
@@ -72,7 +82,9 @@ async function renderCheckoutRoute(){
    client.from('customer_addresses').select('id,label,recipient_name,phone,address_line1,address_line2,landmark,city,state,postal_code,country,is_default').eq('customer_id',customerId).order('is_default',{ascending:false}).order('created_at',{ascending:false})
   ]);
   if(profileError)throw profileError;if(addressError)throw addressError;if(location.hash!==requestedHash)return;
-  const entries=Object.entries(cart||{}).map(([id,qty])=>({p:products.find(x=>x.id===id),qty:Number(qty)})).filter(x=>x.p&&x.qty>0);
+  let buyNowIntent=null;
+  try{const saved=JSON.parse(sessionStorage.getItem('iqa-checkout-buy-now')||'null');const selectedProduct=products.find(x=>x.id===saved?.productId);const selectedQuantity=Number(saved?.quantity);if(selectedProduct&&Number.isInteger(selectedQuantity)&&selectedQuantity>=1&&selectedQuantity<=Math.min(10,Number(selectedProduct.stock)||0))buyNowIntent={p:selectedProduct,qty:selectedQuantity};else if(saved)sessionStorage.removeItem('iqa-checkout-buy-now')}catch(_){try{sessionStorage.removeItem('iqa-checkout-buy-now')}catch(__){}}
+  const entries=buyNowIntent?[buyNowIntent]:Object.entries(cart||{}).map(([id,qty])=>({p:products.find(x=>x.id===id),qty:Number(qty)})).filter(x=>x.p&&x.qty>0);
   if(!entries.length){infoRoute('IQA WATCHES · CHECKOUT','Your bag is empty','Add a watch before continuing.','<a class="button" href="#shop">Explore watches</a>');return;}
   const subtotal=entries.reduce((sum,x)=>sum+x.p.price*x.qty,0),shippingFee=subtotal>500?0:40,total=subtotal+shippingFee;
   const addressId=sessionStorage.getItem('iqa-checkout-address')||'';
@@ -108,6 +120,7 @@ async function renderCheckoutRoute(){
     const response=await fetch(cfg.url.replace(/\/$/,'')+'/functions/v1/iqa-customer-checkout',{method:'POST',headers:{'Content-Type':'application/json','apikey':cfg.publishableKey,'Authorization':'Bearer '+session.access_token,'x-idempotency-key':requestKey},body:JSON.stringify({address_id:selected.id,items:orderItems})});
     const result=await response.json().catch(()=>({}));if(!response.ok||result.ok!==true)throw new Error(result.error||'We could not place your order. Please try again.');
     const order=result.order||{};
+    try{sessionStorage.removeItem('iqa-checkout-buy-now')}catch(_){}
     infoRoute('IQA WATCHES · ORDER CONFIRMED','Thank you. Your order is placed.','Your Cash on Delivery order has been recorded successfully.','<section class="checkout-section order-success" role="status"><div class="eyebrow">ORDER CONFIRMATION</div><h2>Order placed successfully ✓</h2><p>Your order number is <strong>'+esc(order.order_number||'Confirmed')+'</strong>.</p><p>Payment method: <strong>Cash on Delivery</strong></p><p>Order total: <strong>'+money(Number(order.payable_total??total))+'</strong></p><p class="route-note">Please keep your phone available for delivery coordination. Payment is due when the watch is delivered.</p><a class="button" href="#orders">View my orders</a> <a class="button light" href="#shop">Continue shopping</a></section>');
    }catch(err){message.textContent=err.message||'Order could not be placed. Please try again.';button.disabled=false;button.textContent='Confirm COD Order';}
   });
@@ -361,7 +374,7 @@ function renderSearch(){
  const draw=(query='',brand='All',price='all')=>{
   const q=query.trim().toLowerCase();
   const list=products.filter(p=>{
-   const text=[p.name,p.brand,p.category,p.style,p.sku,p.desc].join(' ').toLowerCase();
+   const text=[p.name,p.brand,p.category,p.style,p.modelCode,p.desc].join(' ').toLowerCase();
    const matchText=!q||text.includes(q),matchBrand=brand==='All'||p.brand===brand;
    const matchPrice=price==='all'||(price==='under1000'&&p.price<1000)||(price==='1000to2500'&&p.price>=1000&&p.price<=2500)||(price==='over2500'&&p.price>2500);
    return matchText&&matchBrand&&matchPrice;
@@ -457,6 +470,32 @@ window.addEventListener('pageshow',render);
 window.addEventListener('catalogue:ready',render);
 window.addEventListener('catalogue:error',render);
 function setRouteGalleryIndex(index){const main=document.getElementById('routeMainImage');if(!main)return;const thumbs=Array.from(document.querySelectorAll('[data-gallery-src]'));const total=Math.max(1,thumbs.length);const next=(index+total)%total;if(thumbs.length){const thumb=thumbs[next];main.src=thumb.dataset.gallerySrc;main.alt=thumb.dataset.galleryAlt||main.alt;thumbs.forEach((button,i)=>button.setAttribute('aria-pressed',String(i===next)));}main.dataset.galleryIndex=String(next);const count=document.querySelector('.route-gallery-count');if(count)count.textContent=(next+1)+' / '+total;}
+document.addEventListener('click',event=>{
+ const quantityButton=event.target.closest('[data-pdp-qty]');
+ if(quantityButton){
+  const id=decodeURIComponent((location.hash.split('/')[1]||'')),item=products.find(product=>product.id===id);
+  if(!item)return;
+  const max=Math.max(1,Math.min(10,Number(item.stock)||1)),state=window.iqaPdpSelection?.productId===id?window.iqaPdpSelection:{productId:id,quantity:1};
+  const quantity=Math.max(1,Math.min(max,(Number(state.quantity)||1)+Number(quantityButton.dataset.pdpQty)));
+  window.iqaPdpSelection={productId:id,quantity};
+  const value=document.querySelector('[data-pdp-quantity-value]');if(value)value.textContent=String(quantity);
+  document.querySelectorAll('[data-pdp-qty]').forEach(button=>{const delta=Number(button.dataset.pdpQty);button.disabled=(delta<0&&quantity<=1)||(delta>0&&quantity>=max)});
+  document.querySelectorAll('[data-pdp-quantity]').forEach(button=>button.dataset.pdpQuantity=String(quantity));
+  return;
+ }
+ const addButton=event.target.closest('[data-pdp-add]');
+ if(addButton){const id=addButton.dataset.pdpAdd,quantity=Number(addButton.dataset.pdpQuantity)||1;if(typeof addCartQuantity==='function'&&addCartQuantity(id,quantity))location.hash='bag';return;}
+ const button=event.target.closest('[data-pdp-wish]');
+ if(!button)return;
+ const id=button.dataset.pdpWish;
+ if(!id||typeof toggleWish!=='function')return;
+ const saved=button.getAttribute('aria-pressed')!=='true';
+ toggleWish(id);
+ button.setAttribute('aria-pressed',String(saved));
+ button.classList.toggle('is-saved',saved);
+ button.textContent=saved?'♥ Saved to wishlist':'♡ Save to wishlist';
+ button.setAttribute('aria-label',saved?'Remove this watch from wishlist':'Add this watch to wishlist');
+});
 document.addEventListener('click',e=>{const thumb=e.target.closest('[data-gallery-src]');if(thumb){const thumbs=Array.from(document.querySelectorAll('[data-gallery-src]'));setRouteGalleryIndex(thumbs.indexOf(thumb));}const add=e.target.closest('[data-add-compare]');if(add)location.hash='comparison'});
 
 function ensureIqaImageLightbox(){
@@ -522,8 +561,9 @@ document.addEventListener('click',event=>{
  if(checkout){
   const selection=window.iqaBuyNowSelection,productItem=products.find(item=>item.id===selection?.productId);
   if(!productItem){toast('Please select a watch again.');return;}
-  const quantity=Math.max(1,Math.min(Number(selection.quantity)||1,Number(productItem.stock)||1));
-  for(let index=0;index<quantity;index++){if(!addCart(productItem.id))return;}
+  const quantity=Math.max(1,Math.min(10,Number(selection.quantity)||1,Number(productItem.stock)||1));
+  if(!Number.isInteger(quantity)){toast('Please choose a valid quantity.');return;}
+  try{sessionStorage.setItem('iqa-checkout-buy-now',JSON.stringify({productId:productItem.id,quantity}));}catch(_){toast('Could not save your Buy Now selection. Please try again.');return;}
   location.hash='checkout';return;
  }
  const control=event.target.closest('[data-buy-qty]');

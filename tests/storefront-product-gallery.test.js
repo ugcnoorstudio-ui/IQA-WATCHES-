@@ -102,7 +102,8 @@ test('full-screen product image viewer is present and supports keyboard-accessib
 });
 
 test('Buy Now uses an isolated quantity selection instead of mutating the cart', () => {
-  assert.match(html, /window\.iqaBuyNowSelection=\{productId:id,quantity:1\}/);
+  assert.match(html, /const requestedQuantity=Number\(buyNow\.dataset\.pdpQuantity\)\|\|1/);
+  assert.match(html, /window\.iqaBuyNowSelection=\{productId:id,quantity:Math\.max\(1,Math\.min\(Number\(product\.stock\)\|\|1,requestedQuantity\)\)\}/);
   assert.doesNotMatch(html, /const buyNow=e\.target\.closest\('\[data-buy-now\]'\);if\(buyNow\)\{const id=buyNow\.dataset\.buyNow;if\(!addCart\(id\)\)/);
 });
 
@@ -114,4 +115,20 @@ test('quick-view gallery handles native touch release outside the image and reco
   assert.match(html, /const applySwipe=\(dx,dy\)=>/);
   assert.match(html, /<style id="quick-view-gallery-and-recommendations-fix">/);
   assert.match(html, /<\/div><\/div>'\+\(related\.length\?'<section class="related-products">/);
+});
+
+test('public catalogue exposes real variant details and omits internal SKU fields', () => {
+  assert.ok(catalogue.products.every(product => product.variantId));
+  assert.ok(catalogue.products.every(product => product.variantDetails && typeof product.variantDetails === 'object'));
+  assert.ok(catalogue.products.every(product => !Object.hasOwn(product, 'sku')));
+  const brownLeather = catalogue.products.find(product => product.name.includes('AE-1200WHL-5AV'));
+  assert.equal(brownLeather.variantDetails.case, 'Black Resin');
+  assert.equal(brownLeather.variantDetails.strap, 'Brown Genuine Leather');
+  assert.equal(brownLeather.stock, 7);
+});
+
+test('public model codes remain searchable without exposing internal SKU fields', () => {
+  assert.ok(catalogue.products.some(product => product.modelCode));
+  assert.ok(catalogue.products.every(product => !Object.hasOwn(product, 'sku')));
+  assert.ok(html.includes('p.modelCode'));
 });

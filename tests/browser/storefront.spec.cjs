@@ -249,6 +249,16 @@ test('wishlist persists in browser storage after reload and can be removed', asy
   await expect.poll(() => page.evaluate(() => JSON.parse(localStorage.getItem('iqa-preview-wishlist') || '[]'))).not.toContain(productId);
 });
 
+test('PDP displays the real approved case and strap configuration', async ({ page }) => {
+  await openStore(page);
+  await navigateToHash(page, 'product/0a8836eb-b7ad-41b6-874f-3737e8e94482');
+  const detail = page.locator('#routeView');
+  await expect(detail).toContainText('Available configuration');
+  await expect(detail).toContainText('Black Resin');
+  await expect(detail).toContainText('Brown Genuine Leather');
+  await expect(detail).toContainText('₹1,200');
+});
+
 test('comparison accepts two distinct catalogue products and clears', async ({ page }) => {
   await openStore(page);
   const initialHash = await page.evaluate(() => location.hash);
@@ -307,19 +317,19 @@ test('product detail route displays product content and switches gallery images'
 test('catalogue search finds products by model code and description', async ({ page }) => {
   await openStore(page);
   const samples = await page.evaluate(() => {
-    const withSku = products.find(product => product.sku && product.sku !== 'Not listed');
+    const withModel = products.find(product => product.modelCode);
     const withDescription = products.find(product => product.desc && product.desc.trim().length >= 6);
     return {
-      sku: withSku?.sku || '',
-      skuId: withSku?.id || '',
+      modelCode: withModel?.modelCode || '',
+      modelId: withModel?.id || '',
       description: withDescription?.desc || '',
       descriptionId: withDescription?.id || ''
     };
   });
 
-  expect(samples.sku, 'approved catalogue should expose at least one model code for search QA').toBeTruthy();
-  await page.locator('#searchInput').fill(samples.sku);
-  await expect(page.locator('#productGrid [data-add="' + samples.skuId + '"]')).toHaveCount(1);
+  expect(samples.modelCode, 'approved catalogue should expose at least one public model code for search QA').toBeTruthy();
+  await page.locator('#searchInput').fill(samples.modelCode);
+  await expect(page.locator('#productGrid [data-add="' + samples.modelId + '"]')).toHaveCount(1);
 
   const descriptionToken = samples.description.match(/[a-z0-9]{5,}/i)?.[0];
   expect(descriptionToken, 'approved catalogue should expose a searchable product description').toBeTruthy();
@@ -565,8 +575,8 @@ test('Buy Now keeps its own quantity and does not mutate the shopping bag', asyn
   await expect.poll(() => page.evaluate(() => location.hash)).toBe('#buy-now/' + encodeURIComponent(selectedId));
   const buyNow = page.locator('#routeView');
   await expect(buyNow).toContainText(/Review your selected timepiece/i);
-  await expect(buyNow).toContainText(/Cash on Delivery is available/i);
-  await expect(buyNow).toContainText(/Confirm your delivery details and address at secure checkout/i);
+  await expect(buyNow).toContainText(/Payment options and delivery terms are confirmed only after secure checkout/i);
+  await expect(buyNow).toContainText(/Online payment availability is not currently configured/i);
   await expect(buyNow.locator('[data-buy-now-checkout]')).toBeVisible();
   await expect(buyNow.locator('.buy-now-quantity strong')).toHaveText('1');
   await expect(buyNow.locator('[data-qty]')).toHaveCount(0);
