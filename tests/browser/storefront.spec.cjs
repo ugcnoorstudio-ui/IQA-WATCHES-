@@ -317,19 +317,19 @@ test('product detail route displays product content and switches gallery images'
 test('catalogue search finds products by model code and description', async ({ page }) => {
   await openStore(page);
   const samples = await page.evaluate(() => {
-    const withSku = products.find(product => product.sku && product.sku !== 'Not listed');
+    const withModel = products.find(product => product.modelCode);
     const withDescription = products.find(product => product.desc && product.desc.trim().length >= 6);
     return {
-      sku: withSku?.sku || '',
-      skuId: withSku?.id || '',
+      modelCode: withModel?.modelCode || '',
+      modelId: withModel?.id || '',
       description: withDescription?.desc || '',
       descriptionId: withDescription?.id || ''
     };
   });
 
-  expect(samples.sku, 'approved catalogue should expose at least one model code for search QA').toBeTruthy();
-  await page.locator('#searchInput').fill(samples.sku);
-  await expect(page.locator('#productGrid [data-add="' + samples.skuId + '"]')).toHaveCount(1);
+  expect(samples.modelCode, 'approved catalogue should expose at least one public model code for search QA').toBeTruthy();
+  await page.locator('#searchInput').fill(samples.modelCode);
+  await expect(page.locator('#productGrid [data-add="' + samples.modelId + '"]')).toHaveCount(1);
 
   const descriptionToken = samples.description.match(/[a-z0-9]{5,}/i)?.[0];
   expect(descriptionToken, 'approved catalogue should expose a searchable product description').toBeTruthy();
