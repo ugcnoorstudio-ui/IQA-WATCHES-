@@ -116,3 +116,13 @@ test('quick-view gallery handles native touch release outside the image and reco
   assert.match(html, /<style id="quick-view-gallery-and-recommendations-fix">/);
   assert.match(html, /<\/div><\/div>'\+\(related\.length\?'<section class="related-products">/);
 });
+
+test('public catalogue exposes real variant details and omits internal SKU fields', () => {
+  assert.ok(catalogue.products.every(product => product.variantId));
+  assert.ok(catalogue.products.every(product => product.variantDetails && typeof product.variantDetails === 'object'));
+  assert.ok(catalogue.products.every(product => !Object.hasOwn(product, 'sku')));
+  const brownLeather = catalogue.products.find(product => product.name.includes('AE-1200WHL-5AV'));
+  assert.equal(brownLeather.variantDetails.case, 'Black Resin');
+  assert.equal(brownLeather.variantDetails.strap, 'Brown Genuine Leather');
+  assert.equal(brownLeather.stock, 7);
+});
