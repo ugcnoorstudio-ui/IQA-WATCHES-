@@ -85,7 +85,8 @@
       "variantDetails": {
         "case": "Black Resin",
         "strap": "Brown Genuine Leather"
-      }
+      },
+      "modelCode": "AE-1200WHL-5AV"
     },
     {
       "id": "b440d67b-7bd7-49bd-bdb3-817dc16b7ea7",
@@ -125,7 +126,8 @@
       "variantDetails": {
         "case": "Black Resin",
         "strap": "Silver Stainless Steel"
-      }
+      },
+      "modelCode": "AE-1200WHD-1AV"
     }
   ]
 }
