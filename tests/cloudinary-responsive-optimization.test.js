@@ -11,7 +11,7 @@ test('dynamic Cloudinary images receive responsive srcset variants', () => {
   const end = html.indexOf('function enhanceResponsiveCloudinaryImages(', start);
   assert.ok(start >= 0 && end > start, 'responsive URL helper must exist');
   const helper = html.slice(start, end);
-  const context = { URL, location: { href: 'https://iqa-watches.example/' } };
+  const context = { URL, location: { href: 'https://iqa-watches.example/' }, window: { IQA_SUPABASE_CONFIG: {} } };
   vm.runInNewContext(helper + ';this.buildSrcset=responsiveCloudinarySrcset;', context);
   const result = context.buildSrcset('https://res.cloudinary.com/rrmdzam7/image/upload/v1234567890/iqa-watches/products/watch.jpg');
   const entries = result.split(', ');
@@ -23,7 +23,7 @@ test('dynamic Cloudinary images receive responsive srcset variants', () => {
 test('responsive URL helper replaces existing Cloudinary transforms without duplicating them', () => {
   const start = html.indexOf('function responsiveCloudinarySrcset(');
   const end = html.indexOf('function enhanceResponsiveCloudinaryImages(', start);
-  const context = { URL, location: { href: 'https://iqa-watches.example/' } };
+  const context = { URL, location: { href: 'https://iqa-watches.example/' }, window: { IQA_SUPABASE_CONFIG: {} } };
   vm.runInNewContext(html.slice(start, end) + ';this.buildSrcset=responsiveCloudinarySrcset;', context);
   const result = context.buildSrcset('https://res.cloudinary.com/rrmdzam7/image/upload/c_limit,w_1200/f_auto/q_auto/v123/iqa-watches/products/watch.jpg');
   assert.equal((result.match(/c_limit,w_/g) || []).length, 4);
