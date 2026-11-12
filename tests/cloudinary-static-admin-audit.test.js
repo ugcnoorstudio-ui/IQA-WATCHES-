@@ -174,7 +174,7 @@ test('Cloudinary URL canonicalization removes existing format overrides before f
   const html = read('index.html');
   const start = html.indexOf('function safeImageUrl(');
   const end = html.indexOf('\nfunction responsiveCloudinarySrcset', start);
-  const context = { URL, location: { href: 'https://iqa-watches.example/' }, window: { IQA_SUPABASE_CONFIG: {} } };
+  const context = { URL, location: { href: 'https://iqa-watches.example/' }, window: { IQA_SUPABASE_CONFIG: {} }, cloudinaryWorkerImageUrl: () => '' };
   vm.runInNewContext(html.slice(start, end) + ';this.buildSafe=safeImageUrl;', context);
   const result = context.buildSafe('https://res.cloudinary.com/rrmdzam7/image/upload/f_png,q_100/v123/iqa-watches/products/watch.png');
   assert.ok(result.includes('/c_limit,w_1200/f_auto/q_auto/v123/iqa-watches/products/watch.png'));
