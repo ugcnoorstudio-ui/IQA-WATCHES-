@@ -1228,6 +1228,7 @@ function safeImageUrl(value){if(typeof value!=="string"||!value.trim())return ""
  const assetPath=tail.join("/");
  if(!assetPath.includes("iqa-watches/")||!/\.(?:jpe?g|png|webp|avif)$/i.test(assetPath))return "";
  const canonical=new URL(u.origin+parts.slice(0,uploadIndex+1).concat(["c_limit,w_1200","f_auto","q_auto"],tail).join("/"));
+ canonical.hash=u.hash;
  return cloudinaryWorkerImageUrl(canonical.href,1200)||canonical.href;
  }catch{return ""}}
 function responsiveCloudinarySrcset(value,widths=[320,480,800,1200]){
