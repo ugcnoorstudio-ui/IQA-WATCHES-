@@ -116,11 +116,10 @@ async function cloudinaryImage(request, env, ctx) {
   const validFormat = segments[1] === "f_auto";
   const validQuality = segments[2] === "q_auto";
   const assetPath = segments.slice(3).join("/");
+  const safeAssetPath = /^(?:v[0-9]+\/)?iqa-watches\/[A-Za-z0-9._/-]+\.(?:jpe?g|png|webp|avif)$/i.test(assetPath) &&
+    assetPath.split("/").every(part => part && part !== "." && part !== ".." && /^[A-Za-z0-9._-]+$/.test(part));
   if (!validWidth || !validFormat || !validQuality ||
-      !assetPath.startsWith("v") && !assetPath.startsWith("iqa-watches/") ||
-      !assetPath.includes("iqa-watches/") ||
-      !/\.(?:jpe?g|png|webp|avif)$/i.test(assetPath) ||
-      assetPath.split("/").some(part => part === "." || part === "..")) {
+      assetPath.length > 512 || !safeAssetPath) {
     return json({ ok: false, error: "invalid_image_path" }, 400, corsHeaders(origin));
   }
 
