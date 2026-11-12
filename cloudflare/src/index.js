@@ -354,7 +354,8 @@ export default {
 
     if (url.pathname.startsWith("/api/v1/image/")) {
       return cloudinaryImage(request, env, ctx);
-    }\n    if (url.pathname === "/api/v1/cache-probe") {
+    }
+    if (url.pathname === "/api/v1/cache-probe") {
       return cacheProbe(request, env);
     }
     if (url.pathname === "/api/v1/catalogue") {
