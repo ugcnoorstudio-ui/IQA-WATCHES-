@@ -1217,7 +1217,19 @@ function cloudinaryWorkerImageUrl(value,width=1200){
   return new URL("/api/v1/image/c_limit,w_"+width+"/f_auto/q_auto/"+assetPath,base).href;
  }catch{return ""}
 }
-function safeImageUrl(value){if(typeof value!=="string"||!value.trim())return "";try{const u=new URL(value.trim(),location.href);if(u.protocol!=="https:"||u.hostname!=="res.cloudinary.com")return "";const parts=u.pathname.split("/");const uploadIndex=parts.indexOf("upload");if(uploadIndex>=0&&!parts[uploadIndex+1]?.includes(",")){parts.splice(uploadIndex+1,0,"c_limit,w_1200","f_auto","q_auto");u.pathname=parts.join("/")}return cloudinaryWorkerImageUrl(u.href,1200)||u.href}catch{return ""}}
+function safeImageUrl(value){if(typeof value!=="string"||!value.trim())return "";try{
+ const u=new URL(value.trim(),location.href);
+ if(u.protocol!=="https:"||u.hostname!=="res.cloudinary.com"||u.pathname.includes("%")||/\.svg(?:$|\?)/i.test(u.pathname))return "";
+ const parts=u.pathname.split("/"),uploadIndex=parts.indexOf("upload");
+ if(uploadIndex<0||!parts[uploadIndex+1])return "";
+ const transform=/^(?:c_|w_|h_|f_|q_|g_|dpr_|fl_|ar_|e_|o_|r_|b_|t_|l_|u_|so_|eo_|du_|fps_|ac_|vc_|af_|cs_|d_|ki_|pg_|sp_|vs_)/;
+ const tail=parts.slice(uploadIndex+1);
+ while(tail.length&&transform.test(tail[0]))tail.shift();
+ const assetPath=tail.join("/");
+ if(!assetPath.includes("iqa-watches/")||!/\.(?:jpe?g|png|webp|avif)$/i.test(assetPath))return "";
+ const canonical=new URL(u.origin+parts.slice(0,uploadIndex+1).concat(["c_limit,w_1200","f_auto","q_auto"],tail).join("/"));
+ return cloudinaryWorkerImageUrl(canonical.href,1200)||canonical.href;
+ }catch{return ""}}
 function responsiveCloudinarySrcset(value,widths=[320,480,800,1200]){
  if(typeof value!=="string"||!value.trim())return "";
  try{
