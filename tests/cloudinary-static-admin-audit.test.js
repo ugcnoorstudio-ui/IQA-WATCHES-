@@ -2,6 +2,7 @@ const test = require('node:test');
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
+const vm = require('node:vm');
 
 const read = file => fs.readFileSync(path.join(__dirname, '..', file), 'utf8');
 
@@ -127,7 +128,10 @@ test('Cloudinary delivery uses bounded responsive widths and separate automatic 
   assert.match(html, /rel="preconnect" href="https:\/\/res\.cloudinary\.com" crossorigin/);
   assert.match(html, /loading="lazy" decoding="async"/);
   assert.match(html, /sizes="\(max-width: 760px\) 100vw/);
-  assert.match(html, /parts\.splice\(uploadIndex\+1,0,'c_limit,w_1200','f_auto','q_auto'\)/);
+  assert.match(html, /function safeImageUrl\(value\)/);
+  assert.match(html, /concat\(\["c_limit,w_1200","f_auto","q_auto"\],tail\)/);
+  assert.match(html, /function responsiveCloudinarySrcset\(value,widths=\[320,480,800,1200\]\)/);
+  assert.match(html, /while\(tail\.length&&transform\.test\(tail\[0\]\)\)tail\.shift\(\)/);
   assert.match(admin, /c_limit,w_320\/f_auto\/q_auto/);
   assert.match(manager, /c_limit,w_\x27\+width\+\x27\/f_auto\/q_auto/);
   assert.doesNotMatch(html + admin + manager, /f_auto,q_auto/);
@@ -164,4 +168,16 @@ test('deployed product upload source is Cloudinary-only and stores metadata thro
   assert.match(fn, /iqa-watches\/products/);
   assert.match(fn, /CLOUDINARY_API_SECRET|apiSecret/);
   assert.doesNotMatch(fn, /storage\/v1\/object\/product-images|iqa_register_product_image/);
+});
+
+test('Cloudinary URL canonicalization removes existing format overrides before f_auto', () => {
+  const html = read('index.html');
+  const start = html.indexOf('function safeImageUrl(');
+  const end = html.indexOf('\nfunction responsiveCloudinarySrcset', start);
+  const context = { URL, location: { href: 'https://iqa-watches.example/' }, window: { IQA_SUPABASE_CONFIG: {} } };
+  vm.runInNewContext(html.slice(start, end) + ';this.buildSafe=safeImageUrl;', context);
+  const result = context.buildSafe('https://res.cloudinary.com/rrmdzam7/image/upload/f_png,q_100/v123/iqa-watches/products/watch.png');
+  assert.ok(result.includes('/c_limit,w_1200/f_auto/q_auto/v123/iqa-watches/products/watch.png'));
+  assert.ok(!result.includes('f_png'));
+  assert.ok(!result.includes('q_100'));
 });
