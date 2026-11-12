@@ -87,6 +87,105 @@ async function cacheProbe(request, env) {
   });
 }
 
+
+async function cloudinaryImage(request, env, ctx) {
+  const url = new URL(request.url);
+  const originHeader = request.headers.get("origin");
+  const origin = allowedOrigin(originHeader);
+  if (originHeader && !origin) {
+    return json({ ok: false, error: "origin_not_allowed" }, 403, { vary: "Origin" });
+  }
+  if (request.method === "OPTIONS") {
+    return new Response(null, { status: 204, headers: corsHeaders(origin) });
+  }
+  if (request.method !== "GET" && request.method !== "HEAD") {
+    return json({ ok: false, error: "method_not_allowed" }, 405, corsHeaders(origin));
+  }
+  if (request.headers.has("authorization") || request.headers.has("cookie")) {
+    return json({ ok: false, error: "credentials_not_supported" }, 400, corsHeaders(origin));
+  }
+  if (url.search || env.CLOUDINARY_IMAGE_PROXY_ENABLED !== "true") {
+    return json({ ok: false, error: "image_proxy_unavailable" }, 404, corsHeaders(origin));
+  }
+
+  // The upstream host and Cloudinary cloud name are fixed. Never accept an
+  // arbitrary source URL here: that would turn this public endpoint into an SSRF proxy.
+  const tail = url.pathname.slice("/api/v1/image/".length);
+  const segments = tail.split("/");
+  const validWidth = /^c_limit,w_(?:320|480|800|1200|1600)$/.test(segments[0] || "");
+  const validFormat = segments[1] === "f_auto";
+  const validQuality = segments[2] === "q_auto";
+  const assetPath = segments.slice(3).join("/");
+  if (!validWidth || !validFormat || !validQuality ||
+      !assetPath.startsWith("v") && !assetPath.startsWith("iqa-watches/") ||
+      !assetPath.includes("iqa-watches/") ||
+      !/\.(?:jpe?g|png|webp|avif)$/i.test(assetPath) ||
+      assetPath.split("/").some(part => part === "." || part === "..")) {
+    return json({ ok: false, error: "invalid_image_path" }, 400, corsHeaders(origin));
+  }
+
+  const accept = request.headers.get("accept") || "";
+  const formatKey = /image\/avif/i.test(accept) ? "avif" : /image\/webp/i.test(accept) ? "webp" : "fallback";
+  const cache = globalThis.caches && globalThis.caches.default;
+  const cacheUrl = new URL(url.origin + url.pathname);
+  cacheUrl.searchParams.set("__iqa_format", formatKey);
+  const cacheKey = new Request(cacheUrl.toString(), { method: "GET" });
+
+  if (cache) {
+    try {
+      const hit = await cache.match(cacheKey);
+      if (hit) {
+        const headers = new Headers(hit.headers);
+        headers.set("x-iqa-image-cache", "HIT");
+        for (const [key, value] of Object.entries(corsHeaders(origin))) headers.set(key, value);
+        return new Response(request.method === "HEAD" ? null : hit.body, { status: hit.status, headers });
+      }
+    } catch {
+      // Cache failures must never break product image delivery.
+    }
+  }
+
+  const upstreamUrl = "https://res.cloudinary.com/rrmdzam7/image/upload/" + tail;
+  let upstream;
+  try {
+    upstream = await fetch(upstreamUrl, {
+      method: "GET",
+      headers: { accept: accept || "image/avif,image/webp,image/*,*/*;q=0.8" }
+    });
+  } catch {
+    return json({ ok: false, error: "image_upstream_unavailable" }, 502, corsHeaders(origin));
+  }
+  const contentType = upstream.headers.get("content-type") || "";
+  if (!upstream.ok || !contentType.toLowerCase().startsWith("image/")) {
+    return json({ ok: false, error: "image_upstream_unavailable" }, upstream.status >= 400 ? upstream.status : 502, corsHeaders(origin));
+  }
+
+  const headers = new Headers({
+    "content-type": contentType,
+    "cache-control": "public, max-age=86400, s-maxage=2592000, stale-while-revalidate=86400",
+    "x-content-type-options": "nosniff",
+    "x-iqa-image-cache": "MISS"
+  });
+  for (const [key, value] of Object.entries(corsHeaders(origin))) headers.set(key, value);
+  const response = new Response(upstream.body, { status: 200, headers });
+  if (cache) {
+    try {
+      const cacheResponse = response.clone();
+      // Store a CORS-neutral copy; origin-specific CORS is added after lookup.
+      cacheResponse.headers.delete("access-control-allow-origin");
+      cacheResponse.headers.delete("vary");
+      const write = cache.put(cacheKey, cacheResponse);
+      if (ctx && typeof ctx.waitUntil === "function") ctx.waitUntil(write);
+      else await write;
+    } catch {
+      // Best-effort caching; Cloudinary remains the image origin.
+    }
+  }
+  return request.method === "HEAD"
+    ? new Response(null, { status: response.status, headers: response.headers })
+    : response;
+}
+
 async function publicCatalogue(request, env) {
   const originHeader = request.headers.get("origin");
   const origin = allowedOrigin(originHeader);
@@ -253,7 +352,7 @@ export default {
     const originHeader = request.headers.get("origin");
     const origin = allowedOrigin(originHeader);
 
-    if (url.pathname === "/api/v1/cache-probe") {
+    if (url.pathname.startsWith("/api/v1/image/")) {\n      return cloudinaryImage(request, env, ctx);\n    }\n    if (url.pathname === "/api/v1/cache-probe") {
       return cacheProbe(request, env);
     }
     if (url.pathname === "/api/v1/catalogue") {
