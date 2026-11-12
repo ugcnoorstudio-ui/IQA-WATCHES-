@@ -352,7 +352,9 @@ export default {
     const originHeader = request.headers.get("origin");
     const origin = allowedOrigin(originHeader);
 
-    if (url.pathname.startsWith("/api/v1/image/")) {\n      return cloudinaryImage(request, env, ctx);\n    }\n    if (url.pathname === "/api/v1/cache-probe") {
+    if (url.pathname.startsWith("/api/v1/image/")) {
+      return cloudinaryImage(request, env, ctx);
+    }\n    if (url.pathname === "/api/v1/cache-probe") {
       return cacheProbe(request, env);
     }
     if (url.pathname === "/api/v1/catalogue") {
