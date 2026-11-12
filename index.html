@@ -1200,7 +1200,7 @@ function updateCounts(){$('cartCount').textContent=Object.values(cart).reduce((a
 function openPanel(mode){$('overlay').classList.add('open');$('drawer').classList.add('open');$('drawer').setAttribute('aria-hidden','false');document.body.classList.add('locked');$('drawerTitle').textContent=mode==='wishlist'?'Your wishlist':'Your bag';renderPanel(mode)}
 function closePanel(){$('overlay').classList.remove('open');$('drawer').classList.remove('open');$('drawer').setAttribute('aria-hidden','true');document.body.classList.remove('locked')}
 function cloudinaryWorkerImageUrl(value,width=1200){
- const config=window.IQA_SUPABASE_CONFIG||{};
+ const config=(typeof window!=="undefined"&&window.IQA_SUPABASE_CONFIG)||{};
  const proxy=config&&typeof config.cloudinaryImageProxyUrl==="string"?config.cloudinaryImageProxyUrl.trim():"";
  if(!proxy)return "";
  try{
@@ -1243,7 +1243,7 @@ function responsiveCloudinarySrcset(value,widths=[320,480,800,1200]){
    const tail=parts.slice(uploadIndex+1);
    while(tail.length&&transform.test(tail[0]))tail.shift();
    assetPath=tail.join("/");
-   const config=window.IQA_SUPABASE_CONFIG||{};
+   const config=(typeof window!=="undefined"&&window.IQA_SUPABASE_CONFIG)||{};
    proxyBase=typeof config.cloudinaryImageProxyUrl==="string"?config.cloudinaryImageProxyUrl.trim():"";
    if(!proxyBase)return widths.map(width=>{
     const path=parts.slice(0,uploadIndex+1).concat(["c_limit,w_"+width,"f_auto","q_auto"],tail);
