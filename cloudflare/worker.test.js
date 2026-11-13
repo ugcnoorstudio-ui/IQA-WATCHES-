@@ -280,3 +280,41 @@ test("Production upstream pause blocks Supabase Auth verification", async () => 
     globalThis.fetch = originalFetch;
   }
 });
+
+test("Cloudinary image proxy rejects arbitrary URL-like paths and only fetches fixed cloud", async () => {
+  const originalFetch = globalThis.fetch;
+  let fetched = "";
+  globalThis.fetch = async (url, options) => {
+    fetched = String(url);
+    assert.equal(options.headers.accept, "image/avif,image/webp,image/*,*/*;q=0.8");
+    return new Response(new Uint8Array([1,2,3]), { status: 200, headers: { "content-type": "image/webp" } });
+  };
+  try {
+    const env = { APP_ENV: "staging", CLOUDINARY_IMAGE_PROXY_ENABLED: "true" };
+    const valid = await worker.fetch(request("/api/v1/image/c_limit,w_800/f_auto/q_auto/v1793904334/iqa-watches/products/test.png"), env);
+    assert.equal(valid.status, 200);
+    assert.equal(fetched, "https://res.cloudinary.com/rrmdzam7/image/upload/c_limit,w_800/f_auto/q_auto/v1793904334/iqa-watches/products/test.png");
+    const invalid = await worker.fetch(request("/api/v1/image/c_limit,w_800/f_auto/q_auto/https://evil.example/track.png"), env);
+    assert.equal(invalid.status, 400);
+    assert.match(fetched, /^https:\/\/res\.cloudinary\.com\/rrmdzam7\//);
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
+
+test("Cloudinary image proxy is disabled by default and rejects unsafe path traversal", async () => {
+  const originalFetch = globalThis.fetch;
+  let calls = 0;
+  globalThis.fetch = async () => { calls += 1; return new Response("unexpected"); };
+  try {
+    const disabled = await worker.fetch(request("/api/v1/image/c_limit,w_800/f_auto/q_auto/iqa-watches/products/test.png"), {});
+    assert.equal(disabled.status, 404);
+    const traversal = await worker.fetch(request("/api/v1/image/c_limit,w_800/f_auto/q_auto/iqa-watches/../private.png"), {
+      CLOUDINARY_IMAGE_PROXY_ENABLED: "true"
+    });
+    assert.equal(traversal.status, 400);
+    assert.equal(calls, 0);
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});

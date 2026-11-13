@@ -1390,27 +1390,71 @@ function renderProducts(){
 function updateCounts(){$('cartCount').textContent=Object.values(cart).reduce((a,b)=>a+b,0);$('wishCount').textContent=wishlist.length;saveState()}
 function openPanel(mode){$('overlay').classList.add('open');$('drawer').classList.add('open');$('drawer').setAttribute('aria-hidden','false');document.body.classList.add('locked');$('drawerTitle').textContent=mode==='wishlist'?'Your wishlist':'Your bag';renderPanel(mode)}
 function closePanel(){$('overlay').classList.remove('open');$('drawer').classList.remove('open');$('drawer').setAttribute('aria-hidden','true');document.body.classList.remove('locked')}
-function safeImageUrl(value){if(typeof value!=='string'||!value.trim())return '';try{const u=new URL(value.trim(),location.href);if(u.protocol!=='https:'||u.hostname!=='res.cloudinary.com')return '';const parts=u.pathname.split('/');const uploadIndex=parts.indexOf('upload');if(uploadIndex>=0&&!parts[uploadIndex+1]?.includes(',')){parts.splice(uploadIndex+1,0,'c_limit,w_1200','f_auto','q_auto');u.pathname=parts.join('/')}return u.href}catch{return ''}}
-function responsiveCloudinarySrcset(value,widths=[320,480,800,1200]){
- if(typeof value!=='string'||!value.trim())return '';
+function cloudinaryWorkerImageUrl(value,width=1200){
+ const config=(typeof window!=="undefined"&&window.IQA_SUPABASE_CONFIG)||{};
+ const proxy=config&&typeof config.cloudinaryImageProxyUrl==="string"?config.cloudinaryImageProxyUrl.trim():"";
+ if(!proxy)return "";
  try{
-  const source=new URL(value.trim(),location.href);
-  if(source.protocol!=='https:'||source.hostname!=='res.cloudinary.com'||/\.svg(?:$|\?)/i.test(source.pathname))return '';
-  const parts=source.pathname.split('/'),uploadIndex=parts.indexOf('upload');
-  if(uploadIndex<0)return '';
+  const source=new URL(value,location.href);
+  if(source.protocol!=="https:"||source.hostname!=="res.cloudinary.com"||/\.svg(?:$|\?)/i.test(source.pathname))return "";
+  const parts=source.pathname.split("/"),uploadIndex=parts.indexOf("upload");
+  if(uploadIndex<0)return "";
   const tail=parts.slice(uploadIndex+1),transform=/^(?:c_|w_|h_|f_|q_|g_|dpr_|fl_|ar_|e_|o_|r_|b_|t_|l_|u_|so_|eo_|du_|fps_|ac_|vc_|af_|cs_|d_|ki_|pg_|sp_|vs_)/;
   while(tail.length&&transform.test(tail[0]))tail.shift();
-  if(!tail.length)return '';
-  return widths.map(width=>{
-   const url=new URL(source.href),path=parts.slice(0,uploadIndex+1).concat(['c_limit,w_'+width,'f_auto','q_auto'],tail);
-   url.pathname=path.join('/');
-   return url.href+' '+width+'w';
-  }).join(', ');
- }catch{return ''}
+  const assetPath=tail.join("/");
+  if(!assetPath.includes("iqa-watches/")||!/\.(?:jpe?g|png|webp|avif)$/i.test(assetPath))return "";
+  const base=new URL(proxy);
+  if(base.protocol!=="https:")return "";
+  return new URL("/api/v1/image/c_limit,w_"+width+"/f_auto/q_auto/"+assetPath,base).href;
+ }catch{return ""}
+}
+function safeImageUrl(value){if(typeof value!=="string"||!value.trim())return "";try{
+ const u=new URL(value.trim(),location.href);
+ if(u.protocol!=="https:"||u.hostname!=="res.cloudinary.com"||u.pathname.includes("%")||/\.svg(?:$|\?)/i.test(u.pathname))return "";
+ const parts=u.pathname.split("/"),uploadIndex=parts.indexOf("upload");
+ if(uploadIndex<0||!parts[uploadIndex+1])return "";
+ const transform=/^(?:c_|w_|h_|f_|q_|g_|dpr_|fl_|ar_|e_|o_|r_|b_|t_|l_|u_|so_|eo_|du_|fps_|ac_|vc_|af_|cs_|d_|ki_|pg_|sp_|vs_)/;
+ const tail=parts.slice(uploadIndex+1);
+ while(tail.length&&transform.test(tail[0]))tail.shift();
+ const assetPath=tail.join("/");
+ if(!assetPath.includes("iqa-watches/")||!/\.(?:jpe?g|png|webp|avif)$/i.test(assetPath))return "";
+ const canonical=new URL(u.origin+parts.slice(0,uploadIndex+1).concat(["c_limit,w_1200","f_auto","q_auto"],tail).join("/"));
+ canonical.hash=u.hash;
+ return cloudinaryWorkerImageUrl(canonical.href,1200)||canonical.href;
+ }catch{return ""}}
+function responsiveCloudinarySrcset(value,widths=[320,480,800,1200]){
+ if(typeof value!=="string"||!value.trim())return "";
+ try{
+  const source=new URL(value.trim(),location.href);
+  if(source.protocol!=="https:"||/\.svg(?:$|\?)/i.test(source.pathname))return "";
+  const transform=/^(?:c_|w_|h_|f_|q_|g_|dpr_|fl_|ar_|e_|o_|r_|b_|t_|l_|u_|so_|eo_|du_|fps_|ac_|vc_|af_|cs_|d_|ki_|pg_|sp_|vs_)/;
+  let assetPath="",proxyBase="";
+  if(source.hostname==="res.cloudinary.com"){
+   const parts=source.pathname.split("/"),uploadIndex=parts.indexOf("upload");
+   if(uploadIndex<0)return "";
+   const tail=parts.slice(uploadIndex+1);
+   while(tail.length&&transform.test(tail[0]))tail.shift();
+   assetPath=tail.join("/");
+   const config=(typeof window!=="undefined"&&window.IQA_SUPABASE_CONFIG)||{};
+   proxyBase=typeof config.cloudinaryImageProxyUrl==="string"?config.cloudinaryImageProxyUrl.trim():"";
+   if(!proxyBase)return widths.map(width=>{
+    const path=parts.slice(0,uploadIndex+1).concat(["c_limit,w_"+width,"f_auto","q_auto"],tail);
+    const url=new URL(source.href);url.pathname=path.join("/");
+    return url.href+" "+width+"w";
+   }).join(", ");
+  }else if(source.pathname.includes("/api/v1/image/")){
+   const marker="/api/v1/image/",tail=source.pathname.split(marker)[1].split("/");
+   while(tail.length&&transform.test(tail[0]))tail.shift();
+   assetPath=tail.join("/");
+   proxyBase=source.origin;
+  }else return "";
+  if(!assetPath.includes("iqa-watches/"))return "";
+  return widths.map(width=>new URL("/api/v1/image/c_limit,w_"+width+"/f_auto/q_auto/"+assetPath,proxyBase).href+" "+width+"w").join(", ");
+ }catch{return ""}
 }
 function enhanceResponsiveCloudinaryImages(root=document){
  const scope=root&&root.querySelectorAll?root:document;
- scope.querySelectorAll('img[src*="res.cloudinary.com"]').forEach(img=>{
+ scope.querySelectorAll('img[src*="res.cloudinary.com"],img[src*="/api/v1/image/"]').forEach(img=>{
   if(img.hasAttribute('srcset'))return;
   const src=img.getAttribute('src'),set=responsiveCloudinarySrcset(src);
   if(!set)return;
