@@ -242,6 +242,62 @@ html,body{width:100%;max-width:100%;min-width:0;overflow-x:hidden}
 .image-credit-note{top:22px;bottom:auto;right:22px;letter-spacing:1.8px}
 @media(max-width:760px){.hero{grid-template-columns:1fr;min-height:0}.hero-copy{padding:48px 7% 36px}.hero h1{font-size:clamp(54px,13vw,76px)}.hero-visual{height:clamp(300px,88vw,440px);min-height:0}.hero-image-caption{left:22px;bottom:24px}.image-credit-note{top:14px;right:14px}}
 @media(max-width:420px){.hero-copy{padding:42px 22px 30px}.hero h1{font-size:54px}.hero-visual{height:300px}.hero-secondary-link{font-size:10px}}
+
+/* IQA WATCHES brand refresh — aligned to the supplied chocolate / champagne logo */
+:root{
+ --ink:#382316;--paper:#f5efe5;--white:#fffaf2;--gold:#b88a55;--gold-light:#dfc19a;
+ --muted:#78695d;--line:#e3d6c6;--green:#385947;
+}
+body{background:var(--paper);color:var(--ink)}
+.announcement,.footer,.editorial{background:#382316}
+.site-header{background:rgba(245,239,229,.96);border-bottom-color:#dfcfba}
+.brand-name{color:#382316}
+.nav-links a:hover,.footer a:hover{color:#bd9568}
+.hero{background:#eadcc9}
+.hero-visual{background:#d8c3a9}
+.hero h1 em,.eyebrow{color:#9b7044}
+.button{background:#382316;border-color:#382316}
+.button:hover{color:#382316}
+.button.light{color:#382316;border-color:#9b7044}
+.button.light:hover{background:#382316;color:#fffaf2}
+.product-image,.cart-thumb,.product-modal-image,.route-card img{background:#eee3d4}
+.product-label{color:#68472d}
+.wish-btn.selected{color:#a3443e}
+.editorial-copy .button{border-color:#dfc19a;color:#f5efe5}
+.editorial-copy .button:hover{background:#dfc19a;color:#382316}
+.newsletter{background:#eadcc9}
+.newsletter-form input{background:#fffaf2;border-color:#d4bea3}
+.newsletter-form button{background:#382316;border-color:#382316}
+.drawer,.modal{background:#f5efe5}
+.close-btn,.icon-btn:hover{border-color:#d7c3aa}
+.toast{background:#382316}
+@media(max-width:760px){
+ .nav{min-height:68px;padding:10px 4%;gap:10px}
+ .brand-logo{width:min(210px,42vw);max-height:48px}
+ .hero{grid-template-columns:1fr}
+ .hero-copy{padding:48px 7%}
+ .hero-visual{min-height:330px}
+ .product-grid,.route-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:18px 10px}
+ .section{padding:52px 5%}
+ .trust-strip{grid-template-columns:1fr;gap:12px}
+ .values{grid-template-columns:1fr;gap:18px}
+ .newsletter{align-items:flex-start;flex-direction:column}
+ .newsletter-form{width:100%}
+ .footer-grid{grid-template-columns:1fr 1fr;gap:24px}
+ .product-modal{grid-template-columns:1fr}
+ .product-modal-image{min-height:260px;max-height:42vh}
+}
+@media(max-width:380px){
+ .product-grid,.route-grid{gap:16px 8px}
+ .product-title{font-size:17px}
+ .card-actions{gap:5px}
+ .card-actions button{font-size:8px}
+ .footer-grid{grid-template-columns:1fr}
+}
+@media(prefers-reduced-motion:reduce){
+ *,*::before,*::after{scroll-behavior:auto!important;transition-duration:.01ms!important;animation-duration:.01ms!important;animation-iteration-count:1!important}
+}
+
 </style>
 
 <style>
