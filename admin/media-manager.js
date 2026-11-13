@@ -26,8 +26,11 @@ const BRAND=[
  {id:'iqa-watches-primary-logo',label:'Primary logo',ext:'svg'}
 ];
 const CLOUD='https://res.cloudinary.com/rrmdzam7/image/upload/';
-let active='Product', busy=false, productRows=[], productNames=new Map(), cloudResources=[], unlinkedResult=null;
-const tabs=['Product','Homepage','Category','Editorial','Unassigned','Failed Uploads'];
+let active='Product', busy=false, productRows=[], productNames=new Map(), cloudResources=[], unlinkedResult=null, b2Client=null;
+const B2_STAGING_URL='https://qcxgsomqxfoueootxzpv.supabase.co';
+const B2_STAGING_KEY='sb_publishable_EmGoVBFk35Mc7om3eULcgw_tmEXAAA5';
+function getB2Client(){if(!window.supabase||typeof window.supabase.createClient!=='function')throw new Error('Supabase JS SDK is unavailable. Reload the admin page.');if(!b2Client)b2Client=window.supabase.createClient(B2_STAGING_URL,B2_STAGING_KEY,{auth:{persistSession:true,autoRefreshToken:true,storageKey:'iqa-b2-staging-auth-v1'}});return b2Client;}
+const tabs=['Product','Homepage','Category','Editorial','Unassigned','Failed Uploads','B2 STAGING TEST'];
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 function cloudUrl(id,ext='jpg',width=900){return CLOUD+(ext==='svg'?'':('c_limit,w_'+width+'/f_auto/q_auto/'))+id+'.'+ext}
 function optimized(url,width=900){if(typeof url!=='string'||!url.startsWith('https://res.cloudinary.com/'))return '';return url.replace('/image/upload/','/image/upload/c_limit,w_'+width+'/f_auto/q_auto/')}
@@ -52,6 +55,7 @@ function tabBody(){
   if(rows.length)return grid(rows.map(x=>card(x.public_id.split('/').pop(),x.public_id,optimized(x.secure_url),'Unassigned · '+x.bytes+' bytes · '+x.public_id)));
   return '<div class="panel"><h3>No unassigned Cloudinary assets yet</h3><p class="muted">One legacy image is waiting for a safe review copy. It will not be linked to a product and its Supabase original will remain untouched.</p><button class="btn primary" data-copy-unlinked>Copy to Cloudinary review folder</button></div>';
  }
+ if(active==='B2 STAGING TEST')return '<div class="panel"><h3>Backblaze B2 · STAGING upload test</h3><p class="muted">Isolated test only. This uses the STAGING Supabase project and private Backblaze bucket. It does not create or change a product record and does not replace Cloudinary.</p><form data-b2-login-form><div class="form-grid"><div class="field"><label for="b2StageEmail">STAGING staff email</label><input id="b2StageEmail" name="email" type="email" autocomplete="username" required></div><div class="field"><label for="b2StagePassword">STAGING password</label><input id="b2StagePassword" name="password" type="password" autocomplete="current-password" required></div></div><div class="toolbar"><button class="btn primary" type="submit">Sign in to STAGING</button><button class="btn secondary" type="button" data-b2-logout>Sign out of STAGING</button></div></form><form data-b2-upload-form><div class="field"><label for="b2StageImage">Test image · JPG, PNG, WebP or AVIF · up to 5 MB</label><input id="b2StageImage" name="image" type="file" accept="image/jpeg,image/png,image/webp,image/avif" required></div><div class="toolbar"><button class="btn primary" type="submit">Upload test image to B2</button></div></form><div data-b2-preview class="tool-result" aria-live="polite"></div></div>';
  if(active==='Failed Uploads'){
   const rows=failedRows();
   if(!rows.length)return '<div class="panel"><h3>No failed uploads recorded</h3><p class="muted">If an upload fails, its product and file details will appear here so you can retry with the original file selected again.</p></div>';
@@ -110,6 +114,51 @@ function mount(){
   }
  }
  tabbar.addEventListener('click',e=>{const b=e.target.closest('[data-media-tab]');if(!b)return;active=b.getAttribute('data-media-tab');render()});
+ body.addEventListener('submit',async e=>{
+  const login=e.target.closest('[data-b2-login-form]');
+  if(login){
+   e.preventDefault();
+   const submit=login.querySelector('button[type="submit"]');
+   if(submit)submit.disabled=true;
+   setStatus(box,'Signing in to the separate STAGING Supabase project…');
+   try{
+    const form=new FormData(login);
+    const {data,error}=await getB2Client().auth.signInWithPassword({email:String(form.get('email')||'').trim(),password:String(form.get('password')||'')});
+    if(error)throw error;
+    if(!data?.session?.access_token)throw new Error('STAGING did not return an authenticated session.');
+    setStatus(box,'STAGING sign-in succeeded. The upload function will now independently verify active Owner permission.');
+   }catch(err){setStatus(box,'STAGING sign-in failed: '+(err?.message||String(err)),true)}
+   finally{if(submit)submit.disabled=false}
+   return;
+  }
+  const upload=e.target.closest('[data-b2-upload-form]');
+  if(upload){
+   e.preventDefault();
+   const submit=upload.querySelector('button[type="submit"]');
+   const file=upload.querySelector('input[type="file"]')?.files?.[0];
+   if(!file){setStatus(box,'Choose a test image first.',true);return}
+   if(submit){submit.disabled=true;submit.textContent='Uploading to STAGING…'}
+   setStatus(box,'Checking STAGING Owner session and uploading a private B2 test object…');
+   try{
+    const {data:sessionData,error:sessionError}=await getB2Client().auth.getSession();
+    if(sessionError)throw sessionError;
+    if(!sessionData?.session?.access_token)throw new Error('Sign in to the STAGING project first.');
+    const payload=new FormData();payload.append('image',file,file.name||'b2-staging-test-image');
+    const {data,error}=await getB2Client().functions.invoke('iqa-b2-media-upload',{body:payload});
+    if(error)throw error;
+    if(!data||data.ok!==true||typeof data.download_url!=='string')throw new Error(data?.error||'B2 upload was not confirmed.');
+    const preview=box.querySelector('[data-b2-preview]');
+    if(preview){preview.replaceChildren();const image=document.createElement('img');image.src=data.download_url;image.alt='Private Backblaze B2 STAGING test upload';image.loading='lazy';image.style.cssText='display:block;max-width:100%;max-height:260px;object-fit:contain;margin:12px 0';const details=document.createElement('p');details.className='muted';details.textContent='Private object: '+String(data.object_key||'')+' · Signed preview expires in '+String(data.download_url_expires_in_seconds||600)+' seconds.';preview.append(image,details)}
+    setStatus(box,'SUCCESS: image uploaded to private Backblaze B2 STAGING. No product record changed.');
+   }catch(err){setStatus(box,'B2 STAGING upload failed: '+(err?.message||String(err)),true)}
+   finally{if(submit){submit.disabled=false;submit.textContent='Upload test image to B2'}}
+   return;
+  }
+ });
+ body.addEventListener('click',async e=>{
+  const logout=e.target.closest('[data-b2-logout]');
+  if(logout){try{if(b2Client)await b2Client.auth.signOut({scope:'local'});setStatus(box,'Signed out of the separate STAGING session.')}catch(err){setStatus(box,'STAGING sign-out failed: '+(err?.message||String(err)),true)}return}
+ });
  body.addEventListener('click',async e=>{
   const migrate=e.target.closest('[data-migrate-brand]');
   if(migrate){
