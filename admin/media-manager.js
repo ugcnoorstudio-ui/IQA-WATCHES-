@@ -185,6 +185,8 @@ function mount(){
  });
  refresh.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();void refreshData();});
  box.append(head,description,tabbar,body,status);host.prepend(box);
+ // Render tabs immediately so the isolated B2 test remains reachable even if Cloudinary refresh fails.
+ render();
  refreshData();
 }
 let queued=false;
