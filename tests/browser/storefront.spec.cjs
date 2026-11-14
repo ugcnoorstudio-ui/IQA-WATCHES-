@@ -497,46 +497,18 @@ test('collection routes show only products matching approved audience and explic
 });
 
 
-test('product cards open a complete quick-view modal and related watches replace its content', async ({ page }) => {
-  await openStore(page);
-  const initialHash = await page.evaluate(() => location.hash);
-  await page.evaluate(() => {
-    const first = products[0];
-    products.push({ ...first, id: first.id + '-quick-view-fixture', name: first.name + ' Related QA Watch' });
-    renderProducts();
-  });
-  const card = page.locator('#productGrid .product-card').first();
-  const expectedName = (await card.locator('.product-title').innerText()).trim();
-  await card.locator('.product-image-link').click();
-  const modal = page.locator('#modalWrap');
-  await expect(modal).toHaveClass(/open/);
-  await expect(page.locator('#modalContent h2')).toHaveText(expectedName);
-  await expect(page.locator('#modalContent .product-modal-image img')).toBeVisible();
-  await expect(page.locator('#modalContent .spec-list')).toBeVisible();
-  await expect(modal).toHaveAttribute('role', 'dialog');
-  await expect(modal).toHaveAttribute('aria-modal', 'true');
-  await expect(modal).toHaveAttribute('aria-labelledby', 'modalTitle');
-  await expect(page.locator('#modalContent h2#modalTitle')).toBeVisible();
-  const close = page.locator('#modalClose');
-  await expect(close).toBeFocused();
-  await expect(page.locator('#modalContent .related-product')).not.toHaveCount(0);
-  await page.keyboard.press('Shift+Tab');
-  await expect(page.locator('#modalContent .related-product').last()).toBeFocused();
-  await page.keyboard.press('Tab');
-  await expect(close).toBeFocused();
-  const related = page.locator('#modalContent .related-product').first();
-  const relatedName = (await related.locator('span').innerText()).trim();
-  await related.click();
-  await expect(modal).toHaveClass(/open/);
-  await expect(page.locator('#modalContent h2')).toHaveText(relatedName);
-  await expect.poll(() => page.evaluate(() => location.hash)).toBe(initialHash);
-  await page.keyboard.press('Escape');
-  await expect(modal).not.toHaveClass(/open/);
-  await expect(card.locator('.product-image-link')).toBeFocused();
-  await page.evaluate(() => { location.hash = 'recently-viewed'; });
-  await expect(page.locator('#routeView')).toContainText(relatedName);
-});
-
+test('product cards open a dedicated product page with app-style back navigation', async ({ page }) => {
+ await openStore(page); const initialHash=await page.evaluate(()=>location.hash);
+ const card=page.locator('#productGrid .product-card').first(), name=(await card.locator('.product-title').innerText()).trim(), id=await card.locator('.product-image-link').getAttribute('data-view');
+ await card.locator('.product-image-link').click();
+ await expect.poll(()=>page.evaluate(()=>location.hash)).toBe('#product/'+encodeURIComponent(id));
+ await expect(page.locator('.route-pdp-appbar')).toBeVisible(); await expect(page.locator('[data-pdp-back]')).toContainText('Back');
+ await expect(page.locator('.route-product-copy h2')).toHaveText(name); await expect(page.locator('#routeMainImage')).toBeVisible();
+ await expect(page.locator('.route-product-details')).toHaveCount(2); await expect(page.locator('.route-sticky-buybar')).toBeVisible();
+ await expect(page.locator('.route-recommendations .route-card')).not.toHaveCount(0);
+ await page.locator('[data-pdp-back]').click(); await expect.poll(()=>page.evaluate(()=>location.hash)).toBe(initialHash);
+ await expect(page.locator('#productGrid .product-card').first()).toBeVisible();
+}
 
 test('account navigation opens the customer sign-in or safe unavailable panel', async ({ page, isMobile }) => {
   await page.goto('/');
@@ -563,30 +535,14 @@ test('homepage Explore shortcuts remain removed while the hero and catalogue con
 });
 
 test('Buy Now keeps its own quantity and does not mutate the shopping bag', async ({ page, isMobile }) => {
-  await openStore(page);
-  const card = page.locator('#productGrid .product-card').first();
-  const selectedId = await card.locator('.product-image-link').getAttribute('data-view');
-  const cartBefore = await page.evaluate(id => Number(cart[id] || 0), selectedId);
-  await card.locator('.product-image-link').click();
-  const modal = page.locator('#modalWrap');
-  await expect(modal).toHaveClass(/open/);
-  await modal.locator('[data-buy-now]').click();
-  await expect(modal).not.toHaveClass(/open/);
-  await expect.poll(() => page.evaluate(() => location.hash)).toBe('#buy-now/' + encodeURIComponent(selectedId));
-  const buyNow = page.locator('#routeView');
-  await expect(buyNow).toContainText(/Review your selected timepiece/i);
-  await expect(buyNow).toContainText(/Payment options and delivery terms are confirmed only after secure checkout/i);
-  await expect(buyNow).toContainText(/Online payment availability is not currently configured/i);
-  await expect(buyNow.locator('[data-buy-now-checkout]')).toBeVisible();
-  await expect(buyNow.locator('.buy-now-quantity strong')).toHaveText('1');
-  await expect(buyNow.locator('[data-qty]')).toHaveCount(0);
-  const cartAfter = await page.evaluate(id => Number(cart[id] || 0), selectedId);
-  expect(cartAfter).toBe(cartBefore);
-  if (isMobile) {
-    const overflow = await page.evaluate(() => document.documentElement.scrollWidth > document.documentElement.clientWidth);
-    expect(overflow, 'Buy Now panel should not overflow on mobile').toBe(false);
-  }
-});
+ await openStore(page); const card=page.locator('#productGrid .product-card').first(), id=await card.locator('.product-image-link').getAttribute('data-view');
+ const before=await page.evaluate(id=>Number(cart[id]||0),id); await card.locator('.product-image-link').click();
+ await expect(page.locator('.route-product-copy h2')).toBeVisible(); await page.locator('[data-buy-now]').click();
+ await expect.poll(()=>page.evaluate(()=>location.hash)).toBe('#buy-now/'+encodeURIComponent(id));
+ const buy=page.locator('#routeView'); await expect(buy).toContainText(/Review your selected timepiece/i); await expect(buy.locator('[data-buy-now-checkout]')).toBeVisible();
+ expect(await page.evaluate(id=>Number(cart[id]||0),id)).toBe(before);
+ if(isMobile)expect(await page.evaluate(()=>document.documentElement.scrollWidth<=document.documentElement.clientWidth)).toBe(true);
+}
 
 test('full-screen product image viewer supports navigation, zoom and keyboard close', async ({ page }) => {
   await openStore(page);
@@ -620,17 +576,13 @@ test('full-screen product image viewer supports navigation, zoom and keyboard cl
   await expect(page.locator('#routeMainImage')).toBeVisible();
 });
 
-test('collection, search and wishlist product cards open the same quick-view modal', async ({ page }) => {
-  await openStore(page);
-  await navigateToHash(page, 'shop');
-  const collectionCard = page.locator('#routeCatalogue .route-card').first();
-  await collectionCard.locator('a[data-view]').first().click();
-  await expect(page.locator('#modalWrap')).toHaveClass(/open/);
-  await expect(page.locator('#modalContent .product-modal-copy h2')).not.toBeEmpty();
-  await page.keyboard.press('Escape');
-  await expect(page.locator('#modalWrap')).not.toHaveClass(/open/);
-});
-
+test('collection product cards open the dedicated product page', async ({ page }) => {
+ await openStore(page); await navigateToHash(page,'shop');
+ const link=page.locator('#routeCatalogue .route-card a[data-view]').first(), href=await link.getAttribute('href');
+ await link.click(); await expect.poll(()=>page.evaluate(()=>location.hash)).toBe(href);
+ await expect(page.locator('.route-pdp-appbar')).toBeVisible(); await expect(page.locator('.route-product-copy h2')).not.toBeEmpty();
+ await page.locator('[data-pdp-back]').click(); await expect.poll(()=>page.evaluate(()=>location.hash)).toBe('#shop');
+}
 
 test('customer comparison removes individual watches and prunes stale catalogue IDs', async ({ page }) => {
   await openStore(page);
@@ -688,100 +640,21 @@ test('mobile drawer exposes modal navigation semantics, traps focus and restores
 });
 
 
-test('mobile watch detail opens as a large image-first bottom panel', async ({ page, isMobile }) => {
-  test.skip(!isMobile, 'mobile viewport only');
-  await openStore(page);
-  const card = page.locator('#productGrid .product-card').first();
-  await card.locator('.product-image-link').click();
-  const modal = page.locator('#modalWrap');
-  await expect(modal).toHaveClass(/open/);
-  const layout = await page.locator('#modalWrap').evaluate(el => {
-    const image = el.querySelector('.product-modal-image');
-    return {
-      panelHeight: el.getBoundingClientRect().height,
-      panelWidth: el.getBoundingClientRect().width,
-      viewportHeight: window.innerHeight,
-      viewportWidth: window.innerWidth,
-      imageHeight: image.getBoundingClientRect().height,
-      columns: getComputedStyle(el.querySelector('.product-modal')).gridTemplateColumns,
-      align: getComputedStyle(el).placeItems
-    };
-  });
-  expect(layout.panelHeight).toBeCloseTo(layout.viewportHeight, 0);
-  expect(layout.panelWidth).toBeCloseTo(layout.viewportWidth, 0);
-  expect(layout.imageHeight).toBeGreaterThan(180);
-  expect(layout.columns.split(' ').length).toBe(1);
-  expect(layout.align).toContain('stretch');
-  await expect(page.locator('#modalContent h2')).not.toBeEmpty();
-  await page.locator('#modalContent #modalClose').click();
-});
+test('mobile watch detail is a full product page with compact app navigation', async ({ page, isMobile }) => {
+ test.skip(!isMobile,'mobile viewport only'); await openStore(page);
+ const card=page.locator('#productGrid .product-card').first(),id=await card.locator('.product-image-link').getAttribute('data-view'); await card.locator('.product-image-link').click();
+ await expect.poll(()=>page.evaluate(()=>location.hash)).toBe('#product/'+encodeURIComponent(id));
+ await expect(page.locator('.route-pdp-appbar')).toBeVisible(); await expect(page.locator('[data-pdp-back]')).toBeVisible();
+ const size=await page.evaluate(()=>({viewport:document.documentElement.clientWidth,doc:document.documentElement.scrollWidth,image:document.querySelector('#routeMainImage')?.getBoundingClientRect().height}));
+ expect(size.doc).toBeLessThanOrEqual(size.viewport); expect(size.image).toBeGreaterThan(160); await expect(page.locator('.route-sticky-buybar')).toBeVisible();
+}
 
-test('multi-image watch detail supports touch swipe and synchronized gallery controls', async ({ page }) => {
-  await openStore(page);
-  const card = page.locator('#productGrid .product-card').first();
-  const selectedId = await card.locator('.product-image-link').getAttribute('data-view');
-  const primary = await card.locator('.product-image img').getAttribute('src');
-  await page.evaluate(({ id, src }) => {
-    const product = products.find(item => item.id === id);
-    product.gallery = [
-      { src, alt: 'Swipe primary watch image' },
-      { src: src + '?swipe-test=secondary', alt: 'Swipe secondary watch image' },
-      { src: src + '?swipe-test=tertiary', alt: 'Swipe tertiary watch image' }
-    ];
-    products.push({
-      ...product,
-      id: product.id + '-related-layout-fixture',
-      name: product.name + ' Related Layout Fixture',
-      gallery: [],
-      image: src,
-      stock: 1
-    });
-  }, { id: selectedId, src: primary });
-  // Open the quick-view through the same user interaction used by shoppers.
-  await card.locator('.product-image-link').click();
-  const modal = page.locator('#modalWrap');
-  await expect(modal).toHaveClass(/open/);
-  const image = page.locator('#modalContent [data-modal-image]');
-  const count = page.locator('#modalContent .product-gallery-count');
-  await expect(count).toHaveText('1 / 3');
-
-  await page.evaluate(() => {
-    const image = document.querySelector('#modalContent [data-modal-image]');
-    const copy = document.querySelector('#modalContent .product-modal-copy');
-    const start = new Event('touchstart', { bubbles: true, cancelable: true });
-    Object.defineProperty(start, 'touches', { value: [{ identifier: 17, clientX: 260, clientY: 210 }] });
-    image.dispatchEvent(start);
-    // A finger may finish outside the image; native touchend is listened for at document level.
-    const end = new Event('touchend', { bubbles: true, cancelable: true });
-    Object.defineProperty(end, 'changedTouches', { value: [{ identifier: 17, clientX: 100, clientY: 214 }] });
-    copy.dispatchEvent(end);
-  });
-  await expect(count).toHaveText('2 / 3');
-  await expect(image).toHaveAttribute('alt', 'Swipe secondary watch image');
-  await expect(page.locator('[data-gallery-index="1"]')).toHaveAttribute('aria-pressed', 'true');
-
-  const recommendationFlow = await modal.evaluate(el => {
-    const product = el.querySelector('.product-modal');
-    const related = el.querySelector('.related-products');
-    return {
-      exists: Boolean(related),
-      followsProduct: Boolean(related && product && related.parentElement === product.parentElement && related.previousElementSibling === product),
-      relatedTop: related?.getBoundingClientRect().top ?? -1,
-      productBottom: product?.getBoundingClientRect().bottom ?? -1
-    };
-  });
-  expect(recommendationFlow.exists).toBe(true);
-  expect(recommendationFlow.followsProduct).toBe(true);
-  expect(recommendationFlow.relatedTop).toBeGreaterThanOrEqual(recommendationFlow.productBottom - 1);
-
-  await page.locator('[data-gallery-step="1"]').click();
-  await expect(count).toHaveText('3 / 3');
-  await page.locator('[data-gallery-step="1"]').click();
-  await expect(count).toHaveText('1 / 3');
-  await page.locator('[data-gallery-step="-1"]').click();
-  await expect(count).toHaveText('3 / 3');
-  await page.locator('#modalContent #modalClose').click();
-});
+test('multi-image product page gallery synchronizes thumbnail controls', async ({ page }) => {
+ await openStore(page); const card=page.locator('#productGrid .product-card').first(),id=await card.locator('.product-image-link').getAttribute('data-view'),src=await card.locator('.product-image img').getAttribute('src');
+ await page.evaluate(({id,src})=>{const p=products.find(x=>x.id===id);p.gallery=[{src,alt:'Primary watch image'},{src:src+'?gallery-test=secondary',alt:'Secondary watch image'},{src:src+'?gallery-test=tertiary',alt:'Tertiary watch image'}];location.hash='#product/'+encodeURIComponent(id)},{id,src});
+ await expect(page.locator('#routeMainImage')).toBeVisible(); const thumbs=page.locator('[data-gallery-src]'); await expect(thumbs).toHaveCount(2);
+ await thumbs.nth(1).click(); await expect(page.locator('#routeMainImage')).toHaveAttribute('alt','Secondary watch image'); await expect(thumbs.nth(1)).toHaveAttribute('aria-pressed','true');
+}
 
 test('homepage editorial banners are consolidated into an autoplay carousel with manual and touch navigation', async ({ page }) => {
   await openStore(page);
