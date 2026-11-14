@@ -53,7 +53,7 @@ test('clicking a watch image or title opens the dedicated product page', async (
  await page.locator('[data-pdp-back]').click(); await expect(page.locator('#productGrid .product-card').first()).toBeVisible();
  await page.locator('#productGrid .product-card').first().locator('.product-title a').click();
  await expect(page.locator('.route-pdp-appbar')).toBeVisible();
-}
+});
 
 test('homepage keeps the autoplay editorial carousel without the duplicate customer shortcut row', async ({ page }) => {
   await page.goto('/');
@@ -73,7 +73,7 @@ test('mobile watch details use a full-page layout and app-style Back control', a
  await expect(page.locator('#routeMainImage')).toBeVisible(); await expect(page.locator('.route-sticky-buybar')).toBeVisible();
  const size=await page.evaluate(()=>({width:document.documentElement.clientWidth,scroll:document.documentElement.scrollWidth}));
  expect(size.scroll).toBeLessThanOrEqual(size.width);
-}
+});
 
 test('mobile homepage hero is compact and the brand tagline is clearly visible', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
