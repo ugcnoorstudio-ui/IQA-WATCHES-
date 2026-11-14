@@ -42,7 +42,7 @@ async function firstProductId(page) {
   const id = await (await wish.count() ? wish : add).getAttribute('data-wish').catch(() => null);
   if (id) return id;
   return await add.getAttribute('data-add');
-}
+});
 
 test('homepage loads without horizontal overflow or uncaught page errors', async ({ page }) => {
   const pageErrors = [];
@@ -508,7 +508,7 @@ test('product cards open a dedicated product page with app-style back navigation
  await expect(page.locator('.route-recommendations .route-card')).not.toHaveCount(0);
  await page.locator('[data-pdp-back]').click(); await expect.poll(()=>page.evaluate(()=>location.hash)).toBe(initialHash);
  await expect(page.locator('#productGrid .product-card').first()).toBeVisible();
-}
+});
 
 test('account navigation opens the customer sign-in or safe unavailable panel', async ({ page, isMobile }) => {
   await page.goto('/');
@@ -542,7 +542,7 @@ test('Buy Now keeps its own quantity and does not mutate the shopping bag', asyn
  const buy=page.locator('#routeView'); await expect(buy).toContainText(/Review your selected timepiece/i); await expect(buy.locator('[data-buy-now-checkout]')).toBeVisible();
  expect(await page.evaluate(id=>Number(cart[id]||0),id)).toBe(before);
  if(isMobile)expect(await page.evaluate(()=>document.documentElement.scrollWidth<=document.documentElement.clientWidth)).toBe(true);
-}
+});
 
 test('full-screen product image viewer supports navigation, zoom and keyboard close', async ({ page }) => {
   await openStore(page);
@@ -582,7 +582,7 @@ test('collection product cards open the dedicated product page', async ({ page }
  await link.click(); await expect.poll(()=>page.evaluate(()=>location.hash)).toBe(href);
  await expect(page.locator('.route-pdp-appbar')).toBeVisible(); await expect(page.locator('.route-product-copy h2')).not.toBeEmpty();
  await page.locator('[data-pdp-back]').click(); await expect.poll(()=>page.evaluate(()=>location.hash)).toBe('#shop');
-}
+});
 
 test('customer comparison removes individual watches and prunes stale catalogue IDs', async ({ page }) => {
   await openStore(page);
@@ -647,14 +647,14 @@ test('mobile watch detail is a full product page with compact app navigation', a
  await expect(page.locator('.route-pdp-appbar')).toBeVisible(); await expect(page.locator('[data-pdp-back]')).toBeVisible();
  const size=await page.evaluate(()=>({viewport:document.documentElement.clientWidth,doc:document.documentElement.scrollWidth,image:document.querySelector('#routeMainImage')?.getBoundingClientRect().height}));
  expect(size.doc).toBeLessThanOrEqual(size.viewport); expect(size.image).toBeGreaterThan(160); await expect(page.locator('.route-sticky-buybar')).toBeVisible();
-}
+});
 
 test('multi-image product page gallery synchronizes thumbnail controls', async ({ page }) => {
  await openStore(page); const card=page.locator('#productGrid .product-card').first(),id=await card.locator('.product-image-link').getAttribute('data-view'),src=await card.locator('.product-image img').getAttribute('src');
  await page.evaluate(({id,src})=>{const p=products.find(x=>x.id===id);p.gallery=[{src,alt:'Primary watch image'},{src:src+'?gallery-test=secondary',alt:'Secondary watch image'},{src:src+'?gallery-test=tertiary',alt:'Tertiary watch image'}];location.hash='#product/'+encodeURIComponent(id)},{id,src});
  await expect(page.locator('#routeMainImage')).toBeVisible(); const thumbs=page.locator('[data-gallery-src]'); await expect(thumbs).toHaveCount(2);
  await thumbs.nth(1).click(); await expect(page.locator('#routeMainImage')).toHaveAttribute('alt','Secondary watch image'); await expect(thumbs.nth(1)).toHaveAttribute('aria-pressed','true');
-}
+});
 
 test('homepage editorial banners are consolidated into an autoplay carousel with manual and touch navigation', async ({ page }) => {
   await openStore(page);
