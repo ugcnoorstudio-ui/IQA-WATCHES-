@@ -45,20 +45,15 @@ test('mobile navigation fits narrow 360px and 390px viewports', async ({ page })
   }
 });
 
-test('clicking a watch image, title or Details opens its product detail panel', async ({ page }) => {
-  await page.goto('/');
-  await expect.poll(() => page.locator('#productGrid .product-card').count(), { timeout: 20000 }).toBeGreaterThan(0);
-  const card = page.locator('#productGrid .product-card').first();
-  await card.locator('.product-image-link').click();
-  await expect(page.locator('#modalWrap')).toHaveClass(/open/);
-  await expect(page.locator('#modalContent .product-modal')).toBeVisible();
-  await expect(page.locator('#modalContent h2')).not.toBeEmpty();
-  await page.locator('#modalContent #modalClose').click();
-  await expect(page.locator('#modalWrap')).not.toHaveClass(/open/);
-  await card.locator('.product-title a').click();
-  await expect(page.locator('#modalWrap')).toHaveClass(/open/);
-});
-
+test('clicking a watch image or title opens the dedicated product page', async ({ page }) => {
+ await page.goto('/'); await expect.poll(()=>page.locator('#productGrid .product-card').count(),{timeout:20000}).toBeGreaterThan(0);
+ const card=page.locator('#productGrid .product-card').first(),id=await card.locator('.product-image-link').getAttribute('data-view');
+ await card.locator('.product-image-link').click(); await expect.poll(()=>page.evaluate(()=>location.hash)).toBe('#product/'+encodeURIComponent(id));
+ await expect(page.locator('.route-pdp-appbar')).toBeVisible(); await expect(page.locator('.route-product-copy h2')).not.toBeEmpty();
+ await page.locator('[data-pdp-back]').click(); await expect(page.locator('#productGrid .product-card').first()).toBeVisible();
+ await page.locator('#productGrid .product-card').first().locator('.product-title a').click();
+ await expect(page.locator('.route-pdp-appbar')).toBeVisible();
+}
 
 test('homepage keeps the autoplay editorial carousel without the duplicate customer shortcut row', async ({ page }) => {
   await page.goto('/');
@@ -69,24 +64,16 @@ test('homepage keeps the autoplay editorial carousel without the duplicate custo
   await expect(page.locator('#customerQuickNav')).toHaveCount(0);
 });
 
-test('mobile watch details use a large scrollable image-first panel', async ({ page }) => {
-  await page.setViewportSize({ width: 390, height: 844 });
-  await page.goto('/');
-  await expect.poll(() => page.locator('#productGrid .product-card').count(), { timeout: 20000 }).toBeGreaterThan(0);
-  await page.locator('#productGrid .product-card').first().locator('.product-image-link').click();
-  await expect(page.locator('#modalWrap')).toHaveClass(/open/);
-  const layout = await page.locator('#modalWrap').evaluate(el => ({
-    width: el.getBoundingClientRect().width,
-    height: el.getBoundingClientRect().height,
-    viewportWidth: window.innerWidth,
-    viewportHeight: window.innerHeight,
-    imageFirst: getComputedStyle(el.querySelector('.product-modal')).gridTemplateColumns
-  }));
-  expect(layout.width).toBeCloseTo(layout.viewportWidth, 0);
-  expect(layout.height).toBeCloseTo(layout.viewportHeight, 0);
-  await expect(page.locator('#modalContent .product-modal-image img')).toBeVisible();
-});
-
+test('mobile watch details use a full-page layout and app-style Back control', async ({ page }) => {
+ await page.setViewportSize({width:390,height:844}); await page.goto('/');
+ await expect.poll(()=>page.locator('#productGrid .product-card').count(),{timeout:20000}).toBeGreaterThan(0);
+ const card=page.locator('#productGrid .product-card').first(),id=await card.locator('.product-image-link').getAttribute('data-view');
+ await card.locator('.product-image-link').click(); await expect.poll(()=>page.evaluate(()=>location.hash)).toBe('#product/'+encodeURIComponent(id));
+ await expect(page.locator('.route-pdp-appbar')).toBeVisible(); await expect(page.locator('[data-pdp-back]')).toBeVisible();
+ await expect(page.locator('#routeMainImage')).toBeVisible(); await expect(page.locator('.route-sticky-buybar')).toBeVisible();
+ const size=await page.evaluate(()=>({width:document.documentElement.clientWidth,scroll:document.documentElement.scrollWidth}));
+ expect(size.scroll).toBeLessThanOrEqual(size.width);
+}
 
 test('mobile homepage hero is compact and the brand tagline is clearly visible', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
