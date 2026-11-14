@@ -1173,6 +1173,53 @@ body{background:var(--iqa-cream);color:var(--iqa-text)}
 }
 </style>
 
+
+<style id="iqa-product-detail-mobile-redesign">
+/* Compact, editorial product quick-view — keep the watch and buying controls in focus. */
+#modalWrap .product-modal-image{background:#f1e9de}
+#modalWrap .product-gallery-thumbs{display:flex;justify-content:center;align-items:center;gap:9px;width:100%;max-width:100%;padding:8px 10px 4px;margin:0;overflow-x:auto;scrollbar-width:thin}
+#modalWrap .product-gallery-thumb{flex:0 0 54px;width:54px;height:54px;min-width:54px;padding:4px;border:1px solid #dfd0bd;border-radius:7px;background:#fffaf3}
+#modalWrap .product-gallery-thumb img{display:block;width:100%;height:100%;object-fit:contain}
+#modalWrap .product-gallery-nav{width:36px;height:36px;font-size:23px;box-shadow:0 3px 12px rgba(56,35,22,.10)}
+#modalWrap .product-gallery-count{right:12px;bottom:72px;padding:5px 9px;font-size:11px}
+#modalWrap .product-modal-copy .eyebrow{font-size:10px;letter-spacing:2px;line-height:1.5}
+#modalWrap .product-modal-copy h2{font:400 clamp(26px,5vw,38px)/1.12 var(--serif);letter-spacing:-.35px;margin:10px 0 12px;color:#382316;overflow-wrap:normal}
+#modalWrap .product-modal-copy .price-line{display:flex;align-items:baseline;gap:12px;margin:10px 0 14px}
+#modalWrap .product-modal-copy .price{font-size:22px;font-weight:700}
+#modalWrap .product-modal-copy .old-price{font-size:14px}
+#modalWrap .product-modal-copy .sample-label{display:inline-block;margin:0 0 14px;padding:6px 9px;font-size:10px;letter-spacing:.35px}
+#modalWrap .product-modal-copy>p{font-size:14px;line-height:1.75;color:#74695f;margin:14px 0}
+#modalWrap .product-modal-copy .spec-list{margin-top:18px}
+#modalWrap .product-modal-copy .product-purchase-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:20px 0}
+#modalWrap .modal-close{width:40px;height:40px;border:1px solid #dfd0bd;border-radius:50%;font-size:24px}
+@media(max-width:680px){
+ #modalWrap{padding:0!important;align-items:stretch!important;background:rgba(25,18,13,.48)}
+ #modalWrap .modal{width:100%;height:100dvh;max-height:100dvh;border-radius:0!important;overflow-x:hidden!important;overflow-y:auto!important;background:#f7f1e8}
+ #modalWrap .product-modal{display:flex!important;flex-direction:column;gap:0;overflow:visible!important}
+ #modalWrap .product-modal-image{position:relative;display:flex!important;flex-direction:column;justify-content:center;align-items:center;gap:5px;width:100%;height:auto!important;min-height:0!important;max-height:none!important;padding:14px 12px 10px;overflow:hidden;background:#f1e9de}
+ #modalWrap .product-modal-image>img{display:block;flex:0 0 auto;width:100%;height:clamp(190px,29dvh,265px)!important;min-height:0!important;max-height:265px!important;object-fit:contain;padding:8px 40px!important}
+ #modalWrap .product-gallery-thumbs{flex:0 0 auto;min-height:0;padding:7px 8px 2px}
+ #modalWrap .product-gallery-thumb{flex-basis:50px;width:50px;height:50px;min-width:50px}
+ #modalWrap .product-gallery-nav{width:34px;height:34px;font-size:21px}
+ #modalWrap .product-gallery-prev{left:9px}
+ #modalWrap .product-gallery-next{right:9px}
+ #modalWrap .product-gallery-count{right:12px;bottom:66px}
+ #modalWrap .product-modal-copy{width:100%;height:auto!important;max-height:none!important;min-height:0;padding:20px 20px 30px!important;overflow:visible!important;background:#f7f1e8}
+ #modalWrap .product-modal-copy h2{font-size:clamp(26px,7vw,32px);line-height:1.13;margin:9px 0 12px}
+ #modalWrap .product-modal-copy .price{font-size:22px}
+ #modalWrap .product-modal-copy .sample-label{font-size:9px}
+ #modalWrap .product-modal-copy>p{font-size:14px;line-height:1.72;margin:14px 0}
+ #modalWrap .product-modal-copy .spec-list{font-size:12px}
+ #modalWrap .product-modal-copy .product-purchase-actions{position:sticky;bottom:0;z-index:4;padding:10px 0 max(10px,env(safe-area-inset-bottom));margin:18px 0 0;background:linear-gradient(180deg,rgba(247,241,232,0),#f7f1e8 18%)}
+ #modalWrap .modal-close{position:fixed;top:max(12px,env(safe-area-inset-top));right:12px;width:38px;height:38px;z-index:20;background:#fffaf3;border-radius:50%}
+ #modalWrap .related-products{padding:24px 18px max(30px,env(safe-area-inset-bottom))}
+}
+@media(max-width:380px){
+ #modalWrap .product-modal-copy{padding-left:16px!important;padding-right:16px!important}
+ #modalWrap .product-modal-copy h2{font-size:26px}
+}
+</style>
+
 </head>
 <body>
 <div class="iqa-announcement" role="note">IQA WATCHES <span aria-hidden="true">·</span> TIMELESS STYLE, CONSIDERED DETAILS <span aria-hidden="true">·</span> PERSONAL ASSISTANCE ON WHATSAPP</div>
