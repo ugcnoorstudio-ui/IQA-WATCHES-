@@ -115,3 +115,5 @@ body.nav-open{overflow:hidden}
   .empty-state p{font-size:13px;line-height:1.55}
 }
 @media(prefers-reduced-motion:reduce){.sidebar{transition:none!important}}
+
+.auth-mark-image{width:58px;height:70px;object-fit:contain;border:1px solid var(--gold);background:#f4ead7;border-radius:3px}.brand-mark-image{width:42px;height:50px;object-fit:contain;background:#f4ead7;border-radius:3px;flex:0 0 auto}
