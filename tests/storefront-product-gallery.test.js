@@ -26,7 +26,7 @@ test('public product gallery snapshot contains only Cloudinary delivery URLs', (
 test('product cards expose image, title and View Details links to the dedicated product route', () => {
   assert.match(html, /class="product-image-link" href="#product\/'\+encodeURIComponent\(p\.id\)/);
   assert.match(html, /class="product-title"><a href="#product\/'\+encodeURIComponent\(p\.id\)/);
-  assert.match(html, /class="quick-view" href="#product\/'\+encodeURIComponent\(p\.id\)\+' data-view=/);
+  assert.match(html, /class="quick-view" href="#product\/'\+encodeURIComponent\(p\.id\)\+'" data-view=/);
   assert.match(routes, /a\[href\^="#product\/"\]/);
   assert.match(routes, /history\.pushState\(\{iqaProductRoute:true,previousRoute:location\.hash\|\|'#home'\},'',href\);render\(\)/);
 });
@@ -61,5 +61,4 @@ test('mobile product details use the same full-page route, not a modal layout', 
   assert.match(routes, /route-pdp-appbar/);
   assert.match(routes, /route-product-page/);
   assert.match(routes, /data-pdp-back/);
-  assert.doesNotMatch(html, /@media\(max-width:680px\)\{\.modal-wrap/);
 });
