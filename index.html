@@ -1102,7 +1102,7 @@ body{background:var(--iqa-cream);color:var(--iqa-text)}
 .route-product-assurance span,.route-rating-note span,.route-review-summary p{font-size:11px;line-height:1.7;color:var(--iqa-muted)}
 .route-recommendations{margin-top:70px;border-top:1px solid var(--iqa-line);padding-top:36px}
 .route-recommendations h2{font:400 34px var(--serif);margin:8px 0}
-.route-sticky-buybar{position:sticky;bottom:0;z-index:18;background:rgba(255,250,243,.97);border-top:1px solid var(--iqa-line);box-shadow:0 -8px 28px rgba(56,35,22,.07);padding:12px max(5%,calc((100vw - 1320px)/2));display:flex;align-items:center;justify-content:space-between;gap:18px;backdrop-filter:blur(12px)}
+.route-sticky-buybar{position:fixed;left:0;right:0;bottom:0;z-index:60;background:rgba(13,15,18,.98);border-top:1px solid #80673e;box-shadow:0 -12px 35px rgba(0,0,0,.28);padding:13px max(18px,calc((100vw - 1320px)/2)) calc(13px + env(safe-area-inset-bottom));display:flex;align-items:center;justify-content:space-between;gap:18px;backdrop-filter:blur(12px)}
 .route-sticky-price span,.route-sticky-price strong{display:block}
 .route-sticky-price span{font-size:10px;color:var(--iqa-muted);text-transform:uppercase;letter-spacing:1px}
 .route-sticky-price strong{font-size:18px}
@@ -1203,7 +1203,7 @@ body{background:var(--iqa-cream);color:var(--iqa-text)}
  .route-product-copy h1,.route-product-copy h2{font-size:32px}
  .route-product-assurance{grid-template-columns:1fr 1fr;gap:8px}
  .route-product-assurance article{padding:11px}
- .route-sticky-buybar{gap:8px;padding:9px 3%}
+ .route-sticky-buybar{gap:8px;padding:9px 3% calc(9px + env(safe-area-inset-bottom))}
  .route-sticky-price strong{font-size:15px}
  .route-sticky-actions{gap:6px}
  .route-sticky-actions .button{min-width:0;padding:12px 10px;font-size:9px;flex:1}
