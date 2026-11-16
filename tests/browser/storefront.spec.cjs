@@ -503,8 +503,8 @@ test('product cards open a dedicated product page with app-style back navigation
  await card.locator('.product-image-link').click();
  await expect.poll(()=>page.evaluate(()=>location.hash)).toBe('#product/'+encodeURIComponent(id));
  await expect(page.locator('.route-pdp-appbar')).toBeVisible(); await expect(page.locator('[data-pdp-back]')).toContainText('Back');
- await expect(page.locator('.route-product-copy h2')).toHaveText(name); await expect(page.locator('#routeMainImage')).toBeVisible();
- await expect(page.locator('.route-product-details')).toHaveCount(2); await expect(page.locator('.route-sticky-buybar')).toBeVisible();
+ await expect(page.locator('.route-product-copy h1')).toHaveText(name); await expect(page.locator('#routeMainImage')).toBeVisible(); await expect(page.locator('[data-pdp-page]')).toBeVisible(); await expect(page.locator('#modalWrap.open')).toHaveCount(0);
+ await expect(page.locator('.route-product-details')).toHaveCount(2); await expect(page.locator('.route-sticky-buybar')).toBeVisible(); await expect(page.locator('.route-sticky-buybar')).toHaveCSS('position','fixed');
  await expect(page.locator('.route-recommendations .route-card')).not.toHaveCount(0);
  await page.locator('[data-pdp-back]').click(); await expect.poll(()=>page.evaluate(()=>location.hash)).toBe(initialHash);
  await expect(page.locator('#productGrid .product-card').first()).toBeVisible();
@@ -537,7 +537,7 @@ test('homepage Explore shortcuts remain removed while the hero and catalogue con
 test('Buy Now keeps its own quantity and does not mutate the shopping bag', async ({ page, isMobile }) => {
  await openStore(page); const card=page.locator('#productGrid .product-card').first(), id=await card.locator('.product-image-link').getAttribute('data-view');
  const before=await page.evaluate(id=>Number(cart[id]||0),id); await card.locator('.product-image-link').click();
- await expect(page.locator('.route-product-copy h2')).toBeVisible(); await page.locator('[data-buy-now]').click();
+ await expect(page.locator('.route-product-copy h1')).toBeVisible(); await page.locator('[data-buy-now]').click();
  await expect.poll(()=>page.evaluate(()=>location.hash)).toBe('#buy-now/'+encodeURIComponent(id));
  const buy=page.locator('#routeView'); await expect(buy).toContainText(/Review your selected timepiece/i); await expect(buy.locator('[data-buy-now-checkout]')).toBeVisible();
  expect(await page.evaluate(id=>Number(cart[id]||0),id)).toBe(before);
@@ -580,7 +580,7 @@ test('collection product cards open the dedicated product page', async ({ page }
  await openStore(page); await navigateToHash(page,'shop');
  const link=page.locator('#routeCatalogue .route-card a[data-view]').first(), href=await link.getAttribute('href');
  await link.click(); await expect.poll(()=>page.evaluate(()=>location.hash)).toBe(href);
- await expect(page.locator('.route-pdp-appbar')).toBeVisible(); await expect(page.locator('.route-product-copy h2')).not.toBeEmpty();
+ await expect(page.locator('.route-pdp-appbar')).toBeVisible(); await expect(page.locator('.route-product-copy h1')).not.toBeEmpty();
  await page.locator('[data-pdp-back]').click(); await expect.poll(()=>page.evaluate(()=>location.hash)).toBe('#shop');
 });
 
