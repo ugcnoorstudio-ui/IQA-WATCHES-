@@ -42,7 +42,7 @@ async function firstProductId(page) {
   const id = await (await wish.count() ? wish : add).getAttribute('data-wish').catch(() => null);
   if (id) return id;
   return await add.getAttribute('data-add');
-});
+}
 
 test('homepage loads without horizontal overflow or uncaught page errors', async ({ page }) => {
   const pageErrors = [];
