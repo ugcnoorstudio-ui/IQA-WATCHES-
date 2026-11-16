@@ -51,8 +51,8 @@ test('clicking a watch image or title opens the dedicated product page', async (
  await card.locator('.product-image-link').click(); await expect.poll(()=>page.evaluate(()=>location.hash)).toBe('#product/'+encodeURIComponent(id));
  await expect(page.locator('.route-pdp-appbar')).toBeVisible(); await expect(page.locator('.route-product-copy h1')).not.toBeEmpty(); await expect(page.locator('[data-pdp-page]')).toBeVisible(); await expect(page.locator('#modalWrap.open')).toHaveCount(0);
  await page.locator('[data-pdp-back]').click(); await expect(page.locator('#productGrid .product-card').first()).toBeVisible();
- await page.locator('#productGrid .product-card').first().locator('.product-title a').click();
- await expect(page.locator('.route-pdp-appbar')).toBeVisible();
+ await page.locator('#productGrid .product-card').first().locator('.product-details-link').click();
+ await expect(page.locator('.route-pdp-appbar')).toBeVisible(); await expect(page.locator('[data-pdp-page]')).toBeVisible(); await expect(page.locator('.route-product-copy h1')).not.toBeEmpty();
 });
 
 test('homepage keeps the autoplay editorial carousel without the duplicate customer shortcut row', async ({ page }) => {

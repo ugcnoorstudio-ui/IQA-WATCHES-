@@ -576,6 +576,17 @@ test('full-screen product image viewer supports navigation, zoom and keyboard cl
   await expect(page.locator('#routeMainImage')).toBeVisible();
 });
 
+test('product details CTA opens the same dedicated full-page experience', async ({ page }) => {
+ await openStore(page); await navigateToHash(page,'shop');
+ const link=page.locator('#routeCatalogue .route-card .route-actions a[data-view]').first();
+ await expect(link).toContainText(/Product details/i);
+ await link.click();
+ await expect(page.locator('[data-pdp-page]')).toBeVisible();
+ await expect(page.locator('.route-product-copy h1')).not.toBeEmpty();
+ await expect(page.locator('#modalWrap.open')).toHaveCount(0);
+ await expect(page.locator('.route-sticky-buybar')).toHaveCSS('position','fixed');
+});
+
 test('collection product cards open the dedicated product page', async ({ page }) => {
  await openStore(page); await navigateToHash(page,'shop');
  const link=page.locator('#routeCatalogue .route-card a[data-view]').first(), href=await link.getAttribute('href');

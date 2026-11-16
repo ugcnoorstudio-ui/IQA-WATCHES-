@@ -63,3 +63,28 @@ test('Buy Now selection remains independent from the shopping bag', () => {
   assert.match(routes, /window\.iqaBuyNowSelection=\{productId:p\.id,quantity:1\}/);
   assert.match(routes, /const entries=buyNowIntent\?\[buyNowIntent\]/);
 });
+
+
+test('public catalogue exposes real variant details and omits internal SKU fields', () => {
+  assert.ok(catalogue.products.every(product => product.variantId));
+  assert.ok(catalogue.products.every(product => product.variantDetails && typeof product.variantDetails === 'object'));
+  assert.ok(catalogue.products.every(product => !Object.hasOwn(product, 'sku')));
+  const brownLeather = catalogue.products.find(product => product.name.includes('AE-1200WHL-5AV'));
+  assert.ok(brownLeather);
+  assert.equal(brownLeather.variantDetails.case, 'Black Resin');
+  assert.equal(brownLeather.variantDetails.strap, 'Brown Genuine Leather');
+  assert.equal(brownLeather.stock, 7);
+});
+
+test('public model codes remain searchable without exposing internal SKU fields', () => {
+  assert.ok(catalogue.products.some(product => product.modelCode));
+  assert.ok(catalogue.products.every(product => !Object.hasOwn(product, 'sku')));
+  assert.ok(html.includes('p.modelCode'));
+});
+
+test('static catalogue dimensions remain normalized for product detail rendering', () => {
+  assert.ok(catalogue.products.some(product => product.caseDiameter));
+  assert.ok(catalogue.products.every(product => product.caseThickness === '' || typeof product.caseThickness === 'string'));
+  assert.match(routes, /const specRows=/);
+  assert.match(routes, /value!==null&&value!==undefined/);
+});
