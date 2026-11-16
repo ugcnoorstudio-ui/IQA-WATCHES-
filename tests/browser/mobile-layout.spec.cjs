@@ -69,7 +69,7 @@ test('mobile watch details use a full-page layout and app-style Back control', a
  await expect.poll(()=>page.locator('#productGrid .product-card').count(),{timeout:20000}).toBeGreaterThan(0);
  const card=page.locator('#productGrid .product-card').first(),id=await card.locator('.product-image-link').getAttribute('data-view');
  await card.locator('.product-image-link').click(); await expect.poll(()=>page.evaluate(()=>location.hash)).toBe('#product/'+encodeURIComponent(id));
- await expect(page.locator('.route-pdp-appbar')).toBeVisible(); await expect(page.locator('[data-pdp-back]')).toBeVisible();
+ await expect(page.locator('.route-pdp-appbar')).toBeVisible(); await expect(page.locator('[data-pdp-back]')).toBeVisible(); await expect(page.locator('#modalWrap')).not.toHaveClass(/open/);
  await expect(page.locator('#routeMainImage')).toBeVisible(); await expect(page.locator('.route-sticky-buybar')).toBeVisible();
  const size=await page.evaluate(()=>({width:document.documentElement.clientWidth,scroll:document.documentElement.scrollWidth}));
  expect(size.scroll).toBeLessThanOrEqual(size.width);

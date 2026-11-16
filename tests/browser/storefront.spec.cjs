@@ -286,6 +286,24 @@ test('watch finder returns matches and reset restores defaults', async ({ page }
   await expect(page.locator('#finderResults')).toContainText(/choose your preferences/i);
 });
 
+
+test('image, title and View Details all open the same full-page product route, never the legacy modal', async ({ page }) => {
+  await openStore(page);
+  const card = page.locator('#productGrid .product-card').first();
+  const productId = await card.locator('.product-image-link').getAttribute('data-view');
+  const expectedHash = '#product/' + encodeURIComponent(productId);
+
+  for (const selector of ['.product-image-link', '.product-title a', '.quick-view']) {
+    await card.locator(selector).click();
+    await expect.poll(() => page.evaluate(() => location.hash)).toBe(expectedHash);
+    await expect(page.locator('#routeView .route-pdp-appbar')).toBeVisible();
+    await expect(page.locator('#routeView .route-product-copy h2')).not.toBeEmpty();
+    await expect(page.locator('#modalWrap')).not.toHaveClass(/open/);
+    await page.locator('#routeView [data-pdp-back]').click();
+    await expect(card).toBeVisible();
+  }
+});
+
 test('product detail route displays product content and switches gallery images', async ({ page }) => {
   await openStore(page);
   const productLink = page.locator('#productGrid a[href^="#product/"]').first();
