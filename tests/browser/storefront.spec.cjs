@@ -577,10 +577,12 @@ test('full-screen product image viewer supports navigation, zoom and keyboard cl
 });
 
 test('product details CTA opens the same dedicated full-page experience', async ({ page }) => {
- await openStore(page); await navigateToHash(page,'shop');
- const link=page.locator('#routeCatalogue .route-card .route-actions a[data-view]').first();
+ await openStore(page);
+ const link=page.locator('#productGrid .product-card .product-details-link').first();
+ const id=await link.getAttribute('data-view');
  await expect(link).toContainText(/Product details/i);
  await link.click();
+ await expect.poll(()=>page.evaluate(()=>location.hash)).toBe('#product/'+encodeURIComponent(id));
  await expect(page.locator('[data-pdp-page]')).toBeVisible();
  await expect(page.locator('.route-product-copy h1')).not.toBeEmpty();
  await expect(page.locator('#modalWrap.open')).toHaveCount(0);
