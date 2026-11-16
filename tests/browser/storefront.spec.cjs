@@ -652,7 +652,7 @@ test('mobile watch detail is a full product page with compact app navigation', a
 test('multi-image product page gallery synchronizes thumbnail controls', async ({ page }) => {
  await openStore(page); const card=page.locator('#productGrid .product-card').first(),id=await card.locator('.product-image-link').getAttribute('data-view'),src=await card.locator('.product-image img').getAttribute('src');
  await page.evaluate(({id,src})=>{const p=products.find(x=>x.id===id);p.gallery=[{src,alt:'Primary watch image'},{src:src+'?gallery-test=secondary',alt:'Secondary watch image'},{src:src+'?gallery-test=tertiary',alt:'Tertiary watch image'}];location.hash='#product/'+encodeURIComponent(id)},{id,src});
- await expect(page.locator('#routeMainImage')).toBeVisible(); const thumbs=page.locator('[data-gallery-src]'); await expect(thumbs).toHaveCount(2);
+ await expect(page.locator('#routeMainImage')).toBeVisible(); const thumbs=page.locator('[data-gallery-src]'); await expect(thumbs).toHaveCount(3);
  await thumbs.nth(1).click(); await expect(page.locator('#routeMainImage')).toHaveAttribute('alt','Secondary watch image'); await expect(thumbs.nth(1)).toHaveAttribute('aria-pressed','true');
 });
 
