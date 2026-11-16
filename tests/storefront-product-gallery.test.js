@@ -57,6 +57,7 @@ test('product specifications render only values supplied by the approved catalog
 test('mobile and desktop product pages retain the fixed purchase bar', () => {
   assert.match(html, /\.route-sticky-buybar\{\s*position:fixed;left:0;right:0;bottom:0/);
   assert.doesNotMatch(html, /\.route-sticky-buybar\{position:sticky/);
+  assert.match(html, /#routeView \.route-product-page\{padding-bottom:110px!important\}/);
   assert.match(html, /padding:28px clamp\(18px,4vw,64px\) 110px/);
 });
 
