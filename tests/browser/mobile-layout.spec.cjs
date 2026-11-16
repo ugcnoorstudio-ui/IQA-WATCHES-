@@ -49,10 +49,10 @@ test('clicking a watch image or title opens the dedicated product page', async (
  await page.goto('/'); await expect.poll(()=>page.locator('#productGrid .product-card').count(),{timeout:20000}).toBeGreaterThan(0);
  const card=page.locator('#productGrid .product-card').first(),id=await card.locator('.product-image-link').getAttribute('data-view');
  await card.locator('.product-image-link').click(); await expect.poll(()=>page.evaluate(()=>location.hash)).toBe('#product/'+encodeURIComponent(id));
- await expect(page.locator('.route-pdp-appbar')).toBeVisible(); await expect(page.locator('.route-product-copy h2')).not.toBeEmpty();
+ await expect(page.locator('.route-pdp-appbar')).toBeVisible(); await expect(page.locator('.route-product-copy h1')).not.toBeEmpty(); await expect(page.locator('[data-pdp-page]')).toBeVisible(); await expect(page.locator('#modalWrap.open')).toHaveCount(0);
  await page.locator('[data-pdp-back]').click(); await expect(page.locator('#productGrid .product-card').first()).toBeVisible();
- await page.locator('#productGrid .product-card').first().locator('.product-title a').click();
- await expect(page.locator('.route-pdp-appbar')).toBeVisible();
+ await page.locator('#productGrid .product-card').first().locator('.product-details-link').click();
+ await expect(page.locator('.route-pdp-appbar')).toBeVisible(); await expect(page.locator('[data-pdp-page]')).toBeVisible(); await expect(page.locator('.route-product-copy h1')).not.toBeEmpty();
 });
 
 test('homepage keeps the autoplay editorial carousel without the duplicate customer shortcut row', async ({ page }) => {
@@ -70,7 +70,7 @@ test('mobile watch details use a full-page layout and app-style Back control', a
  const card=page.locator('#productGrid .product-card').first(),id=await card.locator('.product-image-link').getAttribute('data-view');
  await card.locator('.product-image-link').click(); await expect.poll(()=>page.evaluate(()=>location.hash)).toBe('#product/'+encodeURIComponent(id));
  await expect(page.locator('.route-pdp-appbar')).toBeVisible(); await expect(page.locator('[data-pdp-back]')).toBeVisible();
- await expect(page.locator('#routeMainImage')).toBeVisible(); await expect(page.locator('.route-sticky-buybar')).toBeVisible();
+ await expect(page.locator('#routeMainImage')).toBeVisible(); await expect(page.locator('.route-sticky-buybar')).toBeVisible(); await expect(page.locator('.route-sticky-buybar')).toHaveCSS('position','fixed'); const pdpBottomPadding=await page.locator('[data-pdp-page]').evaluate(el=>parseFloat(getComputedStyle(el).paddingBottom)); expect(pdpBottomPadding).toBeGreaterThanOrEqual(110);
  const size=await page.evaluate(()=>({width:document.documentElement.clientWidth,scroll:document.documentElement.scrollWidth}));
  expect(size.scroll).toBeLessThanOrEqual(size.width);
 });
