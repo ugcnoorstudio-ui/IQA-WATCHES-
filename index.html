@@ -1786,8 +1786,8 @@ function renderPanel(mode='cart'){
  }).join('');
  if(isWish){foot.innerHTML='<p class="cart-secure-note">Your wishlist is saved in this browser.</p><button class="cart-secondary-link" id="continueShopping" type="button">Explore the collection</button>';return}
  const s=cartSummary(items);
- const gift= gifting();
- foot.innerHTML=gift+'<div class="cart-totals"><div class="cart-total-row"><span>Subtotal</span><strong>'+money(s.subtotal)+'</strong></div><div class="cart-total-row"><span>Delivery</span><strong>'+(s.shipping===null?'Calculated at checkout':(s.shipping===0?'Complimentary':money(s.shipping)))+'</strong></div></div><div class="cart-grand-total"><span>Selected total</span><span>'+money(s.total)+'</span></div><a class="cart-checkout-button" id="checkoutStart" href="#checkout">Continue to secure checkout</a><a class="cart-secondary-link" id="viewFullBag" href="#bag" style="margin-top:8px">View full bag</a><p class="cart-secure-note">Cash on Delivery is available after sign-in and delivery-address verification. Final totals are confirmed by secure checkout.</p>';
+ body.innerHTML+=gifting();
+ foot.innerHTML='<div class="cart-totals"><div class="cart-total-row"><span>Subtotal</span><strong>'+money(s.subtotal)+'</strong></div><div class="cart-total-row"><span>Delivery</span><strong>'+(s.shipping===null?'Calculated at checkout':(s.shipping===0?'Complimentary':money(s.shipping)))+'</strong></div></div><div class="cart-grand-total"><span>Selected total</span><span>'+money(s.total)+'</span></div><a class="cart-checkout-button" id="checkoutStart" href="#checkout">Continue to secure checkout</a><a class="cart-secondary-link" id="viewFullBag" href="#bag" style="margin-top:8px">View full bag</a><p class="cart-secure-note">Cash on Delivery is available after sign-in and delivery-address verification. Final totals are confirmed by secure checkout.</p>';
  bindGift();
  if(focusQty){const next=$('drawer').querySelector('[data-qty="'+focusQty+'"][data-delta="'+focusDelta+'"]');if(next){try{next.focus({preventScroll:true})}catch(_){next.focus()}}}
 }

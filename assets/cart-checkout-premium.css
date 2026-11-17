@@ -84,7 +84,7 @@
 }
 .drawer .close-btn:hover{background:var(--cart-ivory-deep);border-color:var(--cart-rule-strong)}
 .drawer .close-btn:focus-visible{outline:2px solid var(--cart-focus);outline-offset:2px}
-.drawer-body{padding:6px 24px 4px;flex:1;overflow-y:auto;overscroll-behavior:contain;scrollbar-gutter:stable}
+.drawer-body{padding:6px 24px 4px;flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain;scrollbar-gutter:stable}
 .drawer-foot{
   padding:18px 24px calc(20px + env(safe-area-inset-bottom));
   border-top:1px solid var(--cart-rule);
