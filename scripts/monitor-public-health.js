@@ -1,6 +1,8 @@
 #!/usr/bin/env node
 'use strict';
 
+// E2E workflow verification marker (documentation-only; intentionally no runtime effect).
+
 const fs = require('node:fs');
 const vm = require('node:vm');
 
