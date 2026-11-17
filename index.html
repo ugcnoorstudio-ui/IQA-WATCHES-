@@ -1862,7 +1862,7 @@ function openProduct(id){const p=products.find(x=>x.id===id);if(!p)return;window
   window.clearTimeout(window.iqaGallerySwipeResetTimer);
  };
 }$('modalWrap').classList.add('open');document.body.classList.add('locked');$('modalClose')?.focus();}
-function closeModal(){$('modalWrap').classList.remove('open');document.body.classList.toggle('locked',$('drawer').classList.contains('open')||$('mobileMenu').classList.contains('open')||document.getElementById('iqa-image-lightbox')?.classList.contains('open'));if(productModalReturnFocus?.isConnected)productModalReturnFocus.focus();productModalReturnFocus=null}
+function closeModal(){$('modalWrap').classList.remove('open');document.body.classList.toggle('locked',Boolean($('drawer').classList.contains('open')||$('mobileMenu').classList.contains('open')||document.getElementById('iqa-image-lightbox')?.classList.contains('open')));if(productModalReturnFocus?.isConnected)productModalReturnFocus.focus();productModalReturnFocus=null}
 
 // Smart shopping additions: recommendations are based only on available catalogue attributes.
 const compareIds=[];
