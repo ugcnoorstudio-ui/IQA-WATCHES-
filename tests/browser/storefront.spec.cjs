@@ -774,3 +774,36 @@ test('static catalogue loading failure shows retry action and retains crawlable 
   ).toBe('ready');
   await expect(page.locator('#productStaticFallback')).toBeHidden();
 });
+
+test('premium cart panel opens from bag and add-to-bag, locks scroll, and closes with Escape or backdrop', async ({ page, isMobile }) => {
+  await openStore(page);
+  const card = page.locator('#productGrid .product-card').first();
+  await card.locator('[data-add]').click();
+  const drawer = page.locator('#drawer');
+  await expect(drawer).toHaveClass(/open/);
+  await expect(drawer).toHaveAttribute('aria-hidden', 'false');
+  await expect(drawer).toContainText(/your bag/i);
+  await expect(drawer.locator('.cart-checkout-button')).toBeVisible();
+  await expect(drawer.locator('[data-qty][data-delta="1"]')).toBeVisible();
+  expect(await page.evaluate(() => document.body.classList.contains('locked'))).toBe(true);
+  if (isMobile) {
+    const overflow = await page.evaluate(() => document.documentElement.scrollWidth > document.documentElement.clientWidth);
+    expect(overflow, 'open cart panel should not overflow horizontally').toBe(false);
+  }
+  await page.keyboard.press('Escape');
+  await expect(drawer).not.toHaveClass(/open/);
+  await expect(drawer).toHaveAttribute('aria-hidden', 'true');
+  expect(await page.evaluate(() => document.body.classList.contains('locked'))).toBe(false);
+
+  await page.locator('#cartOpen').click();
+  await expect(drawer).toHaveClass(/open/);
+  await expect(drawer.locator('#checkoutStart')).toHaveAttribute('href', '#checkout');
+  await expect(drawer.locator('#viewFullBag')).toHaveAttribute('href', '#bag');
+  if (!isMobile) {
+    await page.locator('#overlay').click({ position: { x: 12, y: 12 } });
+    await expect(drawer).not.toHaveClass(/open/);
+  } else {
+    await page.locator('#drawerClose').click();
+    await expect(drawer).not.toHaveClass(/open/);
+  }
+});

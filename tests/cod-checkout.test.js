@@ -44,6 +44,11 @@ test('checkout remains authenticated and idempotent with COD only; no online gat
   assert.match(checkout, /x-idempotency-key/);
   assert.match(checkout, /payment_method: "cash_on_delivery"/);
   assert.match(checkout, /payments\.cod_enabled !== true/);
-  assert.match(routes, /UPI · Google Pay · PhonePe · Paytm/);
-  assert.match(routes, /Coming Soon/);
+  // Approved redesign: only payment methods the backend actually supports are
+  // presented. The unavailable UPI/card/wallet placeholders are gone and no
+  // gateway may be referenced until one is configured.
+  assert.match(routes, /Cash on Delivery/);
+  assert.doesNotMatch(routes, /UPI · Google Pay · PhonePe · Paytm/);
+  assert.doesNotMatch(routes, /Coming Soon/);
+  assert.doesNotMatch(routes, /razorpay|stripe|paypal|phonepe/i);
 });

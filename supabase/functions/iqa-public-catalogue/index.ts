@@ -94,7 +94,7 @@ Deno.serve(async (request: Request) => {
     }
 
     const ids = products.map((product) => product.id);
-    const [variantResult, mediaResult] = await Promise.all([
+    const [variantResult, mediaResult, settingsResult] = await Promise.all([
       supabase.from("product_variants")
         .select("id,product_id,sku,options,selling_price,stock_on_hand,stock_reserved,active")
         .in("product_id", ids)
@@ -105,9 +105,28 @@ Deno.serve(async (request: Request) => {
         .in("product_id", ids)
         .order("sort_order", { ascending: true })
         .limit(800),
+      supabase.from("store_settings").select("value").eq("key", "shipping").maybeSingle(),
     ]);
     if (variantResult.error) throw variantResult.error;
     if (mediaResult.error) throw mediaResult.error;
+
+    // Public, read-only delivery summary so the bag and checkout can show the
+    // same charges the order function applies. No secrets, no PIN list of
+    // individual customers, and no estimate unless the store configured one.
+    const shippingRow = settingsResult.error ? null : settingsResult.data?.value as Record<string, unknown> | null;
+    const shippingFee = Number(shippingRow?.flat_shipping_fee);
+    const shippingThreshold = Number(shippingRow?.free_shipping_threshold);
+    const shipping = shippingRow && Number.isFinite(shippingFee) && shippingFee >= 0
+      ? {
+        currency: "INR",
+        flat_shipping_fee: shippingFee,
+        free_shipping_threshold: Number.isFinite(shippingThreshold) && shippingThreshold > 0 ? shippingThreshold : null,
+        free_shipping_operator: shippingRow.free_shipping_operator === "greater_than" ? "greater_than" : "at_least",
+        method: typeof shippingRow.method === "string" ? shippingRow.method : "standard",
+        estimate_label: typeof shippingRow.estimate_label === "string" ? shippingRow.estimate_label : null,
+        estimate_enabled: typeof shippingRow.estimate_label === "string" && shippingRow.estimate_label.trim().length > 0,
+      }
+      : null;
 
     const variants = variantResult.data || [];
     const media = mediaResult.data || [];
@@ -190,6 +209,7 @@ Deno.serve(async (request: Request) => {
       ok: true,
       source: "supabase",
       products: output,
+      shipping,
       generated_at: new Date().toISOString(),
     }, origin);
   } catch (_error) {
